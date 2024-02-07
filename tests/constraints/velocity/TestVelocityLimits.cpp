@@ -2,29 +2,29 @@
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
 #include <cmath>
 #define  s 1.0
-#define  x_size 10u
 #define  vel_lim 20.0
 #define  dT 0.001*s
+#include "../../common.h"
+
 
 using namespace OpenSoT::constraints::velocity;
 
 namespace {
 
 // The fixture for testing class Foo.
-class testVelocityLimits : public ::testing::Test {
+class testVelocityLimits : public TestBase {
  protected:
 
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testVelocityLimits() {
+  testVelocityLimits() : TestBase("coman_floating_base") {
     // You can do set-up work for each test here.
-      zeros.resize(x_size);
-      zeros.setZero(x_size);
+      zeros.resize(_model_ptr->getNv());
+      zeros.setZero(_model_ptr->getNv());
 
-      velocityLimits = new VelocityLimits(  vel_lim,
-                                            dT,
-                                            x_size);
+      velocityLimits = new VelocityLimits( *_model_ptr, vel_lim,
+                                            dT);
 
   }
 
@@ -51,10 +51,10 @@ TEST_F(testVelocityLimits, sizesAreCorrect) {
     Eigen::VectorXd lowerBound = velocityLimits->getLowerBound();
     Eigen::VectorXd upperBound = velocityLimits->getUpperBound();
 
-    EXPECT_EQ(x_size, lowerBound.size()) << "lowerBound should have size"
-                                         << x_size;
-    EXPECT_EQ(x_size, upperBound.size()) << "upperBound should have size"
-                                         << x_size;
+    EXPECT_EQ(_model_ptr->getNv(), lowerBound.size()) << "lowerBound should have size"
+                                         << _model_ptr->getNv();
+    EXPECT_EQ(_model_ptr->getNv(), upperBound.size()) << "upperBound should have size"
+                                         << _model_ptr->getNv();
 
     EXPECT_EQ(0, velocityLimits->getAeq().rows()) << "Aeq should have size 0"
                                                   << "but has size"

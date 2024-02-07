@@ -20,6 +20,8 @@
 
  #include <OpenSoT/Constraint.h>
 #include <Eigen/Dense>
+#include <xbot2_interface/xbotinterface2.h>
+
 
  namespace OpenSoT {
     namespace constraints {
@@ -40,11 +42,12 @@
                  * @param dT the time constant at which we are performing velocity control [s]
                  * @param x_size the size of the unknowns that we want to bound (it CANNOT be a subset)
                  */
-                VelocityLimits(const double qDotLimit,
-                               const double dT,
-                               const unsigned int v_size);
+                VelocityLimits(const XBot::ModelInterface& robot,
+                               const double qDotLimit,
+                               const double dT);
 
-                VelocityLimits(const Eigen::VectorXd& qDotLimit,
+                VelocityLimits(const XBot::ModelInterface& robot,
+                               const Eigen::VectorXd& qDotLimit,
                                const double dT);
 
                 /**
