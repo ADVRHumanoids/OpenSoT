@@ -400,11 +400,11 @@ int main(int argc, char **argv)
                             model_ptr->update();
 
                            using namespace OpenSoT::tasks::velocity;
-                           auto r_sole = std::make_shared<Cartesian>("r_sole", q, *model_ptr.get(), "r_sole", "world");
-                           auto l_sole = std::make_shared<Cartesian>("l_sole", q, *model_ptr.get(), "l_sole", "world");
-                           auto l_wrist = std::make_shared<Cartesian>("l_wrist", q, *model_ptr.get(), "l_wrist", "world");
+                           auto r_sole = std::make_shared<Cartesian>("r_sole", *model_ptr.get(), "r_sole", "world");
+                           auto l_sole = std::make_shared<Cartesian>("l_sole", *model_ptr.get(), "l_sole", "world");
+                           auto l_wrist = std::make_shared<Cartesian>("l_wrist", *model_ptr.get(), "l_wrist", "world");
                            l_wrist->setLambda(0.1);
-                           auto r_wrist = std::make_shared<Cartesian>("r_wrist", q, *model_ptr.get(), TCP_frame, "world");
+                           auto r_wrist = std::make_shared<Cartesian>("r_wrist", *model_ptr.get(), TCP_frame, "world");
                            r_wrist->setLambda(0.1);
                            auto com = std::make_shared<CoM>(*model_ptr.get());
                            com->setLambda(0.1);
@@ -420,7 +420,7 @@ int main(int argc, char **argv)
                            auto joint_limits = std::make_shared<JointLimits>(*model_ptr, qmax, qmin);
 
                            double dT = 0.01;
-                           auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);
+                           auto vel_limits = std::make_shared<VelocityLimits>(*model_ptr, dqlim, dT);
 
                            OpenSoT::AutoStack::Ptr stack;
                            std::cout<<"Creating stack "<<stack_priority<<std::endl;

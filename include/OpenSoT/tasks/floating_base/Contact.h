@@ -53,7 +53,7 @@ namespace OpenSoT{
             private:
                 std::string _link_in_contact;
                 XBot::ModelInterface& _robot;
-                Eigen::MatrixXd _J, Jrot;
+                Eigen::MatrixXd _J, _Jrot;
                 Eigen::MatrixXd _Jcontact;
                 Eigen::VectorXd _dqm;
                 Eigen::MatrixXd _contact_matrix;

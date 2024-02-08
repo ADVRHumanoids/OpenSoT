@@ -277,7 +277,7 @@ int main(int argc, char **argv)
                 model_ptr->update();
 
                using namespace OpenSoT::tasks::velocity;
-               auto TCP = std::make_shared<Cartesian>("TCP", q_init, *model_ptr.get(), TCP_frame, "world");
+               auto TCP = std::make_shared<Cartesian>("TCP", *model_ptr.get(), TCP_frame, "world");
                TCP->setLambda(0.1);
 
                Eigen::VectorXd zeros = q_init;
@@ -293,7 +293,7 @@ int main(int argc, char **argv)
                auto joint_limits = std::make_shared<JointLimits>(*model_ptr, qmax, qmin);
 
                double dT = 0.01;
-               auto vel_limits = std::make_shared<VelocityLimits>(dqlim, dT);
+               auto vel_limits = std::make_shared<VelocityLimits>(*model_ptr, dqlim, dT);
 
                std::list<unsigned int> position_ids = {0, 1, 2};
                OpenSoT::AutoStack::Ptr stack;

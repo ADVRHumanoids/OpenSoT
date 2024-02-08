@@ -47,8 +47,9 @@ OpenSoT::tasks::floating_base::Contact::~Contact()
 void OpenSoT::tasks::floating_base::Contact::_update(const Eigen::VectorXd &x)
 {
     _robot.getJacobian(_link_in_contact, _J);
-    XBot::Utils::rotate(_J, _robot.getPose(_link_in_contact).linear().transpose(), Jrot);
-    _Jcontact = _contact_matrix*_J;
+    _Jrot.resize(_J.rows(), _J.cols());
+    XBot::Utils::rotate(_J, _robot.getPose(_link_in_contact).linear().transpose(), _Jrot);
+    _Jcontact = _contact_matrix*_Jrot;
     _robot.getJointVelocity(_dqm);
     
     Eigen::Affine3d w_T_c;

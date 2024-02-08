@@ -106,7 +106,7 @@ namespace OpenSoT {
 
                         _robot->syncFrom(_model);
 
-                        _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(), q,
+                        _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(),
                                                 *(_robot.get()), CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
                     }
 

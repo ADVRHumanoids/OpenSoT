@@ -24,7 +24,6 @@
 using namespace OpenSoT::tasks::velocity;
 
 Cartesian::Cartesian(std::string task_id,
-                     const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
                      const std::string& distal_link,
                      const std::string& base_link) :
@@ -52,7 +51,7 @@ Cartesian::Cartesian(std::string task_id,
         assert(this->_distal_link_index != _base_link_index);
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
+    this->_update(Eigen::VectorXd(0));
 
     _W.setIdentity(_A.rows(), _A.rows());
 

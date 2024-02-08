@@ -11,7 +11,7 @@ Gaze::Gaze(std::string task_id,
            std::string distal_link) :
     Task(task_id, robot.getNv()),
     _distal_link(distal_link),
-    _cartesian_task(new Cartesian(task_id, x, robot, _distal_link, base_link)),
+    _cartesian_task(new Cartesian(task_id, robot, _distal_link, base_link)),
     _subtask(new SubTask(_cartesian_task, Indices::range(4,5))),
     _robot(robot), _tmp_vector(3), _bl_T_gaze_kdl(),
     _gaze_goal()

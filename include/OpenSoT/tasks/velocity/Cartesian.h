@@ -105,7 +105,6 @@
                  * @param base_link the name of the base link as expressed in the robot urdf. Can be set to "world"
                  */
                 Cartesian(std::string task_id,
-                          const Eigen::VectorXd& x,
                           XBot::ModelInterface &robot,
                           const std::string& distal_link,
                           const std::string& base_link);
