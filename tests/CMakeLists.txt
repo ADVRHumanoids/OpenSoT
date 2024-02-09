@@ -140,10 +140,10 @@ if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     add_test(NAME OpenSoT_tasks_GenericTask COMMAND testGenericTask)
 
 
-#    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
-#    TARGET_LINK_LIBRARIES(testLP ${TestLibs} osqp::osqpstatic)
-#    add_dependencies(testLP   OpenSoT)
-#    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
+    ADD_EXECUTABLE(testLP solvers/TestLP.cpp)
+    TARGET_LINK_LIBRARIES(testLP ${TestLibs} osqp::osqpstatic)
+    add_dependencies(testLP   OpenSoT)
+    add_test(NAME OpenSoT_solvers_linear_programming COMMAND testLP)
 
 endif()
 
