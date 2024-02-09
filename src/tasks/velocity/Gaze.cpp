@@ -5,7 +5,6 @@ using namespace OpenSoT::tasks::velocity;
 
 
 Gaze::Gaze(std::string task_id,
-           const Eigen::VectorXd& x,
            XBot::ModelInterface &robot,
            std::string base_link,
            std::string distal_link) :
@@ -16,7 +15,7 @@ Gaze::Gaze(std::string task_id,
     _robot(robot), _tmp_vector(3), _bl_T_gaze_kdl(),
     _gaze_goal()
 {
-    this->_update(x);
+    this->_update(Eigen::VectorXd(0));
 }
 
 Gaze::~Gaze()
@@ -102,7 +101,7 @@ const unsigned int Gaze::getTaskSize() const
 
 void Gaze::_update(const Eigen::VectorXd &x)
 {
-    _subtask->update(x);
+    _subtask->update(Eigen::VectorXd(0));
     this->_A = _subtask->getA();
     this->_b = _subtask->getb();
     this->_hessianType = _subtask->getHessianAtype();

@@ -46,8 +46,7 @@
                               std::string base_link,
                               std::string l_hand, std::string r_hand,
                               std::string l_foot, std::string r_foot,
-                              double joint_velocity_limits,
-                              const Eigen::VectorXd& state);
+                              double joint_velocity_limits);
 
          virtual ~DefaultHumanoidStack() {}
 

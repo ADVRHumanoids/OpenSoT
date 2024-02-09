@@ -42,7 +42,6 @@ public:
     typedef std::shared_ptr<Gaze> Ptr;
 
     Gaze(std::string task_id,
-         const Eigen::VectorXd &x,
          XBot::ModelInterface &robot,
          std::string base_link,
          std::string distal_link = "gaze");
