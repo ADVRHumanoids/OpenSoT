@@ -61,8 +61,7 @@
                  * @param robot the robot model, with floating base link set on the support foot
                  * @param safetyMargin the margin, in [m], of the bounds margins
                  */
-                ConvexHull( const Eigen::VectorXd& x,
-                            XBot::ModelInterface& robot,
+                ConvexHull( XBot::ModelInterface& robot,
                             const std::list<std::string>& links_in_contact,
                             const double safetyMargin = BOUND_SCALING);
 

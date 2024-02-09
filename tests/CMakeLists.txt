@@ -78,17 +78,17 @@ add_dependencies(testTask   OpenSoT)
 add_test(NAME OpenSoT_tasks_Task COMMAND testTask)
 
     
-# if(${PCL_FOUND} AND ${moveit_core_FOUND})
-#     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
-#     TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
-#     add_dependencies(testAggregatedConstraint   OpenSoT)
-#     add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
+if(${PCL_FOUND} AND ${moveit_core_FOUND})
+     ADD_EXECUTABLE(testAggregatedConstraint     constraints/TestAggregated.cpp)
+     TARGET_LINK_LIBRARIES(testAggregatedConstraint ${TestLibs})
+     add_dependencies(testAggregatedConstraint   OpenSoT)
+     add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 
 #     ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
 #     TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
 #     add_dependencies(testAggregatedTask   OpenSoT)
 #     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
-# endif()
+endif()
 
 
 #ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)

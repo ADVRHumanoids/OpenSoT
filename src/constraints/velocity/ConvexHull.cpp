@@ -22,8 +22,7 @@
 
 using namespace OpenSoT::constraints::velocity;
 
-ConvexHull::ConvexHull(const Eigen::VectorXd& x,
-                       XBot::ModelInterface& robot,
+ConvexHull::ConvexHull(XBot::ModelInterface& robot,
                        const std::list<std::string>& links_in_contact,
                        const double safetyMargin) :
     Constraint("convex_hull", robot.getNv()),
@@ -36,7 +35,7 @@ ConvexHull::ConvexHull(const Eigen::VectorXd& x,
     _bUpperBound.resize(links_in_contact.size());
     _bLowerBound.resize(links_in_contact.size());
     _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
-    this->update(x);
+    this->update(Eigen::VectorXd(0));
 }
 
 void ConvexHull::update(const Eigen::VectorXd &x) {
@@ -60,6 +59,7 @@ bool ConvexHull::getConvexHull(std::vector<Eigen::Vector3d> &ch)
     _points.clear();
     // get support polygon points w.r.t. COM
     if(_convex_hull->getSupportPolygonPoints(_points,_links_in_contact,_robot,"COM")){
+
         if(_points.size() > 2)
         {
             _tmp_ch.clear();

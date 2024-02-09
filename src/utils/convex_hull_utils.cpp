@@ -34,6 +34,8 @@ convex_hull::convex_hull():
 {
     _pointCloud = make_shared< pcl::PointCloud<pcl::PointXYZ> >();
     _projectedPointCloud = make_shared< pcl::PointCloud<pcl::PointXYZ> >();
+
+    world_T_CoM.setIdentity();
 }
 
 convex_hull::~convex_hull()

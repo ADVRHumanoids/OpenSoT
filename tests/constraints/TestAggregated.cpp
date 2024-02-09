@@ -6,20 +6,18 @@
 #include <OpenSoT/constraints/velocity/ConvexHull.h>
 #include <string>
 #include <xbot2_interface/xbotinterface2.h>
+#include "../common.h"
 
-
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace {
 
 // The fixture for testing class Foo.
-class testAggregated : public ::testing::Test {
+class testAggregated : public TestBase {
  protected:
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testAggregated() {
+  testAggregated() : TestBase("coman_floating_base") {
     // You can do set-up work for each test here.
   }
 
@@ -43,88 +41,54 @@ class testAggregated : public ::testing::Test {
   // Objects declared here can be used by all tests in the test case for Foo.
 };
 
-void initializeIfNeeded()
-{
-    static bool is_initialized = false;
-
-    if(!is_initialized) {
-        time_t seed = time(NULL);
-        seed48((unsigned short*)(&seed));
-        srand((unsigned int)(seed));
-
-        is_initialized = true;
-    }
-
-}
-
-double getRandomAngle()
-{
-    initializeIfNeeded();
-    return drand48()*2.0*M_PI-M_PI;
-}
-
-double getRandomAngle(const double min, const double max)
-{
-    initializeIfNeeded();
-    assert(min <= max);
-    if(min < -M_PI || max > M_PI)
-        return getRandomAngle();
-
-    return (double)rand()/RAND_MAX * (max-min) + min;
-}
-
-Eigen::VectorXd getRandomAngles(const Eigen::VectorXd &min,
-                                               const Eigen::VectorXd &max,
-                                               const int size)
-{
-    initializeIfNeeded();
-    Eigen::VectorXd q(size);
-    assert(min.size() >= size);
-    assert(max.size() >= size);
-    for(unsigned int i = 0; i < size; ++i)
-        q(i) = getRandomAngle(min[i],max[i]);
-    return q;
-}
 
 // Tests that the Foo::Bar() method does Abc.
 TEST_F(testAggregated, AggregatedWorks) {
     using namespace OpenSoT::constraints;
     std::list<Aggregated::ConstraintPtr> constraints;
-    const unsigned int nJ = 6;
     const double dT = 0.1;
     const double qDotMax = 0.5;
+
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
     constraints.push_back(  Aggregated::ConstraintPtr(
-            new velocity::VelocityLimits(qDotMax,dT,nJ)
+            new velocity::VelocityLimits(*_model_ptr, qDotMax,dT)
                                                     )
                           );
 
-    Eigen::VectorXd q(nJ); q.setZero(nJ);
-    Eigen::VectorXd q_next(nJ); q_next.setConstant(nJ, M_PI - 0.01);
 
-    Eigen::MatrixXd A(nJ,nJ); A.setIdentity(nJ,nJ);
-    Eigen::VectorXd bUpperBound(nJ); bUpperBound.setConstant(nJ, M_PI);
-    Eigen::VectorXd bLowerBound(nJ); bLowerBound.setZero(nJ);
+    Eigen::VectorXd q_next = _model_ptr->generateRandomQ();
+
+    Eigen::MatrixXd A(_model_ptr->getNv(),_model_ptr->getNv()); A.setIdentity();
+    Eigen::VectorXd bUpperBound(_model_ptr->getNv()); bUpperBound.setConstant(_model_ptr->getNv(), M_PI);
+    Eigen::VectorXd bLowerBound(_model_ptr->getNv()); bLowerBound.setZero();
     constraints.push_back(Aggregated::ConstraintPtr(
         new BilateralConstraint(A,bUpperBound,bLowerBound)));
 
     constraints.push_back(Aggregated::ConstraintPtr(
-        new velocity::JointLimits(q,bUpperBound,bLowerBound)));
-    Aggregated::ConstraintPtr aggregated(new Aggregated(constraints, q));
+        new velocity::JointLimits(*_model_ptr,bUpperBound,bLowerBound)));
+    Aggregated::ConstraintPtr aggregated(new Aggregated(constraints, _model_ptr->getNv()));
 
     /* we should mash joint limits and velocity limits in one */
-    EXPECT_TRUE(aggregated->getLowerBound().size() == nJ);
-    EXPECT_TRUE(aggregated->getUpperBound().size() == nJ);
+    EXPECT_TRUE(aggregated->getLowerBound().size() == _model_ptr->getNv());
+    EXPECT_TRUE(aggregated->getUpperBound().size() == _model_ptr->getNv());
     /* we have a BilateralConstraint... */
-    EXPECT_TRUE(aggregated->getAineq().rows() == nJ);
-    EXPECT_TRUE(aggregated->getbLowerBound().size() == nJ);
-    EXPECT_TRUE(aggregated->getbUpperBound().size() == nJ);
+    EXPECT_TRUE(aggregated->getAineq().rows() == _model_ptr->getNv());
+    EXPECT_TRUE(aggregated->getbLowerBound().size() == _model_ptr->getNv());
+    EXPECT_TRUE(aggregated->getbUpperBound().size() == _model_ptr->getNv());
     /* and no equality constraint */
     EXPECT_TRUE(aggregated->getAeq().rows() == 0);
     EXPECT_TRUE(aggregated->getbeq().size() == 0);
 
     Eigen::VectorXd oldLowerBound = aggregated->getLowerBound();
     Eigen::VectorXd oldUpperBound = aggregated->getUpperBound();
-    aggregated->update(q_next);
+
+    _model_ptr->setJointPosition(q_next);
+    _model_ptr->update();
+    aggregated->update(Eigen::VectorXd(0));
+
     Eigen::VectorXd newLowerBound = aggregated->getLowerBound();
     Eigen::VectorXd newUpperBound = aggregated->getUpperBound();
     EXPECT_FALSE(oldLowerBound == newLowerBound);
@@ -133,17 +97,11 @@ TEST_F(testAggregated, AggregatedWorks) {
 
 TEST_F(testAggregated, UnilateralToBilateralWorks) {
 
-     XBot::ModelInterface::Ptr _model_ptr;
-     _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-     if(_model_ptr)
-         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-     else
-         std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+     Eigen::VectorXd q = _model_ptr->getNeutralQ();
 
-
-     Eigen::VectorXd q;
-     q.setZero(_model_ptr->getJointNum());
+     _model_ptr->setJointPosition(q);
+     _model_ptr->update();
 
      std::list<std::string> _links_in_contact;
      _links_in_contact.push_back("l_foot_lower_left_link");
@@ -156,7 +114,7 @@ TEST_F(testAggregated, UnilateralToBilateralWorks) {
      _links_in_contact.push_back("r_foot_upper_right_link");
 
      OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr convexHull(
-                 new OpenSoT::constraints::velocity::ConvexHull(q,*(_model_ptr.get()), _links_in_contact));
+                 new OpenSoT::constraints::velocity::ConvexHull(*_model_ptr.get(), _links_in_contact));
 
      std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> constraints;
 
@@ -164,7 +122,7 @@ TEST_F(testAggregated, UnilateralToBilateralWorks) {
 
      OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr aggregated(
                  new OpenSoT::constraints::Aggregated(constraints,
-                                                      _model_ptr->getJointNum()));
+                                                      _model_ptr->getNv()));
 
      EXPECT_TRUE(aggregated->getbLowerBound().rows() == aggregated->getbUpperBound().rows()) <<
                  "bLowerBound:" << aggregated->getbLowerBound() << std::endl <<
@@ -173,36 +131,40 @@ TEST_F(testAggregated, UnilateralToBilateralWorks) {
 
 }
 
-/// TODO implement
+/**
+ * @todo implement
+ */
 TEST_F(testAggregated, EqualityToInequalityWorks) {
 }
 
 TEST_F(testAggregated, MultipleAggregationdWork) {
     using namespace OpenSoT::constraints;
     std::list<Aggregated::ConstraintPtr> constraints;
-    const unsigned int nJ = 6;
-    const double dT = 1;
-    const double qDotMax = 50;
-    constraints.push_back(  Aggregated::ConstraintPtr(
-            new velocity::VelocityLimits(qDotMax,dT,nJ)));
+    const double dT = 1.;
+    const double qDotMax = 50.;
 
-    Eigen::VectorXd q(nJ);
-    q = getRandomAngles(Eigen::VectorXd::Constant(nJ, -M_PI),
-                                     Eigen::VectorXd::Constant(nJ, M_PI), nJ);
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+    constraints.push_back(  Aggregated::ConstraintPtr(
+            new velocity::VelocityLimits(*_model_ptr, qDotMax,dT)
+                                                    )
+                          );
 
     Eigen::MatrixXd A;
-    A.setZero(nJ,nJ);
-    Eigen::VectorXd bUpperBound(nJ);
-    bUpperBound<<bUpperBound.setOnes(nJ)*M_PI;
+    A.setZero(_model_ptr->getNv(),_model_ptr->getNv());
+    Eigen::VectorXd bUpperBound(_model_ptr->getNv());
+    bUpperBound<<bUpperBound.setOnes(_model_ptr->getNv())*M_PI;
     Eigen::VectorXd bLowerBound;
-    bLowerBound.setZero(nJ);
+    bLowerBound.setZero(_model_ptr->getNv());
     constraints.push_back(Aggregated::ConstraintPtr(
         new BilateralConstraint(A, bUpperBound, bLowerBound)));
 
-    Aggregated::ConstraintPtr aggregated(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated(new Aggregated(constraints, _model_ptr->getNv()));
 
     constraints.push_back(  Aggregated::ConstraintPtr(
-            new velocity::VelocityLimits(qDotMax/2,dT,nJ)));
+            new velocity::VelocityLimits(*_model_ptr, qDotMax/2,dT)));
 
     for(typename std::list<Aggregated::ConstraintPtr>::iterator i = constraints.begin();
         i != constraints.end(); ++i) {
@@ -210,21 +172,21 @@ TEST_F(testAggregated, MultipleAggregationdWork) {
         if(b->getLowerBound().size() > 0)
             std::cout << b->getLowerBound() << std::endl;
     }
-    Aggregated::ConstraintPtr aggregated2(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated2(new Aggregated(constraints, _model_ptr->getNv()));
 
     constraints.push_back(aggregated);
     constraints.push_back(aggregated2);
 
-    Aggregated::ConstraintPtr aggregated3(new Aggregated(constraints, q));
+    Aggregated::ConstraintPtr aggregated3(new Aggregated(constraints, _model_ptr->getNv()));
 
     Aggregated::ConstraintPtr aggregated4(new Aggregated(aggregated2,
-                                                        aggregated3, q.size()));
+                                                        aggregated3, _model_ptr->getNv()));
 
-    Eigen::VectorXd qq(q.size());
+    Eigen::VectorXd qq(_model_ptr->getNv());
     qq<<qq.setOnes()*-0.1;
     Aggregated::ConstraintPtr aggregated5(new Aggregated(aggregated4,
                                                         Aggregated::ConstraintPtr(
-                                        new velocity::JointLimits(q,qq,qq)), q.size()));
+                                        new velocity::JointLimits(*_model_ptr,qq,qq)), _model_ptr->getNv()));
 
 
     /* testing constraints stay put */
