@@ -345,11 +345,6 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 # add_dependencies(testCoMForceTask  OpenSoT)
 # add_test(NAME OpenSoT_task_force_CoM COMMAND testCoMForceTask)
 
-# ADD_EXECUTABLE(testKinematics utils/TestKinematics.cpp)
-# TARGET_LINK_LIBRARIES(testKinematics ${TestLibs})
-# add_dependencies(testKinematics   OpenSoT)
-# add_test(NAME OpenSoT_utils_test_kinematics COMMAND testKinematics)
-
 # if(${qpSWIFT_FOUND})
 #     ADD_EXECUTABLE(testqpSWIFTSolver solvers/TestqpSWIFT.cpp)
 #     TARGET_LINK_LIBRARIES(testqpSWIFTSolver ${TestLibs} qpSWIFT::qpSWIFT-static)
