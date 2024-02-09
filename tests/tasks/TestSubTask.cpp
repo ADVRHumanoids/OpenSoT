@@ -6,20 +6,19 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/AutoStack.h>
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
+#include "../common.h"
+
 
 using namespace OpenSoT::tasks;
 
-#define DOFS 10
 
 namespace {
 
-class TestSubTaskMap: public ::testing::Test
+class TestSubTaskMap: public TestBase
 {
 protected:
 
-    TestSubTaskMap()
+    TestSubTaskMap():TestBase("coman_floating_base")
     {
 
     }
@@ -39,29 +38,32 @@ protected:
 
 };
 
-class TestSubTask: public ::testing::Test
+class TestSubTask: public TestBase
 {
 protected:
 
     OpenSoT::tasks::velocity::Postural::Ptr _postural;
     OpenSoT::constraints::velocity::JointLimits::Ptr _joint_limits;
 
-    TestSubTask()
+    TestSubTask():TestBase("coman_floating_base")
 
     {
-        Eigen::VectorXd tmp(DOFS);
-        tmp.setZero(DOFS);
-        _postural.reset(new OpenSoT::tasks::velocity::Postural(tmp));
-        Eigen::VectorXd tmp1 = tmp;
-        tmp1<<tmp1.setOnes(DOFS)*M_PI_2;
-        _joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(tmp,tmp1,-tmp1));
+        Eigen::VectorXd tmp;
+        tmp = _model_ptr->getNeutralQ();
+        _model_ptr->setJointPosition(tmp);
+        _model_ptr->update();
 
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+        _postural = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+        Eigen::VectorXd qmin, qmax;
+        _model_ptr->getJointLimits(qmin, qmax);
+
+
+        _joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
+
+        _postural->update(Eigen::VectorXd(0));
+        _joint_limits->update(Eigen::VectorXd(0));
+
 
     }
 
@@ -76,7 +78,6 @@ protected:
 
     }
 
-    XBot::ModelInterface::Ptr _model_ptr;
 
 };
 
@@ -304,24 +305,21 @@ TEST_F(TestSubTask, testgetA)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(0,2));
     ASSERT_EQ(subTask->getA().rows(), 3);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     Eigen::MatrixXd A(3,_postural->getXSize());
     A = _postural->getA().block(0,0,3,_postural->getXSize());
-    //A = conversion_utils_YARP::toYARP(_postural->getA()).submatrix(0,2,0,_postural->getXSize()-1);
     EXPECT_TRUE(matrixAreEqual(subTask->getA(), A));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
-                                                 Indices::range(5,6)));
+    subTask.reset();
+    subTask= std::make_shared<SubTask>(_postural, Indices::range(0,2) +
+                                                 Indices::range(5,6));
     ASSERT_EQ(subTask->getA().rows(), 5);
     ASSERT_EQ(subTask->getA().cols(), _postural->getXSize());
     A.resize(5, _postural->getXSize()); A.setZero(A.rows(), A.cols());
     A << _postural->getA().block(0,0,3,_postural->getXSize()),
          _postural->getA().block(5,0,2,_postural->getXSize());
-    //A = conversion_utils_YARP::toYARP(_postural->getA()).submatrix(0,2,0,_postural->getXSize()-1);
-    //A = yarp::math::pile(A,
-    //                     conversion_utils_YARP::toYARP(_postural->getA()).submatrix(5,6,0,_postural->getXSize()-1));
     EXPECT_TRUE(matrixAreEqual(subTask->getA(),A));
 }
 
@@ -329,7 +327,7 @@ TEST_F(TestSubTask, testGetHessianAType)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(1,3));
     ASSERT_EQ(subTask->getHessianAtype(), HST_POSDEF);
 }
 
@@ -364,19 +362,18 @@ TEST_F(TestSubTask, testgetb)
 {
     using namespace OpenSoT;
 
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(0,2));
     ASSERT_EQ(subTask->getb().size(), 3);
     Eigen::VectorXd b(3), bLambda(3);
     b = _postural->getb().segment(0,3);
     EXPECT_TRUE(vectorAreEqual(subTask->getb(), b));
 
-    subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
-                                                 Indices::range(5,6)));
+    subTask.reset();
+    subTask = std::make_shared<SubTask>(_postural, Indices::range(0,2) +
+                                                 Indices::range(5,6));
     ASSERT_EQ(subTask->getb().size(), 5);
     b.resize(5);
     b << _postural->getb().segment(0,3), _postural->getb().segment(5,2);
-    //b = yarp::math::cat(b,
-    //                    conversion_utils_YARP::toYARP(_postural->getb()).subVector(5,6));
     EXPECT_TRUE(vectorAreEqual(subTask->getb(),b));
 
     b = subTask->getb();
@@ -391,24 +388,20 @@ TEST_F(TestSubTask, testgetWeight)
 {
     using namespace OpenSoT;
 
-    Eigen::VectorXd W_diag(10);
-    for(unsigned int i = 0; i < 10; ++i)
-        W_diag(i) = i;
-    Eigen::MatrixXd W(10,10);
-    W.setZero(10,10);
-    for(unsigned int i = 0; i < 10; ++i)
-        W(i,i) = W_diag(i);
+    Eigen::MatrixXd W(_postural->getWeight().rows(), _postural->getWeight().cols());
+    W.setZero();
+    for(unsigned int i = 0; i < W.rows(); ++i)
+        W(i,i) = i;
     _postural->setWeight(W);
 
     std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
 
 
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(0,2));
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
-    Eigen::VectorXd q(10); q.setRandom(10);
-    subTask->update(q);
+    subTask->update(Eigen::VectorXd(0));
 
     std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
 
@@ -425,18 +418,18 @@ TEST_F(TestSubTask, testgetWeight)
     _postural->setWeight(W);
     std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
 
-    subTask->update(q);
+    subTask->update(Eigen::VectorXd(0));
     std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
 
-    tmp->update(q);
+    tmp->update(Eigen::VectorXd(0));
     std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
 
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),_postural->getWeight().block(0,0,3,3)));
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),tmp->getWeight()));
 
     tmp->setWeight(2*W.block(0,0,3,3));
-    subTask->update(q);
-    tmp->update(q);
+    subTask->update(Eigen::VectorXd(0));
+    tmp->update(Eigen::VectorXd(0));
     std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
     std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
     std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
@@ -463,8 +456,9 @@ TEST_F(TestSubTask, testgetWeight)
     std::cout<<"tmp2->getWeight(): \n"<<tmp2->getWeight()<<std::endl;
 
 
-    subTask= SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
-                                                 Indices::range(5,6)));
+    subTask.reset();
+    subTask= std::make_shared<SubTask>(_postural, Indices::range(0,2) +
+                                                 Indices::range(5,6));
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);
     W.resize(5, 5);
@@ -480,15 +474,18 @@ TEST_F(TestSubTask, testsetWeight)
 {
     using namespace OpenSoT;
 
-    Eigen::VectorXd W_diag(3);
     Eigen::MatrixXd fullW = _postural->getWeight();
-    for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
     Eigen::MatrixXd W(3,3);
-    W.setZero(3,3);
-    for(unsigned int i = 0; i < 3; ++i)
-        W(i,i) = W_diag(i);
+    W.setZero();
 
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(0,2)));
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+        W(i,i) = i+1;
+        fullW(i,i) = i+1;
+    }
+
+
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(0,2));
     subTask->setWeight(W);
 
     ASSERT_EQ(subTask->getWeight().rows(), 3);
@@ -499,15 +496,12 @@ TEST_F(TestSubTask, testsetWeight)
         "\nshould be:\n" << fullW;
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),W));
 
-    W.resize(5,5); W.setZero(5,5);
-    W_diag.resize(5); W_diag.setZero(5);
-    for(unsigned int i = 0; i < 3; ++i) { W_diag(i) = i+1; fullW(i,i) = i+1; }
-    for(unsigned int i = 3; i < 5 ; ++i) { W_diag(i) = i+1; fullW(i+2,i+2) = i+1; }
-    for(unsigned int i = 0; i < 5; ++i)
-        W(i,i) = W_diag(i);
+    W.resize(5,5); W.setZero();
+    for(unsigned int i = 0; i < 3; ++i) { W(i,i) = i+1; fullW(i,i) = i+1; }
+    for(unsigned int i = 3; i < 5 ; ++i) { W(i,i) = i+1; fullW(i+2,i+2) = i+1; }
 
-    subTask = SubTask::Ptr(new SubTask(_postural, Indices::range(0,2) +
-                                                  Indices::range(5,6)));
+    subTask = std::make_shared<SubTask>(_postural, Indices::range(0,2) +
+                                                  Indices::range(5,6));
     subTask->setWeight(W);
     ASSERT_EQ(subTask->getWeight().rows(), 5);
     ASSERT_EQ(subTask->getWeight().cols(), 5);
@@ -525,24 +519,31 @@ TEST_F(TestSubTask, testGetConstraints)
 
     _postural->getConstraints().push_back(_joint_limits);
 
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(1,3));
 
-    Eigen::VectorXd lowerBounds =
-            subTask->getConstraints().front()->getLowerBound();
+    Eigen::VectorXd lowerBounds = subTask->getConstraints().front()->getLowerBound();
     Eigen::VectorXd b = subTask->getb();
 
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-    subTask->update(Eigen::VectorXd::Constant(DOFS, 1.0));
 
-    EXPECT_FALSE( b == subTask->getb());
+    subTask->update(Eigen::VectorXd(0));
+
+    EXPECT_FALSE( b == subTask->getb())<<"b: "<<b.transpose()<<"\n"<<"subTask->getb(): "<<subTask->getb()<<std::endl;
     EXPECT_FALSE( lowerBounds == subTask->getConstraints().front()->getLowerBound());
 
     lowerBounds = subTask->getConstraints().front()->getLowerBound();
     b = subTask->getb();
 
-    subTask->update(Eigen::VectorXd::Constant(DOFS, 0.5));
+    q = _model_ptr->generateRandomQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
-    EXPECT_FALSE( b == subTask->getb());
+    subTask->update(Eigen::VectorXd(0));
+
+    EXPECT_FALSE( b == subTask->getb())<<"b: "<<b.transpose()<<"\n"<<"subTask->getb(): "<<subTask->getb()<<std::endl;
     EXPECT_FALSE( lowerBounds == subTask->getConstraints().front()->getLowerBound());
 }
 
@@ -551,7 +552,7 @@ TEST_F(TestSubTask, testUpdate)
     using namespace OpenSoT;
 
     _postural->getConstraints().push_back(_joint_limits);
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(1,3));
 
 
     ASSERT_EQ(_postural->getConstraints(), subTask->getConstraints());
@@ -562,11 +563,11 @@ TEST_F(TestSubTask, testGetTaskSize)
     using namespace OpenSoT;
 
     _postural->getConstraints().push_back(_joint_limits);
-    SubTask::Ptr subTask(new SubTask(_postural, Indices::range(1,3)));
+    SubTask::Ptr subTask = std::make_shared<SubTask>(_postural, Indices::range(1,3));
     ASSERT_EQ(subTask->getTaskSize(), 3);
 
-    subTask = SubTask::Ptr(new SubTask(_postural, Indices::range(1,3) +
-                                                  Indices::range(6,7)));
+    subTask = std::make_shared<SubTask>(_postural, Indices::range(1,3) +
+                                                  Indices::range(6,7));
     ASSERT_EQ(subTask->getTaskSize(), 5);
 }
 
@@ -593,8 +594,7 @@ TEST_F(TestSubTask, testWithCartesian)
     using namespace OpenSoT::tasks::velocity;
 
     // setting initial position with bent legs
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
     q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -605,8 +605,8 @@ TEST_F(TestSubTask, testWithCartesian)
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    Cartesian::Ptr left_leg(new Cartesian("lleg", q_whole, *_model_ptr,
-                                          "l_sole", "Waist"));
+    Cartesian::Ptr left_leg = std::make_shared<Cartesian>("lleg", *_model_ptr,
+                                          "l_sole", "Waist");
     Eigen::MatrixXd ref(4,4); ref.setRandom(4,4);
     Eigen::VectorXd vref(6); vref.setRandom(6);
     left_leg->setReference(ref, vref);
@@ -615,15 +615,15 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(0);
     indices.push_back(1);
     indices.push_back(2);
-    OpenSoT::SubTask::Ptr pose(new OpenSoT::SubTask(left_leg, indices));
+    OpenSoT::SubTask::Ptr pose = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
 
-    left_leg->update(q_whole);
-    pose->update(q_whole);
+    left_leg->update(Eigen::VectorXd(0));
+    pose->update(Eigen::VectorXd(0));
 
 
-    check_matrix_are_equal(pose->getA(), left_leg->getA().block(0,0,3,_model_ptr->getJointNum()));
+    check_matrix_are_equal(pose->getA(), left_leg->getA().block(0,0,3,_model_ptr->getNv()));
     std::cout<<"pose->getA(): "<<pose->getA()<<std::endl;
-    std::cout<<"left_leg->getA().block(0,0,3,_model_ptr->getJointNum()): "<<left_leg->getA().block(0,0,3,_model_ptr->getJointNum())<<std::endl;
+    std::cout<<"left_leg->getA().block(0,0,3,_model_ptr->getNv()): "<<left_leg->getA().block(0,0,3,_model_ptr->getNv())<<std::endl;
     check_vector_are_equal(pose->getb(), left_leg->getb().segment(0,3));
     std::cout<<"pose->getb(): "<<pose->getb()<<std::endl;
     std::cout<<"left_leg->getb().segment(0,3): "<<left_leg->getb().segment(0,3)<<std::endl;
@@ -633,15 +633,15 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(3);
     indices.push_back(4);
     indices.push_back(5);
-    OpenSoT::SubTask::Ptr pose2(new OpenSoT::SubTask(left_leg, indices));
+    OpenSoT::SubTask::Ptr pose2 = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
 
-    left_leg->update(q_whole);
-    pose2->update(q_whole);
+    left_leg->update(Eigen::VectorXd(0));
+    pose2->update(Eigen::VectorXd(0));
 
 
-    check_matrix_are_equal(pose2->getA(), left_leg->getA().block(3,0,3,_model_ptr->getJointNum()));
+    check_matrix_are_equal(pose2->getA(), left_leg->getA().block(3,0,3,_model_ptr->getNv()));
     std::cout<<"pose2->getA(): "<<pose->getA()<<std::endl;
-    std::cout<<"left_leg->getA().block(0,0,3,_model_ptr->getJointNum()): "<<left_leg->getA().block(3,0,3,_model_ptr->getJointNum())<<std::endl;
+    std::cout<<"left_leg->getA().block(0,0,3,_model_ptr->getNv()): "<<left_leg->getA().block(3,0,3,_model_ptr->getNv())<<std::endl;
     check_vector_are_equal(pose2->getb(), left_leg->getb().segment(3,3));
     std::cout<<"pose2->getb(): "<<pose->getb()<<std::endl;
     std::cout<<"left_leg->getb().segment(0,3): "<<left_leg->getb().segment(3,3)<<std::endl;
@@ -652,18 +652,18 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(1);
     indices.push_back(4);
     indices.push_back(5);
-    OpenSoT::SubTask::Ptr subtask(new OpenSoT::SubTask(left_leg, indices));
-    subtask->update(q_whole);
+    OpenSoT::SubTask::Ptr subtask = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
+    subtask->update(Eigen::VectorXd(0));
 
     EXPECT_EQ(subtask->getA().rows(), indices.size());
-    EXPECT_EQ(subtask->getA().cols(), _model_ptr->getJointNum());
+    EXPECT_EQ(subtask->getA().cols(), _model_ptr->getNv());
     EXPECT_EQ(subtask->getb().size(), indices.size());
 
-    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
         EXPECT_NEAR(subtask->getA().row(0)[i],left_leg->getA().row(1)[i],1e-10);
-    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
         EXPECT_NEAR(subtask->getA().row(1)[i],left_leg->getA().row(4)[i],1e-10);
-    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
         EXPECT_NEAR(subtask->getA().row(2)[i],left_leg->getA().row(5)[i],1e-10);
 
     EXPECT_NEAR(subtask->getb()[0],left_leg->getb()[1],1e-10);
@@ -676,16 +676,16 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.clear();
     indices.push_back(0);
     indices.push_back(4);
-    OpenSoT::SubTask::Ptr subtask2(new OpenSoT::SubTask(left_leg, indices));
-    subtask2->update(q_whole);
+    OpenSoT::SubTask::Ptr subtask2 = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
+    subtask2->update(Eigen::VectorXd(0));
 
     EXPECT_EQ(subtask2->getA().rows(), indices.size());
-    EXPECT_EQ(subtask2->getA().cols(), _model_ptr->getJointNum());
+    EXPECT_EQ(subtask2->getA().cols(), _model_ptr->getNv());
     EXPECT_EQ(subtask2->getb().size(), indices.size());
 
-    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
         EXPECT_NEAR(subtask2->getA().row(0)[i],left_leg->getA().row(0)[i],1e-10);
-    for(unsigned int i = 0; i < _model_ptr->getJointNum(); ++i)
+    for(unsigned int i = 0; i < _model_ptr->getNv(); ++i)
         EXPECT_NEAR(subtask2->getA().row(1)[i],left_leg->getA().row(4)[i],1e-10);
 
     EXPECT_NEAR(subtask2->getb()[0],left_leg->getb()[0],1e-10);
@@ -701,8 +701,7 @@ TEST_F(TestSubTask, testSubTaskCost)
     using namespace OpenSoT::tasks::velocity;
 
     // setting initial position with bent legs
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole = Eigen::VectorXd::Constant(q_whole.size(), 1E-4);
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
     q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -713,8 +712,8 @@ TEST_F(TestSubTask, testSubTaskCost)
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    Cartesian::Ptr left_leg(new Cartesian("lleg", q_whole, *_model_ptr,
-                                          "l_sole", "Waist"));
+    Cartesian::Ptr left_leg = std::make_shared<Cartesian>("lleg",  *_model_ptr,
+                                          "l_sole", "Waist");
     Eigen::MatrixXd ref(4,4); ref.setRandom(4,4);
     Eigen::VectorXd vref(6); vref.setRandom(6);
     left_leg->setReference(ref, vref);
@@ -727,40 +726,41 @@ TEST_F(TestSubTask, testSubTaskCost)
     position_indices.push_back(0);
     position_indices.push_back(1);
     position_indices.push_back(2);
-    OpenSoT::SubTask::Ptr position(new OpenSoT::SubTask(left_leg, position_indices));
+    OpenSoT::SubTask::Ptr position = std::make_shared<OpenSoT::SubTask>(left_leg, position_indices);
 
     std::list<unsigned int> orientation_indices;
     orientation_indices.push_back(3);
     orientation_indices.push_back(4);
     orientation_indices.push_back(5);
-    OpenSoT::SubTask::Ptr orientation(new OpenSoT::SubTask(left_leg, orientation_indices));
+    OpenSoT::SubTask::Ptr orientation = std::make_shared<OpenSoT::SubTask>(left_leg, orientation_indices);
 
-    left_leg->update(q_whole);
+    left_leg->update(Eigen::VectorXd(0));
 
 
-    double left_leg_cost = left_leg->computeCost(q_whole);
-    double position_cost = position->computeCost(q_whole);
-    double orientation_cost = orientation->computeCost(q_whole);
+    Eigen::VectorXd dq(_model_ptr->getNv()); dq.setRandom();
+    double left_leg_cost = left_leg->computeCost(dq);
+    double position_cost = position->computeCost(dq);
+    double orientation_cost = orientation->computeCost(dq);
 
-    std::cout<<"left_leg cost: "<<left_leg->computeCost(q_whole)<<std::endl;
-    std::cout<<"left_leg position cost: "<<position->computeCost(q_whole)<<std::endl;
-    std::cout<<"left_leg orientation cost: "<<orientation->computeCost(q_whole)<<std::endl;
+    std::cout<<"left_leg cost: "<<left_leg->computeCost(dq)<<std::endl;
+    std::cout<<"left_leg position cost: "<<position->computeCost(dq)<<std::endl;
+    std::cout<<"left_leg orientation cost: "<<orientation->computeCost(dq)<<std::endl;
 
     EXPECT_DOUBLE_EQ(left_leg_cost, position_cost + orientation_cost);
 }
 
 TEST_F(TestSubTask, testWithPostural)
 {
-    Eigen::VectorXd q(_model_ptr->getJointNum());
-    q.setRandom(q.size());
-    Eigen::VectorXd q_ref = q;
-    q_ref.setRandom(q.size());
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    Eigen::VectorXd q_ref = _model_ptr->generateRandomQ();
 
     using namespace OpenSoT::tasks;
 
-    velocity::Postural::Ptr postural(new velocity::Postural(q));
+    velocity::Postural::Ptr postural = std::make_shared<velocity::Postural>(*_model_ptr);
     postural->setReference(q_ref);
-    postural->update(q);
+    postural->update(Eigen::VectorXd());
 
     std::list<unsigned int> indices;
     // first chunk of size 3
@@ -781,35 +781,35 @@ TEST_F(TestSubTask, testWithPostural)
     // goes into third chunk and increases it to size 2
     indices.push_back(11);
 
-    OpenSoT::SubTask::Ptr subtask(new OpenSoT::SubTask(postural, indices));
-    subtask->update(q);
+    OpenSoT::SubTask::Ptr subtask = std::make_shared<OpenSoT::SubTask>(postural, indices);
+    subtask->update(Eigen::VectorXd(0));
 
 
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(0)[j], postural->getA().row(1)[j], 1e-10);
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(1)[j], postural->getA().row(2)[j], 1e-10);
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(2)[j], postural->getA().row(3)[j], 1e-10);
 
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(3)[j], postural->getA().row(7)[j], 1e-10);
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(4)[j], postural->getA().row(8)[j], 1e-10);
 
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(5)[j], postural->getA().row(10)[j], 1e-10);
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(6)[j], postural->getA().row(11)[j], 1e-10);
 
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(7)[j], postural->getA().row(13)[j], 1e-10);
 
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(8)[j], postural->getA().row(17)[j], 1e-10);
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(9)[j], postural->getA().row(18)[j], 1e-10);
-    for(unsigned int j = 0; j < _model_ptr->getJointNum(); ++j)
+    for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)
         EXPECT_NEAR(subtask->getA().row(10)[j], postural->getA().row(19)[j], 1e-10);
 
 
