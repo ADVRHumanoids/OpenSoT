@@ -147,12 +147,12 @@ if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
 
 endif()
 
-# if(${GLPK_FOUND})
-#     ADD_EXECUTABLE(testGLPKSolver solvers/TestGLPK.cpp)
-#     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
-#     add_dependencies(testGLPKSolver   OpenSoT)
-#     add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
-# endif()
+ if(${GLPK_FOUND})
+     ADD_EXECUTABLE(testGLPKSolver solvers/TestGLPK.cpp)
+     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
+     add_dependencies(testGLPKSolver   OpenSoT)
+     add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
+ endif()
 
  ADD_EXECUTABLE(testeiQuadProgSolver solvers/TesteiQuadProg.cpp)
  TARGET_LINK_LIBRARIES(testeiQuadProgSolver ${TestLibs})
