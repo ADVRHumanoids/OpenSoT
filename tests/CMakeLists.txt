@@ -123,10 +123,10 @@ add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsV
 #add_dependencies(testiHQP   OpenSoT)
 #add_test(NAME OpenSoT_front_ends_ihqp COMMAND testiHQP)
 
-#ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
-#TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
-#add_dependencies(testQPOasesSolver   OpenSoT)
-#add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
+ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
+TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
+add_dependencies(testQPOasesSolver   OpenSoT)
+add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
 if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
