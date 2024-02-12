@@ -22,11 +22,14 @@
 using namespace OpenSoT::tasks::velocity;
 
 
-MinimumEffort::MinimumEffort(   const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model) :
-    Task("min_effort", robot_model.getNv()), _gTauGradientWorker(x, robot_model), _x(x)
+MinimumEffort::MinimumEffort(const XBot::ModelInterface& robot_model, const double step) :
+    Task("min_effort", robot_model.getNv()),
+    _model(robot_model),
+    _gTauGradientWorker(robot_model),
+    _step(step)
 {
-    _W.resize(_x_size, _x_size);
-    _W.setIdentity(_x_size, _x_size);
+    _W.resize(robot_model.getNv(), robot_model.getNv());
+    _W.setIdentity();
 
     _hessianType = HST_POSDEF;
 
@@ -34,7 +37,7 @@ MinimumEffort::MinimumEffort(   const Eigen::VectorXd& x, const XBot::ModelInter
     _A.setIdentity(_x_size, _x_size);
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
+    this->_update(Eigen::VectorXd(0));
 }
 
 MinimumEffort::~MinimumEffort()
@@ -43,18 +46,39 @@ MinimumEffort::~MinimumEffort()
 }
 
 void MinimumEffort::_update(const Eigen::VectorXd &x) {
+    _q = _model.getJointPosition();
 
-    _x = x;
     /************************* COMPUTING TASK *****************************/
 
-    _b = -1.0 * _lambda * cartesian_utils::computeGradient(x, _gTauGradientWorker, this->getActiveJointsMask());
+
+    Eigen::VectorXd gradient(_model.getNv());
+    gradient.setZero();
+    Eigen::VectorXd deltas(_model.getNv());
+    deltas.setZero();
+
+
+    for(unsigned int i = 0; i < gradient.size(); ++i)
+    {
+        if(this->getActiveJointsMask()[i])
+        {
+            deltas[i] = _step;
+            double fun_a = _gTauGradientWorker.compute(_model.sum(_q, deltas));
+            double fun_b = _gTauGradientWorker.compute(_model.sum(_q, -deltas));
+
+            gradient[i] = (fun_a - fun_b)/(2.0*_step);
+            deltas[i] = 0.0;
+        } else
+            gradient[i] = 0.0;
+    }
+
+    _b = -1.0 * _lambda * gradient;
 
     /**********************************************************************/
 }
 
 double MinimumEffort::computeEffort()
 {
-    return _gTauGradientWorker.compute(_x);
+    return _gTauGradientWorker.compute(_model.getJointPosition());
 }
 
 

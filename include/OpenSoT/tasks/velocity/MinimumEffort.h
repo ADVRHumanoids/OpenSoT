@@ -42,8 +42,8 @@
             public:
                 typedef std::shared_ptr<MinimumEffort> Ptr;
             protected:
-                Eigen::VectorXd _x;
-
+                const XBot::ModelInterface& _model;
+                Eigen::VectorXd _q;
                 /**
                  * @brief The ComputeGTauGradient class implements a worker class to computes the effort for a certain configuration.
                  * It will take into account the robot as standing on a flat floor, and while computing the gradient,
@@ -56,45 +56,30 @@
                     XBot::ModelInterface::Ptr _robot;
                     const XBot::ModelInterface& _model;
                     Eigen::MatrixXd _W;
-                    Eigen::VectorXd _zeros, _tau;
+                    Eigen::VectorXd _tau;
                     Eigen::VectorXd _tau_lim;
 
-                    ComputeGTauGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model) :
+                    ComputeGTauGradient(const XBot::ModelInterface& robot_model) :
                         _robot(robot_model.clone()),
                         _model(robot_model),
-                        _W(q.rows(),q.rows()),
-                        _zeros(q.rows())
+                        _W(robot_model.getNv(), robot_model.getNv())
                     {
-                        _zeros.setZero(q.rows());
-                        _W.setIdentity(q.rows(),q.rows());
+                        _W.setIdentity();
 
                         _robot->syncFrom(_model);
 
                         _model.getEffortLimits(_tau_lim);
 
-                        for(int i = 0; i < q.size(); ++i){
+                        for(int i = 0; i < robot_model.getNv(); ++i){
                             _W(i,i) = 1.0 / std::pow(_tau_lim(i), 2.0);
                         }
 
-//                         _robot.switchAnchor(_model.getAnchor());
-//                         _robot.setAnchor_T_World(_model.getAnchor_T_World());
                     }
 
                     double compute(const Eigen::VectorXd &q)
                     {
-//                         if(_robot.getAnchor() != _model.getAnchor())
-//                             _robot.switchAnchor(_model.getAnchor());
-
                         _robot->setJointPosition(q);
                         _robot->update();
-//                         _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
-
-//                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
-//                         {
-//                             assert("if q and anchor are the same, anchor_t_world should be the same!");
-//
-//                             _robot.setAnchor_T_World(_model.getAnchor_T_World());
-//                         }
 
                         _robot->computeGravityCompensation(_tau);
                         return _tau.transpose()* _W * _tau;
@@ -106,10 +91,11 @@
                 };
 
                 ComputeGTauGradient _gTauGradientWorker;
+                double _step;
 
             public:
 
-                MinimumEffort(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model);
+                MinimumEffort(const XBot::ModelInterface& robot_model, const double step = 1E-3);
 
                 ~MinimumEffort();
 
@@ -146,7 +132,7 @@
                 {
                     if(lambda >= 0.0){
                         _lambda = lambda;
-                        this->_update(_x);
+                        this->_update(Eigen::VectorXd(0));
                     }
                 }
             };
