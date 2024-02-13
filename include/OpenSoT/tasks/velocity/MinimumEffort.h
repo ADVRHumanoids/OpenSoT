@@ -92,6 +92,8 @@
 
                 ComputeGTauGradient _gTauGradientWorker;
                 double _step;
+                Eigen::VectorXd _gradient;
+                Eigen::VectorXd _deltas;
 
             public:
 

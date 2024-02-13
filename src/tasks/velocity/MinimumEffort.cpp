@@ -36,6 +36,9 @@ MinimumEffort::MinimumEffort(const XBot::ModelInterface& robot_model, const doub
     _A.resize(_x_size, _x_size);
     _A.setIdentity(_x_size, _x_size);
 
+    _gradient.resize(_model.getNv());
+    _deltas.resize(_model.getNv());
+
     /* first update. Setting desired pose equal to the actual pose */
     this->_update(Eigen::VectorXd(0));
 }
@@ -50,28 +53,25 @@ void MinimumEffort::_update(const Eigen::VectorXd &x) {
 
     /************************* COMPUTING TASK *****************************/
 
-
-    Eigen::VectorXd gradient(_model.getNv());
-    gradient.setZero();
-    Eigen::VectorXd deltas(_model.getNv());
-    deltas.setZero();
+    _gradient.setZero();
+    _deltas.setZero();
 
 
-    for(unsigned int i = 0; i < gradient.size(); ++i)
+    for(unsigned int i = 0; i < _gradient.size(); ++i)
     {
         if(this->getActiveJointsMask()[i])
         {
-            deltas[i] = _step;
-            double fun_a = _gTauGradientWorker.compute(_model.sum(_q, deltas));
-            double fun_b = _gTauGradientWorker.compute(_model.sum(_q, -deltas));
+            _deltas[i] = _step;
+            double fun_a = _gTauGradientWorker.compute(_model.sum(_q, _deltas));
+            double fun_b = _gTauGradientWorker.compute(_model.sum(_q, -_deltas));
 
-            gradient[i] = (fun_a - fun_b)/(2.0*_step);
-            deltas[i] = 0.0;
+            _gradient[i] = (fun_a - fun_b)/(2.0*_step);
+            _deltas[i] = 0.0;
         } else
-            gradient[i] = 0.0;
+            _gradient[i] = 0.0;
     }
 
-    _b = -1.0 * _lambda * gradient;
+    _b = -1.0 * _lambda * _gradient;
 
     /**********************************************************************/
 }
