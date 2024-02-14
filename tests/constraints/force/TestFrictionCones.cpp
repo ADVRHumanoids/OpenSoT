@@ -11,126 +11,65 @@
 #include <ros/master.h>
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_broadcaster.h>
+#include <eigen_conversions/eigen_kdl.h>
 
+#include "../../common.h"
 
-
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = relative_path;
-
-bool IS_ROSCORE_RUNNING;
 
 namespace{
 
-class testFrictionCones : public ::testing::Test {
+class testFrictionCones : public TestBase {
  protected:
 
-  testFrictionCones()
+  testFrictionCones() : TestBase("coman_floating_base")
   {
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-      if(_model_ptr)
-          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-      else
-          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-
-      int number_of_dofs = _model_ptr->getJointNum();
+      int number_of_dofs = _model_ptr->getNq();
       std::cout<<"#DoFs: "<<number_of_dofs<<std::endl;
 
       _q.resize(number_of_dofs);
-      _q.setZero(number_of_dofs);
+      _q = _model_ptr->getNeutralQ();
 
       _model_ptr->setJointPosition(_q);
       _model_ptr->update();
 
       //Update world according this new configuration:
-      KDL::Frame l_sole_T_Waist;
+      Eigen::Affine3d l_sole_T_Waist;
       this->_model_ptr->getPose("Waist", "l_sole", l_sole_T_Waist);
-      std::cout<<"l_sole_T_Waist:"<<std::endl;
-      this->printKDLFrame(l_sole_T_Waist);
+      std::cout<<"l_sole_T_Waist:\n"<<l_sole_T_Waist.matrix()<<std::endl;
 
-      l_sole_T_Waist.p.x(0.0);
-      l_sole_T_Waist.p.y(0.0);
+      l_sole_T_Waist.translation()[0] = 0.0;
+      l_sole_T_Waist.translation()[1] = 0.0;
 
       this->setWorld(l_sole_T_Waist, this->_q);
       this->_model_ptr->setJointPosition(this->_q);
       this->_model_ptr->update();
 
 
-      KDL::Frame world_T_bl;
+      Eigen::Affine3d world_T_bl;
       _model_ptr->getPose("Waist",world_T_bl);
 
-      std::cout<<"world_T_bl:"<<std::endl;
-      printKDLFrame(world_T_bl);
-      //
+      std::cout<<"world_T_bl: \n "<<world_T_bl.matrix()<<std::endl;
 
       _q[_model_ptr->getDofIndex("RAnkLat")] = -45.0*M_PI/180.0;
       _q[_model_ptr->getDofIndex("LAnkLat")] = 45.0*M_PI/180.0;
       _model_ptr->setJointPosition(_q);
       _model_ptr->update();
       //Update world according this new configuration:
-      world_T_bl.p.z(world_T_bl.p.z()+0.05);
+      world_T_bl.translation()[2] += 0.05;
       this->setWorld(l_sole_T_Waist, this->_q);
       this->_model_ptr->setJointPosition(this->_q);
       this->_model_ptr->update();
       //
-
-
-
-
-
-      if(IS_ROSCORE_RUNNING){
-
-          _n.reset(new ros::NodeHandle());
-          joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
-          world_broadcaster.reset(new tf::TransformBroadcaster());
-      }
   }
 
-  void setWorld(const KDL::Frame& l_sole_T_Waist, Eigen::VectorXd& q)
+  void setWorld(const Eigen::Affine3d& l_sole_T_Waist, Eigen::VectorXd& q)
   {
       this->_model_ptr->setFloatingBasePose(l_sole_T_Waist);
 
+      this->_model_ptr->update();
+
       this->_model_ptr->getJointPosition(q);
-  }
-
-  void publishRobotState()
-  {
-      if(IS_ROSCORE_RUNNING)
-      {
-          sensor_msgs::JointState joint_msg;
-          joint_msg.name = _model_ptr->getEnabledJointNames();
-
-
-          for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
-              joint_msg.position.push_back(0.0);
-
-          for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
-          {
-              int id = _model_ptr->getDofIndex(joint_msg.name[i]);
-              joint_msg.position[id] = _q[i];
-          }
-
-          joint_msg.header.stamp = ros::Time::now();
-
-
-          KDL::Frame world_T_bl;
-          _model_ptr->getPose("Waist",world_T_bl);
-
-          tf::Transform anchor_T_world;
-          anchor_T_world.setOrigin(tf::Vector3(world_T_bl.p.x(),
-              world_T_bl.p.y(), world_T_bl.p.z()));
-          double x,y,z,w;
-          world_T_bl.M.GetQuaternion(x,y,z,w);
-          anchor_T_world.setRotation(tf::Quaternion(x,y,z,w));
-
-          world_broadcaster->sendTransform(tf::StampedTransform(
-              anchor_T_world.inverse(), joint_msg.header.stamp,
-              "Waist", "world"));
-
-
-          joint_state_pub.publish(joint_msg);
-      }
-
   }
 
 
@@ -147,15 +86,7 @@ class testFrictionCones : public ::testing::Test {
 
 
 public:
-  void printKDLFrame(const KDL::Frame& F)
-  {
-      std::cout<<"    pose: ["<<F.p.x()<<", "<<F.p.y()<<", "<<F.p.z()<<"]"<<std::endl;
-      double qx, qy,qz,qw;
-      F.M.GetQuaternion(qx,qy,qz,qw);
-      std::cout<<"    quat: ["<<qx<<", "<<qy<<", "<<qz<<", "<<qw<<"]"<<std::endl;
-  }
 
-  XBot::ModelInterface::Ptr _model_ptr;
   Eigen::VectorXd _q;
   OpenSoT::tasks::force::CoM::Ptr com;
 
@@ -172,28 +103,18 @@ public:
   Eigen::VectorXd bUpperBoud;
   Eigen::VectorXd Aineqx;
 
-  std::shared_ptr<ros::NodeHandle> _n;
-  ros::Publisher joint_state_pub;
-  std::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
 };
 
 
 TEST_F(testFrictionCones, testFrictionCones_) {
 
-    if(IS_ROSCORE_RUNNING){
-        for(unsigned int i = 0; i < 10000; ++i){
-            publishRobotState();
-            ros::spinOnce();
-        }
-    }
-
     std::vector<std::string> links_in_contact;
     links_in_contact.push_back("r_sole");
     links_in_contact.push_back("l_sole");
 
-    KDL::Frame w_T_r_sole;
+    Eigen::Affine3d w_T_r_sole;
     _model_ptr->getPose("r_sole", w_T_r_sole);
-    KDL::Frame w_T_l_sole;
+    Eigen::Affine3d w_T_l_sole;
     _model_ptr->getPose("l_sole", w_T_l_sole);
 
 
@@ -343,8 +264,6 @@ TEST_F(testFrictionCones, testFrictionCones_) {
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "testFrictionCones_node");
-  IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
