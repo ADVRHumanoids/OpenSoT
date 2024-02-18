@@ -84,10 +84,10 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
      add_dependencies(testAggregatedConstraint   OpenSoT)
      add_test(NAME OpenSoT_constraints_Aggregated COMMAND testAggregatedConstraint)
 
-#     ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
-#     TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
-#     add_dependencies(testAggregatedTask   OpenSoT)
-#     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
+     ADD_EXECUTABLE(testAggregatedTask tasks/TestAggregated.cpp)
+     TARGET_LINK_LIBRARIES(testAggregatedTask ${TestLibs})
+     add_dependencies(testAggregatedTask   OpenSoT)
+     add_test(NAME OpenSoT_task_Aggregated COMMAND testAggregatedTask)
 endif()
 
 
