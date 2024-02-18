@@ -268,43 +268,6 @@ class cartesian_utils
 {
 public:
     /**
-     * @brief pnpoly this code is EXACTLY the code of the PNPOLY - Point Inclusion in Polygon Test
-        W. Randolph Franklin (WRF) to test if a point is inside a plygon
-        (https://www.ecse.rpi.edu/~wrf/Research/Short_Notes/pnpoly.html)
-     * @param nvert Number of vertices in the polygon
-     * @param vertx Arrays containing the x-coordinates of the polygon's vertices
-     * @param verty Arrays containing the y-coordinates of the polygon's vertices
-     * @param testx X-coordinate of the test point
-     * @param testy Y-coordinate of the test point
-     * @return
-     *          -1 if the point is outside of the
-     *           0 if the point is on an edge or at a vertes
-     *           1 if the point is inside of the polygon
-     *
-     * REMARKS:
-     *      The vertices may be listed clockwise or anticlockwise.
-     *      The first may optionally be repeated, if so nvert may optionally be increased by 1.
-     *      The input polygon may be a compound polygon constisting of several separate
-     *      subpolygons. If so, the first vertex of each subpolygon must be repeated, and when calculating
-     *      nvert, these first vertices must be counted twice.
-     *      Written by Randolph Franklin, University of Ottawa, 7/70.
-     *
-     * METHOD:
-     *      A vertical line is drawn thru the point in question. If it crosses the polygon an odd number
-     *      of times, then the point is inside of the polygon.
-     */
-    static int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
-    {
-        int i, j, c = 0;
-          for (i = 0, j = nvert-1; i < nvert; j = i++) {
-            if ( ((verty[i]>testy) != (verty[j]>testy)) &&
-             (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
-               c = !c;
-          }
-          return c;
-    }
-
-    /**
      * @brief computePanTiltMatrix given a gaze vector computes the Homogeneous Matrix to control the
      * YAW-PITCH angles.
      * The algorithm used is based on the paper: "Adaptive Predictive Gaze Control of a Redundant Humanoid
