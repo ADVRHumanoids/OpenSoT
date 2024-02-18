@@ -362,20 +362,11 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 #    TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
 #    add_dependencies(testQPOases_SelfCollisionAvoidance   OpenSoT)
 
-#    ADD_EXECUTABLE(testQPOases_VelocityAllocation solvers/TestQPOases_VelocityAllocation.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_VelocityAllocation ${TestLibs})
-#    add_dependencies(testQPOases_VelocityAllocation   OpenSoT)
 
-
-
-#    ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
-#    TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
-#    add_dependencies(testGazeVelocityTask   OpenSoT)
-
-
-#    ADD_EXECUTABLE(testVelocityAllocation utils/TestVelocityAllocation.cpp)
-#    TARGET_LINK_LIBRARIES(testVelocityAllocation ${TestLibs})
-#    add_dependencies(testVelocityAllocation   OpenSoT)
+#ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
+#TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
+#add_dependencies(testGazeVelocityTask   OpenSoT)
+#add_test(NAME OpenSoT_tasks_velocity_gaze COMMAND testGazeTask)
 
 
 
@@ -389,13 +380,11 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 #    add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
 #    add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
 
-#    add_test(NAME OpenSoT_solvers_qpOases_VelocityAllocation COMMAND testQPOases_VelocityAllocation)
 
 
 #    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
 
 
-#    add_test(NAME OpenSoT_utils_VelocityAllocation COMMAND testVelocityAllocation)
 
 
 
