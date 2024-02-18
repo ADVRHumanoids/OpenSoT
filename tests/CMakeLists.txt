@@ -91,10 +91,10 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
 endif()
 
 
-#ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
-#TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
-#add_dependencies(testl1HQP   OpenSoT)
-#add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
+ADD_EXECUTABLE(testl1HQP     solvers/Testl1HQP.cpp)
+TARGET_LINK_LIBRARIES(testl1HQP ${TestLibs})
+add_dependencies(testl1HQP   OpenSoT)
+add_test(NAME OpenSoT_solvers_l1HQP COMMAND testl1HQP)
 
 # if(${OPENSOT_SOTH_FRONT_END})
 #     ADD_EXECUTABLE(testSOTH     solvers/TestSOTH.cpp)

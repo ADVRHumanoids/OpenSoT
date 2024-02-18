@@ -16,7 +16,7 @@ class testl1HQP: public TestBase
 {
 protected:
 
-    testl1HQP(): TestBase("coman")
+    testl1HQP(): TestBase("coman_floating_base")
     {
 
     }
@@ -34,30 +34,24 @@ protected:
     }
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-        Eigen::VectorXd _dq(_model_ptr->getNv());
-        _dq.setZero();
-        _dq[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _dq[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _dq[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _dq[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-        _dq[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
 
-        auto q = _model_ptr->sum(_model_ptr->getNeutralQ(), _dq);
-
-        _model_ptr->setJointPosition(q);
-        _model_ptr->update();
-
-        return q;
+        return _q;
     }
 
 };
@@ -69,13 +63,14 @@ TEST_F(testl1HQP, testContructor)
     model_ptr = _model_ptr;
 
     Eigen::VectorXd q = this->getGoodInitialPosition(model_ptr);
+    _model_ptr->update();
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_sole =
-            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", q, *model_ptr, "l_sole", "world");
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", *model_ptr, "l_sole", "world");
     OpenSoT::tasks::velocity::Cartesian::Ptr r_sole =
-            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", q, *model_ptr, "r_sole", "world");
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", *model_ptr, "r_sole", "world");
     OpenSoT::tasks::velocity::CoM::Ptr CoM =
-            std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *model_ptr);
+            std::make_shared<OpenSoT::tasks::velocity::CoM>(*model_ptr);
 
     Eigen::VectorXd qmin, qmax;
     model_ptr->getJointLimits(qmin, qmax);
@@ -83,7 +78,7 @@ TEST_F(testl1HQP, testContructor)
             std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
     OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM)<<joint_limits;
-    stack->update(q);
+    stack->update(Eigen::VectorXd(0));
 
     OpenSoT::solvers::l1HQP::Ptr l1_solver =
             std::make_shared<OpenSoT::solvers::l1HQP>(*stack);
