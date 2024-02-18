@@ -118,10 +118,10 @@ add_test(NAME OpenSoT_constraints_velocity_JointLimits  COMMAND testJointLimitsV
 #add_dependencies(testJointLimitsInvarianceVelocityBounds   OpenSoT)
 #add_test(NAME OpenSoT_constraints_velocity_JointLimitsInvariance  COMMAND testJointLimitsInvarianceVelocityBounds)
 
-#ADD_EXECUTABLE(testiHQP solvers/TestiHQP.cpp)
-#TARGET_LINK_LIBRARIES(testiHQP ${TestLibs})
-#add_dependencies(testiHQP   OpenSoT)
-#add_test(NAME OpenSoT_front_ends_ihqp COMMAND testiHQP)
+ADD_EXECUTABLE(testiHQP solvers/TestiHQP.cpp)
+TARGET_LINK_LIBRARIES(testiHQP ${TestLibs})
+add_dependencies(testiHQP   OpenSoT)
+add_test(NAME OpenSoT_front_ends_ihqp COMMAND testiHQP)
 
 ADD_EXECUTABLE(testQPOasesSolver solvers/TestQPOases.cpp)
 TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
