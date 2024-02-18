@@ -12,17 +12,16 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/force/Force.h>
 #include <OpenSoT/utils/InverseDynamics.h>
+#include "../../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace{
 
-class testForceCoM : public ::testing::Test {
+class testForceCoM : public TestBase {
 
  protected:
 
-  testForceCoM()
+  testForceCoM() : TestBase("coman_floating_base")
   {
 
   }
@@ -39,11 +38,11 @@ class testForceCoM : public ::testing::Test {
 
 };
 
-class testWrench : public ::testing::Test {
+class testWrench : public TestBase {
 
  protected:
 
-  testWrench()
+  testWrench() : TestBase("coman_floating_base")
   {
 
   }
@@ -61,8 +60,7 @@ class testWrench : public ::testing::Test {
 };
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-    Eigen::VectorXd _q(_model_ptr->getJointNum());
-    _q.setZero(_q.size());
+    Eigen::VectorXd _q = _model_ptr->getNeutralQ();
     _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
     _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
     _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
@@ -82,14 +80,6 @@ Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
 
 
 TEST_F(testForceCoM, testForceCoM_StaticCase) {
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-    if(_model_ptr)
-        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-    else
-        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-
-
 
     Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
 
@@ -179,9 +169,6 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     wrench_reference(14) = 100.;
 
 
-
-
-
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(force_com_task);
 
@@ -193,8 +180,6 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
     force_com_task->update(contact_wrenches_d);
-
-
 
 
     EXPECT_TRUE(sot->solve(contact_wrenches_d));
