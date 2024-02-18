@@ -266,21 +266,21 @@ TEST_F(testOSQPProblem, testProblemWithConstraint)
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
     Eigen::VectorXd _q = _model_ptr->getNeutralQ();
-    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LShSag")+1 ] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LShLat")+1 ] = 10.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LElbj")+1 ] = -80.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RShSag")+1 ] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RShLat")+1 ] = -10.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RElbj")+1 ] = -80.0*M_PI/180.0;
 
     return _q;
 }

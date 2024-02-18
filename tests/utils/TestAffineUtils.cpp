@@ -20,15 +20,15 @@ protected:
 
         q = model_ptr->getNeutralQ();
 
-        q[model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LShSag")+1 ] =  20.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LShLat")+1 ] = 10.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LElbj")+1 ] = -80.0*M_PI/180.0;
 
         model_ptr->setJointPosition(q);
         model_ptr->update();
@@ -80,8 +80,8 @@ TEST_F(testAffineUtils, testConstraintsToAffine)
               constraint->getAineq());
 
     //4. Update q and model
-    this->q[model_ptr->getDofIndex("RHipSag")] = -15.0*M_PI/180.0;
-    this->q[model_ptr->getDofIndex("LHipSag")] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("RHipSag")+1] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("LHipSag")+1] = -15.0*M_PI/180.0;
     this->model_ptr->setJointPosition(this->q);
     this->model_ptr->update();
 
@@ -162,8 +162,8 @@ TEST_F(testAffineUtils, testCartesianTaskToAffine)
     std::cout<<"task->getb(): "<<task->getb().transpose()<<std::endl;
 
     //4. Update q and model
-    this->q[model_ptr->getDofIndex("RHipSag")] = -15.0*M_PI/180.0;
-    this->q[model_ptr->getDofIndex("LHipSag")] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("RHipSag")+1] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("LHipSag")+1] = -15.0*M_PI/180.0;
     this->model_ptr->setJointPosition(this->q);
     this->model_ptr->update();
 

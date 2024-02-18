@@ -51,8 +51,8 @@ class testFrictionCones : public TestBase {
 
       std::cout<<"world_T_bl: \n "<<world_T_bl.matrix()<<std::endl;
 
-      _q[_model_ptr->getDofIndex("RAnkLat")] = -45.0*M_PI/180.0;
-      _q[_model_ptr->getDofIndex("LAnkLat")] = 45.0*M_PI/180.0;
+      _q[_model_ptr->getDofIndex("RAnkLat") + 1] = -45.0*M_PI/180.0;
+      _q[_model_ptr->getDofIndex("LAnkLat") + 1] = 45.0*M_PI/180.0;
       _model_ptr->setJointPosition(_q);
       _model_ptr->update();
       //Update world according this new configuration:

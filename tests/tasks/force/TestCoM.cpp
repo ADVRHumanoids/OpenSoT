@@ -61,25 +61,33 @@ class testWrench : public TestBase {
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
     Eigen::VectorXd _q = _model_ptr->getNeutralQ();
-    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LShSag")] =  -90.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LForearmPlate")] = -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("RShSag")] =  -90.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RForearmPlate")] = -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LShSag")+1 ] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("LForearmPlate")+1 ] = -90.0*M_PI/180.0;
+
+    _q[_model_ptr->getDofIndex("RShSag")+1 ] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getDofIndex("RForearmPlate")+1 ] = -90.0*M_PI/180.0;
 
     return _q;
 }
 
 
 TEST_F(testForceCoM, testForceCoM_StaticCase) {
+    std::cout<<"#nq: "<<_model_ptr->getNq()<<std::endl;
+    std::cout<<"#nv: "<<_model_ptr->getNv()<<std::endl;
+    std::cout<<"#joint_num: "<<_model_ptr->getJointNum()<<std::endl;
+    std::cout<<"#joint_name size: "<<_model_ptr->getJointNames().size()<<std::endl;
+    for(auto jn : _model_ptr->getJointNames())
+        std::cout<<jn<<": "<<_model_ptr->getDofIndex(jn)<<std::endl;
+
 
     Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
 
@@ -174,12 +182,12 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
 
     OpenSoT::solvers::iHQP::Ptr sot(
-                new OpenSoT::solvers::iHQP(stack_of_tasks,0.));
+                new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
     std::cout<<"Solver started"<<std::endl;
 
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    force_com_task->update(contact_wrenches_d);
+    force_com_task->update(Eigen::VectorXd(0));
 
 
     EXPECT_TRUE(sot->solve(contact_wrenches_d));

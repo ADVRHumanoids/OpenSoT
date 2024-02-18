@@ -37,12 +37,12 @@ TEST_F(testCoMTask, testCoMTask_)
 {
     // setting initial position with bent legs
     Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
-    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
 
 
     _model_ptr->setJointPosition(q_whole);
@@ -117,12 +117,12 @@ TEST_F(testCoMTask, testCoMTask_)
 TEST_F(testCoMTask, testReset)
 {    
     Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
-    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
 
 
     _model_ptr->setJointPosition(q_whole);
