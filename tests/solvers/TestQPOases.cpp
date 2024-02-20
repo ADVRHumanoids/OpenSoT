@@ -482,8 +482,8 @@ TEST_F(testQPOasesTask, testQPOasesTask)
 using namespace OpenSoT::constraints::velocity;
 TEST_F(testQPOasesTask, testProblemWithConstraint)
 {
-        Eigen::VectorXd q(_model_ptr->getNq()); q = _model_ptr->getNeutralQ();
-        Eigen::VectorXd q_ref(q.size()); q_ref.setConstant(q.size(), M_PI);
+        Eigen::VectorXd q = _model_ptr->getNeutralQ();
+        Eigen::VectorXd q_ref = _model_ptr->generateRandomQ();
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
@@ -498,7 +498,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
         JointLimits::Ptr joint_limits(
             new JointLimits(*_model_ptr, q_max, q_min));
         postural_task->getConstraints().push_back(joint_limits);
-        postural_task->setLambda(0.1);
+        postural_task->setLambda(1.);
 
         std::cout<<"postural_task->getXSize(): "<<postural_task->getXSize()<<std::endl;
 
@@ -558,7 +558,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
                 EXPECT_NEAR( q[i], q_min[i-1], 1E-4);
             }
             else
-                EXPECT_NEAR( q[i], q_ref[i-1], 1E-4);
+                EXPECT_NEAR( q[i], q_ref[i], 1E-4);
         }
 }
 
@@ -598,8 +598,8 @@ TEST_F(testQPOasesTask, test_on_eigen)
 
 TEST_F(testiHQP, testContructor1Problem)
 {
-    Eigen::VectorXd q(_model_ptr->getNq()); q = _model_ptr->getNeutralQ();
-    Eigen::VectorXd q_ref(q.size()); q_ref.setConstant(q.size(), M_PI);
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    Eigen::VectorXd q_ref = _model_ptr->generateRandomQ();
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
@@ -665,7 +665,7 @@ TEST_F(testiHQP, testContructor1Problem)
             EXPECT_NEAR( q[i], q_min[i-1], 1E-4);
         }
         else
-            EXPECT_NEAR( q[i], q_ref[i-1], 1E-4);
+            EXPECT_NEAR( q[i], q_ref[i], 1E-4);
 
     }
 }

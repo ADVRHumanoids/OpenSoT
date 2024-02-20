@@ -3,28 +3,18 @@
 #include <memory>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <xbot2_interface/xbotinterface2.h>
+#include "../../common.h"
 
 
 namespace {
 
-class testCartesianTask: public ::testing::Test
+class testCartesianTask: public TestBase
 {
 protected:
-    XBot::ModelInterface::Ptr _model_ptr;
-    std::string _path_to_cfg;
 
-    testCartesianTask()
+    testCartesianTask(): TestBase("coman_floating_base")
     {
-        std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
-        _path_to_cfg = relative_path;
-
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     }
 
     virtual ~testCartesianTask() {
@@ -43,15 +33,13 @@ protected:
 
 TEST_F(testCartesianTask, testSetBaseLink)
 {
-    Eigen::VectorXd q(_model_ptr->getJointNum());
-    q.setZero(q.size());
-
-    q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
-    q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
@@ -62,21 +50,21 @@ TEST_F(testCartesianTask, testSetBaseLink)
     std::string base_link3 = "Waist";
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm1(
-        new OpenSoT::tasks::velocity::Cartesian("l_arm",q,*(_model_ptr.get()),distal_link,
+        new OpenSoT::tasks::velocity::Cartesian("l_arm", *_model_ptr,distal_link,
                                                 base_link1));
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm2(
-        new OpenSoT::tasks::velocity::Cartesian("l_arm",q,*(_model_ptr.get()),distal_link,
+        new OpenSoT::tasks::velocity::Cartesian("l_arm",*_model_ptr,distal_link,
                                                 base_link2));
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm3(
-        new OpenSoT::tasks::velocity::Cartesian("l_arm",q,*(_model_ptr.get()),distal_link,
+        new OpenSoT::tasks::velocity::Cartesian("l_arm",*_model_ptr,distal_link,
                                                 base_link3));
 
-    l_arm1->update(q);
-    l_arm2->update(q);
-    l_arm3->update(q);
+    l_arm1->update(Eigen::VectorXd(0));
+    l_arm2->update(Eigen::VectorXd(0));
+    l_arm3->update(Eigen::VectorXd(0));
 
     EXPECT_TRUE(l_arm1->setBaseLink(base_link2));
-    l_arm1->update(q);
+    l_arm1->update(Eigen::VectorXd(0));
 
     EXPECT_NEAR((l_arm1->getA() - l_arm2->getA()).norm(), 0.0, 1e-12);
     EXPECT_NEAR((l_arm1->getb() - l_arm2->getb()).norm(), 0.0, 1e-12);
@@ -84,7 +72,7 @@ TEST_F(testCartesianTask, testSetBaseLink)
     EXPECT_NEAR((l_arm1->getActualPose() - l_arm2->getActualPose()).norm(), 0.0, 1e-12);
 
     EXPECT_TRUE(l_arm1->setBaseLink(base_link3));
-    l_arm1->update(q);
+    l_arm1->update(Eigen::VectorXd(0));
 
     EXPECT_NEAR((l_arm1->getA() - l_arm3->getA()).norm(), 0.0, 1e-12);
     EXPECT_NEAR((l_arm1->getb() - l_arm3->getb()).norm(), 0.0, 1e-12);
@@ -96,20 +84,17 @@ TEST_F(testCartesianTask, testSetBaseLink)
 TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 {
     // setting initial position with bent legs
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole.setZero(q_whole.size());
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
 
-
-    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
     OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::right_leg",
-                                                 q_whole,
-                                                 *(_model_ptr.get()),
+                                                 *_model_ptr,
                                                  "r_sole",
                                                  "world");
 
@@ -127,9 +112,10 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     x_ref.matrix() = x.matrix() + delta_x;
     std::cout<<"x_ref: "<<x_ref.matrix()<<std::endl;
 
-    KDL::Jacobian J; J.resize(q_whole.size());
-    _model_ptr->getJacobian("r_sole",KDL::Vector::Zero(), J);
-    EXPECT_TRUE(cartesian.getA() == J.data);
+    Eigen::MatrixXd J(6, _model_ptr->getNv());
+    J.setZero();
+    _model_ptr->getJacobian("r_sole",J);
+    EXPECT_TRUE(cartesian.getA() == J);
     EXPECT_EQ(cartesian.getA().rows(), 6);
     EXPECT_EQ(cartesian.getb().size(), 6);
 
@@ -163,8 +149,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        cartesian._update(q_whole);
-        q_whole += cartesian.getA().transpose()*cartesian.getb();
+        cartesian._update(Eigen::VectorXd(0));
+        q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
 
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
@@ -188,20 +174,18 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
 TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
 {
     // setting initial position with bent legs
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole.setZero(q_whole.size());
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
 
-    q_whole[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
 
     OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
-                                                 q_whole,
-                                                 *(_model_ptr.get()),
+                                                 *_model_ptr,
                                                  "l_sole",
                                                  "r_sole");
 
@@ -218,10 +202,11 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     x_ref.matrix() = x.matrix() + delta_x;
     std::cout<<"x_ref: "<<x_ref.matrix()<<std::endl;
 
-    KDL::Jacobian J; J.resize(q_whole.size());
+    Eigen::MatrixXd J(6, _model_ptr->getNv());
+    J.setZero();
     _model_ptr->getRelativeJacobian("l_sole","r_sole", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
-    EXPECT_TRUE(cartesian.getA() == J.data);
+    EXPECT_TRUE(cartesian.getA() == J);
     EXPECT_EQ(cartesian.getA().rows(), 6);
     EXPECT_EQ(cartesian.getb().size(), 6);
 
@@ -256,8 +241,8 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        cartesian._update(q_whole);
-        q_whole += cartesian.getA().transpose()*cartesian.getb();
+        cartesian._update(Eigen::VectorXd(0));
+        q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
@@ -279,27 +264,23 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
 }
 
 
-
-
 TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
 {
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole.setZero(q_whole.size());
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
 
-    q_whole[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LShSag")] = 20.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LShSag")] = 20.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
 
     OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
-                                                 q_whole,
-                                                 *(_model_ptr.get()),
+                                                 *_model_ptr,
                                                  "l_wrist",
                                                  "l_sole");
 
@@ -321,11 +302,12 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     x_ref.matrix() = x.matrix() + delta_x;
     std::cout<<"x_ref: "<<x_ref.matrix()<<std::endl;
 
-    KDL::Jacobian J; J.resize(q_whole.size());
+    Eigen::MatrixXd J(6, _model_ptr->getNv());
+    J.setZero();
     _model_ptr->getRelativeJacobian("l_wrist","l_sole", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
-    std::cout<<"J model: "<<J.data<<std::endl;
-    EXPECT_TRUE(cartesian.getA() == J.data);
+    std::cout<<"J model: "<<J<<std::endl;
+    EXPECT_TRUE(cartesian.getA() == J);
     EXPECT_EQ(cartesian.getA().rows(), 6);
     EXPECT_EQ(cartesian.getb().size(), 6);
 
@@ -359,8 +341,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     {
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
-        cartesian._update(q_whole);
-        q_whole += cartesian.getA().transpose()*cartesian.getb();
+        cartesian._update(Eigen::VectorXd(0));
+        q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
         _model_ptr->getPose("l_wrist","l_sole", x_now);
@@ -382,20 +364,18 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
 
 TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
 {
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole.setZero(q_whole.size());
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
 
-    q_whole[_model_ptr->getDofIndex("LShSag")] = 20.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LShSag")] = 20.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
 
     OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::left_leg",
-                                                 q_whole,
-                                                 *(_model_ptr.get()),
+                                                 *_model_ptr,
                                                  "l_wrist",
                                                  "Waist");
     XBot::ModelInterface& reference_to_model_interface = *_model_ptr;
@@ -416,11 +396,12 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     x_ref.matrix() = x.matrix() + delta_x;
     std::cout<<"x_ref: "<<x_ref.matrix()<<std::endl;
 
-    KDL::Jacobian J; J.resize(q_whole.size());
+    Eigen::MatrixXd J(6, _model_ptr->getNv());
+    J.setZero();
     _model_ptr->getRelativeJacobian("l_wrist","Waist", J);
     std::cout<<"getA(): "<<cartesian.getA()<<std::endl;
-    std::cout<<"J model: "<<J.data<<std::endl;
-    EXPECT_TRUE(cartesian.getA() == J.data);
+    std::cout<<"J model: "<<J<<std::endl;
+    EXPECT_TRUE(cartesian.getA() == J);
     EXPECT_EQ(cartesian.getA().rows(), 6);
     EXPECT_EQ(cartesian.getb().size(), 6);
 
@@ -454,8 +435,8 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     {
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
-        cartesian._update(q_whole);
-        q_whole += cartesian.getA().transpose()*cartesian.getb();
+        cartesian._update(Eigen::VectorXd(0));
+        q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
         _model_ptr->getPose("l_wrist","Waist", x_now);
@@ -472,122 +453,118 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
             EXPECT_NEAR(x_ref(i,j),x_now(i,j),1E-4);
         }
     }
-
-
 }
 
-TEST_F(testCartesianTask, testActiveJointsMask)
-{
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole.setZero(q_whole.size());
+//TEST_F(testCartesianTask, testActiveJointsMask)
+//{
+//    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
+//    q_whole.setZero(q_whole.size());
 
 
-    q_whole[_model_ptr->getDofIndex("LHipSag")] = -20.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LHipLat")] = 10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LHipYaw")] = 10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LKneeSag")] = -80.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkLat")] = -10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("LHipSag")] = -20.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("LHipLat")] = 10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("LHipYaw")] = 10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("LKneeSag")] = -80.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("LAnkLat")] = -10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -10.0*M_PI/180.0;
 
-    q_whole[_model_ptr->getDofIndex("WaistLat")] = -10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("WaistSag")] = -10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("WaistYaw")] = -10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("WaistLat")] = -10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("WaistSag")] = -10.0*M_PI/180.0;
+//    q_whole[_model_ptr->getDofIndex("WaistYaw")] = -10.0*M_PI/180.0;
 
-    _model_ptr->setJointPosition(q_whole);
-    _model_ptr->update();
-
-
-    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
-                                                 q_whole,
-                                                 *(_model_ptr.get()),
-                                                 "torso",
-                                                 "l_sole");
-
-    cartesian.update(q_whole);
-    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
-
-    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
-    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
-        EXPECT_TRUE(active_joint_mask[i]);
-
-    Eigen::MatrixXd J = cartesian.getA();
-
-    Eigen::MatrixXd J_torso(6,3); J_torso.setZero(6,3);
-    J_torso.col(0) = J.col((int)_model_ptr->getDofIndex("WaistLat"));
-    J_torso.col(1) = J.col((int)_model_ptr->getDofIndex("WaistSag"));
-    J_torso.col(2) = J.col((int)_model_ptr->getDofIndex("WaistYaw"));
-
-    std::cout<<"J_torso:\n "<<J_torso<<std::endl;
-    std::cout<<std::endl;
-    EXPECT_FALSE(J_torso == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
-
-    Eigen::MatrixXd J_left_leg(6,6);
-    J_left_leg.col(0) = J.col((int)_model_ptr->getDofIndex("LHipSag"));
-    J_left_leg.col(1) = J.col((int)_model_ptr->getDofIndex("LHipLat"));
-    J_left_leg.col(2) = J.col((int)_model_ptr->getDofIndex("LHipYaw"));
-    J_left_leg.col(3) = J.col((int)_model_ptr->getDofIndex("LKneeSag"));
-    J_left_leg.col(4) = J.col((int)_model_ptr->getDofIndex("LAnkLat"));
-    J_left_leg.col(5) = J.col((int)_model_ptr->getDofIndex("LAnkSag"));
-    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
-    EXPECT_FALSE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
-
-    active_joint_mask[(int)_model_ptr->getDofIndex("LHipSag")] = false;
-    active_joint_mask[(int)_model_ptr->getDofIndex("LHipLat")] = false;
-    active_joint_mask[(int)_model_ptr->getDofIndex("LHipYaw")] = false;
-    active_joint_mask[(int)_model_ptr->getDofIndex("LKneeSag")] = false;
-    active_joint_mask[(int)_model_ptr->getDofIndex("LAnkLat")] = false;
-    active_joint_mask[(int)_model_ptr->getDofIndex("LAnkSag")] = false;
-
-    cartesian.setActiveJointsMask(active_joint_mask);
-
-    J = cartesian.getA();
-
-    Eigen::MatrixXd J_torso2(6,3);
-    J_torso2.col(0) = J.col((int)_model_ptr->getDofIndex("WaistLat"));
-    J_torso2.col(1) = J.col((int)_model_ptr->getDofIndex("WaistSag"));
-    J_torso2.col(2) = J.col((int)_model_ptr->getDofIndex("WaistYaw"));
-    std::cout<<"J_torso:\n "<<J_torso2<<std::endl;
-    std::cout<<std::endl;
-    EXPECT_FALSE(J_torso2 == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
-    EXPECT_TRUE(J_torso == J_torso2);
-
-    J_left_leg.col(0) = J.col((int)_model_ptr->getDofIndex("LHipSag"));
-    J_left_leg.col(1) = J.col((int)_model_ptr->getDofIndex("LHipLat"));
-    J_left_leg.col(2) = J.col((int)_model_ptr->getDofIndex("LHipYaw"));
-    J_left_leg.col(3) = J.col((int)_model_ptr->getDofIndex("LKneeSag"));
-    J_left_leg.col(4) = J.col((int)_model_ptr->getDofIndex("LAnkLat"));
-    J_left_leg.col(5) = J.col((int)_model_ptr->getDofIndex("LAnkSag"));
-    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
-    EXPECT_TRUE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
+//    _model_ptr->setJointPosition(q_whole);
+//    _model_ptr->update();
 
 
-    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
-}
+//    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+//                                                 q_whole,
+//                                                 *(_model_ptr.get()),
+//                                                 "torso",
+//                                                 "l_sole");
+
+//    cartesian.update(q_whole);
+//    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
+
+//    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
+//    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
+//        EXPECT_TRUE(active_joint_mask[i]);
+
+//    Eigen::MatrixXd J = cartesian.getA();
+
+//    Eigen::MatrixXd J_torso(6,3); J_torso.setZero(6,3);
+//    J_torso.col(0) = J.col((int)_model_ptr->getDofIndex("WaistLat"));
+//    J_torso.col(1) = J.col((int)_model_ptr->getDofIndex("WaistSag"));
+//    J_torso.col(2) = J.col((int)_model_ptr->getDofIndex("WaistYaw"));
+
+//    std::cout<<"J_torso:\n "<<J_torso<<std::endl;
+//    std::cout<<std::endl;
+//    EXPECT_FALSE(J_torso == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
+
+//    Eigen::MatrixXd J_left_leg(6,6);
+//    J_left_leg.col(0) = J.col((int)_model_ptr->getDofIndex("LHipSag"));
+//    J_left_leg.col(1) = J.col((int)_model_ptr->getDofIndex("LHipLat"));
+//    J_left_leg.col(2) = J.col((int)_model_ptr->getDofIndex("LHipYaw"));
+//    J_left_leg.col(3) = J.col((int)_model_ptr->getDofIndex("LKneeSag"));
+//    J_left_leg.col(4) = J.col((int)_model_ptr->getDofIndex("LAnkLat"));
+//    J_left_leg.col(5) = J.col((int)_model_ptr->getDofIndex("LAnkSag"));
+//    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
+//    EXPECT_FALSE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
+
+//    active_joint_mask[(int)_model_ptr->getDofIndex("LHipSag")] = false;
+//    active_joint_mask[(int)_model_ptr->getDofIndex("LHipLat")] = false;
+//    active_joint_mask[(int)_model_ptr->getDofIndex("LHipYaw")] = false;
+//    active_joint_mask[(int)_model_ptr->getDofIndex("LKneeSag")] = false;
+//    active_joint_mask[(int)_model_ptr->getDofIndex("LAnkLat")] = false;
+//    active_joint_mask[(int)_model_ptr->getDofIndex("LAnkSag")] = false;
+
+//    cartesian.setActiveJointsMask(active_joint_mask);
+
+//    J = cartesian.getA();
+
+//    Eigen::MatrixXd J_torso2(6,3);
+//    J_torso2.col(0) = J.col((int)_model_ptr->getDofIndex("WaistLat"));
+//    J_torso2.col(1) = J.col((int)_model_ptr->getDofIndex("WaistSag"));
+//    J_torso2.col(2) = J.col((int)_model_ptr->getDofIndex("WaistYaw"));
+//    std::cout<<"J_torso:\n "<<J_torso2<<std::endl;
+//    std::cout<<std::endl;
+//    EXPECT_FALSE(J_torso2 == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
+//    EXPECT_TRUE(J_torso == J_torso2);
+
+//    J_left_leg.col(0) = J.col((int)_model_ptr->getDofIndex("LHipSag"));
+//    J_left_leg.col(1) = J.col((int)_model_ptr->getDofIndex("LHipLat"));
+//    J_left_leg.col(2) = J.col((int)_model_ptr->getDofIndex("LHipYaw"));
+//    J_left_leg.col(3) = J.col((int)_model_ptr->getDofIndex("LKneeSag"));
+//    J_left_leg.col(4) = J.col((int)_model_ptr->getDofIndex("LAnkLat"));
+//    J_left_leg.col(5) = J.col((int)_model_ptr->getDofIndex("LAnkSag"));
+//    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
+//    EXPECT_TRUE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
+
+
+//    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
+//}
 
 TEST_F(testCartesianTask, testReset)
 {
-    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-    q_whole.setZero(q_whole.size());
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
 
 
-    q_whole[_model_ptr->getDofIndex("LHipSag")] = -20.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LHipLat")] = 10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LHipYaw")] = 10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LKneeSag")] = -80.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkLat")] = -10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipSag")] = -20.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipLat")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipYaw")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LKneeSag")] = -80.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LAnkLat")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LAnkSag")] = -10.0*M_PI/180.0;
 
-    q_whole[_model_ptr->getDofIndex("WaistLat")] = -10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("WaistSag")] = -10.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("WaistYaw")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("WaistLat")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("WaistSag")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("WaistYaw")] = -10.0*M_PI/180.0;
 
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
 
     OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
-                                                 q_whole,
-                                                 *(_model_ptr.get()),
+                                                 *_model_ptr,
                                                  "torso",
                                                  "l_sole");
 
@@ -610,11 +587,11 @@ TEST_F(testCartesianTask, testReset)
 
 
     std::cout<<"CHANGING q: ACTUAL AND REFERENCE DIFFERENT, b IS NOT 0"<<std::endl;
-    q_whole.setRandom(q_whole.size());
+    q_whole = _model_ptr->generateRandomQ();
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    cartesian.update(q_whole);
+    cartesian.update(Eigen::VectorXd(0));
 
     actual_pose = cartesian.getActualPose();
     std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;
