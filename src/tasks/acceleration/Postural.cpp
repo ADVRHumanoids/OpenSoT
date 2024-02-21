@@ -15,8 +15,8 @@ OpenSoT::tasks::acceleration::Postural::Postural(
 
     _A.setZero(_x_size, _x_size);
 
-    _Kp.setIdentity(_qref.size(), _qref.size());
-    _Kd.setIdentity(_qref.size(), _qref.size());
+    _Kp.setIdentity(robot.getNv(), robot.getNv());
+    _Kd.setIdentity(robot.getNv(), robot.getNv());
 
     setLambda(10.0);
     setWeight(Eigen::MatrixXd::Identity(_x_size, _x_size));
@@ -161,8 +161,8 @@ void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
     _A = _postural_task.getM();
     _b = - _postural_task.getq();
 
-    _qdot_ref.setZero(_qref.size());
-    _qddot_ref.setZero(_qref.size());
+    _qdot_ref.setZero();
+    _qddot_ref.setZero();
 }
 
 void OpenSoT::tasks::acceleration::Postural::_log(XBot::MatLogger2::Ptr logger)

@@ -39,7 +39,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         typedef std::shared_ptr<Postural> Ptr;
         
         Postural(const XBot::ModelInterface& robot,
-                 AffineHelper qddot = AffineHelper(), const std::string task_id = "Postural");
+                 AffineHelper qddot, const std::string task_id = "Postural");
 
         Postural(const XBot::ModelInterface& robot,
                  const std::string task_id = "Postural");

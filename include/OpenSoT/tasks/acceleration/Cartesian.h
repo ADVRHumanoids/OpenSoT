@@ -34,7 +34,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         typedef std::shared_ptr<Cartesian> Ptr;
 
         Cartesian(const std::string task_id,
-                  const Eigen::VectorXd& x,
                   const XBot::ModelInterface& robot,
                   const std::string& distal_link,
                   const std::string& base_link

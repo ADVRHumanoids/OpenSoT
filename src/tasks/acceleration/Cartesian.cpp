@@ -8,7 +8,6 @@ using namespace OpenSoT::tasks::acceleration;
 const std::string Cartesian::world_name = "world";
 
 Cartesian::Cartesian(const std::string task_id,
-                     const Eigen::VectorXd& x,
                      const XBot::ModelInterface& robot,
                      const std::string& distal_link,
                      const std::string& base_link

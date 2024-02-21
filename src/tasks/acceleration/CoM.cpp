@@ -4,7 +4,7 @@ using XBot::Logger;
 
 const std::string OpenSoT::tasks::acceleration::CoM::world_name = "world";
 
-OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const Eigen::VectorXd& x):
+OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot):
     Task< Eigen::MatrixXd, Eigen::VectorXd >("CoM", robot.getNv()),
     _robot(robot),
     _distal_link("CoM"),

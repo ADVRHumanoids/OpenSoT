@@ -38,9 +38,8 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         /**
          * @brief CoM
          * @param robot the robot model
-         * @param x vector of size of joints of the robot (not used anymore)
          */
-        CoM(const XBot::ModelInterface& robot, const Eigen::VectorXd& x);
+        CoM(const XBot::ModelInterface& robot);
 
         /**
          * @brief CoM
