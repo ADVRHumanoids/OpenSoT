@@ -337,57 +337,6 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
      add_test(NAME OpenSoT_solvers_qpswift COMMAND testqpSWIFTSolver)
  endif()
 
-#ADD_EXECUTABLE(testCartesianPositionVelocityConstraint constraints/velocity/TestCartesianPositionConstraint.cpp)
-#TARGET_LINK_LIBRARIES(testCartesianPositionVelocityConstraint ${TestLibs})
-#add_dependencies(testCartesianPositionVelocityConstraint   OpenSoT)
-#add_test(NAME OpenSoT_constraints_velocity_CartesianPosition COMMAND testCartesianPositionVelocityConstraint)
-
-
-
-#    ADD_EXECUTABLE(testQPOases_CartesianPositionConstraint solvers/TestQPOases_CartesianPositionConstraint.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_CartesianPositionConstraint ${TestLibs})
-#    add_dependencies(testQPOases_CartesianPositionConstraint   OpenSoT)
-
-#    ADD_EXECUTABLE(testQPOases_GlobalConstraints solvers/TestQPOases_GlobalConstraints.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_GlobalConstraints ${TestLibs} ${PCL_LIBRARIES})
-#    add_dependencies(testQPOases_GlobalConstraints   OpenSoT)
-
-
-
-#    ADD_EXECUTABLE(testQPOases_PriorityInversion solvers/TestQPOases_PriorityInversion.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_PriorityInversion ${TestLibs})
-#    add_dependencies(testQPOases_PriorityInversion   OpenSoT)
-
-#    ADD_EXECUTABLE(testQPOases_SelfCollisionAvoidance solvers/TestQPOases_SelfCollisionAvoidance.cpp)
-#    TARGET_LINK_LIBRARIES(testQPOases_SelfCollisionAvoidance ${TestLibs})
-#    add_dependencies(testQPOases_SelfCollisionAvoidance   OpenSoT)
-
-
-#ADD_EXECUTABLE(testGazeVelocityTask tasks/velocity/TestGaze.cpp)
-#TARGET_LINK_LIBRARIES(testGazeVelocityTask ${TestLibs})
-#add_dependencies(testGazeVelocityTask   OpenSoT)
-#add_test(NAME OpenSoT_tasks_velocity_gaze COMMAND testGazeTask)
-
-
-
-#
-#    add_test(NAME OpenSoT_solvers_qpOases_CartesianPositionConstraint COMMAND testQPOases_CartesianPositionConstraint)
-
-#    add_test(NAME OpenSoT_solvers_qpOases_GlobalConstraints COMMAND testQPOases_GlobalConstraints)
-    
-#    ##the following tests compile but don't get executed automatically. They are not proper tests ATM, rather case-studies and references for stack tuning.
-#    #add_test(NAME OpenSoT_solvers_qpOases_PriorityInversion COMMAND testQPOases_PriorityInversion)
-#    add_test(NAME OpenSoT_solvers_qpOases_SelfCollisionAvoidance COMMAND testQPOases_SelfCollisionAvoidance)
-#    add_test(NAME OpenSoT_solvers_qpOases_Sparse COMMAND testQPOases_Sparse)
-
-
-
-#    add_test(NAME OpenSoT_task_velocity_Gaze COMMAND testGazeVelocityTask)
-
-
-
-
-
 
 
 find_package(MATLAB QUIET)
