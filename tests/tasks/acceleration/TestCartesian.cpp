@@ -5,49 +5,48 @@
 #include <gtest/gtest.h>
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/eHQP.h>
+#include "../../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace{
 
-class testCartesianTask: public ::testing::Test
+class testCartesianTask: public TestBase
 {
 protected:
 
-    testCartesianTask()
+    testCartesianTask():TestBase("coman_floating_base")
     {
-        _model = XBot::ModelInterface::getModel(_path_to_cfg);
-        _q.setZero(_model->getJointNum());
+        _model = _model_ptr;
+        _q = _model->getNeutralQ();
         setGoodInitialPosition();
-        _dq.setZero(_model->getJointNum());
+        _dq.setZero(_model->getNv());
 
         _model->setJointPosition(_q);
         _model->setJointVelocity(_dq);
         _model->update();
 
-        KDL::Frame l_sole_T_Waist;
+        Eigen::Affine3d l_sole_T_Waist;
         _model->getPose("Waist", "l_sole", l_sole_T_Waist);
 
-        l_sole_T_Waist.p.x(0.0);
-        l_sole_T_Waist.p.y(0.0);
+        l_sole_T_Waist.translation()[0] = 0.;
+        l_sole_T_Waist.translation()[1] = 0.;
 
         this->setWorld(l_sole_T_Waist, _q);
 
 
         l_arm.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("l_arm",_q, *_model, "LSoftHand", "world"));
+            new OpenSoT::tasks::acceleration::Cartesian("l_arm", *_model, "LSoftHand", "world"));
         l_arm->getReference(_l_arm_ref);
         std::cout<<"_l_arm_initial: "<<_l_arm_ref.matrix()<<std::endl;
         r_arm.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("r_arm",_q, *_model, "RSoftHand", "world"));
+            new OpenSoT::tasks::acceleration::Cartesian("r_arm", *_model, "RSoftHand", "world"));
         r_arm->getReference(_r_arm_ref);
         std::cout<<"_r_arm_initial: "<<_r_arm_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
-            OpenSoT::tasks::acceleration::Postural(*_model,_q.size()));
+            OpenSoT::tasks::acceleration::Postural(*_model));
 
         autostack = (l_arm + r_arm)/(postural);
-        autostack->update(_q);
+        autostack->update(Eigen::VectorXd(0));
 
         eHQP.reset(new OpenSoT::solvers::eHQP(autostack->getStack()));
 
@@ -65,7 +64,7 @@ protected:
 
     }
 
-    void setWorld(const KDL::Frame& l_sole_T_Waist, Eigen::VectorXd& q)
+    void setWorld(const Eigen::Affine3d& l_sole_T_Waist, Eigen::VectorXd& q)
     {
         _model->setFloatingBasePose(l_sole_T_Waist);
         _model->update();
@@ -73,23 +72,23 @@ protected:
     }
 
     void setGoodInitialPosition() {
-        _q[_model->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-        _q[_model->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+        _q[_model->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+        _q[_model->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-        _q[_model->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+        _q[_model->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+        _q[_model->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
     }
 
@@ -108,20 +107,20 @@ TEST_F(testCartesianTask, testCartesianTask_)
     this->r_arm->setReference(_r_arm_ref);
 
     double dt = 0.001;
-    Eigen::VectorXd ddq(_q.size()); ddq.setZero(ddq.size());
+    Eigen::VectorXd ddq(_model->getNv()); ddq.setZero();
     for(unsigned int i = 0; i < 1000; ++i)
     {
         _model->setJointPosition(_q);
         _model->setJointVelocity(_dq);
         _model->update();
 
-        autostack->update(_q);
+        autostack->update(Eigen::VectorXd(0));
 
         if(!(eHQP->solve(ddq)))
             std::cout<<"CAN NOT SOLVE"<<std::endl;
 
         _dq += ddq*dt;
-        _q += _dq*dt + 0.5*ddq*dt*dt;
+        _q = _model->sum(_q, _dq*dt + 0.5*ddq*dt*dt);
     }
 
     Eigen::Affine3d r_actual, l_actual;
