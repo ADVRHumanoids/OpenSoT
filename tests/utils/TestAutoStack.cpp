@@ -2,34 +2,23 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include "DefaultHumanoidStack.h"
 #include <gtest/gtest.h>
+#include "../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace {
 
-class testAutoStack: public ::testing::Test
+class testAutoStack: public TestBase
 {
 protected:
-    XBot::ModelInterface::Ptr _robot;
-    OpenSoT::DefaultHumanoidStack::Ptr DHS;
-
-    testAutoStack()
+    testAutoStack() : TestBase("coman_floating_base")
     {
-        _robot = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_robot)
-            std::cout<<"pointer address: "<<_robot.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_robot.get()<<std::endl;
 
 
-        DHS.reset(new OpenSoT::DefaultHumanoidStack(*_robot,
+        DHS.reset(new OpenSoT::DefaultHumanoidStack(*_model_ptr,
               3e-3,
               "Waist",
               "LSoftHand", "RSoftHand",
-              "l_sole", "r_sole", 0.3,
-              Eigen::VectorXd::Zero(_robot->getJointNum())));
+              "l_sole", "r_sole", 0.3));
     }
 
     virtual ~testAutoStack() {
@@ -44,6 +33,8 @@ protected:
 
     }
 
+    OpenSoT::DefaultHumanoidStack::Ptr DHS;
+
 };
 
 TEST_F(testAutoStack, test_complexAutostack)
@@ -57,10 +48,9 @@ TEST_F(testAutoStack, test_complexAutostack)
     auto_stack /= (DHS->leftArm + DHS->rightArm);
     auto_stack = auto_stack<< DHS->jointLimits << feet;
 
-    Eigen::VectorXd q(_robot->getJointNum());
-    q.setRandom();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    auto_stack->update(q);
+    auto_stack->update(Eigen::VectorXd(0));
 
     std::cout<<"# of constraints: "<<auto_stack->getBounds()->getAineq().rows()<<std::endl;
     std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
@@ -71,7 +61,7 @@ TEST_F(testAutoStack, test_complexAutostack)
 
     DHS->leftLeg->setActive(false);
 
-    auto_stack->update(q);
+    auto_stack->update(Eigen::VectorXd(0));
 
     std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
     EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == 0.*DHS->leftLeg->getA().topRows(3));
@@ -80,7 +70,7 @@ TEST_F(testAutoStack, test_complexAutostack)
     DHS->leftLeg->setActive(true);
     DHS->rightLeg->setActive(false);
 
-    auto_stack->update(q);
+    auto_stack->update(Eigen::VectorXd(0));
 
     EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == DHS->leftLeg->getA().topRows(3));
     EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == 0*DHS->rightLeg->getA().topRows(3));
@@ -96,7 +86,7 @@ TEST_F(testAutoStack, test_getTask_with_task_id)
     AutoStack::Ptr auto_stack = (DHS->right2LeftLeg)/
             (DHS->com + DHS->leftArm)/
             DHS->postural;
-    auto_stack->update(Eigen::VectorXd::Zero(_robot->getJointNum()));
+    auto_stack->update(Eigen::VectorXd(0));
 
     OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getTask(task_id);
     EXPECT_TRUE(com_task != NULL);
