@@ -3,15 +3,16 @@
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/utils/AutoStack.h>
 #include <xbot2_interface/xbotinterface2.h>
+#include "../../common.h"
 
 
 namespace {
 
-class testPosturalTask: public ::testing::Test
+class testPosturalTask: public TestBase
 {
 protected:
 
-    testPosturalTask()
+    testPosturalTask() : TestBase("coman_floating_base")
     {
 
     }
@@ -30,59 +31,32 @@ protected:
 
 };
 
-void initializeIfNeeded()
-{
-    static bool is_initialized = false;
-
-    if(!is_initialized) {
-        time_t seed = time(NULL);
-        seed48((unsigned short*)(&seed));
-        srand((unsigned int)(seed));
-
-        is_initialized = true;
-    }
-
-}
-
-double getRandomAngle()
-{
-    initializeIfNeeded();
-    return drand48()*2.0*M_PI-M_PI;
-}
-
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = relative_path;
-
 TEST_F(testPosturalTask, testPosturalTask_subtask)
 {
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        q[i] = getRandomAngle();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
     OpenSoT::tasks::acceleration::Postural::Ptr postural(
-                new OpenSoT::tasks::acceleration::Postural(*_model_ptr, q.size()));
-    postural->update(q);
+                new OpenSoT::tasks::acceleration::Postural(*_model_ptr));
+    postural->update(Eigen::VectorXd(0));
 
     std::cout<<"A size is: ["<<postural->getA().rows()<<" x "<<postural->getA().cols()<<"]"<<std::endl;
     std::cout<<"Model DoFs: "<<_model_ptr->getJointNum()<<std::endl;
 
-    q.setZero(q.size());
+    q = _model_ptr->getNeutralQ();
     postural->setReference(q);
-    postural->update(q);
+    postural->update(Eigen::VectorXd(0));
 
 
     //std::list<unsigned int> idx = {_model_ptr->getDofIndex("WaistLat")};
-    std::list<unsigned int> idx = {_model_ptr->getDofIndex("RWrj2")};
+    std::list<unsigned int> idx = {_model_ptr->getVIndex("RWrj2")};
 
     std::cout<<"idx: "<<*(idx.begin())<<std::endl;
     OpenSoT::SubTask::Ptr sub_postural = postural%idx;
 
-    sub_postural->update(q);
+    sub_postural->update(Eigen::VectorXd(0));
 
     std::cout<<"A task: "<<postural->getA()<<std::endl;
     std::cout<<"b task: "<<postural->getb()<<std::endl;
@@ -103,35 +77,30 @@ TEST_F(testPosturalTask, testPosturalTask_subtask)
 
 TEST_F(testPosturalTask, testPosturalTask_)
 {
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-
-    Eigen::VectorXd q(_model_ptr->getJointNum()); q.setZero(q.size());
-    for(unsigned int i = 0; i < q.size(); ++i)
-        q[i] = getRandomAngle();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
     Eigen::VectorXd q0 = q;
 
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    Eigen::VectorXd q_ref(q.size()); q_ref.setZero();
+    Eigen::VectorXd q_ref = _model_ptr->getNeutralQ();
 
-    OpenSoT::tasks::acceleration::Postural postural(*_model_ptr, q_ref.size());
+    OpenSoT::tasks::acceleration::Postural postural(*_model_ptr);
     postural.setReference(q_ref);
     std::cout<<"Postural Task Inited"<<std::endl;
-    Eigen::MatrixXd A(q.size(), q.size());
+    Eigen::MatrixXd A(_model_ptr->getNv(), _model_ptr->getNv());
     A.setIdentity();
     EXPECT_TRUE(postural.getA() == A);
-    EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(q.size(), q.size()))<<"W: \n"<<postural.getWeight()<<"\n"
+    EXPECT_TRUE(postural.getWeight() == Eigen::MatrixXd::Identity(_model_ptr->getNv(), _model_ptr->getNv()))<<"W: \n"<<postural.getWeight()<<"\n"
         <<"W size: ["<<postural.getWeight().rows()<<" x "<<postural.getWeight().cols()<<"]"<<std::endl;
 
     double K = 1.;
     postural.setLambda(K);
     EXPECT_DOUBLE_EQ(postural.getLambda(), K);
 
-    Eigen::VectorXd dq(q.size());
-    dq.setZero(dq.size());
+    Eigen::VectorXd dq(_model_ptr->getNv());
+    dq.setZero();
     double dT = 0.01;
     for(unsigned int i = 0; i < 10000; ++i)
     {
@@ -139,11 +108,11 @@ TEST_F(testPosturalTask, testPosturalTask_)
         _model_ptr->setJointVelocity(dq);
         _model_ptr->update();
 
-        postural.update(q);
+        postural.update(Eigen::VectorXd(0));
         Eigen::VectorXd ddq(q.size());
         ddq = postural.getb();
         dq += ddq*dT;
-        q += dq*dT + 0.5*ddq*dT*dT;
+        q = _model_ptr->sum(q, dq*dT + 0.5*ddq*dT*dT);
     }
 
     for(unsigned int i = 6; i < q.size(); ++i)
