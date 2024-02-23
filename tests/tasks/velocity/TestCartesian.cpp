@@ -455,93 +455,91 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     }
 }
 
-//TEST_F(testCartesianTask, testActiveJointsMask)
-//{
-//    Eigen::VectorXd q_whole(_model_ptr->getJointNum());
-//    q_whole.setZero(q_whole.size());
+TEST_F(testCartesianTask, testActiveJointsMask)
+{
+    Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
 
 
-//    q_whole[_model_ptr->getDofIndex("LHipSag")] = -20.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("LHipLat")] = 10.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("LHipYaw")] = 10.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("LKneeSag")] = -80.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("LAnkLat")] = -10.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("LAnkSag")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipSag")] = -20.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipLat")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LHipYaw")] = 10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LKneeSag")] = -80.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LAnkLat")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LAnkSag")] = -10.0*M_PI/180.0;
 
-//    q_whole[_model_ptr->getDofIndex("WaistLat")] = -10.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("WaistSag")] = -10.0*M_PI/180.0;
-//    q_whole[_model_ptr->getDofIndex("WaistYaw")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("WaistLat")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("WaistSag")] = -10.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("WaistYaw")] = -10.0*M_PI/180.0;
 
-//    _model_ptr->setJointPosition(q_whole);
-//    _model_ptr->update();
-
-
-//    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
-//                                                 q_whole,
-//                                                 *(_model_ptr.get()),
-//                                                 "torso",
-//                                                 "l_sole");
-
-//    cartesian.update(q_whole);
-//    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
-
-//    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
-//    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
-//        EXPECT_TRUE(active_joint_mask[i]);
-
-//    Eigen::MatrixXd J = cartesian.getA();
-
-//    Eigen::MatrixXd J_torso(6,3); J_torso.setZero(6,3);
-//    J_torso.col(0) = J.col((int)_model_ptr->getDofIndex("WaistLat"));
-//    J_torso.col(1) = J.col((int)_model_ptr->getDofIndex("WaistSag"));
-//    J_torso.col(2) = J.col((int)_model_ptr->getDofIndex("WaistYaw"));
-
-//    std::cout<<"J_torso:\n "<<J_torso<<std::endl;
-//    std::cout<<std::endl;
-//    EXPECT_FALSE(J_torso == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
-
-//    Eigen::MatrixXd J_left_leg(6,6);
-//    J_left_leg.col(0) = J.col((int)_model_ptr->getDofIndex("LHipSag"));
-//    J_left_leg.col(1) = J.col((int)_model_ptr->getDofIndex("LHipLat"));
-//    J_left_leg.col(2) = J.col((int)_model_ptr->getDofIndex("LHipYaw"));
-//    J_left_leg.col(3) = J.col((int)_model_ptr->getDofIndex("LKneeSag"));
-//    J_left_leg.col(4) = J.col((int)_model_ptr->getDofIndex("LAnkLat"));
-//    J_left_leg.col(5) = J.col((int)_model_ptr->getDofIndex("LAnkSag"));
-//    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
-//    EXPECT_FALSE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
-
-//    active_joint_mask[(int)_model_ptr->getDofIndex("LHipSag")] = false;
-//    active_joint_mask[(int)_model_ptr->getDofIndex("LHipLat")] = false;
-//    active_joint_mask[(int)_model_ptr->getDofIndex("LHipYaw")] = false;
-//    active_joint_mask[(int)_model_ptr->getDofIndex("LKneeSag")] = false;
-//    active_joint_mask[(int)_model_ptr->getDofIndex("LAnkLat")] = false;
-//    active_joint_mask[(int)_model_ptr->getDofIndex("LAnkSag")] = false;
-
-//    cartesian.setActiveJointsMask(active_joint_mask);
-
-//    J = cartesian.getA();
-
-//    Eigen::MatrixXd J_torso2(6,3);
-//    J_torso2.col(0) = J.col((int)_model_ptr->getDofIndex("WaistLat"));
-//    J_torso2.col(1) = J.col((int)_model_ptr->getDofIndex("WaistSag"));
-//    J_torso2.col(2) = J.col((int)_model_ptr->getDofIndex("WaistYaw"));
-//    std::cout<<"J_torso:\n "<<J_torso2<<std::endl;
-//    std::cout<<std::endl;
-//    EXPECT_FALSE(J_torso2 == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
-//    EXPECT_TRUE(J_torso == J_torso2);
-
-//    J_left_leg.col(0) = J.col((int)_model_ptr->getDofIndex("LHipSag"));
-//    J_left_leg.col(1) = J.col((int)_model_ptr->getDofIndex("LHipLat"));
-//    J_left_leg.col(2) = J.col((int)_model_ptr->getDofIndex("LHipYaw"));
-//    J_left_leg.col(3) = J.col((int)_model_ptr->getDofIndex("LKneeSag"));
-//    J_left_leg.col(4) = J.col((int)_model_ptr->getDofIndex("LAnkLat"));
-//    J_left_leg.col(5) = J.col((int)_model_ptr->getDofIndex("LAnkSag"));
-//    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
-//    EXPECT_TRUE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
+    _model_ptr->setJointPosition(q_whole);
+    _model_ptr->update();
 
 
-//    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
-//}
+    OpenSoT::tasks::velocity::Cartesian cartesian("cartesian::torso",
+                                                 *_model_ptr,
+                                                 "torso",
+                                                 "l_sole");
+
+    cartesian.update(Eigen::VectorXd(0));
+    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
+
+    std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
+    for(unsigned int i = 0; i < active_joint_mask.size(); ++i)
+        EXPECT_TRUE(active_joint_mask[i]);
+
+    Eigen::MatrixXd J = cartesian.getA();
+
+    Eigen::MatrixXd J_torso(6,3); J_torso.setZero(6,3);
+    J_torso.col(0) = J.col((int)_model_ptr->getQIndex("WaistLat"));
+    J_torso.col(1) = J.col((int)_model_ptr->getQIndex("WaistSag"));
+    J_torso.col(2) = J.col((int)_model_ptr->getQIndex("WaistYaw"));
+
+    std::cout<<"J_torso:\n "<<J_torso<<std::endl;
+    std::cout<<std::endl;
+    EXPECT_FALSE(J_torso == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
+
+    Eigen::MatrixXd J_left_leg(6,6);
+    J_left_leg.col(0) = J.col((int)_model_ptr->getQIndex("LHipSag"));
+    J_left_leg.col(1) = J.col((int)_model_ptr->getQIndex("LHipLat"));
+    J_left_leg.col(2) = J.col((int)_model_ptr->getQIndex("LHipYaw"));
+    J_left_leg.col(3) = J.col((int)_model_ptr->getQIndex("LKneeSag"));
+    J_left_leg.col(4) = J.col((int)_model_ptr->getQIndex("LAnkLat"));
+    J_left_leg.col(5) = J.col((int)_model_ptr->getQIndex("LAnkSag"));
+    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
+    EXPECT_FALSE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
+
+    active_joint_mask[(int)_model_ptr->getQIndex("LHipSag")] = false;
+    active_joint_mask[(int)_model_ptr->getQIndex("LHipLat")] = false;
+    active_joint_mask[(int)_model_ptr->getQIndex("LHipYaw")] = false;
+    active_joint_mask[(int)_model_ptr->getQIndex("LKneeSag")] = false;
+    active_joint_mask[(int)_model_ptr->getQIndex("LAnkLat")] = false;
+    active_joint_mask[(int)_model_ptr->getQIndex("LAnkSag")] = false;
+
+    cartesian.setActiveJointsMask(active_joint_mask);
+
+    J = cartesian.getA();
+
+    Eigen::MatrixXd J_torso2(6,3);
+    J_torso2.col(0) = J.col((int)_model_ptr->getQIndex("WaistLat"));
+    J_torso2.col(1) = J.col((int)_model_ptr->getQIndex("WaistSag"));
+    J_torso2.col(2) = J.col((int)_model_ptr->getQIndex("WaistYaw"));
+    std::cout<<"J_torso:\n "<<J_torso2<<std::endl;
+    std::cout<<std::endl;
+    EXPECT_FALSE(J_torso2 == Eigen::MatrixXd::Zero(J_torso.rows(), J_torso.cols()));
+    EXPECT_TRUE(J_torso == J_torso2);
+
+    J_left_leg.col(0) = J.col((int)_model_ptr->getQIndex("LHipSag"));
+    J_left_leg.col(1) = J.col((int)_model_ptr->getQIndex("LHipLat"));
+    J_left_leg.col(2) = J.col((int)_model_ptr->getQIndex("LHipYaw"));
+    J_left_leg.col(3) = J.col((int)_model_ptr->getQIndex("LKneeSag"));
+    J_left_leg.col(4) = J.col((int)_model_ptr->getQIndex("LAnkLat"));
+    J_left_leg.col(5) = J.col((int)_model_ptr->getQIndex("LAnkSag"));
+    std::cout<<"J_left_leg:\n "<<J_left_leg<<std::endl;
+    EXPECT_TRUE(J_left_leg == Eigen::MatrixXd::Zero(J_left_leg.rows(), J_left_leg.cols()));
+
+
+    std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
+}
 
 TEST_F(testCartesianTask, testReset)
 {

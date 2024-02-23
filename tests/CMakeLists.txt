@@ -283,7 +283,7 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
  add_dependencies(testContactFloatingBaseTask   OpenSoT)
  add_test(NAME OpenSoT_task_floating_base_Postural COMMAND testContactFloatingBaseTask)
 
- ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp) #<-- missing testCartesianTask.testActiveJointsMask !
+ ADD_EXECUTABLE(testCartesianVelocityTask tasks/velocity/TestCartesian.cpp)
  TARGET_LINK_LIBRARIES(testCartesianVelocityTask ${TestLibs})
  add_dependencies(testCartesianVelocityTask   OpenSoT)
  add_test(NAME OpenSoT_task_velocity_Cartesian COMMAND testCartesianVelocityTask)

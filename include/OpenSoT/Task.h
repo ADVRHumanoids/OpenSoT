@@ -431,30 +431,7 @@
             }
             return false;
         }
-#ifdef PORTING_TO_XBOTIFC2
-        /**
-         * @brief setActiveChainsMask set a mask (of true) on the Jacobian of a vector of kinematic chains
-         * @param active_chain_mask vector of kinematic chains to set the active joint mask
-         * @param model to retrieve the joint names from the kinematic chains
-         * @return true
-         */
-        virtual bool setActiveChainsMask(const std::vector<std::string>& active_chain_mask, 
-                                         XBot::ModelInterface::ConstPtr model)
-        {
-            _active_joints_mask.assign(_active_joints_mask.size(), false);
-            
-            for(const auto& ch : active_chain_mask){
-                
-                for(const auto& jid : model->chain(ch).getJointIds())
-                {
-                    _active_joints_mask[ model->getDofIndex(jid) ] = true;
-                }
-            }
-            
-            return true;
-            
-        }
-#endif
+
         /**
          * @brief log logs common Task internal variables
          * @param logger a shared pointer to a MathLogger
