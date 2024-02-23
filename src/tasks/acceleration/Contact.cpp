@@ -22,6 +22,38 @@ void OpenSoT::tasks::acceleration::Contact::_log(XBot::MatLogger2::Ptr logger)
 {
 }
 
+OpenSoT::tasks::acceleration::Contact::Contact(const std::string& task_id,
+                                               const XBot::ModelInterface& robot,
+                                               const std::string& contact_link,
+                                               const Eigen::MatrixXd& contact_matrix):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, robot.getNv()),
+    _robot(robot),
+    _contact_link(contact_link),
+    _K(contact_matrix)
+{
+    _qddot = AffineHelper::Identity(_x_size);
+
+    if(_K.size() == 0){
+        _K.setIdentity(6,6);
+    }
+
+    if( _K.rows() <= 6 && _K.cols() == 6 )
+    {
+    }
+    else{
+        throw std::invalid_argument("Invalid contact matrix");
+    }
+
+    update(Eigen::VectorXd());
+
+    _hessianType = HST_SEMIDEF;
+
+    setWeight(Eigen::MatrixXd::Identity(_K.rows(), _K.rows()));
+
+
+
+}
+
 OpenSoT::tasks::acceleration::Contact::Contact(const std::string& task_id, 
                                                const XBot::ModelInterface& robot, 
                                                const std::string& contact_link, 
