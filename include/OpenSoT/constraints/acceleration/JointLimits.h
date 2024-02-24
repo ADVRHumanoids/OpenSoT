@@ -54,6 +54,8 @@
                 
                 GenericConstraint::Ptr _generic_constraint_internal;
 
+                Eigen::VectorXd _zeros;
+
 
                 /**
                  * @brief _dt

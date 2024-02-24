@@ -115,6 +115,9 @@ TEST_F(testPosturalTask, testPosturalTask_)
         q = _model_ptr->sum(q, dq*dT + 0.5*ddq*dT*dT);
     }
 
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(q[i], q_ref[i], 1E-5);
+
     for(unsigned int i = 6; i < q.size(); ++i)
         EXPECT_NEAR(q[i], q_ref[i], 1E-5);
 
