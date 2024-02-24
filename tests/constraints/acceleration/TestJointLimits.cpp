@@ -9,25 +9,18 @@
 #include <cmath>
 #include <OpenSoT/solvers/iHQP.h>
 #include <matlogger2/matlogger2.h>
+#include "../../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace {
 
-class testJointLimits : public ::testing::Test {
+class testJointLimits : public TestBase {
 protected:
-    testJointLimits():
+    testJointLimits(): TestBase("coman_floating_base"),
         p_test(0.001, M_PI, 20.),
         p_dp(0.01, 2., 12.)
     {
 
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
         logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimits_acceleration");
         logger->set_buffer_mode(XBot::VariableBuffer::Mode::circular_buffer);
@@ -35,7 +28,7 @@ protected:
 
     void createStack()
     {
-        qdot.setZero(_model_ptr->getJointNum());
+        qdot.setZero(_model_ptr->getNv());
         _model_ptr->setJointVelocity(qdot);
 
         
@@ -45,10 +38,10 @@ protected:
 
         _model_ptr->update();
 
-        qddot = OpenSoT::AffineHelper::Identity(_model_ptr->getJointNum());
+        qddot = OpenSoT::AffineHelper::Identity(_model_ptr->getNv());
     
         
-        acc_lims.setOnes(_model_ptr->getJointNum());
+        acc_lims.setOnes(_model_ptr->getNv());
         acc_lims *= p_test._qddot_max; //p_dp._qddot_max; //20.;
         jointAccelerationLimits = std::make_shared<OpenSoT::constraints::GenericConstraint>(
                     "acceleration_limits", acc_lims, -acc_lims, acc_lims.size());
@@ -90,26 +83,25 @@ protected:
     }
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model) {
-        Eigen::VectorXd _q(_model->getJointNum());
-        _q.setZero(_q.size());
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
 
-        _q[_model->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-        _q[_model->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+        _q[_model->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+        _q[_model->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-        _q[_model->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+        _q[_model->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+        _q[_model->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
         return _q;
     }
@@ -132,12 +124,14 @@ protected:
             EXPECT_TRUE( (x-x_min >= -EPS) && (x-x_max <= EPS) )<<
             "joint vel violated @i:"<<i<<" "<<x_min<<" <= "<<x<<" <= "<<x_max<<std::endl;
 
-            EXPECT_TRUE( (q[i]-qmin[i] >= -EPS) && (q[i]-qmax[i] <= EPS) )<<
-            "joint limits @i:"<<i<<" "<<qmin[i]<<" <= "<<q[i]<<" <= "<<qmax[i]<<std::endl;
+            if(i > 6)
+            {
+                EXPECT_TRUE( (q[i+1]-qmin[i] >= -EPS) && (q[i+1]-qmax[i] <= EPS) )<<
+                "joint limits @i:"<<i<<" "<<qmin[i]<<" <= "<<q[i]<<" <= "<<qmax[i]<<std::endl;
+            }
         }
     }
 
-    XBot::ModelInterface::Ptr _model_ptr;
 
     OpenSoT::constraints::acceleration::JointLimits::Ptr jointLimits;
     OpenSoT::constraints::acceleration::VelocityLimits::Ptr jointVelocityLimits;
@@ -187,8 +181,7 @@ protected:
 TEST_F(testJointLimits, testBoundsWithTrajectory) {
     this->createStack();
 
-    Eigen::VectorXd qref(this->q.size());
-    qref.setZero();
+    Eigen::VectorXd qref = _model_ptr->getNeutralQ();
 
     this->postural->setReference(qref);
 
@@ -203,10 +196,16 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         //this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;
-        ASSERT_TRUE(this->solver->solve(qddot));
+        if(this->solver->solve(qddot))
+            EXPECT_TRUE(true);
+        else
+        {
+            EXPECT_TRUE(false);
+            qddot.setZero(_model_ptr->getNv());
+        }
 
 
-        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+        this->q = _model_ptr->sum(this->q, this->qdot*this->dT + 0.5*qddot*this->dT*this->dT);
         this->qdot += qddot*this->dT;
 
 //        this->logger->add("qddot", qddot);
@@ -239,6 +238,9 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         qref.setOnes(qref.size());
         qref *= 3.* std::sin(i*this->dT);
         qref += q0;
+
+        qref.segment(3,4) = qref.segment(3,4)/qref.segment(3,4).norm();
+
         this->postural->setReference(qref);
         
         this->_model_ptr->setJointVelocity(this->qdot);
@@ -249,10 +251,17 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;
-        ASSERT_TRUE(this->solver->solve(qddot));
+        if(this->solver->solve(qddot))
+            EXPECT_TRUE(true);
+        else
+        {
+            EXPECT_TRUE(false);
+            qddot.setZero(_model_ptr->getNv());
+        }
 
 
-        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+
+        this->q = _model_ptr->sum(this->q, this->qdot*this->dT + 0.5*qddot*this->dT*this->dT);
         this->qdot += qddot*this->dT;
 
         this->logger->add("qddot", qddot);
@@ -275,7 +284,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
     this->createStack();
 
     Eigen::VectorXd qref(this->q.size());
-    qref.setZero();
+    qref = _model_ptr->getNeutralQ();
 
     this->postural->setReference(qref);
 
@@ -292,7 +301,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         ASSERT_TRUE(this->solver->solve(qddot));
 
 
-        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+        this->q = _model_ptr->sum(this->q, this->qdot*this->dT + 0.5*qddot*this->dT*this->dT);
         this->qdot += qddot*this->dT;
 
         this->checkConstraints(qddot, 1e-4);
@@ -322,6 +331,8 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         else
             qref *= -3.;
 
+        qref.segment(3,4) = qref.segment(3,4)/qref.segment(3,4).norm();
+
         this->postural->setReference(qref);
 
         this->_model_ptr->setJointVelocity(this->qdot);
@@ -335,7 +346,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         ASSERT_TRUE(this->solver->solve(qddot));
 
 
-        this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+        this->q = _model_ptr->sum(this->q,  this->qdot*this->dT + 0.5*qddot*this->dT*this->dT);
         this->qdot += qddot*this->dT;
 
         logger->add("qddot", qddot);
