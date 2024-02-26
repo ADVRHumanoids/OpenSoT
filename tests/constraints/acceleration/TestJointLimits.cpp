@@ -109,6 +109,8 @@ protected:
     void checkConstraints(const Eigen::VectorXd& qddot, double EPS)
     {
 
+        Eigen::VectorXd _q = _model_ptr->difference(q, _model_ptr->getNeutralQ());
+
         for(unsigned int i = 0; i < qddot.size(); ++i)
         {
             double x = qddot[i];
@@ -124,11 +126,9 @@ protected:
             EXPECT_TRUE( (x-x_min >= -EPS) && (x-x_max <= EPS) )<<
             "joint vel violated @i:"<<i<<" "<<x_min<<" <= "<<x<<" <= "<<x_max<<std::endl;
 
-            if(i > 6)
-            {
-                EXPECT_TRUE( (q[i+1]-qmin[i] >= -EPS) && (q[i+1]-qmax[i] <= EPS) )<<
-                "joint limits @i:"<<i<<" "<<qmin[i]<<" <= "<<q[i]<<" <= "<<qmax[i]<<std::endl;
-            }
+            EXPECT_TRUE( (_q[i]-qmin[i] >= -EPS) && (_q[i]-qmax[i] <= EPS) )<<
+            "joint limits @i:"<<i<<" "<<qmin[i]<<" <= "<<_q[i]<<" <= "<<qmax[i]<<std::endl;
+
         }
     }
 
