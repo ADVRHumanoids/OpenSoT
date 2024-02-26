@@ -11,7 +11,6 @@
 
 #include "../../common.h"
 
-std::string _path_to_cfg = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 
 #define TORAD(deg) deg*M_PI/180.
 #define _EPS_ 1e-5
@@ -21,28 +20,25 @@ namespace {
 class testJointLimitsNaive : public TestBase {
  protected:
 
-  testJointLimitsNaive() : TestBase("coman")
+  testJointLimitsNaive() : TestBase("coman_floating_base")
   {
-
-      if(_model_ptr)
-          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-      else
-          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-    // You can do set-up work for each test here.
-
       _model_ptr->getJointLimits(qLowerBounds, qUpperBounds);
-      zeros.setZero(_model_ptr->getJointNum());
-      q.setZero(_model_ptr->getJointNum());
+
+      q = _model_ptr->getNeutralQ();
+      zeros = q;
+
+      _model_ptr->setJointPosition(q);
+      _model_ptr->update();
 
 
-      vel_max.setOnes(_model_ptr->getJointNum());
+      vel_max.setOnes(_model_ptr->getNv());
       vel_max *= M_PI;
 
       dt = 0.001;
 
       jointLimits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qUpperBounds, qLowerBounds);
 
-      jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(vel_max, dt);
+      jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, vel_max, dt);
 
 
       logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimitsNaive_velocity");
@@ -62,7 +58,7 @@ class testJointLimitsNaive : public TestBase {
     // before each test).
       _model_ptr->setJointPosition(zeros);
       _model_ptr->update();
-      jointLimits->update(zeros);
+      jointLimits->update(Eigen::VectorXd(0));
   }
 
   virtual void TearDown() {
@@ -84,7 +80,6 @@ public:
 
 
   Eigen::VectorXd q;
-  XBot::ModelInterface::Ptr _model_ptr;
   XBot::MatLogger2::Ptr logger;
 
 };
@@ -99,32 +94,30 @@ class testJointLimits : public TestBase {
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testJointLimits(): TestBase("coman")
+  testJointLimits(): TestBase("coman_floating_base")
   {
 
-      if(_model_ptr)
-          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-      else
-          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-    // You can do set-up work for each test here.
-
       _model_ptr->getJointLimits(qLowerBounds, qUpperBounds);
-      zeros.setZero(_model_ptr->getJointNum());
-      q.setZero(_model_ptr->getJointNum());
+
+      q = _model_ptr->getNeutralQ();
+      zeros = q;
+
+      _model_ptr->setJointPosition(q);
+      _model_ptr->update();
+
 
       acc_max.setOnes(_model_ptr->getJointNum());
       acc_max *= 20.;
 
-      vel_max.setOnes(_model_ptr->getJointNum());
+      vel_max.setOnes(_model_ptr->getNv());
       vel_max *= M_PI;
 
       dt = 0.001;
 
-      jointLimitsInvariance = std::make_shared<OpenSoT::constraints::velocity::JointLimitsInvariance>(zeros,
-                                    qUpperBounds, qLowerBounds, acc_max, *_model_ptr.get(), dt);
+      jointLimitsInvariance = std::make_shared<OpenSoT::constraints::velocity::JointLimitsInvariance>(qUpperBounds, qLowerBounds, acc_max, *_model_ptr.get(), dt);
       jointLimitsInvariance->setPStepAheadPredictor(0.9);
 
-      jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(vel_max, dt);
+      jointVelocityLimits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, vel_max, dt);
 
 
       logger = XBot::MatLogger2::MakeLogger("/tmp/testJointLimitsInvariace_velocity");
@@ -166,13 +159,12 @@ public:
 
 
   Eigen::VectorXd q;
-  XBot::ModelInterface::Ptr _model_ptr;
   XBot::MatLogger2::Ptr logger;
 
 };
 
 TEST_F(testJointLimits, sizesAreCorrect) {
-    unsigned int x_size = _model_ptr->getJointNum();
+    unsigned int x_size = _model_ptr->getNv();
 
     Eigen::VectorXd lowerBound = jointLimitsInvariance->getLowerBound();
     Eigen::VectorXd upperBound = jointLimitsInvariance->getUpperBound();
@@ -208,11 +200,14 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     Eigen::VectorXd q(zeros.size()); q.setZero(q.size());
     Eigen::VectorXd q_next = Eigen::VectorXd::Constant(q.size(), 0.05);
 
-    jointLimitsInvariance->update(q);
+    jointLimitsInvariance->update(Eigen::VectorXd(0));
     Eigen::VectorXd oldLowerBound = jointLimitsInvariance->getLowerBound();
     Eigen::VectorXd oldUpperBound = jointLimitsInvariance->getUpperBound();
 
-    jointLimitsInvariance->update(q_next);
+    _model_ptr->setJointPosition(q_next);
+    _model_ptr->update();
+
+    jointLimitsInvariance->update(Eigen::VectorXd(0));
 
     Eigen::VectorXd newLowerBound = jointLimitsInvariance->getLowerBound();
     Eigen::VectorXd newUpperBound = jointLimitsInvariance->getUpperBound();
@@ -231,8 +226,16 @@ TEST_F(testJointLimits, test_bounds)
 
     OpenSoT::tasks::velocity::Postural::Ptr postural =
         std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
+    postural->setLambda(0.1);
 
     Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
+
+    qref.segment(3, 4) = qref.segment(3, 4)/qref.segment(3, 4).norm();
+//    qref[3] = 0.;
+//    qref[4] = 0.;
+//    qref[5] = 0.;
+//    qref[6] = 1.;
+
     postural->setReference(qref);
 
 
@@ -244,10 +247,10 @@ TEST_F(testJointLimits, test_bounds)
     Eigen::VectorXd dq;
     Eigen::VectorXd qdot_prev;
     Eigen::VectorXd qdot, qddot;
-    dq.setZero(this->q.size());
-    qdot_prev.setZero(this->q.size());
-    qdot.setZero(this->q.size());
-    qddot.setZero(this->q.size());
+    dq.setZero(this->_model_ptr->getNv());
+    qdot_prev.setZero(this->_model_ptr->getNv());
+    qdot.setZero(this->_model_ptr->getNv());
+    qddot.setZero(this->_model_ptr->getNv());
     this->_model_ptr->setJointVelocity(qdot_prev);
 
     for(unsigned int i = 0; i < 3000; ++i)
@@ -268,13 +271,13 @@ TEST_F(testJointLimits, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(q);
+        autostack->update(Eigen::VectorXd(0));
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
 
 
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q,  dq);
         qdot = dq/this->dt;
 
 
@@ -282,19 +285,25 @@ TEST_F(testJointLimits, test_bounds)
         qddot = (qdot - qdot_prev)/this->dt;
         qdot_prev = qdot;
 
+        Eigen::VectorXd _q = this->_model_ptr->difference(this->q, this->_model_ptr->getNeutralQ());
+
         for(unsigned int j = 0; j < this->qUpperBounds.size(); ++j)
         {
-            if(this->q[j] >= this->qUpperBounds[j])
-                EXPECT_NEAR(this->q[j] - this->qUpperBounds[j], 0.0, TORAD(0.01))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+            if(_q[j] >= this->qUpperBounds[j])
+                EXPECT_NEAR(_q[j] - this->qUpperBounds[j], 0.0, TORAD(0.01))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
             EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+_EPS_)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+_EPS_)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
-
-
     }
 
 
     qref = -4. * Eigen::VectorXd::Ones(this->q.size());
+//    qref[3] = 0.;
+//    qref[4] = 0.;
+//    qref[5] = 0.;
+//    qref[6] = 1.;
+
+    qref.segment(3, 4) = qref.segment(3, 4)/qref.segment(3, 4).norm();
     postural->setReference(qref);
 
     for(unsigned int i = 0; i < 2000; ++i)
@@ -314,22 +323,24 @@ TEST_F(testJointLimits, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(q);
+        autostack->update(Eigen::VectorXd(0));
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
 
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q,  dq);
         qdot = dq/this->dt;
 
         qddot = (qdot - qdot_prev)/this->dt;
         qdot_prev = qdot;
 
+        Eigen::VectorXd _q = this->_model_ptr->difference(this->q, this->_model_ptr->getNeutralQ());
+
         for(unsigned int j = 0; j < this->qLowerBounds.size(); ++j)
         {
 
-            if(this->q[j] <= this->qLowerBounds[j])
-                EXPECT_NEAR(this->qLowerBounds[j] - this->q[j], 0.0, TORAD(0.01))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
+            if(_q[j] <= this->qLowerBounds[j])
+                EXPECT_NEAR(this->qLowerBounds[j] - _q[j], 0.0, TORAD(0.01))<<"j:"<<j<<"  l:"<<this->qLowerBounds[j]<<"  u:"<<this->qUpperBounds[j]<<std::endl;
             EXPECT_LE(std::fabs(qdot[j]), this->vel_max[j]+_EPS_)<<"std::fabs(qdot[j]): "<<std::fabs(qdot[j])<<"   this->vel_max[j]:"<<this->vel_max[j]<<std::endl;
             EXPECT_LE(std::fabs(qddot[j]), this->acc_max[j]+_EPS_)<<"std::fabs(qddot[j]): "<<std::fabs(qddot[j])<<"   this->acc_max[j]:"<<this->acc_max[j]<<std::endl;
         }
@@ -342,7 +353,7 @@ TEST_F(testJointLimits, test_bounds)
  */
 TEST_F(testJointLimitsNaive, test_bounds)
 {
-    this->q.setZero();
+    this->q = this->_model_ptr->getNeutralQ();
 
     this->_model_ptr->setJointPosition(this->q);
     this->_model_ptr->update();
@@ -352,6 +363,9 @@ TEST_F(testJointLimitsNaive, test_bounds)
         std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     Eigen::VectorXd qref = 4. * Eigen::VectorXd::Ones(this->q.size());
+
+    qref.segment(3, 4) = qref.segment(3, 4)/qref.segment(3, 4).norm();
+
     postural->setReference(qref);
 
 
@@ -363,10 +377,10 @@ TEST_F(testJointLimitsNaive, test_bounds)
     Eigen::VectorXd dq;
     Eigen::VectorXd qdot_prev;
     Eigen::VectorXd qdot, qddot;
-    dq.setZero(this->q.size());
-    qdot_prev.setZero(this->q.size());
-    qdot.setZero(this->q.size());
-    qddot.setZero(this->q.size());
+    dq.setZero(this->_model_ptr->getNv());
+    qdot_prev.setZero(this->_model_ptr->getNv());
+    qdot.setZero(this->_model_ptr->getNv());
+    qddot.setZero(this->_model_ptr->getNv());
     this->_model_ptr->setJointVelocity(qdot_prev);
 
     for(unsigned int i = 0; i < 3000; ++i)
@@ -386,13 +400,13 @@ TEST_F(testJointLimitsNaive, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(q);
+        autostack->update(Eigen::VectorXd(0));
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
 
 
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q,  dq);
         qdot = dq/this->dt;
 
 
@@ -404,6 +418,7 @@ TEST_F(testJointLimitsNaive, test_bounds)
 
 
     qref = -4. * Eigen::VectorXd::Ones(this->q.size());
+    qref.segment(3, 4) = qref.segment(3, 4)/qref.segment(3, 4).norm();
     postural->setReference(qref);
 
     for(unsigned int i = 0; i < 2000; ++i)
@@ -422,12 +437,12 @@ TEST_F(testJointLimitsNaive, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(q);
+        autostack->update(Eigen::VectorXd(0));
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
 
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q,  dq);
         qdot = dq/this->dt;
 
         qddot = (qdot - qdot_prev)/this->dt;

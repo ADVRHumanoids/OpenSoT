@@ -39,16 +39,16 @@
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
 
-                Eigen::VectorXd _qdot_prev;
+                Eigen::VectorXd _qdot_prev, _q, _zeros;
 
                 Eigen::VectorXd _jointAccMax;
 
                 const XBot::ModelInterface& _robot;
 
-                double _lb, _ub, _acc_lim, _pos_lim, _via_lim, _d;
+                double _lb, _ub, _acc_lim, _via_lim, _d;
                 int _ac_lb, _ac_ub;
 
-                Eigen::VectorXd _active_constraint_lb, _active_constraint_ub;
+                Eigen::VectorXd _active_constraint_lb, _active_constraint_ub, _pos_lim_sup, _pos_lim_inf;
 
                 enum active_constraint {
                     pos_lim = 1,
@@ -78,8 +78,7 @@
                  * @param dt
                  * @note the model needs to be updated with joint positions and velocities!
                  */
-                JointLimitsInvariance(const Eigen::VectorXd &q,
-                            const Eigen::VectorXd &jointBoundMax,
+                JointLimitsInvariance(const Eigen::VectorXd &jointBoundMax,
                             const Eigen::VectorXd &jointBoundMin,
                             const Eigen::VectorXd &jointAccMax,
                             XBot::ModelInterface& robot,
