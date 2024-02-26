@@ -19,12 +19,12 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-AngularMomentum::AngularMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot):
+AngularMomentum::AngularMomentum(XBot::ModelInterface& robot):
     Task("AngularMomentum", robot.getNv()), _robot(robot),
     _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredAngularMomentum.setZero();
-    this->_update(x);
+    this->_update(Eigen::VectorXd(0));
 
     _W.resize(3,3);
     _W.setIdentity(3,3);
