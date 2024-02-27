@@ -87,7 +87,7 @@
 
                     void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-                    const Eigen::MatrixXd& getW() {return _W;}
+                    const Eigen::MatrixXd& getW() const {return _W;}
                 };
 
                 ComputeGTauGradient _gTauGradientWorker;
