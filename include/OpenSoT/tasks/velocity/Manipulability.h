@@ -41,8 +41,9 @@ namespace OpenSoT {
             public:
                 typedef std::shared_ptr<Manipulability> Ptr;
 
-                Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const Cartesian::Ptr CartesianTask);
-                Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const CoM::Ptr CartesianTask);
+                Manipulability(const XBot::ModelInterface& robot_model, const Cartesian::Ptr CartesianTask, const double step = 1E-3);
+                Manipulability(const XBot::ModelInterface& robot_model, const CoM::Ptr CartesianTask, const double step = 1E-3);
+
 
                 ~Manipulability();
 
@@ -65,7 +66,7 @@ namespace OpenSoT {
                 /**
                  * @brief getW get a Weight matrix for the manipulability index
                  */
-                Eigen::MatrixXd getW(){
+                const Eigen::MatrixXd&  getW() const{
                     return _manipulabilityIndexGradientWorker.getW();
                 }
 
@@ -73,13 +74,14 @@ namespace OpenSoT {
                 {
                     if(lambda >= 0.0){
                         _lambda = lambda;
-                        this->_update(_x);
+                        this->_update(Eigen::VectorXd(0));
                     }
                 }
 
             protected:
+                const XBot::ModelInterface& _model;
+                Eigen::VectorXd _q;
 
-                Eigen::VectorXd _x;
 
                 /**
                  * @brief The ComputeManipulabilityIndexGradient class implements a worker class to computes
@@ -93,33 +95,33 @@ namespace OpenSoT {
                     Eigen::VectorXd _zeros;
                     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _CartesianTask;
 
-                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
+                    ComputeManipulabilityIndexGradient(const XBot::ModelInterface& robot_model,
                                                        const Cartesian::Ptr CartesianTask) :
                         _robot(robot_model.clone()),
                         _model(robot_model),
-                        _W(q.rows(),q.rows()),
-                        _zeros(q.rows())
+                        _W(_model.getNv(), _model.getNv()),
+                        _zeros(_model.getNv())
                     {
-                        _W.setIdentity(_W.rows(), _W.cols());
+                        _W.setIdentity();
 
-                        _zeros.setZero(_zeros.rows());
+                        _zeros.setZero();
 
                         _robot->syncFrom(_model);
 
                         _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(),
-                                                *(_robot.get()), CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
+                                                *_robot, CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
                     }
 
-                    ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
+                    ComputeManipulabilityIndexGradient(const XBot::ModelInterface& robot_model,
                                                        const CoM::Ptr CartesianTask) :
                         _robot(robot_model.clone()),
                         _model(robot_model),
-                        _W(q.rows(),q.rows()),
-                        _zeros(q.rows())
+                        _W(_model.getNv(), _model.getNv()),
+                        _zeros(_model.getNv())
                     {
-                        _W.setIdentity(_W.rows(), _W.cols());
+                        _W.setIdentity();
 
-                        _zeros.setZero(_zeros.rows());
+                        _zeros.setZero();
 
                         _robot->syncFrom(_model);
 
@@ -139,7 +141,7 @@ namespace OpenSoT {
 
                     void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-                    Eigen::MatrixXd& getW() {return _W;}
+                    const Eigen::MatrixXd& getW() const {return _W;}
 
                     double computeManipulabilityIndex()
                     {
@@ -148,6 +150,10 @@ namespace OpenSoT {
                         return sqrt(fabs((J*_W*J.transpose()).determinant()));
                     }
                 };
+
+                double _step;
+                Eigen::VectorXd _gradient;
+                Eigen::VectorXd _deltas;
 
                 ComputeManipulabilityIndexGradient _manipulabilityIndexGradientWorker;
             };
