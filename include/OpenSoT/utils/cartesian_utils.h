@@ -41,22 +41,6 @@ public:
     virtual double compute(const Eigen::VectorXd &x) = 0;
 };
 
-/**
- * @brief The GradientVector class pure virtual function used to describe functions for computeHessian method.
- */
-class GradientVector {
-    int _size;
-public:
-    GradientVector(const int x_size) : _size(x_size) {}
-    /**
-     * @brief compute value of function in x
-     * @param x
-     * @return scalar
-     */
-
-    virtual Eigen::VectorXd compute(const Eigen::VectorXd &x) = 0;
-    int size() { return _size; }
-};
 
 /**
   This class implements quaternion error as in the paper:
@@ -300,40 +284,7 @@ public:
                                       const Eigen::Affine3d &Td,
                                       Eigen::Vector3d& position_error,
                                       Eigen::Vector3d& orientation_error);
-
-    /**
-     * @brief computeGradient compute numerical gradient of a function using 2 points formula:
-     *
-     *           f(x+h) - f(x-h)
-     *   df(x)= ----------------
-     *                2h
-     * @param x points around gradient is compute
-     * @param fun function to derive
-     * @param step step of gradient
-     * @return vector of gradient
-     */
-    static Eigen::VectorXd computeGradient(const Eigen::VectorXd &x,
-                                              CostFunction &fun,
-                                              const double &step = 1E-3);
-
-    /**
-     * @brief computeGradient compute numerical gradient of a function using 2 points formula:
-     *
-     *           f(x+h) - f(x-h)
-     *   df(x)= ----------------
-     *                2h
-     * @param x points around gradient is compute
-     * @param fun function to derive
-     * @param jointMask the joints over which we want to compute the gradient
-     * @param step step of gradient
-     * @return vector of gradient
-     */
-    static Eigen::VectorXd computeGradient(const Eigen::VectorXd &x,
-                                              CostFunction &fun,
-                                              const std::vector<bool>& jointMask,
-                                              const double &step = 1E-3);
 };
-
 
 
 #endif

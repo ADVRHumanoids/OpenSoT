@@ -95,39 +95,4 @@ void cartesian_utils::computeCartesianError(const Eigen::Affine3d &T,
                                               qd.x(), qd.y(), qd.z(), qd.w());
 }
 
-Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,
-                                                    CostFunction& fun,
-                                                    const double& step) {
-    std::vector<bool> jointMask(x.size(), true);
-    return computeGradient(x, fun, jointMask, step);
-}
-
-Eigen::VectorXd cartesian_utils::computeGradient(const Eigen::VectorXd &x,
-                                                    CostFunction& fun,
-                                                    const std::vector<bool>& jointMask,
-                                                    const double& step) {
-    Eigen::VectorXd gradient(x.rows());
-    gradient.setZero();
-    Eigen::VectorXd deltas(x.rows());
-    deltas.setZero();
-    assert(jointMask.size() == x.size() &&
-           "jointMask must have the same size as x");
-    const double h = step;
-    for(unsigned int i = 0; i < gradient.size(); ++i)
-    {
-        if(jointMask[i])
-        {
-            deltas[i] = h;
-            double fun_a = fun.compute(x+deltas);
-            double fun_b = fun.compute(x-deltas);
-
-            gradient[i] = (fun_a - fun_b)/(2.0*h);
-            deltas[i] = 0.0;
-        } else
-            gradient[i] = 0.0;
-    }
-
-    return gradient;
-}
-
 

@@ -28,16 +28,7 @@ protected:
 class testCartesianUtils: public ::testing::Test
 {
 
-    class sin: public CostFunction
-    {
-        double compute(const Eigen::VectorXd &x)
-        {
-            return std::sin(x[0]);
-        }
-    };
-
 protected:
-    sin sin_function;
 
     testCartesianUtils()
     {
@@ -187,23 +178,7 @@ TEST_F(testCartesianUtils, testComputeCartesianError)
     }
 }
 
-TEST_F(testCartesianUtils, testComputeGradient)
-{
-    int n_of_iterations = 100;
-    double dT = 1.0 / ((double)n_of_iterations);
 
-    for(unsigned int i = 0; i < n_of_iterations; ++i)
-    {
-        double df = cos(i * dT);
-
-        Eigen::VectorXd x(1);
-        x.setZero();
-        x[0] = i*dT;
-        Eigen::VectorXd df_numerical = cartesian_utils::computeGradient(x, this->sin_function, 1E-6);
-
-        EXPECT_NEAR(df, df_numerical[0], 1E-6);
-    }
-}
 
 
 }
