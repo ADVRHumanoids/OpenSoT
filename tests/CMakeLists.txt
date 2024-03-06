@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(rviz_visual_tools QUIET)
 find_package(tf)
 find_package(eigen_conversions)
+find_package(tf_conversions)
 find_package(roscpp )
 find_package(robot_state_publisher )
 find_package(urdf )
@@ -14,7 +15,8 @@ find_package(qpSWIFT QUIET)
 
 
 set(catkin_LIBRARIES
-    ${tf_LIBRARIES} ${roscpp_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${eigen_conversions_LIBRARIES})
+    ${tf_LIBRARIES} ${roscpp_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${eigen_conversions_LIBRARIES}
+${tf_conversions_LIBRARIES})
 
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
 add_definitions(-DOPENSOT_TEST_MODEL_TYPE="pin")
@@ -154,12 +156,12 @@ TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
 add_dependencies(testAffineHelper   OpenSoT)
 add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
 
-# if(${rviz_visual_tools_FOUND})
-#     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
-#     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
-#     add_dependencies(testEigenSVD_StaticWalk_FloatingBase   OpenSoT)
-#     add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
-# endif()
+ if(${rviz_visual_tools_FOUND})
+     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
+     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
+     add_dependencies(testEigenSVD_StaticWalk_FloatingBase   OpenSoT)
+     add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
+ endif()
 
  ADD_EXECUTABLE(testFrictionConeForceConstraint constraints/force/TestFrictionCones.cpp)
  TARGET_LINK_LIBRARIES(testFrictionConeForceConstraint ${TestLibs} ${catkin_LIBRARIES})

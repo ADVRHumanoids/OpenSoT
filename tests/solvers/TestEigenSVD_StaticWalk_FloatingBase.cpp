@@ -20,21 +20,39 @@
 
 #include <xbot2_interface/logger.h>
 #include <matlogger2/matlogger2.h>
+#include "../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = relative_path;
+#include <tf_conversions/tf_eigen.h>
+#include <tf_conversions/tf_kdl.h>
+
 
 bool IS_ROSCORE_RUNNING;
 
 XBot::MatLogger2::Ptr logger;
 
-#define CHECK_JOINT_LIMITS false
-#define CHECK_CARTESIAN_ERROR true
-#define USE_WRONG_COM_REFERENCE false
 #define USE_INERTIA_MATRIX false
-#define USE_COM_AS_CONSTR false
 
 namespace{
+
+
+KDL::Frame poseEigenToKDL(const Eigen::Affine3d& T)
+{
+    tf::Pose tmp;
+    tf::poseEigenToTF(T, tmp);
+    KDL::Frame tmp2;
+    tf::poseTFToKDL(tmp, tmp2);
+    return tmp2;
+}
+
+KDL::Vector vectorEigenToKDL(const Eigen::Vector3d& T)
+{
+    KDL::Vector tmp;
+    tmp.x(T[0]);
+    tmp.y(T[1]);
+    tmp.z(T[2]);
+    return tmp;
+}
+
 
 /**
  * @brief The walking_pattern_generator class generate Cartesian trajectories
@@ -44,9 +62,9 @@ namespace{
  */
 class walking_pattern_generator{
 public:
-    walking_pattern_generator(const KDL::Frame& com_init,
-                              const KDL::Frame& l_sole_init,
-                              const KDL::Frame& r_sole_init):
+    walking_pattern_generator(const Eigen::Affine3d& com_init,
+                              const Eigen::Affine3d& l_sole_init,
+                              const Eigen::Affine3d& r_sole_init):
         com_trj(0.01, "world", "com"),
         l_sole_trj(0.01, "world", "l_sole"),
         r_sole_trj(0.01, "world", "r_sole")
@@ -59,34 +77,34 @@ public:
         KDL::Vector plane_normal; plane_normal.Zero();
         plane_normal.y(1.0);
 
-        KDL::Frame com_wp = com_init;
+        KDL::Frame com_wp = poseEigenToKDL(com_init);
 
         KDL::Frame r_sole_wp;
         KDL::Frame l_sole_wp;
 
         std::vector<double> com_time;
         std::vector<KDL::Frame> com_waypoints;
-        com_waypoints.push_back(com_init);
+        com_waypoints.push_back(com_wp);
 
         //1. We assume the CoM is in the middle of the feet and it
         //moves on top of the left feet (keeping the same height),
         //left and right feet keep the same pose:
-        com_wp.p.x(l_sole_init.p.x());
-        com_wp.p.y(l_sole_init.p.y());
+        com_wp.p.x(poseEigenToKDL(l_sole_init).p.x());
+        com_wp.p.y(poseEigenToKDL(l_sole_init).p.y());
         com_waypoints.push_back(com_wp);
         com_time.push_back(T_com);
 
-        l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_com);
-        r_sole_trj.addMinJerkTrj(r_sole_init, r_sole_init, T_com);
+        l_sole_trj.addMinJerkTrj(poseEigenToKDL(l_sole_init), poseEigenToKDL(l_sole_init), T_com);
+        r_sole_trj.addMinJerkTrj(poseEigenToKDL(r_sole_init), poseEigenToKDL(r_sole_init), T_com);
         //2. Now the CoM is on the left foot, the right foot move forward
         // while the left foot keep the position:
         com_waypoints.push_back(com_wp);
         com_time.push_back(T_foot);
-        l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_foot);
+        l_sole_trj.addMinJerkTrj(poseEigenToKDL(l_sole_init), poseEigenToKDL(l_sole_init), T_foot);
 
-        KDL::Vector arc_center = r_sole_init.p;
+        KDL::Vector arc_center = poseEigenToKDL(r_sole_init).p;
         arc_center.x(arc_center.x() + step_lenght/2.);
-        r_sole_trj.addArcTrj(r_sole_init, r_sole_init.M, M_PI, arc_center, plane_normal, T_foot);
+        r_sole_trj.addArcTrj(poseEigenToKDL(r_sole_init), poseEigenToKDL(r_sole_init).M, M_PI, arc_center, plane_normal, T_foot);
         //3. CoM pass from left to right foot, feet remains in the
         // same position
         r_sole_wp = r_sole_trj.Pos(r_sole_trj.Duration());
@@ -95,7 +113,7 @@ public:
         com_waypoints.push_back(com_wp);
         com_time.push_back(T_com);
 
-        l_sole_trj.addMinJerkTrj(l_sole_init, l_sole_init, T_com);
+        l_sole_trj.addMinJerkTrj(poseEigenToKDL(l_sole_init), poseEigenToKDL(l_sole_init), T_com);
         r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_com);
         //4. Now the CoM is on the right foot, the left foot move forward
         // while the right foot keep the position:
@@ -103,9 +121,9 @@ public:
         com_time.push_back(T_foot);
         r_sole_trj.addMinJerkTrj(r_sole_wp, r_sole_wp, T_foot);
 
-        arc_center = l_sole_init.p;
+        arc_center = poseEigenToKDL(l_sole_init).p;
         arc_center.x(arc_center.x() + step_lenght);
-        l_sole_trj.addArcTrj(l_sole_init, l_sole_init.M, M_PI, arc_center, plane_normal, T_foot);
+        l_sole_trj.addArcTrj(poseEigenToKDL(l_sole_init), poseEigenToKDL(l_sole_init).M, M_PI, arc_center, plane_normal, T_foot);
         //5. CoM pass from right to left foot, feet remains in the
         // same position
         l_sole_wp = l_sole_trj.Pos(l_sole_trj.Duration());
@@ -181,22 +199,18 @@ public:
 
 class manipulation_trajectories{
 public:
-    manipulation_trajectories(const KDL::Frame& com_init,
-                              const KDL::Frame& r_wrist_init):
+    manipulation_trajectories(const Eigen::Affine3d& com_init,
+                              const Eigen::Affine3d& r_wrist_init):
         com_trj(0.01, "world", "com"),
         r_wrist_trj(0.01, "DWYTorso", "r_wrist")
     {
         T_trj = 1.;
-#if USE_WRONG_COM_REFERENCE
-        double h_com = 0.2;//0.1;
-#else
         double h_com = 0.1;
-#endif
         double arm_forward = 0.1;
 
 
-        KDL::Frame com_wp = com_init;
-        KDL::Frame r_wrist_wp = r_wrist_init;
+        KDL::Frame com_wp = poseEigenToKDL(com_init);
+        KDL::Frame r_wrist_wp = poseEigenToKDL(r_wrist_init);
 
         std::vector<KDL::Frame> com_waypoints;
         std::vector<KDL::Frame> r_wrist_waypoints;
@@ -243,24 +257,23 @@ public:
         std::cout<<std::endl;
     }
 
-    theWalkingStack(XBot::ModelInterface& _model,
-                    const Eigen::VectorXd& q):
+    theWalkingStack(XBot::ModelInterface& _model):
         model_ref(_model),
-        I(q.size(), q.size())
+        I(_model.getNv(), _model.getNv())
     {
 
-        I.setIdentity(q.size(), q.size());
+        I.setIdentity();
 
-        l_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_wrist", q,
+        l_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_wrist",
             model_ref, "l_wrist","DWYTorso"));
-        r_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_wrist", q,
+        r_wrist.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_wrist",
             model_ref, "r_wrist","DWYTorso"));
-        l_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_sole", q,
+        l_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::l_sole",
             model_ref, "l_sole","world"));
-        r_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_sole", q,
+        r_sole.reset(new OpenSoT::tasks::velocity::Cartesian("Cartesian::r_sole",
             model_ref, "r_sole","world"));
-        com.reset(new OpenSoT::tasks::velocity::CoM(q, model_ref));
-        gaze.reset(new OpenSoT::tasks::velocity::Gaze("Cartesian::Gaze",q,
+        com.reset(new OpenSoT::tasks::velocity::CoM(model_ref));
+        gaze.reset(new OpenSoT::tasks::velocity::Gaze("Cartesian::Gaze",
                         model_ref, "world"));
         std::vector<bool> ajm = gaze->getActiveJointsMask();
         for(unsigned int i = 0; i < ajm.size(); ++i)
@@ -271,13 +284,13 @@ public:
         gaze->setActiveJointsMask(ajm);
 
 
-        postural.reset(new OpenSoT::tasks::velocity::Postural(q));
+        postural.reset(new OpenSoT::tasks::velocity::Postural(model_ref));
 
         Eigen::VectorXd qmin, qmax;
         model_ref.getJointLimits(qmin, qmax);
-        joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
+        joint_limits.reset(new OpenSoT::constraints::velocity::JointLimits(model_ref, qmax, qmin));
 
-        vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(2.*M_PI, 0.01, q.size()));
+        vel_limits.reset(new OpenSoT::constraints::velocity::VelocityLimits(model_ref, 2.*M_PI, 0.01));
 
 
 
@@ -289,7 +302,7 @@ public:
                     (postural)<<joint_limits<<vel_limits;
 
 
-        auto_stack->update(q);
+        auto_stack->update(Eigen::VectorXd(0));
 
         solver.reset(new OpenSoT::solvers::eHQP(auto_stack->getStack()));
 
@@ -299,18 +312,18 @@ public:
     void setInertiaPostureTask()
     {
         Eigen::MatrixXd M;
-        model_ref.getInertiaMatrix(M);
+        model_ref.computeInertiaMatrix(M);
 
         postural->setWeight(M+I);
         postural->setLambda(0.);
     }
 
-    void update(const Eigen::VectorXd& q)
+    void update()
     {
 #if USE_INERTIA_MATRIX
         setInertiaPostureTask();
 #endif
-        auto_stack->update(q);
+        auto_stack->update(Eigen::VectorXd(0));
 
     }
 
@@ -342,40 +355,27 @@ public:
 
 };
 
-class testStaticWalkFloatingBase: public ::testing::Test{
+class testStaticWalkFloatingBase: public TestBase
+{
 public:
-    void printKDLFrame(const KDL::Frame& F)
-    {
-        std::cout<<"    pose: ["<<F.p.x()<<", "<<F.p.y()<<", "<<F.p.z()<<"]"<<std::endl;
-        double qx, qy,qz,qw;
-        F.M.GetQuaternion(qx,qy,qz,qw);
-        std::cout<<"    quat: ["<<qx<<", "<<qy<<", "<<qz<<", "<<qw<<"]"<<std::endl;
-    }
 
-    testStaticWalkFloatingBase()
+    testStaticWalkFloatingBase() : TestBase("coman_floating_base")
     {
 
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
 
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-
-        int number_of_dofs = _model_ptr->getJointNum();
+        int number_of_dofs = _model_ptr->getNq();
         std::cout<<"#DoFs: "<<number_of_dofs<<std::endl;
 
-        _q.resize(number_of_dofs);
-        _q.setZero(number_of_dofs);
+        _q = _model_ptr->getNeutralQ();
 
         _model_ptr->setJointPosition(_q);
         _model_ptr->update();
 
-        KDL::Frame world_T_bl;
+        Eigen::Affine3d world_T_bl;
         _model_ptr->getPose("Waist",world_T_bl);
 
         std::cout<<"world_T_bl:"<<std::endl;
-        printKDLFrame(world_T_bl);
+        std::cout<<world_T_bl.matrix()<<std::endl;
 
 
 
@@ -392,9 +392,9 @@ public:
     ~testStaticWalkFloatingBase(){}
     virtual void SetUp(){}
     virtual void TearDown(){}
-    void initTrj(const KDL::Frame& com_init,
-            const KDL::Frame& l_sole_init,
-            const KDL::Frame& r_sole_init)
+    void initTrj(const Eigen::Affine3d& com_init,
+            const Eigen::Affine3d& l_sole_init,
+            const Eigen::Affine3d& r_sole_init)
     {
         walk_trj.reset(new walking_pattern_generator(com_init,
                                                      l_sole_init,
@@ -402,8 +402,8 @@ public:
     }
 
 
-    void initManipTrj(const KDL::Frame& com_init,
-            const KDL::Frame& r_wrist_init)
+    void initManipTrj(const Eigen::Affine3d& com_init,
+            const Eigen::Affine3d& r_wrist_init)
     {
         manip_trj.reset(new manipulation_trajectories(com_init,r_wrist_init));
     }
@@ -510,33 +510,24 @@ public:
 
     void publishRobotState()
     {
+
         if(IS_ROSCORE_RUNNING)
         {
             sensor_msgs::JointState joint_msg;
-            joint_msg.name = _model_ptr->getEnabledJointNames();
-
-
-            for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
-                joint_msg.position.push_back(0.0);
-
-            for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
+            for(unsigned int i = 1; i < _model_ptr->getJointNames().size(); ++i)
             {
-                int id = _model_ptr->getDofIndex(joint_msg.name[i]);
-                joint_msg.position[id] = _q[i];
+                joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
+                joint_msg.position.push_back(_q[_model_ptr->getQIndex(_model_ptr->getJointNames()[i])]);
             }
 
             joint_msg.header.stamp = ros::Time::now();
 
 
-            KDL::Frame world_T_bl;
+            Eigen::Affine3d world_T_bl;
             _model_ptr->getPose("Waist",world_T_bl);
 
             tf::Transform anchor_T_world;
-            anchor_T_world.setOrigin(tf::Vector3(world_T_bl.p.x(),
-                world_T_bl.p.y(), world_T_bl.p.z()));
-            double x,y,z,w;
-            world_T_bl.M.GetQuaternion(x,y,z,w);
-            anchor_T_world.setRotation(tf::Quaternion(x,y,z,w));
+            tf::transformEigenToTF(world_T_bl, anchor_T_world);
 
             world_broadcaster->sendTransform(tf::StampedTransform(
                 anchor_T_world.inverse(), joint_msg.header.stamp,
@@ -548,7 +539,7 @@ public:
 
     }
 
-    void setWorld(const KDL::Frame& l_sole_T_Waist, Eigen::VectorXd& q)
+    void setWorld(const Eigen::Affine3d& l_sole_T_Waist, Eigen::VectorXd& q)
     {
         this->_model_ptr->setFloatingBasePose(l_sole_T_Waist);
 
@@ -574,29 +565,28 @@ public:
 
     rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
-    XBot::ModelInterface::Ptr _model_ptr;
     Eigen::VectorXd _q;
 
     std::shared_ptr<ros::NodeHandle> _n;
 
     void setGoodInitialPosition() {
-        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
     }
 
@@ -618,6 +608,15 @@ static inline void KDLFramesAreEqual(const KDL::Frame& a, const KDL::Frame& b,
     EXPECT_NEAR(w,ww, near);
 }
 
+static inline void KDLVectorAreEqual(const KDL::Vector& a, const KDL::Vector& b,
+                                     const double near = 1e-10)
+{
+    EXPECT_NEAR(a.x(), b.x(), near);
+    EXPECT_NEAR(a.y(), b.y(), near);
+    EXPECT_NEAR(a.z(), b.z(), near);
+
+}
+
 TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 {
     this->setGoodInitialPosition();
@@ -627,51 +626,52 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
 
     //Update world according this new configuration:
-    KDL::Frame l_sole_T_Waist;
+    Eigen::Affine3d l_sole_T_Waist;
     this->_model_ptr->getPose("Waist", "l_sole", l_sole_T_Waist);
     std::cout<<"l_sole_T_Waist:"<<std::endl;
-    this->printKDLFrame(l_sole_T_Waist);
+    std::cout<<l_sole_T_Waist.matrix()<<std::endl;
 
-    l_sole_T_Waist.p.x(0.0);
-    l_sole_T_Waist.p.y(0.0);
+    l_sole_T_Waist.translation()[0] = 0.;
+    l_sole_T_Waist.translation()[1] = 0.;
 
     this->setWorld(l_sole_T_Waist, this->_q);
     this->_model_ptr->setJointPosition(this->_q);
     this->_model_ptr->update();
 
 
-    KDL::Frame world_T_bl;
+    Eigen::Affine3d world_T_bl;
     _model_ptr->getPose("Waist",world_T_bl);
 
     std::cout<<"world_T_bl:"<<std::endl;
-    printKDLFrame(world_T_bl);
+    std::cout<<world_T_bl.matrix()<<std::endl;
     //
 
     //Walking
-    KDL::Vector CoM;
+    Eigen::Vector3d CoM;
     this->_model_ptr->getCOM(CoM);
-    KDL::Frame CoM_frame; CoM_frame.p = CoM;
+    Eigen::Affine3d CoM_frame;
+    CoM_frame.translation() = CoM;
     std::cout<<"CoM init:"<<std::endl;
-    this->printKDLFrame(CoM_frame);
+    std::cout<<CoM_frame.matrix()<<std::endl;
 
-    KDL::Frame l_foot_init;
+    Eigen::Affine3d l_foot_init;
     this->_model_ptr->getPose("l_sole", l_foot_init);
     std::cout<<"l_sole init:"<<std::endl;
-    this->printKDLFrame(l_foot_init);
+    std::cout<<l_foot_init.matrix()<<std::endl;
 
-    KDL::Frame r_foot_init;
+    Eigen::Affine3d r_foot_init;
     this->_model_ptr->getPose("r_sole", r_foot_init);
     std::cout<<"r_sole init:"<<std::endl;
-    this->printKDLFrame(r_foot_init);
+    std::cout<<r_foot_init.matrix()<<std::endl;
 
     this->initTrj(CoM_frame, l_foot_init, r_foot_init);
     this->initTrjPublisher();
 
     //Initialize Walking Stack
-    theWalkingStack ws(*(this->_model_ptr.get()), this->_q);
+    theWalkingStack ws(*(this->_model_ptr.get()));
 
     double t = 0.;
-    Eigen::VectorXd dq(this->_q.size()); dq.setZero(dq.size());
+    Eigen::VectorXd dq(this->_model_ptr->getNv()); dq.setZero();
     std::vector<double> loop_time;
     for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
     {
@@ -695,7 +695,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         ws.l_sole->setReference(l_sole_d);
         ws.r_sole->setReference(r_sole_d);
 
-        ws.update(this->_q);
+        ws.update();
 
         uint tic = 0.0;
         if(IS_ROSCORE_RUNNING)
@@ -703,8 +703,8 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         if(!ws.solve(dq)){
             std::cout<<"SOLVER ERROR!"<<std::endl;
-            dq.setZero(dq.size());}
-        this->_q += dq;
+            dq.setZero();}
+        this->_q = this->_model_ptr->sum(this->_q, dq);
 
         uint toc = 0.0;
         if(IS_ROSCORE_RUNNING)
@@ -712,24 +712,16 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         this->update(this->_q);
 
-#if CHECK_CARTESIAN_ERROR
-        KDL::Frame tmp; KDL::Vector tmp_vector;
+        Eigen::Vector3d tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
-        tmp.p = tmp_vector;
-        KDLFramesAreEqual(com_d, tmp, 1e-3);
-        KDL::Frame l_sole;
+        KDLVectorAreEqual(com_d.p, vectorEigenToKDL(tmp_vector), 1e-3);
+        Eigen::Affine3d l_sole;
         this->_model_ptr->getPose("l_sole", l_sole);
-        KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
-        KDL::Frame r_sole;
+        KDLFramesAreEqual(l_sole_d, poseEigenToKDL(l_sole),1e-3);
+        Eigen::Affine3d r_sole;
         this->_model_ptr->getPose("r_sole", r_sole);
-        KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
-#endif
+        KDLFramesAreEqual(r_sole_d, poseEigenToKDL(r_sole), 1e-3);
 
-#if CHECK_JOINT_LIMITS
-        for(unsigned int i = 0; i < this->_q.size(); ++i){
-            EXPECT_LE(this->_q[i]-qmax[i], 1e-10)<<"i: "<<i<<"\n qmax: "<<qmax[i]<<"\n q: "<<this->_q[i]<<std::endl;
-            EXPECT_LE(qmin[i]-this->_q[i], 1e-10)<<"i: "<<i<<"\n qmin: "<<qmin[i]<<"\n q: "<<this->_q[i]<<std::endl;;}
-#endif
 
 
         if(IS_ROSCORE_RUNNING){
@@ -755,18 +747,18 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
     //Manipulation
 
     this->_model_ptr->getCOM(CoM);
-    CoM_frame; CoM_frame.p = CoM;
+    CoM_frame.translation() = CoM;
 
-    KDL::Frame r_wrist_init;
+    Eigen::Affine3d r_wrist_init;
     this->_model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
     std::cout<<"r_wrist init:"<<std::endl;
-    this->printKDLFrame(r_wrist_init);
+    std::cout<<r_wrist_init.matrix()<<std::endl;
 
     this->initManipTrj(CoM_frame,  r_wrist_init);
     this->initManipTrjPublisher();
 
 
-    dq.setZero(dq.size());
+    dq.setZero();
     t = 0.0;
     std::cout<<"Starting whole-body manipulation"<<std::endl;
     for(unsigned int i = 0; i < int(this->manip_trj->com_trj.Duration()) * 100; ++i)
@@ -790,7 +782,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         ws.com->setReference(com_d.p);
         ws.r_wrist->setReference(r_wrist_d);
 
-        ws.update(this->_q);
+        ws.update();
 
         uint tic = 0.0;
         if(IS_ROSCORE_RUNNING)
@@ -798,36 +790,31 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         if(!ws.solve(dq)){
             std::cout<<"SOLVER ERROR!"<<std::endl;
-            dq.setZero(dq.size());}
-        this->_q += dq;
+            dq.setZero();}
+        this->_q = this->_model_ptr->sum(this->_q, dq);
 
         uint toc = 0.0;
         if(IS_ROSCORE_RUNNING)
             toc = ros::Time::now().nsec;
 
         this->update(this->_q);
-        KDL::Frame tmp; KDL::Vector tmp_vector;
+        Eigen::Vector3d tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
-        tmp.p = tmp_vector;
-#if CHECK_CARTESIAN_ERROR
-        KDLFramesAreEqual(com_d, tmp, 1e-3);
-        KDL::Frame r_wrist;
+        KDLVectorAreEqual(com_d.p, vectorEigenToKDL(tmp_vector), 1e-3);
+        Eigen::Affine3d r_wrist;
         this->_model_ptr->getPose("r_wrist","DWYTorso",r_wrist);
-        KDLFramesAreEqual(r_wrist_d, r_wrist, 1e-3);
-#endif
+        KDLFramesAreEqual(r_wrist_d, poseEigenToKDL(r_wrist), 1e-3);
         //log
-        Eigen::VectorXd com(3); com[0] = tmp.p.x(); com[1] = tmp.p.y(); com[2] = tmp.p.z();
+        Eigen::VectorXd com(3);
+        com[0] = vectorEigenToKDL(tmp_vector).x();
+        com[1] = vectorEigenToKDL(tmp_vector).y();
+        com[2] = vectorEigenToKDL(tmp_vector).z();
         logger->add("EigCoM", com);
         com[0] = com_d.p.x(); com[1] = com_d.p.y(); com[2] = com_d.p.z();
         logger->add("EigCoMd", com);
         //
 
 
-#if CHECK_JOINT_LIMITS
-        for(unsigned int i = 0; i < this->_q.size(); ++i){
-            EXPECT_LE(this->_q[i]-qmax[i], 1e-10)<<"i: "<<i<<"\n qmax: "<<qmax[i]<<"\n q: "<<this->_q[i]<<std::endl;
-            EXPECT_LE(qmin[i]-this->_q[i], 1e-10)<<"i: "<<i<<"\n qmin: "<<qmin[i]<<"\n q: "<<this->_q[i]<<std::endl;;}
-#endif
 
         if(IS_ROSCORE_RUNNING){
             loop_time.push_back((toc-tic)/1e6);
@@ -848,11 +835,11 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
     //Walking
     t = 0.0;
-    dq.setZero(dq.size());
+    dq.setZero();
     this->update(this->_q);
 
     this->_model_ptr->getCOM(CoM);
-    CoM_frame.p = CoM;
+    CoM_frame.translation() = CoM;
 
     this->_model_ptr->getPose("l_sole", l_foot_init);
 
@@ -883,7 +870,7 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
         ws.l_sole->setReference(l_sole_d);
         ws.r_sole->setReference(r_sole_d);
 
-        ws.update(this->_q);
+        ws.update();
 
         uint tic = 0.0;
         if(IS_ROSCORE_RUNNING)
@@ -891,8 +878,8 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         if(!ws.solve(dq)){
             std::cout<<"SOLVER ERROR!"<<std::endl;
-            dq.setZero(dq.size());}
-        this->_q += dq;
+            dq.setZero();}
+        this->_q = this->_model_ptr->sum(this->_q, dq);
 
         uint toc = 0.0;
         if(IS_ROSCORE_RUNNING)
@@ -900,24 +887,16 @@ TEST_F(testStaticWalkFloatingBase, testStaticWalkFloatingBase_)
 
         this->update(this->_q);
 
-#if CHECK_CARTESIAN_ERROR
-        KDL::Frame tmp; KDL::Vector tmp_vector;
+        Eigen::Vector3d tmp_vector;
         this->_model_ptr->getCOM(tmp_vector);
-        tmp.p = tmp_vector;
-        KDLFramesAreEqual(com_d, tmp, 1e-3);
-        KDL::Frame l_sole;
+        KDLVectorAreEqual(com_d.p, vectorEigenToKDL(tmp_vector), 1e-3);
+        Eigen::Affine3d l_sole;
         this->_model_ptr->getPose("l_sole", l_sole);
-        KDLFramesAreEqual(l_sole_d, l_sole,1e-3);
-        KDL::Frame r_sole;
+        KDLFramesAreEqual(l_sole_d, poseEigenToKDL(l_sole), 1e-3);
+        Eigen::Affine3d r_sole;
         this->_model_ptr->getPose("r_sole", r_sole);
-        KDLFramesAreEqual(r_sole_d, r_sole,1e-3);
-#endif
+        KDLFramesAreEqual(r_sole_d, poseEigenToKDL(r_sole), 1e-3);
 
-#if CHECK_JOINT_LIMITS
-        for(unsigned int i = 0; i < this->_q.size(); ++i){
-            EXPECT_LE(this->_q[i]-qmax[i], 1e-10)<<"i: "<<i<<"\n qmax: "<<qmax[i]<<"\n q: "<<this->_q[i]<<std::endl;
-            EXPECT_LE(qmin[i]-this->_q[i], 1e-10)<<"i: "<<i<<"\n qmin: "<<qmin[i]<<"\n q: "<<this->_q[i]<<std::endl;;}
-#endif
 
         if(IS_ROSCORE_RUNNING){
             loop_time.push_back((toc-tic)/1e6);
