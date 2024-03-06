@@ -22,19 +22,19 @@ protected:
 
     {
         q = _model_ptr->getNeutralQ();
-        q[_model_ptr->getDofIndex("LHipSag") + 1] = toRad(-23.5);
-        q[_model_ptr->getDofIndex("LHipLat") + 1] = toRad(2.0);
-        q[_model_ptr->getDofIndex("LHipYaw") + 1] = toRad(-4.0);
-        q[_model_ptr->getDofIndex("LKneeSag") + 1] = toRad(50.1);
-        q[_model_ptr->getDofIndex("LAnkLat") + 1] = toRad(-2.0);
-        q[_model_ptr->getDofIndex("LAnkSag") + 1] = toRad(-26.6);
+        q[_model_ptr->getQIndex("LHipSag")] = toRad(-23.5);
+        q[_model_ptr->getQIndex("LHipLat")] = toRad(2.0);
+        q[_model_ptr->getQIndex("LHipYaw")] = toRad(-4.0);
+        q[_model_ptr->getQIndex("LKneeSag")] = toRad(50.1);
+        q[_model_ptr->getQIndex("LAnkLat")] = toRad(-2.0);
+        q[_model_ptr->getQIndex("LAnkSag")] = toRad(-26.6);
 
-        q[_model_ptr->getDofIndex("RHipSag") + 1] = toRad(-23.5);
-        q[_model_ptr->getDofIndex("RHipLat") + 1] = toRad(-2.0);
-        q[_model_ptr->getDofIndex("RHipYaw") + 1] = toRad(0.0);
-        q[_model_ptr->getDofIndex("RKneeSag") + 1] = toRad(50.1);
-        q[_model_ptr->getDofIndex("RAnkLat") + 1] = toRad(2.0);
-        q[_model_ptr->getDofIndex("RAnkSag") + 1] = toRad(-26.6);
+        q[_model_ptr->getQIndex("RHipSag")] = toRad(-23.5);
+        q[_model_ptr->getQIndex("RHipLat")] = toRad(-2.0);
+        q[_model_ptr->getQIndex("RHipYaw")] = toRad(0.0);
+        q[_model_ptr->getQIndex("RKneeSag")] = toRad(50.1);
+        q[_model_ptr->getQIndex("RAnkLat")] = toRad(2.0);
+        q[_model_ptr->getQIndex("RAnkSag")] = toRad(-26.6);
 
 
         Eigen::VectorXd qmin, qmax;
