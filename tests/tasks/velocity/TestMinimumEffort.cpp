@@ -50,12 +50,12 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
     // setting initial position with bent legs
     Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
     double angle = 45;
-    q_whole[_model_ptr->getDofIndex("RShSag") + 1] = -angle*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RShLat") + 1] = 0.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("RElbj") + 1] = -angle*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LShSag") + 1] = -angle*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LShLat") + 1] = 0.0*M_PI/180.0;
-    q_whole[_model_ptr->getDofIndex("LElbj") + 1] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RShSag")] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RShLat")] = 0.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("RElbj")] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LShSag")] = -angle*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LShLat")] = 0.0*M_PI/180.0;
+    q_whole[_model_ptr->getQIndex("LElbj")] = -angle*M_PI/180.0;
 
     if(IS_ROSCORE_RUNNING)
     {
