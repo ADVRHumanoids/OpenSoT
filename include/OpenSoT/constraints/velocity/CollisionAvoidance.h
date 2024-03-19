@@ -194,6 +194,8 @@ protected:
      */
     const XBot::ModelInterface& _robot;
 
+    XBot::ModelInterface::Ptr _collision_model;
+
     /**
      * @brief _dist_calc
      */

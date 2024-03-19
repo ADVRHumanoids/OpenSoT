@@ -36,10 +36,13 @@ CollisionAvoidance::CollisionAvoidance(
     _max_pairs(max_pairs)
 {
     // construct custom model for collisions
-    ModelInterface::Ptr collision_model = ModelInterface::getModel(collision_urdf, collision_srdf, robot.getType());
+    _collision_model =
+        ModelInterface::getModel(collision_urdf ? collision_urdf : robot.getUrdf(),
+                                 collision_srdf ? collision_srdf : robot.getSrdf(),
+                                 robot.getType());
 
     // construct link distance computation util
-    _dist_calc = std::make_unique<Collision::CollisionModel>(collision_model);
+    _dist_calc = std::make_unique<Collision::CollisionModel>(_collision_model);
 
     // if max pairs not specified, set it as number of total
     // link pairs
@@ -78,7 +81,11 @@ void CollisionAvoidance::setDetectionThreshold(const double detection_threshold)
 
 void CollisionAvoidance::update(const Eigen::VectorXd &x)
 {
+    // update collision model
+    _collision_model->syncFrom(_robot, ControlMode::POSITION);
+    _dist_calc->update();
 
+    // reset constraint
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
 
@@ -88,16 +95,9 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
     // compute jacobians
     _dist_calc->getDistanceJacobian(_distance_J);
 
-    // order indices in ascending distance
-    std::multimap<double, int> dist_to_idx;
-    for(int i = 0; i < _distances.size(); i++)
-    {
-        dist_to_idx.insert({_distances[i], i});
-    }
-
     // populate Aineq and bUpperBound
     int row_idx = 0;
-    for(auto& [d, i] : dist_to_idx)
+    for(int i : _dist_calc->getOrderedCollisionPairIndices())
     {
         _Aineq.row(row_idx) = _distance_J.row(i);
         _bUpperBound(row_idx) = _bound_scaling*(_distances(i) - _distance_threshold);
