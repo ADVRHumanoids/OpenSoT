@@ -55,6 +55,8 @@ option(OPENSOT_VERBOSE "Some additional prints" FALSE)
 option(OPENSOT_VERBOSE_MATLOG "Log all aggregated tasks/constraints to MAT-file" FALSE)
 option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
 
+option(OPENSOT_COMPILE_COLLISION "Compile OpenSoT collision avoidance" TRUE)
+
 if(${OPENSOT_DISABLE_VECTORIZATION})
     add_definitions(-DEIGEN_DONT_VECTORIZE)
     add_definitions(-DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
@@ -110,10 +112,11 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
         src/constraints/velocity/ConvexHull.cpp)
 endif()
 
-if(${FCL_FOUND} AND ${moveit_core_FOUND})
+if(${OPENSOT_COMPILE_COLLISION})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
         src/constraints/velocity/CollisionAvoidance.cpp)
+
 endif()
 
 ##TASKS
@@ -200,9 +203,8 @@ ADD_LIBRARY(OpenSoT SHARED
     ${sot_INCLUDES})
 
 set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
-if(${FCL_FOUND} AND ${moveit_core_FOUND})
-    set(PRIVATE_TLL ${PRIVATE_TLL} fcl
-        ${moveit_core_LIBRARIES})
+if(${OPENSOT_COMPILE_COLLISION})
+    target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision)
 endif()
 if(${PCL_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})

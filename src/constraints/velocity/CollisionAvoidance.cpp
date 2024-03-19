@@ -16,18 +16,10 @@
 */
 
 #include <OpenSoT/constraints/velocity/CollisionAvoidance.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include <xbot2_interface/collision.h>
 
 using namespace OpenSoT::constraints::velocity;
 using namespace XBot;
-
-namespace
-{
-Eigen::Vector3d k2e(const KDL::Vector &k)
-{
-    return Eigen::Vector3d(k[0], k[1], k[2]);
-}
-}
 
 CollisionAvoidance::CollisionAvoidance(
         const Eigen::VectorXd& x,
@@ -43,17 +35,18 @@ CollisionAvoidance::CollisionAvoidance(
     _bound_scaling(1.0),
     _max_pairs(max_pairs)
 {
+    // construct custom model for collisions
+    ModelInterface::Ptr collision_model = ModelInterface::getModel(collision_urdf, collision_srdf, robot.getType());
+
     // construct link distance computation util
-    _dist_calc = std::make_unique<ComputeLinksDistance>(robot,
-                                                        collision_urdf,
-                                                        collision_srdf);
+    _dist_calc = std::make_unique<Collision::CollisionModel>(collision_model);
 
     // if max pairs not specified, set it as number of total
     // link pairs
     if(_max_pairs < 0)
     {
         // note: threshold = inf
-        _max_pairs = _dist_calc->getLinkDistances().size();
+        _max_pairs = _dist_calc->getNumCollisionPairs();
     }
 
     // initialize matrices
@@ -89,61 +82,25 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
 
-    _distance_list = _dist_calc->getLinkDistances(_detection_threshold);
+    // compute distances
+    _dist_calc->computeDistance(_distances, _detection_threshold);
 
-    int row_idx = 0;
+    // compute jacobians
+    _dist_calc->getDistanceJacobian(_distance_J);
 
-    for(const auto& data : _distance_list)
+    // order indices in ascending distance
+    std::multimap<double, int> dist_to_idx;
+    for(int i = 0; i < _distances.size(); i++)
     {
+        dist_to_idx.insert({_distances[i], i});
+    }
 
-        // we filled the task, skip the rest of colliding pairs
-        if(row_idx >= _max_pairs)
-        {
-            break;
-        }
-
-        // closest point on first link
-        Eigen::Vector3d p1_world = data.getClosestPoints().first.translation();
-
-        // closest point on second link
-        Eigen::Vector3d p2_world = data.getClosestPoints().second.translation();
-
-        // local closest points on link 1
-        Eigen::Affine3d w_T_l1;
-        _robot.getPose(data.getLinkNames().first, w_T_l1);
-        Eigen::Vector3d p1_local = w_T_l1.inverse()*p1_world;
-
-        // minimum distance direction
-        Eigen::Vector3d p12 = p2_world - p1_world;
-
-        // minimum distance
-        double d12 = data.getDistance();
-
-        // jacobian of p1
-        _robot.getJacobian(data.getLinkNames().first,
-                           p1_local,
-                           _Jtmp);
-
-        _Aineq.row(row_idx) = p12.transpose() * _Jtmp.topRows<3>() / d12;
-
-        // jacobian of p2 only if link2 is a robot link
-        // (it could be part of the environment)
-        if(!data.isLink2WorldObject())
-        {
-            // local closest points on link 2
-            Eigen::Affine3d w_T_l2;
-            _robot.getPose(data.getLinkNames().second, w_T_l2);
-            Eigen::Vector3d p2_local = w_T_l2.inverse()*p2_world;
-
-            // jacobian of p2
-            _robot.getJacobian(data.getLinkNames().second,
-                               p2_local,
-                               _Jtmp);
-
-            _Aineq.row(row_idx) -= p12.transpose() * _Jtmp.topRows<3>() / d12;
-        }
-
-        _bUpperBound(row_idx) = _bound_scaling*(d12 - _distance_threshold);
+    // populate Aineq and bUpperBound
+    int row_idx = 0;
+    for(auto& [d, i] : dist_to_idx)
+    {
+        _Aineq.row(row_idx) = _distance_J.row(i);
+        _bUpperBound(row_idx) = _bound_scaling*(_distances(i) - _distance_threshold);
 
         // to avoid infeasibilities, cap upper bound to zero
         // (i.e. don't change current distance if in collision)
@@ -153,50 +110,64 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
         }
 
         ++row_idx;
+    }
 
+}
+
+bool CollisionAvoidance::setCollisionWhiteList(std::set<std::pair<std::string, std::string>> whiteList)
+{
+    try
+    {
+        _dist_calc->setLinkPairs(whiteList);
+        return true;
+    }
+    catch(std::out_of_range& e)
+    {
+        Logger::error(e.what());
+        return false;
     }
 }
 
-bool CollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
-{
-    return _dist_calc->setCollisionWhiteList(whiteList);
-}
+// bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
+// {
+//     return _dist_calc->setWorldCollisions(wc);
+// }
 
-bool CollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
-{
-    return _dist_calc->setCollisionBlackList(blackList);
-}
+// void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
+// {
+//     _dist_calc->setLinksVsEnvironment(links);
+// }
 
-bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
-{
-    return _dist_calc->setWorldCollisions(wc);
-}
+// bool CollisionAvoidance::addWorldCollision(const std::string &id,
+//                                                std::shared_ptr<fcl::CollisionObjectd> fcl_obj)
+// {
+//     return _dist_calc->addWorldCollision(id, fcl_obj);
+// }
 
-void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
-{
-    _dist_calc->setLinksVsEnvironment(links);
-}
+// bool CollisionAvoidance::removeWorldCollision(const std::string &id)
+// {
+//     return _dist_calc->removeWorldCollision(id);
+// }
 
-bool CollisionAvoidance::addWorldCollision(const std::string &id,
-                                               std::shared_ptr<fcl::CollisionObjectd> fcl_obj)
-{
-    return _dist_calc->addWorldCollision(id, fcl_obj);
-}
-
-bool CollisionAvoidance::removeWorldCollision(const std::string &id)
-{
-    return _dist_calc->removeWorldCollision(id);
-}
-
-bool CollisionAvoidance::moveWorldCollision(const std::string &id,
-                                            Eigen::Affine3d new_pose)
-{
-    return _dist_calc->moveWorldCollision(id, new_pose);
-}
+// bool CollisionAvoidance::moveWorldCollision(const std::string &id,
+//                                             Eigen::Affine3d new_pose)
+// {
+//     return _dist_calc->moveWorldCollision(id, new_pose);
+// }
 
 void CollisionAvoidance::setBoundScaling(const double boundScaling)
 {
     _bound_scaling = boundScaling;
+}
+
+Collision::CollisionModel &CollisionAvoidance::getCollisionModel()
+{
+    return *_dist_calc;
+}
+
+const Collision::CollisionModel &CollisionAvoidance::getCollisionModel() const
+{
+    return *_dist_calc;
 }
 
 CollisionAvoidance::~CollisionAvoidance() = default;

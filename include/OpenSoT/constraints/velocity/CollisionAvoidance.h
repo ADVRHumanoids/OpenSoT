@@ -21,23 +21,12 @@
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/collision.h>
 
 #include <srdfdom/model.h>
 #include <Eigen/Dense>
 
 #include <moveit_msgs/PlanningSceneWorld.h>
-
-class ComputeLinksDistance;
-class LinkPairDistance;
-
-// forward declare fcl collision object
-namespace fcl
-{
-    template <typename Scalar>
-    class CollisionObject;
-
-    using CollisionObjectd = CollisionObject<double>;
-}
 
 namespace OpenSoT { namespace constraints { namespace velocity {
 
@@ -67,10 +56,10 @@ public:
      * NOTE: if urdf and srdf are not specified, the one inside the robot model will be used
      */
     CollisionAvoidance(const Eigen::VectorXd& x,
-                           const XBot::ModelInterface& robot,
-                           int max_pairs = -1,
-                           urdf::ModelConstSharedPtr collision_urdf = nullptr,
-                           srdf::ModelConstSharedPtr collision_srdf = nullptr);
+                       const XBot::ModelInterface& robot,
+                       int max_pairs = -1,
+                       urdf::ModelConstSharedPtr collision_urdf = nullptr,
+                       srdf::ModelConstSharedPtr collision_srdf = nullptr);
 
     /**
      * @brief getLinkPairThreshold distance offset between two link pairs
@@ -119,46 +108,38 @@ public:
      * @param whiteList a list of links pairs for which to not check collision detection
      * @return true on success
      */
-    bool setCollisionWhiteList(std::list<LinksPair> whiteList);
+    bool setCollisionWhiteList(std::set<std::pair<std::string, std::string>> whiteList);
 
-    /**
-     * @brief setCollisionBlackList resets the allowed collision matrix by setting all collision pairs
-     *        (for which collision geometries are avaiable) as enabled.
-     *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
-     *        which are disabled in the SRDF
-     * @param blackList a list of links pairs for which to not check collision detection
-     * @return true on success
-     */
-    bool setCollisionBlackList(std::list<LinksPair> blackList);
+    // TODO: waiting for world collision support !
+    //
+    // /**
+    //  * @brief add/remove world collision objects according to the given planning
+    //  * scene world
+    //  * @return true if all requests (additions, deletions) could be performs
+    //  * succesfully, false on (partial) insuccess
+    //  */
+    // bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
 
-    /**
-     * @brief add/remove world collision objects according to the given planning
-     * scene world
-     * @return true if all requests (additions, deletions) could be performs
-     * succesfully, false on (partial) insuccess
-     */
-    bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
+    // /**
+    //  * @brief add single collision to the world
+    //  * @param id is the unique collision id
+    //  * @param fcl_obj is the fcl collision object (geometry + transform)
+    //  * @return true if input is valid
+    //  */
+    // bool addWorldCollision(const std::string& id,
+    //                        std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
 
-    /**
-     * @brief add single collision to the world
-     * @param id is the unique collision id
-     * @param fcl_obj is the fcl collision object (geometry + transform)
-     * @return true if input is valid
-     */
-    bool addWorldCollision(const std::string& id,
-                           std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
+    // /**
+    //  * @brief remove world collision with given id
+    //  */
+    // bool removeWorldCollision(const std::string& id);
 
-    /**
-     * @brief remove world collision with given id
-     */
-    bool removeWorldCollision(const std::string& id);
-
-    /**
-     * @brief change the transform w.r.t. the world for the given
-     * world collision
-     */
-    bool moveWorldCollision(const std::string& id,
-                            Eigen::Affine3d new_pose);
+    // /**
+    //  * @brief change the transform w.r.t. the world for the given
+    //  * world collision
+    //  */
+    // bool moveWorldCollision(const std::string& id,
+    //                         Eigen::Affine3d new_pose);
 
     /**
      * @brief setBoundScaling sets bound scaling for the capsule constraint
@@ -174,12 +155,15 @@ public:
      */
     void setLinksVsEnvironment(const std::list<std::string>& links);
 
+    /**
+     * @brief getter for the internal collision model
+     */
+    XBot::Collision::CollisionModel& getCollisionModel();
 
     /**
-     * @brief getLinkPairDistances
-     * @return list of LinkPairDistance which will be used in the task
+     * @brief getter for the internal collision model
      */
-    const std::list<LinkPairDistance>& getLinkPairDistances(){ return _distance_list;}
+    const XBot::Collision::CollisionModel& getCollisionModel() const;
 
     ~CollisionAvoidance();
 
@@ -213,7 +197,10 @@ protected:
     /**
      * @brief _dist_calc
      */
-    std::unique_ptr<ComputeLinksDistance> _dist_calc;
+    std::unique_ptr<XBot::Collision::CollisionModel> _dist_calc;
+
+    Eigen::VectorXd _distances;
+    Eigen::MatrixXd _distance_J;
 
     /**
      * @brief _x_cache is a copy of last q vector used to update the constraints.
@@ -227,8 +214,6 @@ protected:
      * @brief _Jtmp
      */
     Eigen::MatrixXd _Jtmp;
-
-    std::list<LinkPairDistance> _distance_list;
 
 };
 
