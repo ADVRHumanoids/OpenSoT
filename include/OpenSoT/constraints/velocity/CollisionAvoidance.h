@@ -45,6 +45,8 @@ public:
 
     typedef std::shared_ptr<CollisionAvoidance> Ptr;
     typedef std::pair<std::string, std::string> LinksPair;
+    typedef XBot::Collision::CollisionModel::WitnessPointVector WitnessPointVector;
+    typedef XBot::Collision::CollisionModel::LinkPairVector LinkPairVector;
 
     /**
      * @brief SelfCollisionAvoidance
@@ -110,6 +112,12 @@ public:
      * @return false if collisionList.size() > _max_pairs or if links are not founded in the model
      */
     bool updateCollisionList(std::set<std::pair<std::string, std::string>> collisionList);
+
+    /**
+     * @brief updateEnvironment must be called after a collision has been added or
+     * removed from the envronment
+     */
+    void updateEnvironment();
 
     // TODO: waiting for world collision support !
     //
@@ -188,6 +196,11 @@ public:
     ~CollisionAvoidance();
 
 protected:
+
+    /**
+     * @brief _include_env
+     */
+    bool _include_env;
 
     /**
      * @brief _bound_scaling
