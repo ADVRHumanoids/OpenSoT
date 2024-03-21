@@ -166,6 +166,25 @@ public:
      */
     const XBot::Collision::CollisionModel& getCollisionModel() const;
 
+    /**
+     * @brief get the vector of witness points used by this constraint
+     * during the last call to update(), in ascending distance order
+     * @param wp
+     */
+    void getOrderedWitnessPointVector(WitnessPointVector& wp) const;
+
+    /**
+     * @brief getOrderedLinkPairVector
+     * @param lp
+     */
+    void getOrderedLinkPairVector(LinkPairVector& lp) const;
+
+    /**
+     * @brief getOrderedDistanceVector
+     * @param d
+     */
+    void getOrderedDistanceVector(std::vector<double>& d) const;
+
     ~CollisionAvoidance();
 
 protected:
@@ -204,6 +223,9 @@ protected:
 
     Eigen::VectorXd _distances;
     Eigen::MatrixXd _distance_J;
+    int _num_active_pairs;
+    mutable WitnessPointVector _wpv;
+    mutable LinkPairVector _lpv;
 
     /**
      * @brief _Jtmp

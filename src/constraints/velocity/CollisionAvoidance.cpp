@@ -56,6 +56,9 @@ CollisionAvoidance::CollisionAvoidance(
     _bUpperBound.setZero(_max_pairs);
     _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
 
+    // initialize link pair vector
+    _lpv = _dist_calc->getCollisionPairs(_include_env);
+
 }
 
 double CollisionAvoidance::getLinkPairThreshold()
@@ -202,6 +205,44 @@ Collision::CollisionModel &CollisionAvoidance::getCollisionModel()
 const Collision::CollisionModel &CollisionAvoidance::getCollisionModel() const
 {
     return *_dist_calc;
+}
+
+void CollisionAvoidance::getOrderedWitnessPointVector(WitnessPointVector &wp) const
+{
+    wp.clear();
+
+    _dist_calc->getWitnessPoints(_wpv, _include_env);
+
+    const auto& ordered_idx = _dist_calc->getOrderedCollisionPairIndices();
+
+    for(int i = 0; i < _num_active_pairs && i < _distances.size(); i++)
+    {
+        wp.push_back(_wpv[ordered_idx[i]]);
+    }
+}
+
+void CollisionAvoidance::getOrderedLinkPairVector(LinkPairVector &lp) const
+{
+    lp.clear();
+
+    const auto& ordered_idx = _dist_calc->getOrderedCollisionPairIndices();
+
+    for(int i = 0; i < _num_active_pairs && i < _distances.size(); i++)
+    {
+        lp.push_back(_lpv[ordered_idx[i]]);
+    }
+}
+
+void CollisionAvoidance::getOrderedDistanceVector(std::vector<double> &d) const
+{
+    d.clear();
+
+    const auto& ordered_idx = _dist_calc->getOrderedCollisionPairIndices();
+
+    for(int i = 0; i < _num_active_pairs && i < _distances.size(); i++)
+    {
+        d.push_back(_distances[ordered_idx[i]]);
+    }
 }
 
 CollisionAvoidance::~CollisionAvoidance() = default;
