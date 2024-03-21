@@ -197,6 +197,11 @@ void CollisionAvoidance::setBoundScaling(const double boundScaling)
     _bound_scaling = boundScaling;
 }
 
+void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string> &links)
+{
+    _dist_calc->setLinksVsEnvironment(std::set(links.begin(), links.end()));
+}
+
 Collision::CollisionModel &CollisionAvoidance::getCollisionModel()
 {
     return *_dist_calc;
