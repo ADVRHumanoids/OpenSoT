@@ -40,7 +40,7 @@
 #include <kdl_parser/kdl_parser.hpp>
 #include <moveit_msgs/PlanningSceneWorld.h>
 
-#include <OpenSoT/utils/LinkPairDistance.h>
+#include "LinkPairDistance.h"
 
 #include <map>
 
