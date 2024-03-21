@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/collision_utils.h>
+#include "collision_utils.h"
 #include <octomap_msgs/conversions.h>
 #include <eigen_conversions/eigen_msg.h>
 

@@ -9,7 +9,7 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include "collision_utils.h"
 #include <chrono>
 #define ENABLE_ROS false
 

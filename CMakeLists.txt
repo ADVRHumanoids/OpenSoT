@@ -38,12 +38,6 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                                                                 
 find_package(eigen_conversions REQUIRED)
 find_package(xbot2_interface REQUIRED)
-find_package(fcl 0.6.1 QUIET)
-if(DEFINED FCL_VERSION)
-    set(FCL_FOUND 1)
-else()
-    set(FCL_FOUND 0)
-endif()
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
 
@@ -178,12 +172,6 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/cartesian_utils.cpp
     src/utils/ForceOptimization.cpp
     src/utils/InverseDynamics.cpp)
-
-if(${FCL_FOUND} AND ${moveit_core_FOUND})
-    message("Adding src/utils/collision_utils.cpp to compilation")
-    set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
-        src/utils/collision_utils.cpp)
-endif()
 
 if(${PCL_FOUND})
     message("Adding src/utils/convex_hull_utils.cpp to compilation")

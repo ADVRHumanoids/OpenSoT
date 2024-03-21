@@ -12,6 +12,13 @@ find_package(urdf )
 find_package(srdfdom)
 find_package(osqp QUIET)
 find_package(qpSWIFT QUIET)
+find_package(fcl 0.6.1 QUIET)
+if(DEFINED FCL_VERSION)
+    set(FCL_FOUND 1)
+else()
+    set(FCL_FOUND 0)
+endif()
+
 
 
 set(catkin_LIBRARIES
@@ -193,13 +200,14 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
  add_dependencies(testSubConstraint   OpenSoT)
  add_test(NAME OpenSoT_constraint_SubConstraint COMMAND testSubConstraint)
 
+
 if(${FCL_FOUND})
-     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp)
+     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp collision_utils.cpp)
      TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd)
      add_dependencies(testCollisionUtils   OpenSoT)
      add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 
-     ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
+     ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp collision_utils.cpp)
      TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd)
      add_dependencies(testCollisionAvoidanceVelocityConstraint   OpenSoT)
      add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)

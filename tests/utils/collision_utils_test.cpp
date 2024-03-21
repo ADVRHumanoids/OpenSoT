@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include "collision_utils.h"
 #include <cmath>
 #include <fcl/narrowphase/detail/primitive_shape_algorithm/capsule_capsule-inl.h>
 #include <xbot2_interface/xbotinterface2.h>
