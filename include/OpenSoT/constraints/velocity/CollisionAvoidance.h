@@ -55,8 +55,7 @@ public:
      * @param collision_srdf srdf used for collision model
      * NOTE: if urdf and srdf are not specified, the one inside the robot model will be used
      */
-    CollisionAvoidance(const Eigen::VectorXd& x,
-                       const XBot::ModelInterface& robot,
+    CollisionAvoidance(const XBot::ModelInterface& robot,
                        int max_pairs = -1,
                        urdf::ModelConstSharedPtr collision_urdf = nullptr,
                        srdf::ModelConstSharedPtr collision_srdf = nullptr);
@@ -88,27 +87,29 @@ public:
     /**
      * @brief update recomputes Aineq and bUpperBound if x is different than the
      *  previously stored value
-     * @param x the state vector. It gets cached so that we won't recompute
-     * capsules distances if x didn't change
-     * TODO if the capsules distances are given by a server
-     * (i.e. a separate thread updaing capsules at a given rate)
-     * then the inelegant caching of x is not needed anymore (notice that,
-     * however, it would be nice to have a caching system
-     * at the stack level so that, if two tasks in the same stack are constrained
-     *  by the same constraint, this constraint
-     * gets updated only once per stack update)
+     * @param x the state vector.
      */
     void update(const Eigen::VectorXd &x);
 
 
     /**
-     * @brief setCollisionWhiteList resets the allowed collision matrix by setting all collision pairs as disabled.
-     *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
-     *        which are disabled in the SRDF
-     * @param whiteList a list of links pairs for which to not check collision detection
-     * @return true on success
+     * @brief setCollisionList permits to set a list of collision pairs (links).
+     * @note when using set CollisionList, the internal list of collision is reset. This entails the resizing of
+     * internal constraint matrices. For this reason, this method SHOULD NOT be called once the constraint has been
+     * added into the solver but only BEFORE!
+     * @param collisionList set of link pairs names
+     * @return false if links are not founded in the model
      */
-    bool setCollisionWhiteList(std::set<std::pair<std::string, std::string>> whiteList);
+    bool setCollisionList(std::set<std::pair<std::string, std::string>> collisionList);
+
+    /**
+     * @brief updateCollisionList permits to update the collision list with different collision pairs
+     * @note the parameter collisionList in input can not be larger than the maximum number of link pairs (_max_pairs),
+     * this is to avoid resize of constraint matrix
+     * @param collisionList set of link pairs names
+     * @return false if collisionList.size() > _max_pairs or if links are not founded in the model
+     */
+    bool updateCollisionList(std::set<std::pair<std::string, std::string>> collisionList);
 
     // TODO: waiting for world collision support !
     //
@@ -203,14 +204,6 @@ protected:
 
     Eigen::VectorXd _distances;
     Eigen::MatrixXd _distance_J;
-
-    /**
-     * @brief _x_cache is a copy of last q vector used to update the constraints.
-     * It is used in order to avoid multiple updated when the constraint is present
-     * in multiple tasks in the same stack. It is a simple speedup waiting for the stack system to support
-     * constraint caching - or for idynutils to support some form of cache system
-     */
-    Eigen::VectorXd _x_cache;
 
     /**
      * @brief _Jtmp

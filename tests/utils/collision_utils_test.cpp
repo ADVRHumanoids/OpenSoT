@@ -32,17 +32,6 @@
 #define MAKE_SHARED std::make_shared
 #endif
 
-KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
-{
-    Eigen::Quaterniond q(in.linear());
-    Eigen::Vector3d t = in.translation();
-
-    KDL::Frame f;
-    f.p = KDL::Vector(t[0],t[1],t[2]);
-    f.M = KDL::Rotation::Quaternion(q.x(), q.y(), q.z(), q.w());
-
-    return f;
-}
 
 Eigen::Affine3d fcl2Eigen(const fcl::Transform3<double> &in)
 {

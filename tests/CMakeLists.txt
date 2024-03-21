@@ -47,8 +47,8 @@ add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/"
 SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
                      ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
                      ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
-if(${FCL_FOUND})
-    SET(TestLibs ${TestLibs} ${FCL_LIBRARIES})
+if(${moveit_core_FOUND})
+    SET(TestLibs ${TestLibs} ${moveit_core_LIBRARIES})
 endif()
 
 if(${rviz_visual_tools_FOUND})
@@ -199,10 +199,10 @@ if(${FCL_FOUND})
      add_dependencies(testCollisionUtils   OpenSoT)
      add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 
-#     ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
-#     TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd)
-#     add_dependencies(testCollisionAvoidanceVelocityConstraint   OpenSoT)
-#     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
+     ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp)
+     TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd)
+     add_dependencies(testCollisionAvoidanceVelocityConstraint   OpenSoT)
+     add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 
 #     ADD_EXECUTABLE(testCollisionAvoidanceEnvironmentVelocityConstraint constraints/velocity/TestCollisionAvoidanceEnvironment.cpp)
 #     TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs} -lccd)

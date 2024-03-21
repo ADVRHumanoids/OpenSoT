@@ -22,7 +22,6 @@ using namespace OpenSoT::constraints::velocity;
 using namespace XBot;
 
 CollisionAvoidance::CollisionAvoidance(
-        const Eigen::VectorXd& x,
         const XBot::ModelInterface& robot,
         int max_pairs,
         urdf::ModelConstSharedPtr collision_urdf,
@@ -31,7 +30,6 @@ CollisionAvoidance::CollisionAvoidance(
     _detection_threshold(std::numeric_limits<double>::max()),
     _distance_threshold(0.001),
     _robot(robot),
-    _x_cache(x),
     _bound_scaling(1.0),
     _max_pairs(max_pairs)
 {
@@ -51,6 +49,7 @@ CollisionAvoidance::CollisionAvoidance(
         // note: threshold = inf
         _max_pairs = _dist_calc->getNumCollisionPairs();
     }
+    _distance_J.setZero(_dist_calc->getNumCollisionPairs(), getXSize());
 
     // initialize matrices
     _Aineq.setZero(_max_pairs, getXSize());
@@ -82,7 +81,9 @@ void CollisionAvoidance::setDetectionThreshold(const double detection_threshold)
 void CollisionAvoidance::update(const Eigen::VectorXd &x)
 {
     // update collision model
-    _collision_model->syncFrom(_robot, ControlMode::POSITION);
+    //_collision_model->syncFrom(_robot, ControlMode::POSITION); <-- not updating
+    _collision_model->setJointPosition(_robot.getJointPosition());
+    _collision_model->update();
     _dist_calc->update();
 
     // reset constraint
@@ -96,29 +97,62 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
     _dist_calc->getDistanceJacobian(_distance_J);
 
     // populate Aineq and bUpperBound
-    int row_idx = 0;
     for(int i : _dist_calc->getOrderedCollisionPairIndices())
     {
-        _Aineq.row(row_idx) = _distance_J.row(i);
-        _bUpperBound(row_idx) = _bound_scaling*(_distances(i) - _distance_threshold);
-
-        // to avoid infeasibilities, cap upper bound to zero
-        // (i.e. don't change current distance if in collision)
-        if(_bUpperBound(row_idx) < 0.0)
+        if(i < _max_pairs)
         {
-            _bUpperBound(row_idx) = 0.0;
-        }
+            _Aineq.row(i) = -_distance_J.row(i);
+            _bUpperBound(i) = _bound_scaling*(_distances(i) - _distance_threshold);
 
-        ++row_idx;
+            // to avoid infeasibilities, cap upper bound to zero
+            // (i.e. don't change current distance if in collision)
+            if(_bUpperBound(i) < 0.0)
+            {
+                _bUpperBound(i) = 0.0;
+            }
+        }
+        else
+            break;
+
     }
 
 }
 
-bool CollisionAvoidance::setCollisionWhiteList(std::set<std::pair<std::string, std::string>> whiteList)
+bool CollisionAvoidance::setCollisionList(std::set<std::pair<std::string, std::string>> collisionList)
 {
     try
     {
-        _dist_calc->setLinkPairs(whiteList);
+        _dist_calc->setLinkPairs(collisionList);
+        _max_pairs = collisionList.size();
+        // initialize matrices
+        _Aineq.setZero(_max_pairs, getXSize());
+        _bUpperBound.setZero(_max_pairs);
+        _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
+        _distance_J.setZero(_max_pairs, _robot.getNv());
+
+        return true;
+    }
+    catch(std::out_of_range& e)
+    {
+        Logger::error(e.what());
+        return false;
+    }
+}
+
+bool CollisionAvoidance::updateCollisionList(std::set<std::pair<std::string, std::string>> collisionList)
+{
+    if(collisionList.size() > _max_pairs)
+    {
+        Logger::error("collisionList.size() > _max_pairs when updating collision list");
+        return false;
+    }
+
+    try
+    {
+        _dist_calc->setLinkPairs(collisionList);
+        _Aineq.setZero();
+        _bUpperBound.setZero();
+        _distance_J.setZero(collisionList.size(), _robot.getNv());
         return true;
     }
     catch(std::out_of_range& e)
