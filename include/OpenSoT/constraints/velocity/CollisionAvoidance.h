@@ -114,10 +114,10 @@ public:
     bool updateCollisionList(std::set<std::pair<std::string, std::string>> collisionList);
 
     /**
-     * @brief updateEnvironment must be called after a collision has been added or
-     * removed from the envronment
+     * @brief collisionModelUpdated must be called after a collision has been added or
+     * removed from the model
      */
-    void updateEnvironment();
+    void collisionModelUpdated();
 
     // TODO: waiting for world collision support !
     //

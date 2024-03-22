@@ -182,7 +182,7 @@ bool CollisionAvoidance::updateCollisionList(std::set<std::pair<std::string, std
     }
 }
 
-void CollisionAvoidance::updateEnvironment()
+void CollisionAvoidance::collisionModelUpdated()
 {
     _lpv = _dist_calc->getCollisionPairs(_include_env);
 }
