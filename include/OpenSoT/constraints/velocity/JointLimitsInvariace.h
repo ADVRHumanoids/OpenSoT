@@ -70,7 +70,6 @@
             public:
                 /**
                  * @brief JointLimitsInvariance constructor
-                 * @param q
                  * @param jointBoundMax max joint limits
                  * @param jointBoundMin min joint limits
                  * @param jointAccMax max joint acceleration
