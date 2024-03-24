@@ -19,13 +19,14 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
 #include <qpOASES.hpp>
+#include <OpenSoT/utils/AutoStack.h>
 #include <fstream>
 
 #include <xbot2_interface/xbotinterface2.h>
 #include <chrono>
 #include <ctime>
 #include <thread>
-
+#include "../common.h"
 
 
 #define GREEN "\033[0;32m"
@@ -188,24 +189,23 @@ protected:
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _robot) {
 
-    Eigen::VectorXd _q(_robot->getJointNum());
-    _q.setZero(_q.size());
+    Eigen::VectorXd _q = _robot->getNeutralQ();
 
-    _q[_robot->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_robot->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_robot->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_robot->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_robot->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_robot->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_robot->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_robot->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_robot->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_robot->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    _q[_robot->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    _q[_robot->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    _q[_robot->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_robot->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    _q[_robot->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _q[_robot->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    _q[_robot->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-    _q[_robot->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    _q[_robot->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_robot->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+    _q[_robot->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
     return _q;
 
@@ -221,11 +221,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
 
 
-    std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-
-    std::string _path_to_cfg = relative_path;
-
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    XBot::ModelInterface::Ptr _model_ptr = GetTestModel("coman");
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -244,26 +240,26 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     _model_ptr->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits =
-            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax,qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr,qmax,qmin);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits =
-            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 0.6,3e-3,q.size());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, 0.6,3e-3);
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
     bounds_list.push_back(boundsVelocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds =
-            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
+            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, _model_ptr->getNv());
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_arm_task =
-            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_arm",q, *(_model_ptr.get()),
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_arm",*(_model_ptr.get()),
                                                         "l_wrist",
                                                         "world");
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task =
-            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
@@ -275,7 +271,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
 
 
-    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
+    Eigen::VectorXd dq(_model_ptr->getNv()); dq.setZero();
 
     double dt=3e-3;
 
@@ -288,9 +284,9 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     q = getGoodInitialPosition(_model_ptr);
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    l_arm_task->update(q);
-    postural_task->update(q);
-    bounds->update(q);
+    l_arm_task->update(Eigen::VectorXd(0));
+    postural_task->update(Eigen::VectorXd(0));
+    bounds->update(Eigen::VectorXd(0));
 
     current_pose_y = l_arm_task->getActualPose();
     l_arm_task->getActualPose(current_pose);
@@ -425,12 +421,12 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        l_arm_task->update(q);
-        postural_task->update(q);
-        bounds->update(q);
+        l_arm_task->update(Eigen::VectorXd(0));
+        postural_task->update(Eigen::VectorXd(0));
+        bounds->update(Eigen::VectorXd(0));
 
         EXPECT_TRUE(sot->solve(dq));
-        q += dq;
+        q = _model_ptr->sum(q, dq);
 
         current_pose_y = l_arm_task->getActualPose();
         l_arm_task->getActualPose(current_pose);
@@ -550,24 +546,11 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 }
 
 
-
-
-
-
-
-
-
-
-
 TEST_P(testQPOases_CoMAndPosturalFF, testCoMFF)
 {
     bool hasInitialError = GetParam();
 
-    std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-
-    std::string _path_to_cfg = relative_path;
-
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    XBot::ModelInterface::Ptr _model_ptr = GetTestModel("coman_floating_base");
 
     if(_model_ptr)
         std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -588,35 +571,42 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits =
-            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits =
-            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 0.9,3e-3,q.size());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, 0.9,3e-3);
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
     bounds_list.push_back(boundsVelocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds =
-            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
+            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, _model_ptr->getNv());
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr l_sole = std::make_shared<OpenSoT::tasks::velocity::Cartesian>(
+                "l_sole", *_model_ptr, "l_sole", "world");
+
+    OpenSoT::tasks::velocity::Cartesian::Ptr r_sole = std::make_shared<OpenSoT::tasks::velocity::Cartesian>(
+                "r_sole", *_model_ptr, "r_sole", "world");
 
     OpenSoT::tasks::velocity::CoM::Ptr com =
-            std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *(_model_ptr));
+            std::make_shared<OpenSoT::tasks::velocity::CoM>(*(_model_ptr));
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task =
-            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
     stack_of_tasks.push_back(com);
+    stack_of_tasks.push_back(l_sole+r_sole);
     stack_of_tasks.push_back(postural_task);
 
     OpenSoT::solvers::iHQP::Ptr sot = std::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e8);
 
 
 
-    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
+    Eigen::VectorXd dq(_model_ptr->getNv()); dq.setZero();
 
     double dt=3e-3;
 
@@ -629,9 +619,11 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    com->update(q);
-    postural_task->update(q);
-    bounds->update(q);
+    com->update(Eigen::VectorXd(0));
+    l_sole->update(Eigen::VectorXd(0));
+    r_sole->update(Eigen::VectorXd(0));
+    postural_task->update(Eigen::VectorXd(0));
+    bounds->update(Eigen::VectorXd(0));
 
 
     if(!hasInitialError) {
@@ -725,12 +717,14 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        com->update(q);
-        postural_task->update(q);
-        bounds->update(q);
+        com->update(Eigen::VectorXd(0));
+        l_sole->update(Eigen::VectorXd(0));
+        r_sole->update(Eigen::VectorXd(0));
+        postural_task->update(Eigen::VectorXd(0));
+        bounds->update(Eigen::VectorXd(0));
 
         EXPECT_TRUE(sot->solve(dq));
-        q += dq;
+        q = _model_ptr->sum(q, dq);
 
         current_position_y = com->getActualPosition();
         current_pose.p.x(current_position_y(0));
@@ -807,41 +801,14 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
 {
     bool hasInitialError = GetParam();
 
-    std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-
-    std::string _path_to_cfg = relative_path;
-
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-    if(_model_ptr)
-        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-    else
-        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+    XBot::ModelInterface::Ptr _model_ptr = GetTestModel("coman");
 
 
-    double j_index = _model_ptr->getDofIndex("LShLat");
+    double j_index = _model_ptr->getQIndex("LShLat");
     std::cout << "Applying trajectory to joint "
               << "LShLat" << std::endl;
 
@@ -857,21 +824,21 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     _model_ptr->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits =
-            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q,qmax,qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr,qmax,qmin);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsVelocityLimits =
-            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>( 1.5,3e-3,q.size());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, 1.5,3e-3);
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
     bounds_list.push_back(boundsJointLimits);
     bounds_list.push_back(boundsVelocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds =
-            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, q.size());
+            std::make_shared<OpenSoT::constraints::Aggregated>(bounds_list, _model_ptr->getNv());
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task =
-            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
 
@@ -881,7 +848,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
             std::make_shared<OpenSoT::solvers::iHQP>(stack_of_tasks, bounds,1e9);
 
 
-    Eigen::VectorXd dq(q.size()); dq.setZero(q.size());
+    Eigen::VectorXd dq(_model_ptr->getNv()); dq.setZero();
 
     double dt=3e-3;
 
@@ -894,8 +861,8 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    postural_task->update(q);
-    bounds->update(q);
+    postural_task->update(Eigen::VectorXd(0));
+    bounds->update(Eigen::VectorXd(0));
 
     if(!hasInitialError) {
         /**************************************************
@@ -977,14 +944,14 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(q);
-        bounds->update(q);
+        postural_task->update(Eigen::VectorXd(0));
+        bounds->update(Eigen::VectorXd(0));
 
         EXPECT_TRUE(sot->solve(dq));
 
         current_pose.p[0] = q[j_index];
 
-        q += dq;
+        q = _model_ptr->sum(q, dq);
 
         std::chrono::duration<double> t_compute = std::chrono::system_clock::now() - t_begin;
 
