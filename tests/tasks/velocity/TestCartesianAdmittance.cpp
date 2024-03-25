@@ -2,28 +2,17 @@
 #include <OpenSoT/tasks/velocity/CartesianAdmittance.h>
 #include <memory>
 #include <xbot2_interface/xbotinterface2.h>
+#include "../../common.h"
 
 
 namespace{
 
-class testCartesianAdmittanceTask: public ::testing::Test
+class testCartesianAdmittanceTask: public TestBase
 {
 protected:
-    XBot::ModelInterface::Ptr _model_ptr;
-    std::string _path_to_cfg;
 
-    testCartesianAdmittanceTask()
+    testCartesianAdmittanceTask():TestBase("coman")
     {
-        std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-
-        _path_to_cfg = relative_path;
-
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
     }
 
     virtual ~testCartesianAdmittanceTask() {
@@ -41,15 +30,16 @@ protected:
 
 TEST_F(testCartesianAdmittanceTask, testComputeParameters)
 {
-    Eigen::VectorXd q(_model_ptr->getJointNum());
-    q.setZero(q.size());
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     XBot::ForceTorqueSensor::ConstPtr ft;
-    ft.reset(new XBot::ForceTorqueSensor(_model_ptr->getUrdf().getLink("LSoftHand"), 0));
+    ft.reset(new XBot::ForceTorqueSensor("LSoftHand"));
 
     OpenSoT::tasks::velocity::CartesianAdmittance::Ptr left_arm;
     left_arm.reset(new OpenSoT::tasks::velocity::CartesianAdmittance(
-                       "left_arm", q, *_model_ptr, "world", ft));
+                       "left_arm", *_model_ptr, "world", ft));
 
     double dt = 0.001;
     //left_arm->setFilterTimeStep(dt);

@@ -9,6 +9,235 @@ using namespace XBot::Utils;
 namespace OpenSoT {
    namespace tasks {
        namespace velocity {
+       template <typename SignalType>
+       /**
+        * @brief SecondOrderFilter implements a canonical continuous-time
+        * second order filter with transfer function
+        *                   1
+        * P(s) =  -----------------------,  w = natural frequency, eps = damping ratio
+        *         (s/w)^2 + 2*eps/w*s + 1
+        *
+        * and discretized according to a trapezoidal (aka Tustin) scheme. This yields
+        * a difference equation of the following form:
+        *
+        *      a0*y + a1*yd + a2*ydd = u + b1*ud + b2*udd
+        *
+        * where yd = y(k-1), ydd = y(k-2) and so on (d = delayed).
+        */
+       class SecondOrderFilter {
+
+       public:
+
+           typedef std::shared_ptr<SecondOrderFilter<SignalType>> Ptr;
+
+           SecondOrderFilter():
+               _omega(1.0),
+               _eps(0.8),
+               _ts(0.01),
+               _reset_has_been_called(false)
+           {
+               computeCoeff();
+           }
+
+           SecondOrderFilter(double omega, double eps, double ts, const SignalType& initial_state):
+               _omega(omega),
+               _eps(eps),
+               _ts(ts),
+               _reset_has_been_called(false)
+           {
+               computeCoeff();
+               reset(initial_state);
+           }
+
+           void reset(const SignalType& initial_state){
+               _reset_has_been_called = true;
+               _u = initial_state;
+               _y = initial_state;
+               _yd = initial_state;
+               _ydd = initial_state;
+               _udd = initial_state;
+               _ud = initial_state;
+           }
+
+           const SignalType& process(const SignalType& input){
+
+               if(!_reset_has_been_called) reset(input*0);
+
+
+               _ydd = _yd;
+               _yd = _y;
+               _udd = _ud;
+               _ud = _u;
+
+
+               _u = input;
+               _y = 1.0/_a0 * ( _u + _b1*_ud + _b2*_udd - _a1*_yd - _a2*_ydd );
+
+               return _y;
+           }
+
+           const SignalType& getOutput() const {
+               return _y;
+           }
+
+           void setOmega(double omega){
+               _omega = omega;
+               computeCoeff();
+           }
+
+           double getOmega()
+           {
+               return _omega;
+           }
+
+           void setDamping(double eps){
+               _eps = eps;
+               computeCoeff();
+           }
+
+           double getDamping()
+           {
+               return _eps;
+           }
+
+           void setTimeStep(double ts){
+               _ts = ts;
+               computeCoeff();
+           }
+
+           double getTimeStep()
+           {
+               return _ts;
+           }
+
+       private:
+
+           void computeCoeff()
+           {
+               _b1 = 2.0;
+               _b2 = 1.0;
+
+               _a0 = 1.0 + 4.0*_eps/(_omega*_ts) + 4.0/std::pow(_omega*_ts, 2.0);
+               _a1 = 2 - 8.0/std::pow(_omega*_ts, 2.0);
+               _a2 = 1.0 + 4.0/std::pow(_omega*_ts, 2.0) - 4.0*_eps/(_omega*_ts);
+
+           }
+
+           double _omega;
+           double _eps;
+           double _ts;
+
+           double _b1, _b2;
+           double _a0, _a1, _a2;
+
+           bool _reset_has_been_called;
+
+           SignalType _y, _yd, _ydd, _u, _ud, _udd;
+
+       };
+
+       template<class SignalType>
+       class SecondOrderFilterArray
+       {
+       public:
+           SecondOrderFilterArray(const int channels):
+               _channels(channels)
+           {
+               SecondOrderFilter<SignalType> filter;
+               SignalType tmp;
+               for(unsigned int i = 0; i < _channels; ++i){
+                   _filters.push_back(filter);
+                   _output.push_back(tmp);
+               }
+           }
+
+           const std::vector<SignalType>& process(const std::vector<SignalType>& input)
+           {
+               if(input.size() != _channels)
+                   throw std::runtime_error("input size != filters size");
+
+               for(unsigned int i = 0; i < _channels; ++i){
+                   _filters[i].process(input[i]);
+                   _output[i] = _filters[i].getOutput();
+               }
+               return _output;
+           }
+
+           const std::vector<SignalType>& getOutput() const {
+               return _output;
+           }
+
+           void reset(const SignalType& init)
+           {
+               for(unsigned int i = 0; i < _channels; ++i){
+                   _filters[i].reset(init);
+                   _output[i] = init;
+               }
+           }
+
+           bool setTimeStep(const double time_step, const int channel)
+           {
+               if(channel >= _channels)
+                   return false;
+               else
+                   _filters[channel].setTimeStep(time_step);
+               return true;
+           }
+
+           double getTimeStep(const int channel)
+           {
+               if(channel >= _channels)
+                   throw std::runtime_error("channel out of channels range!");
+               else
+                   return _filters[channel].getTimeStep();
+           }
+
+           bool setDamping(const double damping, const int channel)
+           {
+               if(channel >= _channels)
+                   return false;
+               else
+                   _filters[channel].setDamping(damping);
+               return true;
+           }
+
+           double getDamping(const int channel)
+           {
+               if(channel >= _channels)
+                   throw std::runtime_error("channel out of channels range!");
+               else
+                   return _filters[channel].getDamping();
+           }
+
+           bool setOmega(const double omega, const int channel)
+           {
+               if(channel >= _channels)
+                   return false;
+               else
+                   _filters[channel].setOmega(omega);
+               return true;
+           }
+
+           double getOmega(const int channel)
+           {
+               if(channel >= _channels)
+                   throw std::runtime_error("channel out of channels range!");
+               else
+                   return _filters[channel].getOmega();
+           }
+
+           int getNumberOfChannels()
+           {
+               return _channels;
+           }
+
+       private:
+           std::vector<SecondOrderFilter<SignalType>> _filters;
+           std::vector<SignalType> _output;
+           int _channels;
+
+       };
+
        /**
         * @brief The CartesianAdmittance class implements a simple admittance controller in velocity at the end-effectors.
         * The implemented scheme is the following:
@@ -40,7 +269,6 @@ namespace OpenSoT {
              * @param ft_sensor used to get measured contact forces and retrieve the distal_link
              */
             CartesianAdmittance(std::string task_id,
-                                const Eigen::VectorXd& x,
                                 XBot::ModelInterface &robot,
                                 std::string base_link,
                                 XBot::ForceTorqueSensor::ConstPtr ft_sensor);
@@ -195,8 +423,7 @@ namespace OpenSoT {
 
            void _update(const Eigen::VectorXd& x);
 
-           //XBot::Utils::SecondOrderFilter<Eigen::Vector6d> _filter;
-           XBot::Utils::SecondOrderFilterArray<double> _filter;
+           SecondOrderFilterArray<double> _filter;
 
            Eigen::Vector6d _C;
 

@@ -5,11 +5,10 @@ using namespace OpenSoT::tasks::velocity;
 #define CHANNELS 6
 
 CartesianAdmittance::CartesianAdmittance(std::string task_id,
-                                         const Eigen::VectorXd &x,
                                          XBot::ModelInterface &robot,
                                          std::string base_link,
                                          XBot::ForceTorqueSensor::ConstPtr ft_sensor):
-    Cartesian(task_id, x, robot, ft_sensor->getName(), base_link),
+    Cartesian(task_id, robot, ft_sensor->getName(), base_link),
     _ft_sensor(ft_sensor),
     _filter(CHANNELS)
 {
@@ -60,8 +59,7 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
         _robot.getPose(_distal_link, _base_link, _bl_T_ft);
     }
     
-    
-    _wrench_error = XBot::Utils::GetAdjointFromRotation(_bl_T_ft.linear())*_wrench_measured;
+    _wrench_error = XBot::Utils::adjointFromRotation(_bl_T_ft.linear())*_wrench_measured;
     
     apply_deadzone(_wrench_error);
     
@@ -73,7 +71,7 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 
     _desiredTwist = _C.asDiagonal()*_wrench_filt;
 
-    Cartesian::_update(x);
+    Cartesian::_update(Eigen::VectorXd(0));
 }
 
 bool CartesianAdmittance::reset()

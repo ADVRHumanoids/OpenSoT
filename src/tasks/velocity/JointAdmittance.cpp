@@ -2,9 +2,8 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterface &model,
-                                 const Eigen::VectorXd& x):
-    Postural(x, "joint_admittance"),
+JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterface &model):
+    Postural(model, "joint_admittance"),
     _robot(robot),
     _model(model)
 {
@@ -21,14 +20,12 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterfa
     _tau_filt.setZero(this->getXSize());
     _tau_error.setZero(this->getXSize());
     _h.setZero(this->getXSize());
+    _qdot_desired.setZero(this->getXSize());
 
 
     _model.getJointPosition(_q);
 
-    if( (x-_q).sum() < 1e-9 )
-        _update(x);
-    else
-        throw std::runtime_error("There is a mismatch among model joint position and input x!");
+    _update(Eigen::VectorXd(0));
 }
 
 void JointAdmittance::_update(const Eigen::VectorXd &x)
@@ -41,13 +38,12 @@ void JointAdmittance::_update(const Eigen::VectorXd &x)
 
     _tau_filt = _filter.process(_tau_error);
 
-    _xdot_desired = _C*_tau_filt;
+    _qdot_desired = _C*_tau_filt;
 
     if(_model.isFloatingBase())
-        _xdot_desired.head(6).setZero();
+        _qdot_desired.head(6).setZero();
 
-    _model.getJointPosition(_q);
-    Postural::_update(_q);
+    Postural::_update(Eigen::VectorXd(0));
 }
 
 void JointAdmittance::setJointCompliance(const Eigen::MatrixXd &C)

@@ -127,7 +127,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/acceleration/MinJointVel.cpp
     src/tasks/acceleration/AngularMomentum.cpp
     src/tasks/velocity/Cartesian.cpp
-    # src/tasks/velocity/CartesianAdmittance.cpp REFACTOR
+    src/tasks/velocity/CartesianAdmittance.cpp #TODO: refactor to better implementation of admittance, not using filters
     src/tasks/velocity/PureRolling.cpp
     src/tasks/velocity/Gaze.cpp
     src/tasks/velocity/Contact.cpp
@@ -137,7 +137,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/Manipulability.cpp
     src/tasks/velocity/MinimumEffort.cpp
     src/tasks/velocity/Postural.cpp
-    # src/tasks/velocity/JointAdmittance.cpp REFACTOR
+    src/tasks/velocity/JointAdmittance.cpp #TODO: refactor to better implementation of admittance, not using filters
     src/tasks/force/CoM.cpp
     src/tasks/force/FloatingBase.cpp
     src/tasks/force/Force.cpp
