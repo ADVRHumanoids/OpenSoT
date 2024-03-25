@@ -45,7 +45,7 @@ class testJointLimits : public TestBase {
     // before each test).
       _model_ptr->setJointPosition(zeros);
       _model_ptr->update();
-      jointLimits->update(zeros);
+      jointLimits->update();
   }
 
   virtual void TearDown() {
@@ -114,7 +114,7 @@ TEST_F(testJointLimits, BoundsAreCorrect) {
 
     _model_ptr->setJointPosition(_model_ptr->sum(zeros, dq));
     _model_ptr->update();
-    jointLimits->update(q);
+    jointLimits->update();
     Eigen::VectorXd lowerBound = jointLimits->getLowerBound();
     Eigen::VectorXd upperBound = jointLimits->getUpperBound();
 
@@ -175,14 +175,14 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    jointLimits->update(Eigen::VectorXd(0));
+    jointLimits->update();
     Eigen::VectorXd oldLowerBound = jointLimits->getLowerBound();
     Eigen::VectorXd oldUpperBound = jointLimits->getUpperBound();
 
     _model_ptr->setJointPosition(q_next);
     _model_ptr->update();
 
-    jointLimits->update(Eigen::VectorXd(0));
+    jointLimits->update();
     Eigen::VectorXd newLowerBound = jointLimits->getLowerBound();
     Eigen::VectorXd newUpperBound = jointLimits->getUpperBound();
 
@@ -205,7 +205,7 @@ TEST_F(testJointLimits, startingOutsideBoundsPositive)
     _model_ptr->update();
 
     OpenSoT::constraints::velocity::JointLimits joint_lims(*_model_ptr, q_max, q_min);
-    joint_lims.update(Eigen::VectorXd(0));
+    joint_lims.update();
 
     Eigen::VectorXd lb = joint_lims.getLowerBound();
 
@@ -231,7 +231,7 @@ TEST_F(testJointLimits, startingOutsideBoundsPositive)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    joint_lims.update(Eigen::VectorXd(0));
+    joint_lims.update();
     lb = joint_lims.getLowerBound();
     _model_ptr->difference(_model_ptr->getJointPosition(), _model_ptr->getNeutralQ(), dq);
     dqmin_diff = q_min - dq;
@@ -260,7 +260,7 @@ TEST_F(testJointLimits, startingOutsideBoundsNegative)
     _model_ptr->update();
 
     OpenSoT::constraints::velocity::JointLimits joint_lims(*_model_ptr, q_max, q_min);
-    joint_lims.update(Eigen::VectorXd(0));
+    joint_lims.update();
 
     Eigen::VectorXd lb = joint_lims.getLowerBound();
     Eigen::VectorXd dq;
@@ -284,7 +284,7 @@ TEST_F(testJointLimits, startingOutsideBoundsNegative)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    joint_lims.update(Eigen::VectorXd(0));
+    joint_lims.update();
     lb = joint_lims.getLowerBound();
     _model_ptr->difference(_model_ptr->getJointPosition(), _model_ptr->getNeutralQ(), dq);
     dqmin_diff = q_min - dq;

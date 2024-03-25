@@ -51,7 +51,7 @@ namespace OpenSoT {
 
        private:
 
-            virtual void update(const Eigen::VectorXd& x);
+            virtual void update();
 
             std::string _contact_link;
 
@@ -85,7 +85,7 @@ namespace OpenSoT {
 
            CoP::Ptr getCoP(const std::string& contact_name);
 
-           void update(const Eigen::VectorXd &x);
+           void update();
 
 
        private:

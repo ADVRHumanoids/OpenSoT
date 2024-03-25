@@ -58,7 +58,7 @@ class testJointLimitsNaive : public TestBase {
     // before each test).
       _model_ptr->setJointPosition(zeros);
       _model_ptr->update();
-      jointLimits->update(Eigen::VectorXd(0));
+      jointLimits->update();
   }
 
   virtual void TearDown() {
@@ -137,7 +137,7 @@ class testJointLimits : public TestBase {
     // before each test).
       _model_ptr->setJointPosition(zeros);
       _model_ptr->update();
-      jointLimitsInvariance->update(zeros);
+      jointLimitsInvariance->update();
   }
 
   virtual void TearDown() {
@@ -200,14 +200,14 @@ TEST_F(testJointLimits, boundsDoUpdate) {
     Eigen::VectorXd q(zeros.size()); q.setZero(q.size());
     Eigen::VectorXd q_next = Eigen::VectorXd::Constant(q.size(), 0.05);
 
-    jointLimitsInvariance->update(Eigen::VectorXd(0));
+    jointLimitsInvariance->update();
     Eigen::VectorXd oldLowerBound = jointLimitsInvariance->getLowerBound();
     Eigen::VectorXd oldUpperBound = jointLimitsInvariance->getUpperBound();
 
     _model_ptr->setJointPosition(q_next);
     _model_ptr->update();
 
-    jointLimitsInvariance->update(Eigen::VectorXd(0));
+    jointLimitsInvariance->update();
 
     Eigen::VectorXd newLowerBound = jointLimitsInvariance->getLowerBound();
     Eigen::VectorXd newUpperBound = jointLimitsInvariance->getUpperBound();

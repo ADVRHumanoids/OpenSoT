@@ -384,7 +384,7 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack,
 
 void OpenSoT::AutoStack::update(const Eigen::VectorXd &state)
 {
-    _boundsAggregated->update(state);
+    _boundsAggregated->update();
     typedef std::vector<OpenSoT::tasks::Aggregated::TaskPtr>::iterator it_t;
     for(it_t task = _stack.begin(); task != _stack.end(); ++task)
         (*task)->update(state);

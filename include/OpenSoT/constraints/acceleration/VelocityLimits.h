@@ -45,7 +45,7 @@ public:
      * @brief update
      * @param x
      */
-    virtual void update(const Eigen::VectorXd& x);
+    virtual void update();
 
     /**
      * @brief setVelocityLimits update velocity limits

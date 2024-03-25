@@ -468,7 +468,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
     lb.setZero(3);
     ub<<1e30, 1e30, 1.;
     OpenSoT::constraints::GenericConstraint::Ptr bounds(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 3));
-    bounds->update(Eigen::VectorXd(1));
+    bounds->update();
 
     Eigen::MatrixXd Ac(2,3);
     Ac<<1.,1.,1.,
@@ -479,7 +479,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
 
     OpenSoT::AffineHelper var(Ac, Eigen::VectorXd::Zero(2));
     OpenSoT::constraints::GenericConstraint::Ptr constr(new OpenSoT::constraints::GenericConstraint("constraint", var, uA, lA, OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
-    constr->update(Eigen::VectorXd(1));
+    constr->update();
     std::cout<<"lA: "<<constr->getbLowerBound();
 
     OpenSoT::solvers::GLPKBackEnd::Ptr solver = OpenSoT::solvers::BackEndFactory(

@@ -30,10 +30,10 @@ JointLimitsECBF::JointLimitsECBF(XBot::ModelInterface &robot,
     __lowerBound = -jointAccMax;
     __upperBound = jointAccMax;
 
-    update(Eigen::VectorXd(1));
+    update();
 }
 
-void JointLimitsECBF::update(const Eigen::VectorXd &x)
+void JointLimitsECBF::update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
@@ -63,7 +63,7 @@ void JointLimitsECBF::update(const Eigen::VectorXd &x)
 
     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
 
-    _generic_constraint_internal->update(x);
+    _generic_constraint_internal->update();
 
     _Aineq = _generic_constraint_internal->getAineq();
     _bLowerBound = _generic_constraint_internal->getbLowerBound();

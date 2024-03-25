@@ -401,7 +401,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
 
         taskCartesianAggregated->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
@@ -530,14 +530,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
         this->_model_ptr->update();
 
         auto tic = std::chrono::steady_clock::now();
-        this->sc_constraint->update(Eigen::VectorXd(0));
+        this->sc_constraint->update();
         auto toc = std::chrono::steady_clock::now();
         auto time_for_update = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
         std::cout<<"SCA Update time: "<<time_for_update/1000.<<" [ms]"<<std::endl;
 
         taskCartesianAggregated->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
@@ -767,7 +767,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
         taskCartesianAggregated->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
@@ -988,7 +988,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
         taskCartesianAggregated->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
@@ -1100,7 +1100,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
         taskCartesianAggregated->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;

@@ -57,14 +57,14 @@ Aggregated::Aggregated(ConstraintPtr bound1,
     this->generateAll();
 }
 
-void Aggregated::update(const Eigen::VectorXd& x) {
+void Aggregated::update() {
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
         ConstraintPtr &b = *i;
         /* update bounds */
-        b->update(x);
+        b->update();
     }
 
     this->generateAll();

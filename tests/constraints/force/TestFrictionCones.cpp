@@ -190,7 +190,7 @@ TEST_F(testFrictionCones, testFrictionCones_) {
 
     friction_cones.reset(new OpenSoT::constraints::force::FrictionCones(
                             links_in_contact, wrenches, *(_model_ptr.get()), friction__cones));
-    friction_cones->update(QPcontact_wrenches_d);
+    friction_cones->update();
 
 
 

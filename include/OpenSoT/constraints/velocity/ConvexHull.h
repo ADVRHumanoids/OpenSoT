@@ -94,7 +94,7 @@
                  */
                 void setSafetyMargin(const double safetyMargin);
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
                 std::list<std::string> getLinksInContact()
                 {

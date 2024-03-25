@@ -53,7 +53,7 @@ _com_task(task), _is_cartesian(false)
 
 
 
-void CartesianVelocity::update(const Eigen::VectorXd &x) {
+void CartesianVelocity::update() {
 
     this->generateAineq();
 

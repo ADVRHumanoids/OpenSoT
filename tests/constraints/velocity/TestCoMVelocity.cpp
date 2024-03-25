@@ -52,7 +52,7 @@ protected:
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      comVelocity->update(Eigen::VectorXd(0));
+      comVelocity->update();
   }
 
   virtual void TearDown() {
@@ -128,7 +128,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     Eigen::VectorXd q = _model_ptr->getNeutralQ();
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    comVelocity->update(Eigen::VectorXd(0));
+    comVelocity->update();
 
     Aineq = comVelocity->getAineq();
 //    pAineq = pinv(Aineq);
@@ -187,7 +187,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_LE(com_pose_final(i), com_pose_init(i));
 
-    comVelocity->update(Eigen::VectorXd(0));
+    comVelocity->update();
 
     Aineq = comVelocity->getAineq();
 //    pAineq = pinv(Aineq);
@@ -242,7 +242,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_LE(com_pose_init(i), com_pose_final(i));
 
-    comVelocity->update(Eigen::VectorXd(0));
+    comVelocity->update();
 
     Aineq = comVelocity->getAineq();
 //////    pAineq = pinv(Aineq);

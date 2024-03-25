@@ -86,7 +86,7 @@ void CollisionAvoidance::setDetectionThreshold(const double detection_threshold)
     _detection_threshold = std::fabs(detection_threshold);
 }
 
-void CollisionAvoidance::update(const Eigen::VectorXd &x)
+void CollisionAvoidance::update()
 {
     // update collision model
     //_collision_model->syncFrom(_robot, ControlMode::POSITION); <-- not updating

@@ -81,7 +81,7 @@
                             const double dt);
 
 
-                void update(const Eigen::VectorXd& x);
+                void update();
 
                 /**
                  * @brief setJointAccMax updates joint acceleration limits

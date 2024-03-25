@@ -32,7 +32,7 @@ public:
                  const std::vector<std::string>& contact_links,
                  const Eigen::VectorXd& torque_limits);
 
-    void update(const Eigen::VectorXd& x);
+    void update();
 
     /**
      * @brief setTorqueLimits to set new torque limits

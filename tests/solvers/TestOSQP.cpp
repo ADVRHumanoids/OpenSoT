@@ -495,7 +495,7 @@ TEST_F(testOSQPProblem, testContructor2Problems)
 
         cartesian_task->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        joint_constraints->update(Eigen::VectorXd(0));
+        joint_constraints->update();
 
         ASSERT_TRUE(sot.solve(dq));
         q = _model_ptr->sum(q, dq);
@@ -584,7 +584,7 @@ TEST_F(testiHQP, testContructor1Problem)
         _model_ptr->update();
 
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         EXPECT_TRUE(sot.solve(dq));
         sot.getObjective(0,obj_);

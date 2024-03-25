@@ -45,7 +45,7 @@ public:
 
     virtual ~SubConstraint(){}
 
-    virtual void update(const Eigen::VectorXd& x);
+    virtual void update();
 
 protected:
     Indices _subConstraintMap;

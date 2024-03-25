@@ -35,10 +35,10 @@ ConvexHull::ConvexHull(XBot::ModelInterface& robot,
     _bUpperBound.resize(links_in_contact.size());
     _bLowerBound.resize(links_in_contact.size());
     _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
-    this->update(Eigen::VectorXd(0));
+    this->update();
 }
 
-void ConvexHull::update(const Eigen::VectorXd &x) {
+void ConvexHull::update() {
 
     /************************ COMPUTING BOUNDS ****************************/
 

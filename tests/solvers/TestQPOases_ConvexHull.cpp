@@ -300,7 +300,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         com_task->update(Eigen::VectorXd(0));
         boundsConvexHull->log(logger);
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
@@ -337,7 +337,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     _model_ptr_com->setJointPosition(q);
     _model_ptr_com->update();
 
-    boundsConvexHull->update(Eigen::VectorXd(0));
+    boundsConvexHull->update();
     boundsConvexHull->log(logger);
     std::vector<Eigen::Vector3d> points;
     std::vector<Eigen::Vector3d> points_inner;
@@ -391,7 +391,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             com_task->update(q);
             boundsConvexHull->log(logger);
             postural_task->update(Eigen::VectorXd(0));
-            bounds->update(Eigen::VectorXd(0));
+            bounds->update();
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";

@@ -19,10 +19,10 @@ TorqueLimits::TorqueLimits(const XBot::ModelInterface &robot,
 
     _enabled_contacts.assign(_contact_links.size(), true);
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
-void TorqueLimits::update(const Eigen::VectorXd &x)
+void TorqueLimits::update()
 {
     _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);

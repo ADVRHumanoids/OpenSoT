@@ -71,7 +71,7 @@ TEST_F(TestSubConstraint, testSubBounds)
 
     OpenSoT::SubConstraint::Ptr sub_postural = this->_joint_limits%indices;
 
-    sub_postural->update(this->q);
+    sub_postural->update();
 
     std::cout<<"lower bound[:]: "<<this->_joint_limits->getLowerBound().transpose()<<std::endl;
     std::cout<<"lower bound[6:end]: "<<sub_postural->getbLowerBound().transpose()<<std::endl;
@@ -91,7 +91,7 @@ TEST_F(TestSubConstraint, testSubBounds)
 
     this->q = _model_ptr->generateRandomQ();
 
-    sub_postural->update(Eigen::VectorXd(0));
+    sub_postural->update();
     std::cout<<"lower bound[:]: "<<this->_joint_limits->getLowerBound().transpose()<<std::endl;
     std::cout<<"lower bound[6:end]: "<<sub_postural->getbLowerBound().transpose()<<std::endl;
 
@@ -115,7 +115,7 @@ TEST_F(TestSubConstraint, testSubInequalityConstraint)
 
     OpenSoT::SubConstraint::Ptr sub_vcom = this->_vcom_constraint%indices;
 
-    sub_vcom->update(Eigen::VectorXd(0));
+    sub_vcom->update();
 
     std::cout<<"lower bound[:]: "<<this->_vcom_constraint->getbLowerBound().transpose()<<std::endl;
     std::cout<<"lower bound[0:1]: "<<sub_vcom->getbLowerBound().transpose()<<std::endl;
@@ -137,7 +137,7 @@ TEST_F(TestSubConstraint, testSubInequalityConstraint)
 
     this->q = _model_ptr->generateRandomQ();
 
-    sub_vcom->update(Eigen::VectorXd(0));
+    sub_vcom->update();
     std::cout<<"update q..."<<std::endl;
 
     std::cout<<"lower bound[:]: "<<this->_vcom_constraint->getbLowerBound().transpose()<<std::endl;

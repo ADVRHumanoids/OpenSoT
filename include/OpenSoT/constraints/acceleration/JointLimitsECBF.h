@@ -72,7 +72,7 @@ namespace OpenSoT {
                             const Eigen::VectorXd &jointVelMax,
                             const Eigen::VectorXd &jointAccMax);
 
-                void update(const Eigen::VectorXd& x);
+                void update();
 
                 /**
                  * @brief setAlpha1 gain applied to joint position limits

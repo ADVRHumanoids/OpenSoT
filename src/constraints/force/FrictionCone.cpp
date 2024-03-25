@@ -55,7 +55,7 @@ namespace OpenSoT {
 
 
 
-       void FrictionCone::update(const Eigen::VectorXd &x)
+       void FrictionCone::update()
        {
 
        }
@@ -110,7 +110,7 @@ namespace OpenSoT {
            _internal_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
                    (constraint_list, wrench[0].getInputSize());
 
-           update(Eigen::VectorXd(0));
+           update();
        }
 
        FrictionCone::Ptr FrictionCones::getFrictionCone(const std::string& contact_name)
@@ -121,9 +121,9 @@ namespace OpenSoT {
                return NULL;
        }
 
-       void FrictionCones::update(const Eigen::VectorXd &x)
+       void FrictionCones::update()
        {
-           _internal_constraint->update(x);
+           _internal_constraint->update();
            generateBounds();
        }
 

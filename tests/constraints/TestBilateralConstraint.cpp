@@ -68,7 +68,7 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     Eigen::VectorXd oldbLowerBound = bilateral->getbLowerBound();
     Eigen::VectorXd oldbUpperBound = bilateral->getbUpperBound();
     Eigen::MatrixXd oldAineq = bilateral->getAineq();
-    bilateral->update(q_next);
+    bilateral->update();
     Eigen::VectorXd newbLowerBound = bilateral->getbLowerBound();
     Eigen::VectorXd newbUpperBound = bilateral->getbUpperBound();
     Eigen::MatrixXd newAineq = bilateral->getAineq();

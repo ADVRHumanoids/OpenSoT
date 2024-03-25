@@ -91,7 +91,7 @@ public:
      *  previously stored value
      * @param x the state vector.
      */
-    void update(const Eigen::VectorXd &x);
+    void update();
 
 
     /**

@@ -372,13 +372,13 @@
             @return the number of rows of A */
         virtual const unsigned int getTaskSize() const { return _A.rows(); }
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
             @param x variable state at the current step (input) */
         void update(const Vector_type &x) {
            
             
             for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
-                i != this->getConstraints().end(); ++i) (*i)->update(x);
+                i != this->getConstraints().end(); ++i) (*i)->update();
             this->_update(x);
             
             if(!_is_active){

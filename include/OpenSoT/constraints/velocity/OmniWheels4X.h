@@ -74,7 +74,7 @@ namespace OpenSoT {
             * @brief update the constraint
             * @param x state vector
             */
-           virtual void update(const Eigen::VectorXd &x);
+           virtual void update();
 
 
        private:

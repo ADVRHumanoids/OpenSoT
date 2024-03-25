@@ -31,7 +31,7 @@ namespace OpenSoT { namespace constraints { namespace force {
         
     private:
         
-        void update(const Eigen::VectorXd& x) override;
+        void update() override;
         
         const XBot::ModelInterface& _robot;
         std::vector<std::string> _contact_links;

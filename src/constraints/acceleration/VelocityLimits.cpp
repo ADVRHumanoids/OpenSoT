@@ -22,7 +22,7 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
                 ( _qdotmax - _qdot)/(_dT*_p),
                 ( _qdotmin - _qdot)/(_dT*_p),
                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
-    update(Eigen::VectorXd(0));
+    update();
 }
 
 OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelInterface& robot,
@@ -44,10 +44,10 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
                 ( _qdotmax - _qdot)/(_dT*_p),
                 ( _qdotmin - _qdot)/(_dT*_p),
                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
-    update(Eigen::VectorXd(0));
+    update();
 }
 
-void OpenSoT::constraints::acceleration::VelocityLimits::update(const Eigen::VectorXd &x)
+void OpenSoT::constraints::acceleration::VelocityLimits::update()
 {
     _robot.getJointVelocity(_qdot);
 
@@ -56,7 +56,7 @@ void OpenSoT::constraints::acceleration::VelocityLimits::update(const Eigen::Vec
                 ( _qdotmin - _qdot)/(_dT*_p)
                 );
 
-    _generic_constraint_internal->update(x);
+    _generic_constraint_internal->update();
 
     _Aineq = _generic_constraint_internal->getAineq();
     _bLowerBound = _generic_constraint_internal->getbLowerBound();

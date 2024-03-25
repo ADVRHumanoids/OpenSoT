@@ -142,7 +142,7 @@ using namespace OpenSoT::utils;
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
 
-            void update(const Eigen::VectorXd &x);
+            void update();
 
             void log(XBot::MatLogger2::Ptr logger) override;
 

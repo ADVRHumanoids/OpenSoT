@@ -54,7 +54,7 @@ protected:
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      _convexHull->update(Eigen::VectorXd(0));
+      _convexHull->update();
       _model_ptr->setJointPosition(_model_ptr->getNeutralQ());
       _model_ptr->update();
   }
@@ -129,7 +129,7 @@ TEST_F(testConvexHull, checkImplementation) {
 
     updateModel(q, _model_ptr);
     OpenSoT::constraints::velocity::ConvexHull localConvexHull(*(_model_ptr.get()), _links_in_contact, 0.00);
-    localConvexHull.update(Eigen::VectorXd(0));
+    localConvexHull.update();
 
     std::list<Eigen::Vector3d> points;
     std::vector<Eigen::Vector3d> ch;
@@ -283,7 +283,7 @@ TEST_F(testConvexHull, NoZeroRowsPreset) {
 
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
-        _convexHull->update(Eigen::VectorXd(0));
+        _convexHull->update();
         std::vector<Eigen::Vector3d> ch;
         _convexHull->getConvexHull(ch);
         Eigen::MatrixXd A_ch(_links_in_contact.size(),2);
@@ -315,7 +315,7 @@ TEST_F(testConvexHull, BoundsAreCorrect) {
 
 
     updateModel(q, _model_ptr);
-    _convexHull->update(Eigen::VectorXd(0));
+    _convexHull->update();
 
     // Get Vector of CH's points from coman
     std::list<Eigen::Vector3d> points;

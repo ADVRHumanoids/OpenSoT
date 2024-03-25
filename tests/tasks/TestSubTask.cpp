@@ -62,7 +62,7 @@ protected:
         _joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
         _postural->update(Eigen::VectorXd(0));
-        _joint_limits->update(Eigen::VectorXd(0));
+        _joint_limits->update();
 
 
     }

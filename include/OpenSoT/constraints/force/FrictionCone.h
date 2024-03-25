@@ -70,7 +70,7 @@
                              const friction_cone & mu);
 
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
                 void setFrictionCone(const friction_cone& frc);
 
@@ -101,7 +101,7 @@
 
                 FrictionCone::Ptr getFrictionCone(const std::string& contact_name);
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
             private:
                 std::map<std::string, FrictionCone::Ptr> _friction_cone_map;

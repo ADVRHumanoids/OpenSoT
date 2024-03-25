@@ -351,7 +351,7 @@ TEST_F(testWrench, testWrenchLim)
     OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
             std::make_shared<OpenSoT::constraints::force::WrenchLimits>
             ("wrench1", lowerLims, upperLims,wrench1);
-    wrench_lims->update(Eigen::VectorXd(0));
+    wrench_lims->update();
 
     std::vector<OpenSoT::AffineHelper> wrenches;
     wrenches.push_back(opt.getVariable("wrench1"));
@@ -363,7 +363,7 @@ TEST_F(testWrench, testWrenchLim)
     OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
             std::make_shared<OpenSoT::constraints::force::WrenchesLimits>
             (contacts, lowerLims, upperLims,wrenches);
-    wrenches_lims->update(Eigen::VectorXd(0));
+    wrenches_lims->update();
 
 
 }

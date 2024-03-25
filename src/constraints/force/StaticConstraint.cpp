@@ -11,10 +11,10 @@ OpenSoT::constraints::force::StaticConstraint::StaticConstraint(const XBot::Mode
     _forces(forces),
     _robot_torque(robot_torque)
 {
-    update(Eigen::VectorXd());
+    update();
 }
 
-void OpenSoT::constraints::force::StaticConstraint::update(const Eigen::VectorXd& x)
+void OpenSoT::constraints::force::StaticConstraint::update()
 {
     _constr.setZero(getXSize(), _robot.getActuatedNv());
     

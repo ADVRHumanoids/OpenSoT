@@ -286,7 +286,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     _model_ptr->update();
     l_arm_task->update(Eigen::VectorXd(0));
     postural_task->update(Eigen::VectorXd(0));
-    bounds->update(Eigen::VectorXd(0));
+    bounds->update();
 
     current_pose_y = l_arm_task->getActualPose();
     l_arm_task->getActualPose(current_pose);
@@ -423,7 +423,7 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
 
         l_arm_task->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         EXPECT_TRUE(sot->solve(dq));
         q = _model_ptr->sum(q, dq);
@@ -623,7 +623,7 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
     l_sole->update(Eigen::VectorXd(0));
     r_sole->update(Eigen::VectorXd(0));
     postural_task->update(Eigen::VectorXd(0));
-    bounds->update(Eigen::VectorXd(0));
+    bounds->update();
 
 
     if(!hasInitialError) {
@@ -721,7 +721,7 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
         l_sole->update(Eigen::VectorXd(0));
         r_sole->update(Eigen::VectorXd(0));
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         EXPECT_TRUE(sot->solve(dq));
         q = _model_ptr->sum(q, dq);
@@ -862,7 +862,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     _model_ptr->update();
 
     postural_task->update(Eigen::VectorXd(0));
-    bounds->update(Eigen::VectorXd(0));
+    bounds->update();
 
     if(!hasInitialError) {
         /**************************************************
@@ -945,7 +945,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         _model_ptr->update();
 
         postural_task->update(Eigen::VectorXd(0));
-        bounds->update(Eigen::VectorXd(0));
+        bounds->update();
 
         EXPECT_TRUE(sot->solve(dq));
 

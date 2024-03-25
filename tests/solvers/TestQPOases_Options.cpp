@@ -118,7 +118,7 @@ public:
     {
         _cartesian_task_0->update(Eigen::VectorXd(0));
         _postural_task->update(Eigen::VectorXd(0));
-        _joint_constraints->update(Eigen::VectorXd(0));
+        _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" ";
     }
@@ -295,7 +295,7 @@ public:
         _cartesian_task_0->update(Eigen::VectorXd(0));
         _cartesian_task_1->update(Eigen::VectorXd(0));
         _postural_task->update(Eigen::VectorXd(0));
-        _joint_constraints->update(Eigen::VectorXd(0));
+        _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
     }
@@ -318,21 +318,21 @@ public:
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
         Eigen::VectorXd _q = _model_ptr->getNeutralQ();
-        _q[_model_ptr->getDofIndex("RHipSag") +1] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")+1] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")+1] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")+1] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")+1] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")+1] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")+1] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")+1] = 10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")+1] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")+1] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")+1] = -10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")+1] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
         return _q;
     }
 
@@ -490,7 +490,7 @@ public:
     {
         _cartesian_tasks->update(Eigen::VectorXd(0));
         _postural_task->update(Eigen::VectorXd(0));
-        _joint_constraints->update(Eigen::VectorXd(0));
+        _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
     }
@@ -514,21 +514,21 @@ public:
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
         Eigen::VectorXd _q = _model_ptr->getNeutralQ();
-        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
         return _q;
     }
 

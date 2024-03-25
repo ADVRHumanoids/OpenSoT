@@ -54,7 +54,7 @@ TEST_F(testLProblem, testSingleLPProblem)
     lb = -2*Eigen::VectorXd::Ones(4);
     ub = 2.*Eigen::VectorXd::Ones(4);
     OpenSoT::constraints::GenericConstraint::Ptr constr(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 4));
-    constr->update(Eigen::VectorXd(4));
+    constr->update();
     std::cout<<"lb: "<<constr->getLowerBound().transpose()<<std::endl;
     std::cout<<"ub: "<<constr->getUpperBound().transpose()<<std::endl;
 
@@ -231,7 +231,7 @@ TEST_F(testLProblem, testMILPProblem)
         lb.setZero(3);
         ub<<1e30, 1e30, 1.;
         OpenSoT::constraints::GenericConstraint::Ptr bounds(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 3));
-        bounds->update(Eigen::VectorXd(1));
+        bounds->update();
 
         Eigen::MatrixXd Ac_CBC(1,3);
         Ac_CBC<<1.,1.,1;
@@ -243,7 +243,7 @@ TEST_F(testLProblem, testMILPProblem)
         OpenSoT::constraints::GenericConstraint::Ptr constr(
                                  new OpenSoT::constraints::GenericConstraint("constraint", var, uA_CBC, lA_CBC,
                                                                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
-        constr->update(Eigen::VectorXd(1));
+        constr->update();
 
         /* _autostack */
         OpenSoT::AutoStack::Ptr _autostack;

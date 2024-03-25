@@ -87,7 +87,7 @@ TEST_F(testAggregated, AggregatedWorks) {
 
     _model_ptr->setJointPosition(q_next);
     _model_ptr->update();
-    aggregated->update(Eigen::VectorXd(0));
+    aggregated->update();
 
     Eigen::VectorXd newLowerBound = aggregated->getLowerBound();
     Eigen::VectorXd newUpperBound = aggregated->getUpperBound();

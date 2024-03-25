@@ -93,7 +93,7 @@ AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::Const
                        OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
         }
     }
-    update(Eigen::VectorXd(1));
+    update();
 }
 
 AffineConstraint::~AffineConstraint()
@@ -101,10 +101,10 @@ AffineConstraint::~AffineConstraint()
 
 }
 
-void AffineConstraint::update(const Eigen::VectorXd& x)
+void AffineConstraint::update()
 {
     //1. Update internal constraint
-    _internal_constraint->update(x);
+    _internal_constraint->update();
 
     //2. Update internal generic constraint
     if(_internal_constraint->isBound())
@@ -112,7 +112,7 @@ void AffineConstraint::update(const Eigen::VectorXd& x)
         _internal_generic_constraint->setBounds(
                     _internal_constraint->getUpperBound(),
                     _internal_constraint->getLowerBound());
-        _internal_generic_constraint->update(x);
+        _internal_generic_constraint->update();
     }
     else
     {
@@ -123,7 +123,7 @@ void AffineConstraint::update(const Eigen::VectorXd& x)
                     _constraint_affine,
                     _internal_constraint->getbeq(),
                     _internal_constraint->getbeq());
-            _internal_constraint->update(x);
+            _internal_constraint->update();
         }
         else
         {
@@ -132,7 +132,7 @@ void AffineConstraint::update(const Eigen::VectorXd& x)
                     _constraint_affine,
                     _internal_constraint->getbUpperBound(),
                     _internal_constraint->getbLowerBound());
-            _internal_constraint->update(x);
+            _internal_constraint->update();
         }
     }
 

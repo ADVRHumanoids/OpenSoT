@@ -60,7 +60,7 @@
                                   const double dT,
                                   const OpenSoT::tasks::velocity::CoM::Ptr& task);
 
-                virtual void update(const Eigen::VectorXd &x);
+                virtual void update();
 
                 /**
                  * @brief getVelocityLimits

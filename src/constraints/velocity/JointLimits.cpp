@@ -31,10 +31,10 @@ JointLimits::JointLimits(   const XBot::ModelInterface& robot,
 
 
     /* calling update to generate bounds */
-    JointLimits::update(Eigen::VectorXd(0));
+    JointLimits::update();
 }
 
-void JointLimits::update(const Eigen::VectorXd& x)
+void JointLimits::update()
 {
     _robot.difference(_robot.getJointPosition(),
                       _robot.getNeutralQ(),

@@ -85,7 +85,7 @@ TEST_F(testAffineUtils, testConstraintsToAffine)
     this->model_ptr->setJointPosition(this->q);
     this->model_ptr->update();
 
-    affine_constraint->update(Eigen::VectorXd(0));
+    affine_constraint->update();
     EXPECT_EQ(affine_constraint->getAineq().rows(), constraint->getAineq().rows());
     EXPECT_EQ(affine_constraint->getAineq().cols(), constraint->getAineq().cols() + slack_size);
     EXPECT_EQ(affine_constraint->getbLowerBound(), constraint->getbLowerBound());
@@ -121,8 +121,8 @@ TEST_F(testAffineUtils, testBoundsToAffine)
 
     //4. Update bound
     bound->setVelocityLimits(M_PI/4.);
-    bound->update(Eigen::VectorXd(0));
-    affine_bound->update(Eigen::VectorXd(0));
+    bound->update();
+    affine_bound->update();
 
     EXPECT_EQ(affine_bound->getAineq().rows(), bound->getLowerBound().rows());
     EXPECT_EQ(affine_bound->getAineq().cols(), bound->getLowerBound().rows() + slack_size);

@@ -63,7 +63,7 @@ JointLimitsViability::JointLimitsViability(XBot::ModelInterface& robot,
                 -_jointAccMax,
                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
 
-    update(Eigen::VectorXd(1));
+    update();
 }
 
 void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
@@ -76,7 +76,7 @@ void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
     logger->add("_ddq_UB_via", _ddq_UB_via);
 }
 
-void JointLimitsViability::update(const Eigen::VectorXd &x)
+void JointLimitsViability::update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
@@ -87,7 +87,7 @@ void JointLimitsViability::update(const Eigen::VectorXd &x)
 
     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
 
-    _generic_constraint_internal->update(x);
+    _generic_constraint_internal->update();
 
     _Aineq = _generic_constraint_internal->getAineq();
     _bLowerBound = _generic_constraint_internal->getbLowerBound();

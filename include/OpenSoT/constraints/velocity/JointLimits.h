@@ -54,7 +54,7 @@
                             const Eigen::VectorXd &jointBoundMin,
                             const double boundScaling = 1.0);
 
-                void update(const Eigen::VectorXd &x);
+                void update();
                 void setBoundScaling(const double boundScaling);
             };
         }

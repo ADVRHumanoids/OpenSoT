@@ -89,7 +89,7 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
     _aggregated_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
 WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
@@ -108,7 +108,7 @@ WrenchesLimits::WrenchesLimits(const std::vector<std::string>& contact_name,
     _aggregated_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
 WrenchesLimits::WrenchesLimits(const std::map<std::string, WrenchLimits::Ptr>& wrench_lims_constraints,
@@ -125,7 +125,7 @@ WrenchesLimits::WrenchesLimits(const std::map<std::string, WrenchLimits::Ptr>& w
     _aggregated_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
 WrenchLimits::Ptr WrenchesLimits::getWrenchLimits(const std::string& contact_name)
@@ -136,9 +136,9 @@ WrenchLimits::Ptr WrenchesLimits::getWrenchLimits(const std::string& contact_nam
         return NULL;
 }
 
-void WrenchesLimits::update(const Eigen::VectorXd &x)
+void WrenchesLimits::update()
 {
-    _aggregated_constraint->update(x);
+    _aggregated_constraint->update();
     generateBounds();
 }
 

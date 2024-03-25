@@ -56,7 +56,7 @@ public:
                  const Eigen::Vector2d& Y_Lims,
                  const double& mu);
 
-    void update(const Eigen::VectorXd &x);
+    void update();
 
     /**
      * @brief setMu update friction coefficient
@@ -110,7 +110,7 @@ public:
 
     NormalTorque::Ptr getNormalTorque(const std::string& contact_name);
 
-    void update(const Eigen::VectorXd &x);
+    void update();
 
 private:
     std::map<std::string, NormalTorque::Ptr> _normal_torque_map;
