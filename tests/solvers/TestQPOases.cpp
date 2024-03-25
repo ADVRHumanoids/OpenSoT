@@ -422,7 +422,7 @@ TEST_F(testQPOasesProblem, testTask)
 
     OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr);
     postural_task.setReference(q_ref);
-    postural_task.update(Eigen::VectorXd(0));
+    postural_task.update();
 
     Eigen::MatrixXd H(_model_ptr->getNv(),_model_ptr->getNv()); H.setIdentity();
     Eigen::VectorXd g(-1.0*postural_task.getb());
@@ -458,7 +458,7 @@ TEST_F(testQPOasesTask, testQPOasesTask)
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
                 new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->setReference(q_ref);
-    postural_task->update(Eigen::VectorXd(0));
+    postural_task->update();
     std::cout<<"error: "<<postural_task->getb()<<std::endl;
 
 //    OpenSoT::solvers::QPOasesBackEnd qp_postural_problem(postural_task->getXSize(), 0,
@@ -527,7 +527,7 @@ TEST_F(testQPOasesTask, testProblemWithConstraint)
             _model_ptr->setJointPosition(q);
             _model_ptr->update();
 
-            postural_task->update(Eigen::VectorXd(0));
+            postural_task->update();
 
             qp_postural_problem->updateBounds(constraint->getLowerBound(), constraint->getUpperBound());
             qp_postural_problem->updateTask(postural_task->getA(), -1.0*postural_task->getb());
@@ -639,7 +639,7 @@ TEST_F(testiHQP, testContructor1Problem)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(Eigen::VectorXd(0));
+        postural_task->update();
         bounds->update();
 
         EXPECT_TRUE(sot.solve(dq));
@@ -715,7 +715,7 @@ TEST_F(testQPOasesTask, testCoMTask)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        com_task->update(Eigen::VectorXd(0));
+        com_task->update();
 
         qp_CoM_problem->updateProblem(com_task->getA().transpose()*com_task->getA(), -1.0*com_task->getA().transpose()*com_task->getb(),
                                           constraint->getAineq(), constraint->getbLowerBound(), constraint->getbUpperBound(),
@@ -749,7 +749,7 @@ TEST_F(testQPOasesTask, testCartesian)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", *_model_ptr,
                 "l_wrist", "Waist"));
 
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
     Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
     std::cout<<"T_actual: \n"<<T_actual<<std::endl;
@@ -760,7 +760,7 @@ TEST_F(testQPOasesTask, testCartesian)
     std::cout<<"T_ref: \n"<<T_ref<<std::endl;
 
     cartesian_task->setReference(T_ref);
-    cartesian_task->update(q);
+    cartesian_task->update();
 
 //    OpenSoT::solvers::QPOasesBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
     OpenSoT::solvers::BackEnd::Ptr qp_cartesian_problem = OpenSoT::solvers::BackEndFactory(
@@ -776,7 +776,7 @@ TEST_F(testQPOasesTask, testCartesian)
         _model_ptr->update();
 
 
-        cartesian_task->update(q);
+        cartesian_task->update();
         qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
         ASSERT_TRUE(qp_cartesian_problem->solve());
         Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
@@ -812,7 +812,7 @@ TEST_F(testQPOasesTask, testEpsRegularisation)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", *_model_ptr,
                 "l_wrist", "Waist"));
 
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
     Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
     std::cout<<"T_actual: \n"<<T_actual<<std::endl;
@@ -823,7 +823,7 @@ TEST_F(testQPOasesTask, testEpsRegularisation)
     std::cout<<"T_ref: \n"<<T_ref<<std::endl;
 
     cartesian_task->setReference(T_ref);
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
 //    OpenSoT::solvers::QPOasesBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0, cartesian_task->getHessianAtype());
     OpenSoT::solvers::BackEnd::Ptr qp_cartesian_problem = OpenSoT::solvers::BackEndFactory(
@@ -846,7 +846,7 @@ TEST_F(testQPOasesTask, testEpsRegularisation)
         _model_ptr->update();
 
 
-        cartesian_task->update(q);
+        cartesian_task->update();
         qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
         ASSERT_TRUE(qp_cartesian_problem->solve());
         Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
@@ -937,8 +937,8 @@ TEST_F(testiHQP, testContructor2Problems)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        cartesian_task->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        cartesian_task->update();
+        postural_task->update();
         joint_constraints->update();
 
         ASSERT_TRUE(sot.solve(dq));
@@ -993,7 +993,7 @@ TEST_F(testiHQP, testSingleTask)
 
     OpenSoT::AutoStack::Ptr autostack(new OpenSoT::AutoStack(postural));
     autostack = autostack<<joint_limits<<vel_limits;
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     OpenSoT::solvers::iHQP::Ptr solver;
     solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e8);
@@ -1001,7 +1001,7 @@ TEST_F(testiHQP, testSingleTask)
     Eigen::VectorXd x(_model_ptr->getNv());
     EXPECT_TRUE(solver->solve(x));
 
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     solver.reset();
     solver = std::make_shared<OpenSoT::solvers::iHQP>(autostack->getStack(), autostack->getBounds(), 1e8);
@@ -1050,7 +1050,7 @@ TEST_F(testiHQP, testMinEffort)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        joint_space_task->update(Eigen::VectorXd(0));
+        joint_space_task->update();
         bounds->update();
 
         Eigen::VectorXd old_gradient = oldGravityGradient.computeMinEffort(q);

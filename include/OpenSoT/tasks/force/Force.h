@@ -57,7 +57,7 @@ namespace OpenSoT {
             const std::string& getDistalLink() const;
             const std::string& getBaseLink() const;
         protected:
-            virtual void _update(const Eigen::VectorXd& x);    
+            virtual void _update();
         private:
             std::string _distal_link, _base_link;
             OpenSoT::tasks::MinimizeVariable::Ptr _min_var;
@@ -80,7 +80,7 @@ namespace OpenSoT {
         private:
             std::map<std::string, Wrench::Ptr> wrench_tasks;
             OpenSoT::tasks::Aggregated::Ptr _aggregated_task;
-            virtual void _update(const Eigen::VectorXd& x);
+            virtual void _update();
 
 
         };

@@ -11,12 +11,12 @@ OpenSoT::tasks::velocity::Contact::Contact(std::string task_id,
     _model(model),
     _K(contact_matrix)
 {
-    _update(Eigen::VectorXd());
+    _update();
     _W.setIdentity(getTaskSize(), getTaskSize());
 }
 
 
-void OpenSoT::tasks::velocity::Contact::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::velocity::Contact::_update()
 {
     /* Body jacobian */
     _model.getJacobian(_distal_link, _Jtmp);

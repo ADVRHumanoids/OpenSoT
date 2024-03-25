@@ -302,7 +302,7 @@ public:
                     (postural)<<joint_limits<<vel_limits;
 
 
-        auto_stack->update(Eigen::VectorXd(0));
+        auto_stack->update();
 
         solver.reset(new OpenSoT::solvers::eHQP(auto_stack->getStack()));
 
@@ -323,7 +323,7 @@ public:
 #if USE_INERTIA_MATRIX
         setInertiaPostureTask();
 #endif
-        auto_stack->update(Eigen::VectorXd(0));
+        auto_stack->update();
 
     }
 

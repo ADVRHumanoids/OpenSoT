@@ -114,9 +114,9 @@ TEST_F(testManipolability, testManipolabilityTask)
         _model_ptr->update();
 
 
-        cartesian_task->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
-        manipulability_task->update(Eigen::VectorXd(0));
+        cartesian_task->update();
+        postural_task->update();
+        manipulability_task->update();
         joint_constraints->update();
 
         sot.solve(dq);
@@ -171,9 +171,9 @@ TEST_F(testManipolability, testManipolabilityTask)
         _model_ptr->update();
 
 
-        cartesian_task->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
-        manipulability_task->update(Eigen::VectorXd(0));
+        cartesian_task->update();
+        postural_task->update();
+        manipulability_task->update();
         joint_constraints->update();
 
         sot_manip.solve(dq);

@@ -52,7 +52,6 @@
                 
                 virtual void _log(XBot::MatLogger2::Ptr logger);
                 
-                AffineHelper _wrenches;
                 AffineHelper _com_task;
                 
                 XBot::ModelInterface& _robot;
@@ -108,14 +107,7 @@
                 Eigen::Vector3d velocityError;
                 Eigen::Vector3d angularMomentumError;
 
-                /**
-                 * @brief CoM
-                 * @param x the initial configuration of the robot
-                 * @param robot the robot model, with floating base link set on the support foot
-                 */
-                CoM(const Eigen::VectorXd& x, 
-                    std::vector<std::string>& links_in_contact,
-                    XBot::ModelInterface& robot);
+
                 
                 
                 CoM(std::vector<AffineHelper> wrenches,
@@ -124,7 +116,7 @@
 
                 ~CoM();
 
-                void _update(const Eigen::VectorXd& x);
+                void _update();
 
 
                 void setLinearReference(const Eigen::Vector3d& desiredPosition);

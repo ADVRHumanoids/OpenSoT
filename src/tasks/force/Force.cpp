@@ -14,12 +14,12 @@ Wrench::Wrench(const std::string& id,
     Eigen::VectorXd zeros; zeros.setZero(wrench.getOutputSize());
     _min_var->setReference(zeros);
     _hessianType = OpenSoT::HessianType::HST_SEMIDEF;
-    _update(Eigen::VectorXd(0));
+    _update();
 }
 
-void Wrench::_update(const Eigen::VectorXd &x)
+void Wrench::_update()
 {
-    _min_var->update(x);
+    _min_var->update();
 
     _A = _min_var->getA();
     _b = _min_var->getb();
@@ -68,7 +68,7 @@ Wrenches::Wrenches(const std::string& id,
     _aggregated_task = std::make_shared<OpenSoT::tasks::Aggregated>
             (task_list, wrenches[0].getInputSize());
 
-    _update(Eigen::VectorXd(0));
+    _update();
 }
 
 Wrench::Ptr Wrenches::getWrenchTask(const std::string& contact_name)
@@ -79,9 +79,9 @@ Wrench::Ptr Wrenches::getWrenchTask(const std::string& contact_name)
         return NULL;
 }
 
-void Wrenches::_update(const Eigen::VectorXd& x)
+void Wrenches::_update()
 {
-    _aggregated_task->update(x);
+    _aggregated_task->update();
     _A = _aggregated_task->getA();
     _b = _aggregated_task->getb();
 }

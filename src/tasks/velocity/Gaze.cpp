@@ -15,7 +15,7 @@ Gaze::Gaze(std::string task_id,
     _robot(robot), _tmp_vector(3), _bl_T_gaze_kdl(),
     _gaze_goal()
 {
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 }
 
 Gaze::~Gaze()
@@ -99,9 +99,9 @@ const unsigned int Gaze::getTaskSize() const
     return _subtask->getTaskSize();
 }
 
-void Gaze::_update(const Eigen::VectorXd &x)
+void Gaze::_update()
 {
-    _subtask->update(Eigen::VectorXd(0));
+    _subtask->update();
     this->_A = _subtask->getA();
     this->_b = _subtask->getb();
     this->_hessianType = _subtask->getHessianAtype();

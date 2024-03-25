@@ -41,7 +41,7 @@ Cartesian::Cartesian(const std::string task_id,
     _Kp.setIdentity();
     _Kd.setIdentity();
     
-    update(Eigen::VectorXd(1));
+    update();
 
     setWeight(Eigen::MatrixXd::Identity(6,6));
 
@@ -81,7 +81,7 @@ Cartesian::Cartesian(const std::string task_id,
     _Kp.setIdentity();
     _Kd.setIdentity();
     
-    update(Eigen::VectorXd(1));
+    update();
     
     setWeight(Eigen::MatrixXd::Identity(6,6));
     
@@ -124,7 +124,7 @@ const double Cartesian::getOrientationErrorGain() const
 }
 
 
-void Cartesian::_update(const Eigen::VectorXd& x)
+void Cartesian::_update()
 {
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;

@@ -22,13 +22,10 @@ JointAdmittance::JointAdmittance(XBot::ModelInterface &robot, XBot::ModelInterfa
     _h.setZero(this->getXSize());
     _qdot_desired.setZero(this->getXSize());
 
-
-    _model.getJointPosition(_q);
-
-    _update(Eigen::VectorXd(0));
+    _update();
 }
 
-void JointAdmittance::_update(const Eigen::VectorXd &x)
+void JointAdmittance::_update()
 {
     _robot.getJointEffort(_tau);
     _robot.computeNonlinearTerm(_h);
@@ -43,7 +40,7 @@ void JointAdmittance::_update(const Eigen::VectorXd &x)
     if(_model.isFloatingBase())
         _qdot_desired.head(6).setZero();
 
-    Postural::_update(Eigen::VectorXd(0));
+    Postural::_update();
 }
 
 void JointAdmittance::setJointCompliance(const Eigen::MatrixXd &C)

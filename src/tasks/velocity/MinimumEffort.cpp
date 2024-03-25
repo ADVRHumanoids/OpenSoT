@@ -40,7 +40,7 @@ MinimumEffort::MinimumEffort(const XBot::ModelInterface& robot_model, const doub
     _deltas.resize(_model.getNv());
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 }
 
 MinimumEffort::~MinimumEffort()
@@ -48,7 +48,7 @@ MinimumEffort::~MinimumEffort()
 
 }
 
-void MinimumEffort::_update(const Eigen::VectorXd &x) {
+void MinimumEffort::_update() {
     _q = _model.getJointPosition();
 
     /************************* COMPUTING TASK *****************************/

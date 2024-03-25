@@ -54,7 +54,7 @@ namespace OpenSoT {
            Eigen::MatrixXd _Mom;
            Eigen::Matrix3d _K;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
            std::string _base_link;
            std::string _distal_link;

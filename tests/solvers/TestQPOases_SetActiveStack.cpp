@@ -67,47 +67,47 @@ TEST_F(testActivateStack, test_deactivate_task)
 
     //1) Test setActive with postural task
     OpenSoT::tasks::velocity::Postural::Ptr taskA(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
-    taskA->update(Eigen::VectorXd(0));
+    taskA->update();
     Eigen::MatrixXd JA = taskA->getA();
 
     //here we deactivate the task
     taskA->setActive(false);
-    taskA->update(Eigen::VectorXd(0));
+    taskA->update();
 
     EXPECT_TRUE(taskA->getA() == Eigen::MatrixXd::Zero(JA.rows(), JA.cols()));
 
     //here we reactivate the task
     taskA->setActive(true);
-    taskA->update(Eigen::VectorXd(0));
+    taskA->update();
 
     EXPECT_TRUE(taskA->getA() == JA);
 
     //2) Test setActive with Cartesian task
     OpenSoT::tasks::velocity::Cartesian::Ptr taskB(new OpenSoT::tasks::velocity::Cartesian("foo", *_model_ptr,
                                                                                            "l_sole", "Waist"));
-    taskB->update(Eigen::VectorXd(0));
+    taskB->update();
     Eigen::MatrixXd JB = taskB->getA();
 
     //here we deactivate the task
     taskB->setActive(false);
-    taskB->update(Eigen::VectorXd(0));
+    taskB->update();
 
     EXPECT_TRUE(taskB->getA() == Eigen::MatrixXd::Zero(JB.rows(), JB.cols()));
 
     //here we reactivate the task
     taskB->setActive(true);
-    taskB->update(Eigen::VectorXd(0));
+    taskB->update();
 
     EXPECT_TRUE(taskB->getA() == JB);
 
     //3) Test setActive with postural + Cartesian tasks
     OpenSoT::tasks::Aggregated::Ptr taskAB = (taskA + taskB);
-    taskAB->update(Eigen::VectorXd(0));
+    taskAB->update();
     Eigen::MatrixXd JAB = taskAB->getA();
 
     //here we deactivate the postural task
     taskA->setActive(false);
-    taskAB->update(Eigen::VectorXd(0));
+    taskAB->update();
 
     EXPECT_TRUE(taskAB->getA().block(0,0,JA.rows(),JA.cols()) == Eigen::MatrixXd::Zero(JA.rows(), JA.cols()));
     EXPECT_TRUE(taskAB->getA().block(JA.rows(),0,JB.rows(),JA.cols()) == JB);
@@ -115,7 +115,7 @@ TEST_F(testActivateStack, test_deactivate_task)
     //here we reactivate the postural task and we deactivate the Cartesian task
     taskA->setActive(true);
     taskB->setActive(false);
-    taskAB->update(Eigen::VectorXd(0));
+    taskAB->update();
 
     EXPECT_TRUE(taskAB->getA().block(0,0,JA.rows(),JA.cols()) == JA);
     EXPECT_TRUE(taskAB->getA().block(JA.rows(),0,JB.rows(),JA.cols()) == Eigen::MatrixXd::Zero(JB.rows(), JB.cols()));
@@ -123,14 +123,14 @@ TEST_F(testActivateStack, test_deactivate_task)
     //here both tasks are active
     taskA->setActive(true);
     taskB->setActive(true);
-    taskAB->update(Eigen::VectorXd(0));
+    taskAB->update();
 
     EXPECT_TRUE(taskAB->getA() == JAB);
 
     //here both tasks are not active
     taskA->setActive(false);
     taskB->setActive(false);
-    taskAB->update(Eigen::VectorXd(0));
+    taskAB->update();
 
     EXPECT_TRUE(taskAB->getA() == Eigen::MatrixXd::Zero(JA.rows() + JB.rows(), JB.cols()));
 
@@ -138,24 +138,24 @@ TEST_F(testActivateStack, test_deactivate_task)
     taskA->setActive(true);
     taskB->setActive(true);
     taskAB->setActive(false);
-    taskAB->update(Eigen::VectorXd(0));
+    taskAB->update();
 
     EXPECT_TRUE(taskAB->getA() == Eigen::MatrixXd::Zero(JA.rows() + JB.rows(), JB.cols()));
 
     //4)Check  Cartesian task with q update
     taskB->setActive(false);
-    taskB->update(Eigen::VectorXd(0));
+    taskB->update();
 
     q = _model_ptr->generateRandomQ();
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    taskB->update(Eigen::VectorXd(0));
+    taskB->update();
     EXPECT_TRUE(taskB->getA() == Eigen::MatrixXd::Zero(JB.rows(), JB.cols()));
 
     //The Jacobian is changed wrt the previous q!
     taskB->setActive(true);
-    taskB->update(Eigen::VectorXd(0));
+    taskB->update();
     EXPECT_FALSE(taskB->getA() == JB);
 
 
@@ -187,7 +187,7 @@ TEST_F(testActivateStack, test_deactivate_stack)
             autostack = ((left_arm)/
                      (postural)) << joint_limits;
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         OpenSoT::solvers::iHQP sot(autostack->getStack(), autostack->getBounds());
 
@@ -214,7 +214,7 @@ TEST_F(testActivateStack, test_deactivate_stack)
             _model_ptr->setJointPosition(q);
             _model_ptr->update();
 
-            autostack->update(Eigen::VectorXd(0));
+            autostack->update();
 
             ASSERT_TRUE(sot.solve(dq));
 

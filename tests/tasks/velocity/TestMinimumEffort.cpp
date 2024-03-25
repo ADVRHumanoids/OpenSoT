@@ -79,7 +79,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
     OpenSoT::tasks::velocity::MinimumEffort::Ptr minimumEffort;
     minimumEffort.reset(new OpenSoT::tasks::velocity::MinimumEffort(*_model_ptr));
-    minimumEffort->update(Eigen::VectorXd(0));
+    minimumEffort->update();
 
 
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack stack;
@@ -125,7 +125,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        minimumEffort->update(Eigen::VectorXd(0));
+        minimumEffort->update();
         double old_effort = minimumEffort->computeEffort();
 
 
@@ -151,7 +151,7 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
 
 
-        minimumEffort->update(Eigen::VectorXd(0));
+        minimumEffort->update();
         EXPECT_LE(minimumEffort->computeEffort(), old_effort);
         std::cout << "Effort at step" << i << ": " << minimumEffort->computeEffort() << std::endl;
 

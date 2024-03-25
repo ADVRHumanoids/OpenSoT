@@ -284,8 +284,8 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
     q = getGoodInitialPosition(_model_ptr);
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    l_arm_task->update(Eigen::VectorXd(0));
-    postural_task->update(Eigen::VectorXd(0));
+    l_arm_task->update();
+    postural_task->update();
     bounds->update();
 
     current_pose_y = l_arm_task->getActualPose();
@@ -421,8 +421,8 @@ TEST_P(testQPOases_CartesianFF, testCartesianFF)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        l_arm_task->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        l_arm_task->update();
+        postural_task->update();
         bounds->update();
 
         EXPECT_TRUE(sot->solve(dq));
@@ -619,10 +619,10 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    com->update(Eigen::VectorXd(0));
-    l_sole->update(Eigen::VectorXd(0));
-    r_sole->update(Eigen::VectorXd(0));
-    postural_task->update(Eigen::VectorXd(0));
+    com->update();
+    l_sole->update();
+    r_sole->update();
+    postural_task->update();
     bounds->update();
 
 
@@ -706,7 +706,7 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
         // initializing previous norm
         if(previous_norm < 0)
         {
-            com->update(Eigen::VectorXd(1));
+            com->update();
             previous_norm = sqrt(com->getb().squaredNorm());
         }
 
@@ -717,10 +717,10 @@ std::cout<<"floating_base_pose:\n"<<floating_base_pose.matrix()<<std::endl;
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        com->update(Eigen::VectorXd(0));
-        l_sole->update(Eigen::VectorXd(0));
-        r_sole->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        com->update();
+        l_sole->update();
+        r_sole->update();
+        postural_task->update();
         bounds->update();
 
         EXPECT_TRUE(sot->solve(dq));
@@ -861,7 +861,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    postural_task->update(Eigen::VectorXd(0));
+    postural_task->update();
     bounds->update();
 
     if(!hasInitialError) {
@@ -944,7 +944,7 @@ TEST_P(testQPOases_CoMAndPosturalFF, testPosturalFF)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(Eigen::VectorXd(0));
+        postural_task->update();
         bounds->update();
 
         EXPECT_TRUE(sot->solve(dq));

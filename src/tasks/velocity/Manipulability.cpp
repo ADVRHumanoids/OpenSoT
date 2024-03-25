@@ -23,7 +23,7 @@ Manipulability::Manipulability(const XBot::ModelInterface& robot_model,
     _deltas.resize(_model.getNv());
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 
 }
 
@@ -47,7 +47,7 @@ Manipulability::Manipulability(const XBot::ModelInterface& robot_model,
 
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 }
 
 Manipulability::~Manipulability()
@@ -55,7 +55,7 @@ Manipulability::~Manipulability()
 
 }
 
-void Manipulability::_update(const Eigen::VectorXd &x) {
+void Manipulability::_update() {
 
     _model.getJointPosition(_q);
 

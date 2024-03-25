@@ -16,10 +16,10 @@ OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::
     _enabled_contacts.assign(_contact_links.size(), true);
     _W.setIdentity(6,6);
     _hessianType = OpenSoT::HessianType::HST_SEMIDEF;
-    update(_h);
+    update();
 }
 
-void OpenSoT::tasks::acceleration::DynamicFeasibility::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::acceleration::DynamicFeasibility::_update()
 {
     _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);

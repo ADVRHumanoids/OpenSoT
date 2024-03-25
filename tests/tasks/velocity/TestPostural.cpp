@@ -74,14 +74,14 @@ TEST_F(testPosturalTask, testPosturalTask_)
     _model_ptr->update();
 
     postural.setReference(q_ref);
-    postural.update(Eigen::VectorXd(0));
+    postural.update();
     EXPECT_TRUE(postural.getb() == postural.getLambda()*_model_ptr->difference(q_ref, q));
 
     for(unsigned int i = 0; i < 100; ++i)
     {
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
-        postural.update(q);
+        postural.update();
         Eigen::VectorXd qq = postural.getb();
         q = _model_ptr->sum(q, qq);
     }
@@ -127,7 +127,7 @@ TEST_F(testPosturalTask, testPosturalTaskWithJointLimits_)
     Eigen::VectorXd old_UpperBound = bound->getUpperBound();
     _model_ptr->setJointPosition(q_next);
     _model_ptr->update();
-    postural->update(q_next);
+    postural->update();
     Eigen::VectorXd new_b = postural->getb();
     Eigen::VectorXd new_LowerBound = bound->getLowerBound();
     Eigen::VectorXd new_UpperBound = bound->getUpperBound();
@@ -170,7 +170,7 @@ TEST_F(testPosturalTask, testReset)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    postural.update(Eigen::VectorXd(0));
+    postural.update();
 
     actual_q = postural.getActualPositions();
     std::cout<<"actual_q: \n"<<actual_q<<std::endl;

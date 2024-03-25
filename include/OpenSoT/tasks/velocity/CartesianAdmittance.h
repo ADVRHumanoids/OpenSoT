@@ -421,7 +421,7 @@ namespace OpenSoT {
            Eigen::Vector6d _deadzone;
            std::vector<double> _tmp;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
            SecondOrderFilterArray<double> _filter;
 

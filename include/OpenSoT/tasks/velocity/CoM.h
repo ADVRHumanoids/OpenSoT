@@ -69,7 +69,7 @@
 
                 ~CoM();
 
-                virtual void _update(const Eigen::VectorXd& x);
+                virtual void _update();
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.

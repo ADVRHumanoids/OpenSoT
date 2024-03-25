@@ -45,7 +45,7 @@ namespace OpenSoT{
                         const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd::Identity(6,6), 
                         const Eigen::Affine3d& desired_contact_pose = Eigen::Affine3d::Identity() );
                 ~Contact();
-                virtual void _update(const Eigen::VectorXd& x);
+                virtual void _update();
 
                 void setLinkInContact(const std::string link_in_contact);
                 const std::string& getLinkInContact() const;

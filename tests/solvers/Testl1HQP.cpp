@@ -78,7 +78,7 @@ TEST_F(testl1HQP, testContructor)
             std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
     OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM)<<joint_limits;
-    stack->update(Eigen::VectorXd(0));
+    stack->update();
 
     OpenSoT::solvers::l1HQP::Ptr l1_solver =
             std::make_shared<OpenSoT::solvers::l1HQP>(*stack);
@@ -137,7 +137,7 @@ TEST_F(testl1HQP, testContructor)
     std::vector<OpenSoT::solvers::priority_constraint::Ptr> priority_constraints = l1_solver->getPriorityConstraints();
     if(priority_constraints.size() > 0)
     {
-        priority_constraints[0]->update(Eigen::VectorXd(0));
+        priority_constraints[0]->update();
         EXPECT_TRUE(priority_constraints.size() == stack->getStack().size()-1);
         EXPECT_EQ(priority_constraints[0]->getAineq().rows(), 1);
         EXPECT_EQ(priority_constraints[0]->getAineq().cols(), linear_tasks["t0"]->getc().size());

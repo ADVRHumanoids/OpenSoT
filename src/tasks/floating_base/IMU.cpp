@@ -22,7 +22,7 @@ OpenSoT::tasks::floating_base::IMU::IMU(XBot::ModelInterface &robot, XBot::ImuSe
         throw std::runtime_error("Imu is not attached to floating_base link!");
 
 
-    _update(Eigen::VectorXd::Zero(robot.getJointNum()));
+    _update();
 }
 
 OpenSoT::tasks::floating_base::IMU::~IMU()
@@ -30,7 +30,7 @@ OpenSoT::tasks::floating_base::IMU::~IMU()
 
 }
 
-void OpenSoT::tasks::floating_base::IMU::_update(const Eigen::VectorXd &x)
+void OpenSoT::tasks::floating_base::IMU::_update()
 {
     _robot.getJacobian(_fb_link, _J);
     _imu->getAngularVelocity(_angular_velocity);

@@ -51,7 +51,7 @@ protected:
         vel_lims.reset(new VelocityLimits(*_model_ptr, M_PI, dT));
 
         autostack = ((l_sole + r_sole)/com/postural)<<vel_lims;
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         ik_solver.reset(
             new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds(), 1e6));
@@ -143,7 +143,7 @@ TEST_F(testPosturalTask, floating_base_open_loop)
     OpenSoT::AutoStack::Ptr autostack_fb(
                 new OpenSoT::AutoStack((l_sole_fb + r_sole_fb)));
     autostack_fb<<fb_lims;
-    autostack_fb->update(Eigen::VectorXd(0));
+    autostack_fb->update();
 
     OpenSoT::solvers::iHQP::Ptr solver_fb(
         new OpenSoT::solvers::iHQP(autostack_fb->getStack(), autostack_fb->getBounds(), 1e6));
@@ -163,7 +163,7 @@ TEST_F(testPosturalTask, floating_base_open_loop)
         robot->setJointVelocity(dqm/dT);
         robot->update();
 
-        autostack_fb->update(Eigen::VectorXd(0));
+        autostack_fb->update();
         if(!solver_fb->solve(dQ)){
             std::cout<<"solver ik can not solve!"<<std::endl;
             dQ.setZero(dq.size());}
@@ -183,7 +183,7 @@ TEST_F(testPosturalTask, floating_base_open_loop)
         _model_ptr->setJointVelocity(dq/dT);
         _model_ptr->update();
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         if(!ik_solver->solve(dq)){
             std::cout<<"solver ik can not solve!"<<std::endl;

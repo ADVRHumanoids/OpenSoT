@@ -293,13 +293,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _model_ptr_com->setJointPosition(q);
         _model_ptr_com->update();
 
-        right_foot_task->update(Eigen::VectorXd(0));
+        right_foot_task->update();
         std::cout<<"right_foot_task->getb().norm(): "<<right_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
-        left_foot_task->update(Eigen::VectorXd(0));
+        left_foot_task->update();
         std::cout<<"left_foot_task->getb().norm(): "<<left_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
-        com_task->update(Eigen::VectorXd(0));
+        com_task->update();
         boundsConvexHull->log(logger);
-        postural_task->update(Eigen::VectorXd(0));
+        postural_task->update();
         bounds->update();
 
         _log << com_task->getActualPosition()[0] << ","
@@ -386,11 +386,11 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             _model_ptr_com->setJointPosition(q);
             _model_ptr_com->update();
 
-            right_foot_task->update(Eigen::VectorXd(0));
-            left_foot_task->update(Eigen::VectorXd(0));
-            com_task->update(q);
+            right_foot_task->update();
+            left_foot_task->update();
+            com_task->update();
             boundsConvexHull->log(logger);
-            postural_task->update(Eigen::VectorXd(0));
+            postural_task->update();
             bounds->update();
 
             _log << com_task->getActualPosition()[0] << ","

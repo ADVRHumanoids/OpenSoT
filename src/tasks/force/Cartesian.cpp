@@ -26,12 +26,12 @@ Cartesian::Cartesian(const std::string task_id,
     
     I.setIdentity();
     
-    update(Eigen::VectorXd(1));
+    update();
     
     setWeight(Eigen::MatrixXd::Identity(6,6));
 }
 
-void Cartesian::_update(const Eigen::VectorXd& x)
+void Cartesian::_update()
 {
   if (_base_link == world_name)
   {

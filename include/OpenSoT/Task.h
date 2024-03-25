@@ -112,9 +112,8 @@
          */
         std::vector<bool> _active_joints_mask;
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-            @param x variable state at the current step (input) */
-        virtual void _update(const Vector_type &x) = 0;
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
+        virtual void _update() = 0;
 
         struct istrue //predicate
         {
@@ -372,14 +371,13 @@
             @return the number of rows of A */
         virtual const unsigned int getTaskSize() const { return _A.rows(); }
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-            @param x variable state at the current step (input) */
-        void update(const Vector_type &x) {
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
+        void update() {
            
             
             for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
                 i != this->getConstraints().end(); ++i) (*i)->update();
-            this->_update(x);
+            this->_update();
             
             if(!_is_active){
                 _A_last_active = _A;

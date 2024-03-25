@@ -28,7 +28,7 @@ public:
     }
 
     ~fooTask(){}
-    void _update(const Eigen::VectorXd &x){}
+    void _update(){}
 };
 
 class testTask: public TestBase
@@ -62,7 +62,7 @@ TEST_F(testTask, testCheckConsistency)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
     postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
-    postural->update(Eigen::VectorXd(0));
+    postural->update();
 
     EXPECT_TRUE(postural->checkConsistency());
 
@@ -71,7 +71,7 @@ TEST_F(testTask, testCheckConsistency)
 
     fooTask::Ptr footask;
     footask.reset(new fooTask(fooA, foob));
-    footask->update(Eigen::VectorXd::Ones(10));
+    footask->update();
 
     EXPECT_FALSE(footask->checkConsistency());
 
@@ -125,7 +125,7 @@ TEST_F(testTask, testComputeCost)
     postural->setWeight(10.);
     postural->setLambda(1.);
 
-    postural->update(Eigen::VectorXd(0));
+    postural->update();
 
     Eigen::VectorXd x(_model_ptr->getNv());
     x.setRandom();

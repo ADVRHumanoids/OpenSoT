@@ -271,7 +271,7 @@ TEST_F(testJointLimits, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
@@ -323,7 +323,7 @@ TEST_F(testJointLimits, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
@@ -400,7 +400,7 @@ TEST_F(testJointLimitsNaive, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);
@@ -437,7 +437,7 @@ TEST_F(testJointLimitsNaive, test_bounds)
         this->_model_ptr->setJointVelocity(qdot_prev);
         this->_model_ptr->update();
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
         EXPECT_TRUE(solver->solve(dq));
 
         autostack->log(this->logger);

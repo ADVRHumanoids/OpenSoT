@@ -80,7 +80,7 @@ TEST_F(testCoMTask, testCoMTask_)
         EXPECT_NEAR(CoM.getb()[i],0,1E-12) << "b[i] = " << CoM.getb()[i];
 
     CoM.setReference(x_ref);
-    CoM.update(Eigen::VectorXd(0));
+    CoM.update();
     Eigen::VectorXd positionError = x_ref - x;
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_NEAR(CoM.getb()[i],CoM.getLambda()*positionError[i],1E-12) << "b[i] = " << CoM.getb()[i];
@@ -92,7 +92,7 @@ TEST_F(testCoMTask, testCoMTask_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        CoM.update(Eigen::VectorXd(0));
+        CoM.update();
 
         Eigen::MatrixXd Apinv;
         _pinv.compute(CoM.getA(), Apinv);
@@ -148,7 +148,7 @@ TEST_F(testCoMTask, testReset)
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    CoM.update(Eigen::VectorXd(0));
+    CoM.update();
 
     actual_pose = CoM.getActualPosition();
     std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;

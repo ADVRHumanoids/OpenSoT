@@ -41,7 +41,7 @@ namespace OpenSoT{
                 IMU(XBot::ModelInterface& robot, XBot::ImuSensor::ConstPtr imu);
                 ~IMU();
 
-                void _update(const Eigen::VectorXd& x);
+                void _update();
 
             private:
                 Eigen::MatrixXd _J;

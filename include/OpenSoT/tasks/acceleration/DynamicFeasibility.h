@@ -63,7 +63,7 @@ namespace OpenSoT {
             Eigen::VectorXd checkTask(const Eigen::VectorXd& x);
 
         private:
-                virtual void _update(const Eigen::VectorXd& x);
+                virtual void _update();
 
                 const XBot::ModelInterface& _robot;
                 AffineHelper _qddot;

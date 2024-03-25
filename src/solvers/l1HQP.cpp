@@ -83,7 +83,7 @@ void l1HQP::creates_internal_problem()
     _internal_stack = std::make_shared<OpenSoT::AutoStack>(aggregated, constraint_list);
 
 
-    _internal_stack->update(Eigen::VectorXd(0));
+    _internal_stack->update();
 }
 
 void l1HQP::creates_constraints()
@@ -169,7 +169,7 @@ void l1HQP::creates_problem_variables()
 
 bool l1HQP::solve(Eigen::VectorXd& solution)
 {   
-    _internal_stack->update(Eigen::VectorXd(0));
+    _internal_stack->update();
 
     if(!_solver->updateProblem(_H, _internal_stack->getStack()[0]->getc().transpose(),
         _internal_stack->getBounds()->getAineq(),
@@ -224,10 +224,10 @@ task_to_constraint_helper::task_to_constraint_helper(std::string id, OpenSoT::ta
     _bLowerBound.resize(3*task->getA().rows());
     _bLowerBound << -inf, -inf, o;
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
-void task_to_constraint_helper::update(const Eigen::VectorXd& x)
+void task_to_constraint_helper::update()
 {
     _AA.pile(_task->getWA());
     _AA.pile(-_task->getWA());
@@ -254,10 +254,10 @@ constraint_helper::constraint_helper(std::string id, OpenSoT::constraints::Aggre
     if(_constraints->getLowerBound().size() > 0)
         I.setIdentity(_constraints->getLowerBound().size(), _constraints->getLowerBound().size());
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
-void constraint_helper::update(const Eigen::VectorXd& x)
+void constraint_helper::update()
 {
 
 
@@ -307,7 +307,7 @@ priority_constraint::priority_constraint(const std::string& id,
     _Aineq = _ones.transpose();
 }
 
-void priority_constraint::update(const Eigen::VectorXd &x)
+void priority_constraint::update()
 {
 
 }

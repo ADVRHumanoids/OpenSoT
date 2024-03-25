@@ -218,7 +218,7 @@ TEST_F(testGLPKProblem, testIKMILP)
 //        this->_model_ptr->getInertiaMatrix(M);
 //        postural->setWeight(M);
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         auto tic = std::chrono::steady_clock::now();
         EXPECT_TRUE(solver->solve(dq));
@@ -387,7 +387,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
         this->_model_ptr->setJointPosition(q);
         this->_model_ptr->update();
 
-        autostack2->update(Eigen::VectorXd(0));
+        autostack2->update();
 
         auto tic = std::chrono::steady_clock::now();
         bool a = solver2->solve(dx);
@@ -462,7 +462,7 @@ TEST_F(testGLPKProblem, testMILPProblem)
     c<<3.,-2.,-1;
     task->setHessianType(OpenSoT::HST_ZERO);
     task->setc(c);
-    task->update(Eigen::VectorXd(1));
+    task->update();
 
     Eigen::VectorXd lb(3), ub(3);
     lb.setZero(3);

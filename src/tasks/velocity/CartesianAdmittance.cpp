@@ -47,7 +47,7 @@ CartesianAdmittance::CartesianAdmittance(std::string task_id,
     _tmp.assign(CHANNELS, 0.);
 }
 
-void CartesianAdmittance::_update(const Eigen::VectorXd &x)
+void CartesianAdmittance::_update()
 {
     _ft_sensor->getWrench(_wrench_measured);
     if(_base_link == "world")
@@ -71,7 +71,7 @@ void CartesianAdmittance::_update(const Eigen::VectorXd &x)
 
     _desiredTwist = _C.asDiagonal()*_wrench_filt;
 
-    Cartesian::_update(Eigen::VectorXd(0));
+    Cartesian::_update();
 }
 
 bool CartesianAdmittance::reset()

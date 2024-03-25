@@ -93,7 +93,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         bool reset() override;
 
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
 
         virtual void _log(XBot::MatLogger2::Ptr logger);
 

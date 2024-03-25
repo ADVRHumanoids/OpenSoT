@@ -63,7 +63,7 @@
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
             @param x variable state at the current step (input) */
-        virtual void _update(const Eigen::VectorXd &x);
+        virtual void _update();
 
         static const std::string _SUBTASK_SEPARATION_;
 

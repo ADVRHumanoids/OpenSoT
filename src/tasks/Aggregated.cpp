@@ -89,11 +89,11 @@ Aggregated::~Aggregated()
 {
 }
 
-void Aggregated::_update(const Eigen::VectorXd& x) {
+void Aggregated::_update() {
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-        t->update(x);
+        t->update();
     }
     this->generateAll();
 

@@ -107,7 +107,7 @@
                  * computeEffort() function will take into account the updated posture of the robot.
                  * @param x the actual posture of the robot
                  */
-                void _update(const Eigen::VectorXd& x);
+                void _update();
 
                 /**
                  * @brief computeEffort
@@ -134,7 +134,7 @@
                 {
                     if(lambda >= 0.0){
                         _lambda = lambda;
-                        this->_update(Eigen::VectorXd(0));
+                        this->_update();
                     }
                 }
             };

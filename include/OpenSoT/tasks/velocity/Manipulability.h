@@ -47,7 +47,7 @@ namespace OpenSoT {
 
                 ~Manipulability();
 
-                void _update(const Eigen::VectorXd& x);
+                void _update();
 
                 /**
                  * @brief ComputeManipulabilityIndex
@@ -74,7 +74,7 @@ namespace OpenSoT {
                 {
                     if(lambda >= 0.0){
                         _lambda = lambda;
-                        this->_update(Eigen::VectorXd(0));
+                        this->_update();
                     }
                 }
 
@@ -134,7 +134,7 @@ namespace OpenSoT {
                         _robot->update();
 
 
-                        _CartesianTask->update(q);
+                        _CartesianTask->update();
 
                         return computeManipulabilityIndex();
                     }

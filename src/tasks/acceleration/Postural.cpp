@@ -28,7 +28,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(
 
     _Mi.setIdentity(robot.getNv(), robot.getNv());
 
-    _update(_q);
+    _update();
 }
 
 OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& robot,
@@ -57,7 +57,7 @@ OpenSoT::tasks::acceleration::Postural::Postural(const XBot::ModelInterface& rob
     _qddot_ref_cached = _qddot_ref;
 
     
-    _update(_q);
+    _update();
 }
 
 void OpenSoT::tasks::acceleration::Postural::setGainType(GainType type)
@@ -132,7 +132,7 @@ void OpenSoT::tasks::acceleration::Postural::setReference(const Eigen::VectorXd&
 }
 
 
-void OpenSoT::tasks::acceleration::Postural::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::acceleration::Postural::_update()
 {
     _qdot_ref_cached = _qdot_ref;
     _qddot_ref_cached = _qddot_ref;

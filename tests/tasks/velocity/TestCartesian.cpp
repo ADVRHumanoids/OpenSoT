@@ -59,12 +59,12 @@ TEST_F(testCartesianTask, testSetBaseLink)
         new OpenSoT::tasks::velocity::Cartesian("l_arm",*_model_ptr,distal_link,
                                                 base_link3));
 
-    l_arm1->update(Eigen::VectorXd(0));
-    l_arm2->update(Eigen::VectorXd(0));
-    l_arm3->update(Eigen::VectorXd(0));
+    l_arm1->update();
+    l_arm2->update();
+    l_arm3->update();
 
     EXPECT_TRUE(l_arm1->setBaseLink(base_link2));
-    l_arm1->update(Eigen::VectorXd(0));
+    l_arm1->update();
 
     EXPECT_NEAR((l_arm1->getA() - l_arm2->getA()).norm(), 0.0, 1e-12);
     EXPECT_NEAR((l_arm1->getb() - l_arm2->getb()).norm(), 0.0, 1e-12);
@@ -72,7 +72,7 @@ TEST_F(testCartesianTask, testSetBaseLink)
     EXPECT_NEAR((l_arm1->getActualPose() - l_arm2->getActualPose()).norm(), 0.0, 1e-12);
 
     EXPECT_TRUE(l_arm1->setBaseLink(base_link3));
-    l_arm1->update(Eigen::VectorXd(0));
+    l_arm1->update();
 
     EXPECT_NEAR((l_arm1->getA() - l_arm3->getA()).norm(), 0.0, 1e-12);
     EXPECT_NEAR((l_arm1->getb() - l_arm3->getb()).norm(), 0.0, 1e-12);
@@ -128,7 +128,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref.matrix());
-    cartesian.update(q_whole);
+    cartesian.update();
     Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
@@ -149,7 +149,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldGlobal_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        cartesian._update(Eigen::VectorXd(0));
+        cartesian._update();
         q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
 
         _model_ptr->setJointPosition(q_whole);
@@ -219,7 +219,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref.matrix());
-    cartesian.update(q_whole);
+    cartesian.update();
     Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
@@ -241,7 +241,7 @@ TEST_F(testCartesianTask, testCartesianTaskWorldLocal_)
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
 
-        cartesian._update(Eigen::VectorXd(0));
+        cartesian._update();
         q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
@@ -320,7 +320,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref.matrix());
-    cartesian.update(q_whole);
+    cartesian.update();
     Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
@@ -341,7 +341,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeUpdateWorld_)
     {
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
-        cartesian._update(Eigen::VectorXd(0));
+        cartesian._update();
         q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
@@ -414,7 +414,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     EXPECT_DOUBLE_EQ(cartesian.getLambda(), K);
 
     cartesian.setReference(x_ref.matrix());
-    cartesian.update(q_whole);
+    cartesian.update();
     Eigen::Vector3d positionError, orientationError;
     cartesian_utils::computeCartesianError(x.matrix(), x_ref.matrix(),
                                            positionError, orientationError);
@@ -435,7 +435,7 @@ TEST_F(testCartesianTask, testCartesianTaskRelativeWaistUpdateWorld_)
     {
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
-        cartesian._update(Eigen::VectorXd(0));
+        cartesian._update();
         q_whole = _model_ptr->sum(q_whole, cartesian.getA().transpose()*cartesian.getb());
         _model_ptr->setJointPosition(q_whole);
         _model_ptr->update();
@@ -480,7 +480,7 @@ TEST_F(testCartesianTask, testActiveJointsMask)
                                                  "torso",
                                                  "l_sole");
 
-    cartesian.update(Eigen::VectorXd(0));
+    cartesian.update();
     std::cout<<"J:\n "<<cartesian.getA()<<std::endl;
 
     std::vector<bool> active_joint_mask = cartesian.getActiveJointsMask();
@@ -589,7 +589,7 @@ TEST_F(testCartesianTask, testReset)
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
 
-    cartesian.update(Eigen::VectorXd(0));
+    cartesian.update();
 
     actual_pose = cartesian.getActualPose();
     std::cout<<"actual_pose: \n"<<actual_pose<<std::endl;

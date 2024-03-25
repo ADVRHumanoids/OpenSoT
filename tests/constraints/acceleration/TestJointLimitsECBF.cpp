@@ -179,7 +179,7 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->update();
         //this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;
@@ -229,7 +229,7 @@ TEST_F(testJointLimits, testBoundsWithTrajectory) {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->update();
         this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;
@@ -269,7 +269,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->update();
 
         Eigen::VectorXd qddot;
         ASSERT_TRUE(this->solver->solve(qddot));
@@ -313,7 +313,7 @@ TEST_F(testJointLimits, testBoundsWithRegulation) {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->update();
         this->autostack->log(this->logger);
 
         Eigen::VectorXd qddot;

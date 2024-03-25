@@ -40,14 +40,14 @@ TEST_F(testPosturalTask, testPosturalTask_subtask)
 
     OpenSoT::tasks::acceleration::Postural::Ptr postural(
                 new OpenSoT::tasks::acceleration::Postural(*_model_ptr));
-    postural->update(Eigen::VectorXd(0));
+    postural->update();
 
     std::cout<<"A size is: ["<<postural->getA().rows()<<" x "<<postural->getA().cols()<<"]"<<std::endl;
     std::cout<<"Model DoFs: "<<_model_ptr->getJointNum()<<std::endl;
 
     q = _model_ptr->getNeutralQ();
     postural->setReference(q);
-    postural->update(Eigen::VectorXd(0));
+    postural->update();
 
 
     //std::list<unsigned int> idx = {_model_ptr->getDofIndex("WaistLat")};
@@ -56,7 +56,7 @@ TEST_F(testPosturalTask, testPosturalTask_subtask)
     std::cout<<"idx: "<<*(idx.begin())<<std::endl;
     OpenSoT::SubTask::Ptr sub_postural = postural%idx;
 
-    sub_postural->update(Eigen::VectorXd(0));
+    sub_postural->update();
 
     std::cout<<"A task: "<<postural->getA()<<std::endl;
     std::cout<<"b task: "<<postural->getb()<<std::endl;
@@ -108,7 +108,7 @@ TEST_F(testPosturalTask, testPosturalTask_)
         _model_ptr->setJointVelocity(dq);
         _model_ptr->update();
 
-        postural.update(Eigen::VectorXd(0));
+        postural.update();
         Eigen::VectorXd ddq(q.size());
         ddq = postural.getb();
         dq += ddq*dT;

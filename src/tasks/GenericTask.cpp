@@ -17,7 +17,7 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
 
     _hessianType = HST_SEMIDEF;
 
-    _update(Eigen::VectorXd(1));
+    _update();
     
     _W.setIdentity(_A.rows(), _A.rows());
 }
@@ -36,7 +36,7 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
 
     _hessianType = HST_SEMIDEF;
 
-    _update(Eigen::VectorXd(1));
+    _update();
 
     _W.setIdentity(_A.rows(), _A.rows());
 }
@@ -46,7 +46,7 @@ GenericTask::~GenericTask()
 
 }
 
-void GenericTask::_update(const Eigen::VectorXd &x)
+void GenericTask::_update()
 {
     _task = __A*_var - __b;
 
@@ -66,7 +66,7 @@ bool GenericTask::setc(const Eigen::VectorXd& c)
 
     __c = c;
 
-    _update(Eigen::VectorXd(1));
+    _update();
 
     return true;
 }

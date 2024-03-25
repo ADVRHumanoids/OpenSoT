@@ -232,7 +232,7 @@ namespace OpenSoT {
            XBot::ModelInterface& _robot;
            XBot::ModelInterface& _model;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
            SecondOrderFilter<Eigen::VectorXd> _filter;
 

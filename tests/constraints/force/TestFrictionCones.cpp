@@ -118,13 +118,16 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     _model_ptr->getPose("l_sole", w_T_l_sole);
 
 
-    Eigen::VectorXd QPcontact_wrenches_d(6*links_in_contact.size());
-    QPcontact_wrenches_d.setZero(QPcontact_wrenches_d.rows());
+    std::vector<OpenSoT::AffineHelper> QPcontact_wrenches;
+    for(unsigned int i = 0; i < links_in_contact.size(); ++i)
+        QPcontact_wrenches.push_back(OpenSoT::AffineHelper::Identity(6));
+
+
     Eigen::VectorXd SVDcontact_wrenches_d(6*links_in_contact.size());
     SVDcontact_wrenches_d.setZero(SVDcontact_wrenches_d.rows());
 
-    com.reset(new OpenSoT::tasks::force::CoM(QPcontact_wrenches_d, links_in_contact, *_model_ptr));
-    com->update(QPcontact_wrenches_d);
+    com.reset(new OpenSoT::tasks::force::CoM(QPcontact_wrenches, links_in_contact, *_model_ptr));
+    com->update();
 
 
     Eigen::VectorXd wrench_lims;
@@ -147,6 +150,7 @@ TEST_F(testFrictionCones, testFrictionCones_) {
     QPsolver.reset(new OpenSoT::solvers::iHQP(stack_of_tasks,wrench_limits,2E5));
 
     std::cout<<"QP Solver started"<<std::endl;
+    Eigen::VectorXd QPcontact_wrenches_d;
     bool solved = false;
     do{
         solved = QPsolver->solve(QPcontact_wrenches_d);

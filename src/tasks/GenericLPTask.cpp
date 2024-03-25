@@ -10,9 +10,9 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd &
     _task.reset(new GenericTask(task_id+"_internal", O, o));
     _hessianType = HST_ZERO;
     _task->setc(c);
-    _task->update(Eigen::VectorXd(1));
+    _task->update();
 
-    _update(Eigen::VectorXd(1));
+    _update();
     _W = _task->getWeight();
     _W.setZero(_W.rows(), _W.cols());
 
@@ -30,9 +30,9 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd& 
     _task.reset(new GenericTask(task_id+"_internal", O, o, var));
     _hessianType = HST_ZERO;
     _task->setc(c);
-    _task->update(Eigen::VectorXd(1));
+    _task->update();
 
-    _update(Eigen::VectorXd(1));
+    _update();
     _W = _task->getWeight();
     _W.setZero(_W.rows(), _W.cols());
 
@@ -41,9 +41,9 @@ GenericLPTask::GenericLPTask(const std::string &task_id, const Eigen::VectorXd& 
         throw std::runtime_error(s.c_str());}
 }
 
-void GenericLPTask::_update(const Eigen::VectorXd &x)
+void GenericLPTask::_update()
 {
-    _task->update(x);
+    _task->update();
 
     _A = _task->getA();
     _b = _task->getb();

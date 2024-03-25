@@ -171,7 +171,7 @@ TEST_F(testAffineUtils, testCartesianTaskToAffine)
     Eigen::Affine3d T = Eigen::Affine3d::Identity();
     task->setReference(T);
 
-    affine_task->update(Eigen::VectorXd(0));
+    affine_task->update();
 
     Eigen::Affine3d T_ref; task->getReference(T_ref);
     EXPECT_EQ(T.matrix(), T_ref.matrix());

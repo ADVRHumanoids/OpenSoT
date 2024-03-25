@@ -32,7 +32,7 @@ namespace solvers {
         priority_constraint(const std::string& id,
                             const OpenSoT::tasks::GenericLPTask::Ptr high_priority_task,
                             const OpenSoT::tasks::GenericLPTask::Ptr low_priority_task);
-        void update(const Eigen::VectorXd& x);
+        void update();
     private:
         std::weak_ptr<OpenSoT::tasks::GenericLPTask> _high_task;
         std::weak_ptr<OpenSoT::tasks::GenericLPTask> _low_task;
@@ -48,7 +48,7 @@ namespace solvers {
         constraint_helper(std::string id, OpenSoT::constraints::Aggregated::ConstraintPtr constraints,
                           const AffineHelper& x);
 
-        void update(const Eigen::VectorXd& x);
+        void update();
     private:
         OpenSoT::constraints::Aggregated::ConstraintPtr _constraints;
         AffineHelper _constraint;
@@ -79,7 +79,7 @@ namespace solvers {
         task_to_constraint_helper(std::string id, OpenSoT::tasks::Aggregated::TaskPtr& task,
                                   const AffineHelper& x, const AffineHelper& t);
 
-        void update(const Eigen::VectorXd& x);
+        void update();
     private:
         OpenSoT::tasks::Aggregated::TaskPtr& _task;
         AffineHelper _constraint;

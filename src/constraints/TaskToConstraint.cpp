@@ -54,7 +54,7 @@ TaskToConstraint::TaskToConstraint(TaskToConstraint::TaskPtr task,
 
 void TaskToConstraint::update()
 {
-    _task->update(Eigen::VectorXd(0));
+    _task->update();
     this->generateAll();
 }
 

@@ -68,7 +68,7 @@ namespace OpenSoT {
             /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                       OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
 
-            void update(const Eigen::VectorXd & state);
+            void update();
 
             void log(XBot::MatLogger2::Ptr logger);
 

@@ -96,7 +96,7 @@ TEST_F(testQPOases_AutoStack, testSolveUsingAutoStack)
         model->setJointPosition(q);
         model->update();
 
-        subTaskTest->update(Eigen::VectorXd(0));
+        subTaskTest->update();
 
         if(dq.norm() > 1e-3)
             EXPECT_NE(oldBoundsNorm,sqrt(DHS->jointLimits->getbLowerBound().squaredNorm()));
@@ -192,7 +192,7 @@ TEST_F(testQPOases_AutoStack, testComplexAutoStack)
     {
         model->setJointPosition(q);
         model->update();
-        AutoStack->update(Eigen::VectorXd(0));
+        AutoStack->update();
 
         ASSERT_TRUE(solver->solve(dq));
         q = model->sum(q, dq);
@@ -290,7 +290,7 @@ TEST_F(testQPOases_AutoStack, testAutoStackConstructor)
     {
         model->setJointPosition(q);
         model->update();
-        AutoStack->update(Eigen::VectorXd(0));
+        AutoStack->update();
 
         ASSERT_TRUE(solver->solve(dq));
         q = model->sum(q, dq);

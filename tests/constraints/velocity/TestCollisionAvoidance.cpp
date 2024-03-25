@@ -399,8 +399,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        taskCartesianAggregated->update();
+        postural_task->update();
         bounds->update();
 
         if(!sot->solve(dq)){
@@ -535,8 +535,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
         auto time_for_update = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
         std::cout<<"SCA Update time: "<<time_for_update/1000.<<" [ms]"<<std::endl;
 
-        taskCartesianAggregated->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        taskCartesianAggregated->update();
+        postural_task->update();
         bounds->update();
 
         if(!sot->solve(dq)){
@@ -765,8 +765,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        taskCartesianAggregated->update();
+        postural_task->update();
         bounds->update();
 
         if(!sot->solve(dq)){
@@ -986,8 +986,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        taskCartesianAggregated->update();
+        postural_task->update();
         bounds->update();
 
         if(!sot->solve(dq)){
@@ -1098,8 +1098,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        taskCartesianAggregated->update();
+        postural_task->update();
         bounds->update();
 
         if(!sot->solve(dq)){

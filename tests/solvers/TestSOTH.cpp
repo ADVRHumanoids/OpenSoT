@@ -174,7 +174,7 @@ TEST_F(testSOTH, constrainedVariableLinearSystemOpenSoT)
     ub[0] = 1.; ub[1] = 1.; ub[2] = 1.;
 
     constr->setBounds(ub, lb);
-    stack->update(Eigen::VectorXd(1));
+    stack->update();
 
 
     hcod.solve(solution);

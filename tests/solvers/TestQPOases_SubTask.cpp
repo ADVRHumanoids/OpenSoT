@@ -112,7 +112,7 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasks)
     q = _model_ptr->sum(q, dq);
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    subTaskTest->update(Eigen::VectorXd(0));
+    subTaskTest->update();
     ASSERT_TRUE(solver->solve(dq));
 }
 
@@ -142,7 +142,7 @@ TEST_F(testQPOases_SubTask, testSolveUsingSubTasksAndAggregated)
     q = _model_ptr->sum(q, dq);
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    subTaskTest->update(Eigen::VectorXd(0));
+    subTaskTest->update();
     ASSERT_TRUE(solver->solve(dq));
 }
 
@@ -171,7 +171,7 @@ TEST_F(testQPOases_SubTask, testSolveCartesianThroughSubTasksAndAggregated)
     {
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
-        subTaskTest->update(q);
+        subTaskTest->update();
         Eigen::VectorXd dq(_model_ptr->getNv()); dq.setZero();
         ASSERT_TRUE(solver->solve(dq));
         q = _model_ptr->sum(q, dq);

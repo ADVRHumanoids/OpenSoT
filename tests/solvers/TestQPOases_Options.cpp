@@ -66,7 +66,7 @@ public:
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
 
         _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->update();
 
         _postural_task = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
@@ -116,8 +116,8 @@ public:
 
     void update()
     {
-        _cartesian_task_0->update(Eigen::VectorXd(0));
-        _postural_task->update(Eigen::VectorXd(0));
+        _cartesian_task_0->update();
+        _postural_task->update();
         _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" ";
@@ -238,10 +238,10 @@ public:
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
         _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->update();
 
         _cartesian_task_1->setReference(T_ref_1);
-        _cartesian_task_1->update(q);
+        _cartesian_task_1->update();
 
         _postural_task = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
@@ -292,9 +292,9 @@ public:
 
     void update()
     {
-        _cartesian_task_0->update(Eigen::VectorXd(0));
-        _cartesian_task_1->update(Eigen::VectorXd(0));
-        _postural_task->update(Eigen::VectorXd(0));
+        _cartesian_task_0->update();
+        _cartesian_task_1->update();
+        _postural_task->update();
         _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
@@ -431,10 +431,10 @@ public:
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
         _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->update();
 
         _cartesian_task_1->setReference(T_ref_1);
-        _cartesian_task_1->update(q);
+        _cartesian_task_1->update();
 
         _postural_task = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
@@ -488,8 +488,8 @@ public:
 
     void update()
     {
-        _cartesian_tasks->update(Eigen::VectorXd(0));
-        _postural_task->update(Eigen::VectorXd(0));
+        _cartesian_tasks->update();
+        _postural_task->update();
         _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";

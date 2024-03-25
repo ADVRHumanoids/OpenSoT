@@ -24,7 +24,7 @@ AngularMomentum::AngularMomentum(XBot::ModelInterface& robot):
     _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredAngularMomentum.setZero();
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 
     _W.resize(3,3);
     _W.setIdentity(3,3);
@@ -41,7 +41,7 @@ AngularMomentum::~AngularMomentum()
 
 }
 
-void AngularMomentum::_update(const Eigen::VectorXd& x)
+void AngularMomentum::_update()
 {
     _robot.computeCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(3,0,3,_x_size);

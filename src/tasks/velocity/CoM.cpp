@@ -38,7 +38,7 @@ CoM::CoM(XBot::ModelInterface &robot,
     _desiredVelocityRef = _desiredVelocity;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 
 
     /* initializing to zero error */
@@ -56,7 +56,7 @@ CoM::~CoM()
 {
 }
 
-void CoM::_update(const Eigen::VectorXd &x)
+void CoM::_update()
 {
 
     /************************* COMPUTING TASK *****************************/

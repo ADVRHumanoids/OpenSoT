@@ -20,7 +20,7 @@ AngularMomentum::AngularMomentum(XBot::ModelInterface &robot, const AffineHelper
     _K.setIdentity(3,3);
 
     _Ldot_d.setZero();
-    _update(Eigen::VectorXd(1));
+    _update();
 }
 
 AngularMomentum::~AngularMomentum()
@@ -28,7 +28,7 @@ AngularMomentum::~AngularMomentum()
 
 }
 
-void AngularMomentum::_update(const Eigen::VectorXd &x)
+void AngularMomentum::_update()
 {
     //1. get centroidal momentum matrix and momentum
     _robot.computeCentroidalMomentumMatrix(_Mom);

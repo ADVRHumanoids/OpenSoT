@@ -37,7 +37,7 @@ class GenericLPTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
 
     ~GenericLPTask();
 
-    virtual void _update(const Eigen::VectorXd &x);
+    virtual void _update();
 
     /**
      * @brief setc update the c of the task

@@ -145,7 +145,7 @@ TEST_F(testeiQuadProgProblem, testTask)
 
     OpenSoT::tasks::velocity::Postural postural_task(*_model_ptr);
     postural_task.setReference(q_ref);
-    postural_task.update(Eigen::VectorXd(0));
+    postural_task.update();
 
     Eigen::MatrixXd H(_model_ptr->getNv(), _model_ptr->getNv()); H.setIdentity(H.rows(), H.cols());
     Eigen::VectorXd g(-1.0*postural_task.getb());
@@ -166,7 +166,7 @@ TEST_F(testeiQuadProgProblem, testTask)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task.update(Eigen::VectorXd(0));
+        postural_task.update();
 
         qp_postural_problem->updateTask(H, -1.0*postural_task.getb());
 
@@ -230,7 +230,7 @@ TEST_F(testeiQuadProgProblem, testProblemWithConstraint)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(Eigen::VectorXd(0));
+        postural_task->update();
 
         qp_postural_problem->updateBounds(constraint->getLowerBound(), constraint->getUpperBound());
         qp_postural_problem->updateTask(postural_task->getA(), -1.0*postural_task->getb());
@@ -309,7 +309,7 @@ TEST_F(testeiQuadProgProblem, testCartesian)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", *_model_ptr,
                 "l_wrist", "Waist"));
 
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
     Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
     std::cout<<"T_actual: \n"<<T_actual<<std::endl;
@@ -320,7 +320,7 @@ TEST_F(testeiQuadProgProblem, testCartesian)
     std::cout<<"T_ref: \n"<<T_ref<<std::endl;
 
     cartesian_task->setReference(T_ref);
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
     //OpenSoT::solvers::OSQPBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0);
     OpenSoT::solvers::BackEnd::Ptr qp_cartesian_problem = OpenSoT::solvers::BackEndFactory(
@@ -337,7 +337,7 @@ TEST_F(testeiQuadProgProblem, testCartesian)
         _model_ptr->update();
 
 
-        cartesian_task->update(Eigen::VectorXd(0));
+        cartesian_task->update();
         qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
         ASSERT_TRUE(qp_cartesian_problem->solve());
         Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
@@ -372,7 +372,7 @@ TEST_F(testeiQuadProgProblem, testEpsRegularisation)
                 new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", *_model_ptr,
                 "l_wrist", "Waist"));
 
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
     Eigen::MatrixXd T_actual = cartesian_task->getActualPose();
     std::cout<<"T_actual: \n"<<T_actual<<std::endl;
@@ -383,7 +383,7 @@ TEST_F(testeiQuadProgProblem, testEpsRegularisation)
     std::cout<<"T_ref: \n"<<T_ref<<std::endl;
 
     cartesian_task->setReference(T_ref);
-    cartesian_task->update(Eigen::VectorXd(0));
+    cartesian_task->update();
 
     //OpenSoT::solvers::OSQPBackEnd qp_cartesian_problem(cartesian_task->getXSize(), 0);
     OpenSoT::solvers::BackEnd::Ptr qp_cartesian_problem = OpenSoT::solvers::BackEndFactory(
@@ -406,7 +406,7 @@ TEST_F(testeiQuadProgProblem, testEpsRegularisation)
         _model_ptr->update();
 
 
-        cartesian_task->update(Eigen::VectorXd(0));
+        cartesian_task->update();
         qp_cartesian_problem->updateTask(cartesian_task->getA().transpose()*cartesian_task->getA(), -1.0*cartesian_task->getA().transpose()*cartesian_task->getb());
         ASSERT_TRUE(qp_cartesian_problem->solve());
         Eigen::VectorXd dq = qp_cartesian_problem->getSolution();
@@ -500,8 +500,8 @@ TEST_F(testeiQuadProgProblem, testContructor2Problems)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        cartesian_task->update(Eigen::VectorXd(0));
-        postural_task->update(Eigen::VectorXd(0));
+        cartesian_task->update();
+        postural_task->update();
         joint_constraints->update();
 
         ASSERT_TRUE(sot.solve(dq));
@@ -598,7 +598,7 @@ TEST_F(testiHQP, testContructor1Problem)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(Eigen::VectorXd(0));
+        postural_task->update();
         bounds->update();
 
         EXPECT_TRUE(sot.solve(dq));

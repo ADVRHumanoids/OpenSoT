@@ -50,7 +50,7 @@ TEST_F(testAutoStack, test_complexAutostack)
 
     Eigen::VectorXd q = _model_ptr->generateRandomQ();
 
-    auto_stack->update(Eigen::VectorXd(0));
+    auto_stack->update();
 
     std::cout<<"# of constraints: "<<auto_stack->getBounds()->getAineq().rows()<<std::endl;
     std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
@@ -61,7 +61,7 @@ TEST_F(testAutoStack, test_complexAutostack)
 
     DHS->leftLeg->setActive(false);
 
-    auto_stack->update(Eigen::VectorXd(0));
+    auto_stack->update();
 
     std::cout<<"Aineq: \n"<<auto_stack->getBounds()->getAineq()<<std::endl;
     EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == 0.*DHS->leftLeg->getA().topRows(3));
@@ -70,7 +70,7 @@ TEST_F(testAutoStack, test_complexAutostack)
     DHS->leftLeg->setActive(true);
     DHS->rightLeg->setActive(false);
 
-    auto_stack->update(Eigen::VectorXd(0));
+    auto_stack->update();
 
     EXPECT_TRUE(auto_stack->getBounds()->getAineq().topRows(3) == DHS->leftLeg->getA().topRows(3));
     EXPECT_TRUE(auto_stack->getBounds()->getAineq().bottomRows(3) == 0*DHS->rightLeg->getA().topRows(3));
@@ -86,7 +86,7 @@ TEST_F(testAutoStack, test_getTask_with_task_id)
     AutoStack::Ptr auto_stack = (DHS->right2LeftLeg)/
             (DHS->com + DHS->leftArm)/
             DHS->postural;
-    auto_stack->update(Eigen::VectorXd(0));
+    auto_stack->update();
 
     OpenSoT::solvers::iHQP::TaskPtr com_task = auto_stack->getTask(task_id);
     EXPECT_TRUE(com_task != NULL);
@@ -292,7 +292,7 @@ TEST_F(testAutoStack, testOperatorModulo)
     KDL::Frame ref; ref.Identity();
     DHS->leftArm->setReference(ref);
 
-    sub_task->update(Eigen::VectorXd::Zero(DHS->leftArm->getA().cols()));
+    sub_task->update();
 
     EXPECT_TRUE(sub_task->getA().row(0) == DHS->leftArm->getA().row(0));
     EXPECT_TRUE(sub_task->getA().row(1) == DHS->leftArm->getA().row(2));

@@ -81,7 +81,7 @@ void CartesianPositionConstraint::getCurrentPosition(Eigen::VectorXd& current_po
 void CartesianPositionConstraint::update() {
 
     if(_is_Cartesian){
-        _cartesianTask->update(Eigen::VectorXd(0));
+        _cartesianTask->update();
         /************************ COMPUTING BOUNDS ****************************/
         J = _cartesianTask->getA().block(0,0,3,_x_size);
         assert(J.rows() == 3 && "Jacobian doesn't have 3 rows. Something went wrong.");
@@ -95,7 +95,7 @@ void CartesianPositionConstraint::update() {
 
         /**********************************************************************/
     }else{
-        _comTask->update(Eigen::VectorXd(0));
+        _comTask->update();
         J = _comTask->getA();
 
         _Aineq = _A_Cartesian * J;

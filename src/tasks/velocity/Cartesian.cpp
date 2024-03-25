@@ -51,7 +51,7 @@ Cartesian::Cartesian(std::string task_id,
         assert(this->_distal_link_index != _base_link_index);
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 
     _W.setIdentity(_A.rows(), _A.rows());
 
@@ -65,7 +65,7 @@ Cartesian::~Cartesian()
 {
 }
 
-void Cartesian::_update(const Eigen::VectorXd &x) {
+void Cartesian::_update() {
 
     /************************* COMPUTING TASK *****************************/
     _desiredTwistRef = _desiredTwist;
@@ -355,7 +355,7 @@ void Cartesian::_log(XBot::MatLogger2::Ptr logger)
 bool Cartesian::reset()
 {
     _is_initialized = false;
-    _update(Eigen::VectorXd(1));
+    _update();
 
     return true;
 }

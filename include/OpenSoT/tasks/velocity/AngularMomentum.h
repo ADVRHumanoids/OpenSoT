@@ -48,7 +48,7 @@ namespace OpenSoT {
 
            Eigen::MatrixXd _Momentum;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
            std::string _base_link;
            std::string _distal_link;

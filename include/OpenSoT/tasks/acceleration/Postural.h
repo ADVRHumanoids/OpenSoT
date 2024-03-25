@@ -47,7 +47,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void setGainType(GainType type);
         GainType getGainType() const;
         
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
         
         /**
          * @brief setReference sets a new reference for the postural actuated part.

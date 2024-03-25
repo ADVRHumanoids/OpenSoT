@@ -1,7 +1,7 @@
 #include <OpenSoT/tasks/acceleration/Contact.h>
 #include <xbot2_interface/logger.h>
 
-void OpenSoT::tasks::acceleration::Contact::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::acceleration::Contact::_update()
 {
     _robot.getJacobian(_contact_link, _J);
     
@@ -44,7 +44,7 @@ OpenSoT::tasks::acceleration::Contact::Contact(const std::string& task_id,
         throw std::invalid_argument("Invalid contact matrix");
     }
 
-    update(Eigen::VectorXd());
+    update();
 
     _hessianType = HST_SEMIDEF;
 
@@ -76,7 +76,7 @@ OpenSoT::tasks::acceleration::Contact::Contact(const std::string& task_id,
         throw std::invalid_argument("Invalid contact matrix");
     }
     
-    update(Eigen::VectorXd());
+    update();
 
     _hessianType = HST_SEMIDEF;
     

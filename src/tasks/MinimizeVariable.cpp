@@ -1,7 +1,7 @@
 #include <OpenSoT/tasks/MinimizeVariable.h>
 
 
-void OpenSoT::tasks::MinimizeVariable::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::MinimizeVariable::_update()
 {
 
 }

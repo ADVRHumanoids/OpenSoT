@@ -28,7 +28,7 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot):
     _Kd.setIdentity();
 
 
-    update(Eigen::VectorXd(1));
+    update();
 
     setWeight(Eigen::MatrixXd::Identity(3,3));
 }
@@ -56,7 +56,7 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface &robot, const 
     _Kd.setIdentity();
 
 
-    update(Eigen::VectorXd(1));
+    update();
 
     setWeight(Eigen::MatrixXd::Identity(3,3));
 }
@@ -71,7 +71,7 @@ const std::string& OpenSoT::tasks::acceleration::CoM::getDistalLink() const
     return _distal_link;
 }
 
-void OpenSoT::tasks::acceleration::CoM::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::acceleration::CoM::_update()
 {
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;

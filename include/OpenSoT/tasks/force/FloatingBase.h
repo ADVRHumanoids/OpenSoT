@@ -56,7 +56,7 @@ namespace OpenSoT {
             void setEnabledContacts(const std::vector<bool>& enabled_contacts);
 
             private:
-            virtual void _update(const Eigen::VectorXd& x);
+            virtual void _update();
             virtual void _log(XBot::MatLogger2::Ptr logger);
 
             std::vector<std::string> _contact_links;

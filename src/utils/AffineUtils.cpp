@@ -21,7 +21,7 @@ AffineTask::AffineTask(const OpenSoT::tasks::Aggregated::TaskPtr &task, const Af
     _lambda = 1.;
     _internal_generic_task->setWeight(task->getWeight());
 
-    _update(Eigen::VectorXd(1));
+    _update();
 }
 
 AffineTask::~AffineTask()
@@ -29,17 +29,17 @@ AffineTask::~AffineTask()
 
 }
 
-void AffineTask::_update(const Eigen::VectorXd &x)
+void AffineTask::_update()
 {
     //1. Update original task which will be used to set desired quantities
-    _internal_task->update(x);
+    _internal_task->update();
 
     //2. Update internal generic task and get matrices with affines
     _internal_generic_task->setA(_internal_task->getA());
     _internal_generic_task->setb(_internal_task->getb());
     _internal_generic_task->setc(_internal_task->getc());
     _internal_generic_task->setWeight(_internal_task->getWeight());
-    _internal_generic_task->update(x);
+    _internal_generic_task->update();
 
     //3. Update Affine Task
     _A = _internal_generic_task->getA();

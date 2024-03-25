@@ -145,7 +145,7 @@ using namespace OpenSoT::utils;
 
             ~Aggregated();
 
-            void _update(const Eigen::VectorXd &x);
+            void _update();
 
 
             /**

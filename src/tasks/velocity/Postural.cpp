@@ -40,14 +40,14 @@ Postural::Postural(const XBot::ModelInterface& robot,
 
     /* first update. Setting desired pose equal to the actual pose */
     this->setReference(_q);
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 }
 
 Postural::~Postural()
 {
 }
 
-void Postural::_update(const Eigen::VectorXd &q) {
+void Postural::_update() {
     _v_desired_ref = _v_desired;
     _q = _robot.getJointPosition();
 
@@ -120,7 +120,7 @@ Eigen::VectorXd OpenSoT::tasks::velocity::Postural::getActualPositions()
 bool OpenSoT::tasks::velocity::Postural::reset()
 {
     _q_desired = _q;
-    _update(_q_desired);
+    _update();
 
     return true;
 }

@@ -21,7 +21,7 @@ public:
     AffineTask(const OpenSoT::tasks::Aggregated::TaskPtr& task,
                const AffineHelper& var);
 
-    virtual void _update(const Eigen::VectorXd &x);
+    virtual void _update();
     ~AffineTask();
 
     static AffineTask::Ptr toAffine(const OpenSoT::tasks::Aggregated::TaskPtr& task,

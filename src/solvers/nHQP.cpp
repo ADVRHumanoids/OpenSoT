@@ -27,7 +27,7 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
         auto t = stack_of_tasks[i];
 
         // update task (NB: with x = zeros(nx))
-        t->update(_solution);
+        t->update();
 
         // the current layer does not have any dof to move
         // the optimization problem is ill-formed

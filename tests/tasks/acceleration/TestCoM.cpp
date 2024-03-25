@@ -63,7 +63,7 @@ protected:
 
 
         autostack = ((l_sole + r_sole)/(com)/(postural))<<acc_lims;
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         iHQP.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds()));
 
@@ -137,7 +137,7 @@ TEST_F(testCoMTask, testCoMTask_)
         this->_model_ptr->setJointVelocity(_dq);
         this->_model_ptr->update();
 
-        this->autostack->update(Eigen::VectorXd(0));
+        this->autostack->update();
 
 
         if(!(iHQP->solve(ddq)))

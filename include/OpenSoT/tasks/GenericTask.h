@@ -40,7 +40,7 @@ class GenericTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
 
     ~GenericTask();
 
-    virtual void _update(const Eigen::VectorXd &x);
+    virtual void _update();
 
     /**
      * @brief setA update the A matrix of the task

@@ -61,7 +61,7 @@ protected:
 
         _joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
-        _postural->update(Eigen::VectorXd(0));
+        _postural->update();
         _joint_limits->update();
 
 
@@ -378,7 +378,7 @@ TEST_F(TestSubTask, testgetb)
 
     b = subTask->getb();
     subTask->setLambda(0.1);
-    subTask->update(_postural->getActualPositions());
+    subTask->update();
     bLambda = subTask->getb();
 
     EXPECT_TRUE(vectorAreEqual(bLambda,b*0.1));
@@ -401,7 +401,7 @@ TEST_F(TestSubTask, testgetWeight)
     ASSERT_EQ(subTask->getWeight().rows(), 3);
     ASSERT_EQ(subTask->getWeight().cols(), 3);
 
-    subTask->update(Eigen::VectorXd(0));
+    subTask->update();
 
     std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
 
@@ -418,18 +418,18 @@ TEST_F(TestSubTask, testgetWeight)
     _postural->setWeight(W);
     std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
 
-    subTask->update(Eigen::VectorXd(0));
+    subTask->update();
     std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
 
-    tmp->update(Eigen::VectorXd(0));
+    tmp->update();
     std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
 
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),_postural->getWeight().block(0,0,3,3)));
     EXPECT_TRUE(matrixAreEqual(subTask->getWeight(),tmp->getWeight()));
 
     tmp->setWeight(2*W.block(0,0,3,3));
-    subTask->update(Eigen::VectorXd(0));
-    tmp->update(Eigen::VectorXd(0));
+    subTask->update();
+    tmp->update();
     std::cout<<"_postural->getWeight(): \n"<<_postural->getWeight()<<std::endl;
     std::cout<<"subTask->getWeight(): \n"<<subTask->getWeight()<<std::endl;
     std::cout<<"tmp->getWeight(): \n"<<tmp->getWeight()<<std::endl;
@@ -529,7 +529,7 @@ TEST_F(TestSubTask, testGetConstraints)
     _model_ptr->update();
 
 
-    subTask->update(Eigen::VectorXd(0));
+    subTask->update();
 
     EXPECT_FALSE( b == subTask->getb())<<"b: "<<b.transpose()<<"\n"<<"subTask->getb(): "<<subTask->getb()<<std::endl;
     EXPECT_FALSE( lowerBounds == subTask->getConstraints().front()->getLowerBound());
@@ -541,7 +541,7 @@ TEST_F(TestSubTask, testGetConstraints)
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
 
-    subTask->update(Eigen::VectorXd(0));
+    subTask->update();
 
     EXPECT_FALSE( b == subTask->getb())<<"b: "<<b.transpose()<<"\n"<<"subTask->getb(): "<<subTask->getb()<<std::endl;
     EXPECT_FALSE( lowerBounds == subTask->getConstraints().front()->getLowerBound());
@@ -617,8 +617,8 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(2);
     OpenSoT::SubTask::Ptr pose = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
 
-    left_leg->update(Eigen::VectorXd(0));
-    pose->update(Eigen::VectorXd(0));
+    left_leg->update();
+    pose->update();
 
 
     check_matrix_are_equal(pose->getA(), left_leg->getA().block(0,0,3,_model_ptr->getNv()));
@@ -635,8 +635,8 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(5);
     OpenSoT::SubTask::Ptr pose2 = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
 
-    left_leg->update(Eigen::VectorXd(0));
-    pose2->update(Eigen::VectorXd(0));
+    left_leg->update();
+    pose2->update();
 
 
     check_matrix_are_equal(pose2->getA(), left_leg->getA().block(3,0,3,_model_ptr->getNv()));
@@ -653,7 +653,7 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(4);
     indices.push_back(5);
     OpenSoT::SubTask::Ptr subtask = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
-    subtask->update(Eigen::VectorXd(0));
+    subtask->update();
 
     EXPECT_EQ(subtask->getA().rows(), indices.size());
     EXPECT_EQ(subtask->getA().cols(), _model_ptr->getNv());
@@ -677,7 +677,7 @@ TEST_F(TestSubTask, testWithCartesian)
     indices.push_back(0);
     indices.push_back(4);
     OpenSoT::SubTask::Ptr subtask2 = std::make_shared<OpenSoT::SubTask>(left_leg, indices);
-    subtask2->update(Eigen::VectorXd(0));
+    subtask2->update();
 
     EXPECT_EQ(subtask2->getA().rows(), indices.size());
     EXPECT_EQ(subtask2->getA().cols(), _model_ptr->getNv());
@@ -734,7 +734,7 @@ TEST_F(TestSubTask, testSubTaskCost)
     orientation_indices.push_back(5);
     OpenSoT::SubTask::Ptr orientation = std::make_shared<OpenSoT::SubTask>(left_leg, orientation_indices);
 
-    left_leg->update(Eigen::VectorXd(0));
+    left_leg->update();
 
 
     Eigen::VectorXd dq(_model_ptr->getNv()); dq.setRandom();
@@ -760,7 +760,7 @@ TEST_F(TestSubTask, testWithPostural)
 
     velocity::Postural::Ptr postural = std::make_shared<velocity::Postural>(*_model_ptr);
     postural->setReference(q_ref);
-    postural->update(Eigen::VectorXd());
+    postural->update();
 
     std::list<unsigned int> indices;
     // first chunk of size 3
@@ -782,7 +782,7 @@ TEST_F(TestSubTask, testWithPostural)
     indices.push_back(11);
 
     OpenSoT::SubTask::Ptr subtask = std::make_shared<OpenSoT::SubTask>(postural, indices);
-    subtask->update(Eigen::VectorXd(0));
+    subtask->update();
 
 
     for(unsigned int j = 0; j < _model_ptr->getNv(); ++j)

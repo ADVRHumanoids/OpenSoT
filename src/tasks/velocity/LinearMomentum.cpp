@@ -23,7 +23,7 @@ LinearMomentum::LinearMomentum(XBot::ModelInterface& robot):
     Task("LinearMomentum", robot.getNv()), _robot(robot)
 {
     _desiredLinearMomentum.setZero();
-    this->_update(Eigen::VectorXd(0));
+    this->_update();
 
     _W.resize(3,3);
     _W.setIdentity(3,3);
@@ -40,7 +40,7 @@ LinearMomentum::~LinearMomentum()
 
 }
 
-void LinearMomentum::_update(const Eigen::VectorXd& x)
+void LinearMomentum::_update()
 {
     _robot.computeCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(0,0,3,_x_size);

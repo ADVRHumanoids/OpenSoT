@@ -42,7 +42,7 @@ public:
     ~Contact();
     
 
-    void _update(const Eigen::VectorXd& x);
+    void _update();
 
     const std::string& getLinkName() const;
 

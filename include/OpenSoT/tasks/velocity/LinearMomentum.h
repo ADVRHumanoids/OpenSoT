@@ -50,7 +50,7 @@ namespace OpenSoT {
 
            Eigen::MatrixXd _Momentum;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
         public:
            /**

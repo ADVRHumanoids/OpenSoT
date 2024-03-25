@@ -46,7 +46,7 @@ protected:
             OpenSoT::tasks::acceleration::Postural(*_model));
 
         autostack = (l_arm + r_arm)/(postural);
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         eHQP.reset(new OpenSoT::solvers::eHQP(autostack->getStack()));
 
@@ -114,7 +114,7 @@ TEST_F(testCartesianTask, testCartesianTask_)
         _model->setJointVelocity(_dq);
         _model->update();
 
-        autostack->update(Eigen::VectorXd(0));
+        autostack->update();
 
         if(!(eHQP->solve(ddq)))
             std::cout<<"CAN NOT SOLVE"<<std::endl;

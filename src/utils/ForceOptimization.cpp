@@ -144,7 +144,7 @@ bool OpenSoT::utils::ForceOptimization::compute(const Eigen::VectorXd& fixed_bas
     Fc.resize(_contact_links.size());
     
     _forza_giusta->setFloatingBaseTorque(fixed_base_torque.head<6>());
-    _autostack->update(_x_value);
+    _autostack->update();
     
     if(!_solver->solve(_x_value))
     {

@@ -382,14 +382,14 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack,
 
 }
 
-void OpenSoT::AutoStack::update(const Eigen::VectorXd &state)
+void OpenSoT::AutoStack::update()
 {
     _boundsAggregated->update();
     typedef std::vector<OpenSoT::tasks::Aggregated::TaskPtr>::iterator it_t;
     for(it_t task = _stack.begin(); task != _stack.end(); ++task)
-        (*task)->update(state);
+        (*task)->update();
     if(_regularisation_task)
-        _regularisation_task->update(state);
+        _regularisation_task->update();
 }
 
 std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& OpenSoT::AutoStack::getBoundsList()

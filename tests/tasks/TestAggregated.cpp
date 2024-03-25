@@ -130,8 +130,8 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(Eigen::VectorXd(0));
-        aggregated_task->update(Eigen::VectorXd(0));
+        postural_task->update();
+        aggregated_task->update();
         EXPECT_TRUE(aggregated_task->getA() == postural_task->getA());
         EXPECT_TRUE(aggregated_task->getb() == postural_task->getb());
 
@@ -160,8 +160,8 @@ TEST_F(testAggregatedTask, testAggregatedTask_)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        postural_task->update(Eigen::VectorXd(0));
-        aggregated_task->update(Eigen::VectorXd(0));
+        postural_task->update();
+        aggregated_task->update();
         EXPECT_TRUE(aggregated_task->getA() == postural_task->getA());
         EXPECT_TRUE(aggregated_task->getb() == postural_task->getb()) << "aggregated_task b is " << aggregated_task->getb() << std::endl
                                                                       << " while postural_task b is " << postural_task->getb();
@@ -260,8 +260,8 @@ TEST_F(testAggregatedTask, testAggregatedCost)
     Eigen::VectorXd dq(_model_ptr->getNv());
     dq.setRandom();
 
-    Cartesian1->update(Eigen::VectorXd(0));
-    Cartesian2->update(Eigen::VectorXd(0));
+    Cartesian1->update();
+    Cartesian2->update();
 
     double Cartesian1_cost = Cartesian1->computeCost(dq);
     double Cartesian2_cost = Cartesian2->computeCost(dq);
@@ -328,9 +328,9 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
         _task1->getConstraints().push_back(constraintCoMVelocity);
         EXPECT_EQ(_task1->getConstraints().size(), 2)<<"3.2"<<std::endl;
 
-        _task0->update(Eigen::VectorXd(0));
+        _task0->update();
         EXPECT_EQ(_task0->getConstraints().size(), 2)<<"4"<<std::endl;
-        _task1->update(Eigen::VectorXd(0));
+        _task1->update();
         EXPECT_EQ(_task1->getConstraints().size(), 2)<<"5"<<std::endl;
         ASSERT_EQ(_task1->getOwnConstraints().size(), 1);
         ASSERT_EQ(_task1->getAggregatedConstraints().size(), 1);
@@ -393,9 +393,9 @@ TEST_F(testAggregatedTask, testConstraintsUpdate)
         _model_ptr->setJointPosition(q);
         _model_ptr->update();
 
-        _task0->update(Eigen::VectorXd(0));
+        _task0->update();
         EXPECT_EQ(_task0->getConstraints().size(), 2)<<"6"<<std::endl;
-        _task1->update(Eigen::VectorXd(0));
+        _task1->update();
         EXPECT_EQ(_task1->getConstraints().size(), 2)<<"7"<<std::endl;
 
         A0 = _task0->getA();
@@ -482,7 +482,7 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
     W = Eigen::MatrixXd::Identity(W.rows(), W.cols());
     waist->setWeight(10*W);
     lwrist->setWeight(20*W);
-    t1->update(q);
+    t1->update();
     std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
     std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
     std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
@@ -490,7 +490,7 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
     EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
     Eigen::MatrixXd W2(12,12); W2.setOnes();
     t1->setWeight(W2);
-    t1->update(q);
+    t1->update();
     std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
     std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
     std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
@@ -498,7 +498,7 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
     EXPECT_TRUE(matrixAreEqual(lwrist->getWeight(), t1->getWeight().block(0,0,6,6)));
     waist->setWeight(10*W);
     lwrist->setWeight(20*W);
-    t1->update(q);
+    t1->update();
     std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
     std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
     std::cout<<"lwrist->getWeight(): \n"<<lwrist->getWeight()<<std::endl;
@@ -514,10 +514,10 @@ TEST_F(testAggregatedTask, testWeightsUpdate)
 
     std::list<unsigned int> id = {1,2};
     auto s1 = rwrist%id;
-    s1->update(Eigen::VectorXd(0));
+    s1->update();
 
     auto t2 = (t1+s1);
-    t2->update(Eigen::VectorXd(0));
+    t2->update();
 
     std::cout<<"t1->getWeight(): \n"<<t1->getWeight()<<std::endl;
     std::cout<<"waist->getWeight(): \n"<<waist->getWeight()<<std::endl;
@@ -563,7 +563,7 @@ TEST_F(testAggregatedTask, testSingleTask)
 
     OpenSoT::tasks::Aggregated::Ptr aggr = std::make_shared<OpenSoT::tasks::Aggregated>(waist, _model_ptr->getNv());
 
-    aggr->update(Eigen::VectorXd(0));
+    aggr->update();
 
     EXPECT_TRUE(aggr->getA() == waist->getA());
     EXPECT_TRUE(aggr->getb() == waist->getb());
