@@ -15,9 +15,8 @@
 #include <fstream>
 #include <OpenSoT/utils/AutoStack.h>
 #include <matlogger2/matlogger2.h>
+#include "../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = relative_path;
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
@@ -26,7 +25,7 @@ namespace {
 
 void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
                               const Eigen::VectorXd& b_ch,
-                              std::vector<KDL::Vector>& points) {
+                              std::vector<Eigen::Vector3d>& points) {
     unsigned int nRects = 0;
     for(unsigned int i = 0; i < A_ch.rows(); ++i)
     {
@@ -65,7 +64,7 @@ void getPointsFromConstraints(const Eigen::MatrixXd &A_ch,
         double y = (a_i*c_j-c_i*a_j)/(a_i*b_j-b_i*a_j);
         std::cout << "(" << x << "," << y << ")" << std::endl;
         if(!isnan(x) && !isnan(y))
-            points.push_back(KDL::Vector(x,y,0.0));
+            points.push_back(Eigen::Vector3d(x,y,0.0));
 
     }
 }
@@ -101,24 +100,23 @@ protected:
 };
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface& _robot) {
-    Eigen::VectorXd q(_robot.getJointNum());
-    q.setZero(q.size());
+    Eigen::VectorXd q = _robot.getNeutralQ();
 
-    q[_robot.getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q[_robot.getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q[_robot.getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    q[_robot.getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[_robot.getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[_robot.getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[_robot.getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[_robot.getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[_robot.getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    q[_robot.getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[_robot.getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    q[_robot.getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    q[_robot.getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[_robot.getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[_robot.getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    q[_robot.getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    q[_robot.getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-    q[_robot.getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    q[_robot.getQIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[_robot.getQIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[_robot.getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
 
     std::cout << "Q_initial: " << q << std::endl;
@@ -145,7 +143,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
     XBot::ModelInterface::Ptr _model_ptr_com;
-    _model_ptr_com = XBot::ModelInterface::getModel(_path_to_cfg);
+    _model_ptr_com = GetTestModel("coman_floating_base");
     if(_model_ptr_com)
         std::cout<<"pointer address: "<<_model_ptr_com.get()<<std::endl;
     else
@@ -172,13 +170,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     _model_ptr_com->getJointLimits(qmin, qmax);
 
     OpenSoT::constraints::Aggregated::ConstraintPtr boundsJointLimits(
-            new OpenSoT::constraints::velocity::JointLimits(q, qmax, qmin));
+            new OpenSoT::constraints::velocity::JointLimits(*_model_ptr_com, qmax, qmin));
 
-    Eigen::VectorXd qdotmax(q.size()); qdotmax.setOnes(q.size());
+    Eigen::VectorXd qdotmax(_model_ptr_com->getNv()); qdotmax.setOnes();
     qdotmax *= 0.3;
     qdotmax.segment(0,6)<<100.,100.,100.,100.,100.,100.;
     OpenSoT::constraints::Aggregated::ConstraintPtr velocityLimits(
-            new OpenSoT::constraints::velocity::VelocityLimits(qdotmax, 3e-3));
+            new OpenSoT::constraints::velocity::VelocityLimits(*_model_ptr_com, qdotmax, 3e-3));
 
 
     std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds_list;
@@ -187,10 +185,10 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     bounds_list.push_back(velocityLimits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds(
-                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+                new OpenSoT::constraints::Aggregated(bounds_list, _model_ptr_com->getNv()));
 
     OpenSoT::tasks::velocity::CoM::Ptr com_task(
-                new OpenSoT::tasks::velocity::CoM(q, *(_model_ptr_com.get())));
+                new OpenSoT::tasks::velocity::CoM(*(_model_ptr_com.get())));
     com_task->setLambda(.6);
 
     Eigen::Matrix3d W;
@@ -216,19 +214,19 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     OpenSoT::constraints::velocity::ConvexHull::Ptr boundsConvexHull(
                 new OpenSoT::constraints::velocity::ConvexHull(
-                    q, *(_model_ptr_com.get()),
+                    *(_model_ptr_com.get()),
                     _links_in_contact, 0.01));
     com_task->getConstraints().push_back(boundsConvexHull);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr right_foot_task(
-                new OpenSoT::tasks::velocity::Cartesian("world::right_foot",q , *(_model_ptr_com.get()),
+                new OpenSoT::tasks::velocity::Cartesian("world::right_foot", *(_model_ptr_com.get()),
                                                         "r_sole",
                                                         "world"));
     right_foot_task->setLambda(.2);
     right_foot_task->setOrientationErrorGain(.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr left_foot_task(
-                new OpenSoT::tasks::velocity::Cartesian("world::left_foot",q , *(_model_ptr_com.get()),
+                new OpenSoT::tasks::velocity::Cartesian("world::left_foot", *(_model_ptr_com.get()),
                                                         "l_sole",
                                                         "r_sole"));
     left_foot_task->setLambda(.2);
@@ -236,7 +234,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     // Postural Task
     OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-            new OpenSoT::tasks::velocity::Postural(q));
+            new OpenSoT::tasks::velocity::Postural(*_model_ptr_com));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     if(footStrategy == USE_TASK)
@@ -295,14 +293,14 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         _model_ptr_com->setJointPosition(q);
         _model_ptr_com->update();
 
-        right_foot_task->update(q);
+        right_foot_task->update(Eigen::VectorXd(0));
         std::cout<<"right_foot_task->getb().norm(): "<<right_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
-        left_foot_task->update(q);
+        left_foot_task->update(Eigen::VectorXd(0));
         std::cout<<"left_foot_task->getb().norm(): "<<left_foot_task->getb().norm()<<" @ iter: "<<i<<std::endl;
-        com_task->update(q);
+        com_task->update(Eigen::VectorXd(0));
         boundsConvexHull->log(logger);
-        postural_task->update(q);
-        bounds->update(q);
+        postural_task->update(Eigen::VectorXd(0));
+        bounds->update(Eigen::VectorXd(0));
 
         _log << com_task->getActualPosition()[0] << ","
             << com_task->getActualPosition()[1] <<";";
@@ -321,7 +319,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         Eigen::VectorXd dq(q.size());
         dq.setZero(dq.size());
         EXPECT_TRUE(sot->solve(dq));
-        q += dq;
+        q = _model_ptr_com->sum(q, dq);
 
         Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
         for(unsigned int r = 0; r < 4; ++r)
@@ -339,13 +337,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
     _model_ptr_com->setJointPosition(q);
     _model_ptr_com->update();
 
-    boundsConvexHull->update(q);
+    boundsConvexHull->update(Eigen::VectorXd(0));
     boundsConvexHull->log(logger);
-    std::vector<KDL::Vector> points;
-    std::vector<KDL::Vector> points_inner;
+    std::vector<Eigen::Vector3d> points;
+    std::vector<Eigen::Vector3d> points_inner;
     boundsConvexHull->getConvexHull(points);
 
-    KDL::Vector point_old;
+    Eigen::Vector3d point_old;
     Eigen::MatrixXd A_ch(_links_in_contact.size(),2), A_ch_outer(_links_in_contact.size(),2);
     Eigen::VectorXd b_ch(_links_in_contact.size()), b_ch_outer(_links_in_contact.size());
     boundsConvexHull->getConstraints(points, A_ch, b_ch, 0.01);
@@ -360,21 +358,18 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     points.push_back(points.front());
     points_inner.push_back(points_inner.front());
-    typedef std::vector<KDL::Vector>::iterator it_p;
-    for(it_p point = points.begin();
-        point != points.end();
-        ++point)
+    for(auto point : points)
     {
         std::cout << std::endl
                   << "=================" << std::endl
                   << "Moving from ("
-                  << point_old.x() << "," << point_old.y()
+                  << point_old[0] << "," << point_old[1]
                   << ") to ("
-                  << point->x() << "," << point->y()
+                  << point[0] << "," << point[1]
                   <<")" << std::endl;
 
-        T_com_p_ref[0] = point->x();
-        T_com_p_ref[1] = point->y();
+        T_com_p_ref[0] = point[0];
+        T_com_p_ref[1] = point[1];
 
         com_task->setReference(T_com_p_ref);
 
@@ -391,12 +386,12 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             _model_ptr_com->setJointPosition(q);
             _model_ptr_com->update();
 
-            right_foot_task->update(q);
-            left_foot_task->update(q);
+            right_foot_task->update(Eigen::VectorXd(0));
+            left_foot_task->update(Eigen::VectorXd(0));
             com_task->update(q);
             boundsConvexHull->log(logger);
-            postural_task->update(q);
-            bounds->update(q);
+            postural_task->update(Eigen::VectorXd(0));
+            bounds->update(Eigen::VectorXd(0));
 
             _log << com_task->getActualPosition()[0] << ","
                 << com_task->getActualPosition()[1] <<";";
@@ -431,7 +426,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             Eigen::VectorXd dq(q.size());
             dq.setZero(dq.size());
             EXPECT_TRUE(sot->solve(dq));
-            q += dq;
+            q = _model_ptr_com->sum(q, dq);
 
 
             Eigen::MatrixXd right_foot_pose_now = right_foot_task->getActualPose();
@@ -469,7 +464,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
         exp_distance<<0.01,0.01;
         double expected_d = exp_distance.norm();
 
-        std::vector<KDL::Vector> points_check;
+        std::vector<Eigen::Vector3d> points_check;
         boundsConvexHull->getConvexHull(points_check);
         Eigen::MatrixXd A_ch_check(_links_in_contact.size(), 2);
         Eigen::VectorXd b_ch_check(_links_in_contact.size());
@@ -477,7 +472,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
 
         EXPECT_NEAR(d, expected_d, (expected_d-0.01)*1.01) << "Failed to reach point "
-                                                           << *point
+                                                           << point
                                                            << " in the allocated threshold (0.01m)." << std::endl;
         //EXPECT_TRUE(A_ch == A_ch_check) << "Convex Hull changed!" << std::endl;
 
@@ -492,7 +487,7 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
             std::cout << "Had originally " << points.size() -1 << " points in the Convex Hull, "
                       << " now we have " << points_check.size() << std::endl;
         }
-        point_old = *point;
+        point_old = point;
     }
 
 
@@ -501,18 +496,13 @@ TEST_P(testQPOases_ConvexHull, tryFollowingBounds) {
 
     if(footStrategy == USE_TASK)
     {
-        typedef std::vector<KDL::Vector>::iterator it_p;
         _log << "points=[";
-        for(it_p point = points.begin();
-            point != points.end();
-            ++point)
-            _log << point->x() << "," << point->y() << ";";
+        for(auto point : points)
+            _log << point[0] << "," << point[1] << ";";
         _log << "];" << std::endl;
         _log << "points_inner=[";
-        for(it_p point = points_inner.begin();
-            point != points_inner.end();
-            ++point)
-            _log << point->x() << "," << point->y() << ";";
+        for(auto point : points_inner)
+            _log << point[0] << "," << point[1] << ";";
         _log << "];" << std::endl;
 
         _log << "ch_figure = figure('Position',[0 0 1027 768]); hold on; ref=plot(points(:,1), points(:,2), 'r-.'); constr=plot(points_inner(:,1), points_inner(:,2), 'g'); axis equal;" << std::endl;
