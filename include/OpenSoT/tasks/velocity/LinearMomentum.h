@@ -58,7 +58,7 @@ namespace OpenSoT {
             * @param x joint states
             * @param robot reference to a model
             */
-           LinearMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot);
+           LinearMomentum(XBot::ModelInterface& robot);
            ~LinearMomentum();
 
            /**
