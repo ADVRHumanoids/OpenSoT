@@ -489,6 +489,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     std::set<std::pair<std::string,std::string> > whiteList;
     whiteList.insert(std::pair<std::string, std::string>(linkA,linkB));
     this->sc_constraint->setCollisionList(whiteList);
+    this->sc_constraint->setMaxPairs(whiteList.size());
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
@@ -724,6 +725,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     whiteList.insert(std::pair<std::string,std::string>(linkA,linkB));
     whiteList.insert(std::pair<std::string,std::string>(linkC,linkD));
     this->sc_constraint->setCollisionList(whiteList);
+    this->sc_constraint->setMaxPairs(whiteList.size());
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
@@ -945,6 +947,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     whiteList.insert(std::pair<std::string,std::string>(linkA,linkB));
     whiteList.insert(std::pair<std::string,std::string>(linkC,linkD));
     this->sc_constraint->setCollisionList(whiteList);
+    this->sc_constraint->setMaxPairs(whiteList.size());
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
@@ -1089,7 +1092,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     std::cout << "xxx Setting whitelist" << std::endl;
     std::set<std::pair<std::string,std::string> > whiteList2;
     whiteList2.insert(std::pair<std::string,std::string>(linkA,linkB));
-    EXPECT_TRUE(this->sc_constraint->updateCollisionList(whiteList2));
+    this->sc_constraint->setCollisionList(whiteList2);
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     dq.setZero();

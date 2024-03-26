@@ -9,10 +9,12 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include <xbot2_interface/collision.h>
 #include <chrono>
 #include <OpenSoT/utils/AutoStack.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <fstream>
+#include "collision_utils.h"
 #define ENABLE_ROS false
 
 #if ENABLE_ROS
@@ -40,35 +42,41 @@ class testCollisionAvoidanceConstraint : public ::testing::Test
 
 public:
 
- protected:
+    std::string ReadFile(std::string path)
+    {
+        std::ifstream t(path);
+        std::stringstream buffer;
+        buffer << t.rdbuf();
+        return buffer.str();
+    }
+
 
   testCollisionAvoidanceConstraint()
   {
-      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_capsules.yaml";
-      std::string urdf_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
-      std::ifstream f(urdf_path);
+      std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
+      std::ifstream f(urdf_capsule_path);
       std::stringstream ss;
       ss << f.rdbuf();
 
-      urdf = MAKE_SHARED<urdf::Model>();
-      urdf->initFile(urdf_path);
+      urdf = std::make_shared<urdf::Model>();
+      urdf->initFile(urdf_capsule_path);
 
       std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
-      srdf = MAKE_SHARED<srdf::Model>();
+      srdf = std::make_shared<srdf::Model>();
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
-      _path_to_cfg = relative_path;
 
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+      _model_ptr = XBot::ModelInterface::getModel(ReadFile(urdf_capsule_path), ReadFile(srdf_capsule_path), "pin");
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
       else
           std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-      q.resize(_model_ptr->getJointNum());
-      q.setZero(q.size());
+      q = _model_ptr->getNeutralQ();
+      _model_ptr->setJointPosition(q);
+      _model_ptr->update();
 
 #if ENABLE_ROS
       int argc = 0;
@@ -78,13 +86,13 @@ public:
       pub = n->advertise<sensor_msgs::JointState>("joint_states", 1000,1);
 
       KDL::Tree my_tree;
-      if (!kdl_parser::treeFromFile(urdf_path, my_tree)){
+      if (!kdl_parser::treeFromFile(urdf_capsule_path, my_tree)){
         ROS_ERROR("Failed to construct kdl tree");}
       rsp = std::make_shared<robot_state_publisher::RobotStatePublisher>(my_tree);
       n->setParam("/robot_description", ss.str());
 
-      for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
-          joint_state.name.push_back(this->_model_ptr->getEnabledJointNames()[i]);
+      for(unsigned int i = 0; i < this->_model_ptr->getJointNames().size(); ++i){
+          joint_state.name.push_back(this->_model_ptr->getJointNames()[i]);
           joint_state.position.push_back(0.0);}
 #endif
 
@@ -102,28 +110,26 @@ public:
 #if ENABLE_ROS
 public:
   void publishJointStates(const Eigen::VectorXd& q)
-{
-    std::map<std::string, double> joint_map;
-    for(unsigned int i = 0; i < q.size(); ++i){
-        joint_state.position[i] = q[i];
-        joint_map[joint_state.name[i]] = joint_state.position[i];
-    }
-    joint_state.header.stamp = ros::Time::now();
+  {
+      std::map<std::string, double> joint_map;
+      for(unsigned int i = 0; i < q.size(); ++i){
+          joint_state.position[i] = q[i];
+          joint_map[joint_state.name[i]] = joint_state.position[i];
+      }
+      joint_state.header.stamp = ros::Time::now();
 
-    pub.publish(joint_state);
+      pub.publish(joint_state);
 
-    rsp->publishTransforms(joint_map, ros::Time::now(), "");
-    rsp->publishFixedTransforms("");
+      rsp->publishTransforms(joint_map, ros::Time::now(), "");
+      rsp->publishFixedTransforms("");
 
-
-    ros::spinOnce();
-}
+      ros::spinOnce();
+  }
 #endif
 
 
 
   XBot::ModelInterface::Ptr _model_ptr;
-  std::string _path_to_cfg;
   Eigen::VectorXd q;
 
   urdf::ModelSharedPtr urdf;
@@ -140,25 +146,24 @@ public:
 };
 
 Eigen::VectorXd getGoodInitialPosition(const XBot::ModelInterface::Ptr _model_ptr) {
-    Eigen::VectorXd _q(_model_ptr->getJointNum());
-    _q.setZero(_q.size());
-    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+    _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
     return _q;
 }
@@ -183,7 +188,6 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     string left_arm_link = "LSoftHandLink";
     auto left_arm_task = std::make_shared<OpenSoT::tasks::velocity::Cartesian>
                              ( base_link + "_TO_" + left_arm_link,
-                               q,
                                *_model_ptr,
                                left_arm_link,
                                base_link
@@ -195,7 +199,6 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     string right_arm_link = "RSoftHandLink";
     auto right_arm_task = std::make_shared<OpenSoT::tasks::velocity::Cartesian>
                              ( base_link + "_TO_" + right_arm_link,
-                               q,
                                *_model_ptr,
                                right_arm_link,
                                base_link
@@ -206,22 +209,30 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 
     Eigen::VectorXd q_min, q_max;
     _model_ptr->getJointLimits ( q_min, q_max );
-    auto joint_limit_constraint = std::make_shared<OpenSoT::constraints::velocity::JointLimits> ( q, q_max, q_min );
+    auto joint_limit_constraint = std::make_shared<OpenSoT::constraints::velocity::JointLimits> ( *_model_ptr, q_max, q_min );
 
+    auto joint_velocity_limit_constraint = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits> ( *_model_ptr, 1., 0.005);
 
-    std::list<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
-    std::map<std::string, std::shared_ptr<fcl::CollisionObjectd>> envionment_collision_objects;
-    std::shared_ptr<fcl::CollisionGeometryd> shape = std::make_shared<fcl::Boxd> ( 0.1, 0.6, 1.4 );
-    std::shared_ptr<fcl::CollisionObjectd> collision_object ( new fcl::CollisionObjectd ( shape ) );
-    fcl::Transform3d shape_origin;
-    shape_origin.translation() << 0.7, 0, 0.; // in world frame
-    shape_origin.linear() = Eigen::Matrix3d::Identity();
-    collision_object->setTransform ( shape_origin );
-    envionment_collision_objects["env"] = collision_object;
 
     OpenSoT::constraints::velocity::CollisionAvoidance::Ptr environment_collsion_constraint =
             std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance> (
-                q, *_model_ptr, -1, this->urdf, this->srdf);
+                *_model_ptr, -1, this->urdf, this->srdf);
+    // we consider only environment collision avoidance
+    environment_collsion_constraint->setCollisionList(std::set<std::pair<std::string, std::string>>());
+
+    Eigen::Affine3d w_T_c; w_T_c.setIdentity();
+    w_T_c.translation()<< 0.7, 0, 0.;
+    XBot::Collision::Shape::Box box;
+    box.size<<0.1, 0.6, 1.4;
+
+    EXPECT_TRUE(environment_collsion_constraint->addCollisionShape("mybox", "world", box, w_T_c));
+
+    std::set<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
+
+    environment_collsion_constraint->setLinksVsEnvironment(interested_links);
+
+    environment_collsion_constraint->setMaxPairs(300);
+
 
     environment_collsion_constraint->setDetectionThreshold(1.);
     environment_collsion_constraint->setLinkPairThreshold(0.0001);
@@ -230,18 +241,11 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 
 
 
-    for(auto pair : envionment_collision_objects)
-        EXPECT_TRUE(environment_collsion_constraint->addWorldCollision(pair.first, pair.second));
-
-
-    // we consider only environment collision avoidance
-    environment_collsion_constraint->setCollisionWhiteList(std::list<LinkPairDistance::LinksPair>());
-    environment_collsion_constraint->setLinksVsEnvironment(interested_links);
-
 
     auto autostack_ = std::make_shared<OpenSoT::AutoStack> ( left_arm_task + right_arm_task); // + 0.2*postural_task%indices
     autostack_ << joint_limit_constraint;
     autostack_ << environment_collsion_constraint;
+    autostack_<<joint_velocity_limit_constraint;
 
     /* Create solver */
    double eps_regularization = 1e6;
@@ -251,9 +255,6 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
                      eps_regularization,
                      solver_backend );
 
-    Eigen::Affine3d collision_pose;
-    collision_pose.translation() = shape_origin.translation(); // in world frame
-    collision_pose.linear() = shape_origin.linear();
 
 #if ENABLE_ROS
     /* visualization */
@@ -273,7 +274,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         cube.color.g = 1.0;
         cube.color.a = 0.5;
 
-        tf::poseEigenToMsg ( collision_pose, cube.pose );
+        tf::poseEigenToMsg ( w_T_c, cube.pose );
 #endif
 
 
@@ -281,7 +282,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     double T = 5; //[s]
 
     Eigen::VectorXd dq;
-    dq.setZero(q.size());
+    dq.setZero(_model_ptr->getNv());
     for(unsigned int i = 0; i <= int(T/dt); ++i)
     {
 
@@ -302,11 +303,9 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         right_arm_task->setReference ( desired_pose.matrix() );
 
 
-        EXPECT_LE(left_arm_task->getActualPose()(0,3), 0.406); //checked empirically...
-
-        autostack_->update ( q );
+        autostack_->update ();
         EXPECT_TRUE(solver->solve ( dq ));
-        q += dq;
+        q = _model_ptr->sum(q, dq);
 
 #if ENABLE_ROS
         this->publishJointStates(q);
@@ -315,6 +314,15 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 #endif
 
     }
+
+    /**
+     * Due to environment the final y position of the left arm should be < than the final position of the right arm
+     */
+    EXPECT_NEAR(std::fabs(left_arm_task->getActualPose()(0,3) - right_arm_task->getActualPose()(0,3)), 0.00130826, 1e-8); //checked empirically...
+    std::cout<<"std::fabs(left_arm_task->getActualPose()(0,3) - right_arm_task->getActualPose()(0,3)): "<<std::fabs(left_arm_task->getActualPose()(0,3) - right_arm_task->getActualPose()(0,3))<<std::endl;
+    std::cout<<"left_arm_task->getActualPose()(0,3): "<<left_arm_task->getActualPose()(0,3)<<std::endl;
+    std::cout<<"right_arm_task->getActualPose()(0,3): "<<right_arm_task->getActualPose()(0,3)<<std::endl;
+
 
 
 

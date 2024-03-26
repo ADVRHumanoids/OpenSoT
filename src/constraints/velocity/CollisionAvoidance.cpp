@@ -97,12 +97,16 @@ void CollisionAvoidance::update()
     // reset constraint
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
+    _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
+
+
+    _distance_J.setZero(_dist_calc->getNumCollisionPairs(_include_env), _distance_J.cols());
+    _distances.setZero(_distance_J.rows());
 
     // compute distances
     _dist_calc->computeDistance(_distances, _include_env, _detection_threshold);
 
     // compute jacobians
-    _distance_J.setZero(_dist_calc->getNumCollisionPairs(_include_env), _distance_J.cols());
     _dist_calc->getDistanceJacobian(_distance_J, _include_env);
 
     // populate Aineq and bUpperBound
@@ -138,48 +142,29 @@ void CollisionAvoidance::update()
 
 }
 
-bool CollisionAvoidance::setCollisionList(std::set<std::pair<std::string, std::string>> collisionList)
+bool CollisionAvoidance::addCollisionShape(const std::string &name,
+                       const std::string &link,
+                       const XBot::Collision::Shape::Variant &shape,
+                       const Eigen::Affine3d &link_T_shape,
+                       const std::vector<std::string> &disabled_collisions)
 {
-    try
-    {
-        _dist_calc->setLinkPairs(collisionList);
-        _max_pairs = collisionList.size();
-        // initialize matrices
-        _Aineq.setZero(_max_pairs, getXSize());
-        _bUpperBound.setZero(_max_pairs);
-        _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
-        _distance_J.setZero(_max_pairs, _robot.getNv());
-
-        return true;
-    }
-    catch(std::out_of_range& e)
-    {
-        Logger::error(e.what());
-        return false;
-    }
+    return _dist_calc->addCollisionShape(name, link, shape, link_T_shape, disabled_collisions);
 }
 
-bool CollisionAvoidance::updateCollisionList(std::set<std::pair<std::string, std::string>> collisionList)
+bool CollisionAvoidance::moveCollisionShape(const std::string& id, const Eigen::Affine3d& new_pose)
 {
-    if(collisionList.size() > _max_pairs)
-    {
-        Logger::error("collisionList.size() > _max_pairs when updating collision list");
-        return false;
-    }
+    return _dist_calc->moveCollisionShape(id, new_pose);
+}
 
-    try
-    {
-        _dist_calc->setLinkPairs(collisionList);
-        _Aineq.setZero();
-        _bUpperBound.setZero();
-        _distance_J.setZero(collisionList.size(), _robot.getNv());
-        return true;
-    }
-    catch(std::out_of_range& e)
-    {
-        Logger::error(e.what());
-        return false;
-    }
+void CollisionAvoidance::setMaxPairs(const unsigned int max_pairs)
+{
+    _max_pairs = max_pairs;
+    update();
+}
+
+void CollisionAvoidance::setCollisionList(std::set<std::pair<std::string, std::string>> collisionList)
+{
+    _dist_calc->setLinkPairs(collisionList);
 }
 
 void CollisionAvoidance::collisionModelUpdated()
@@ -187,41 +172,25 @@ void CollisionAvoidance::collisionModelUpdated()
     _lpv = _dist_calc->getCollisionPairs(_include_env);
 }
 
-// bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::PlanningSceneWorld &wc)
-// {
-//     return _dist_calc->setWorldCollisions(wc);
-// }
 
-// void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
-// {
-//     _dist_calc->setLinksVsEnvironment(links);
-// }
 
-// bool CollisionAvoidance::addWorldCollision(const std::string &id,
-//                                                std::shared_ptr<fcl::CollisionObjectd> fcl_obj)
-// {
-//     return _dist_calc->addWorldCollision(id, fcl_obj);
-// }
+
 
 // bool CollisionAvoidance::removeWorldCollision(const std::string &id)
 // {
 //     return _dist_calc->removeWorldCollision(id);
 // }
 
-// bool CollisionAvoidance::moveWorldCollision(const std::string &id,
-//                                             Eigen::Affine3d new_pose)
-// {
-//     return _dist_calc->moveWorldCollision(id, new_pose);
-// }
+
 
 void CollisionAvoidance::setBoundScaling(const double boundScaling)
 {
     _bound_scaling = boundScaling;
 }
 
-void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string> &links)
+void CollisionAvoidance::setLinksVsEnvironment(const std::set<std::string> &links)
 {
-    _dist_calc->setLinksVsEnvironment(std::set(links.begin(), links.end()));
+    _dist_calc->setLinksVsEnvironment(links);
 }
 
 Collision::CollisionModel &CollisionAvoidance::getCollisionModel()
