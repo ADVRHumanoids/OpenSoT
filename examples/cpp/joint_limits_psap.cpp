@@ -22,7 +22,7 @@ public:
         /**
          * @brief Create and get a model Pointer from config
          */
-        _model_ptr = GetTestModel("coman");
+        _model_ptr = GetTestModel("coman"); //this version of coman is fixed-base
         /**
          * @brief Create a logger
          */
@@ -37,26 +37,25 @@ public:
      * @return q
      */
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model) {
-        Eigen::VectorXd _q(_model->getJointNum());
-        _q.setZero(_q.size());
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
 
-        _q[_model->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-        _q[_model->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+        _q[_model->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+        _q[_model->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-        _q[_model->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+        _q[_model->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+        _q[_model->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
         return _q;
     }
@@ -69,7 +68,7 @@ public:
         /**
          * @brief Initialize zero joint velocity in the model
          */
-        qdot.setZero(_model_ptr->getJointNum());
+        qdot.setZero(_model_ptr->getNv());
         _model_ptr->setJointVelocity(qdot);
 
         /**
@@ -91,7 +90,7 @@ public:
         /**
          * @brief Set joint acceleration limits
          */
-        acc_lims.setOnes(_model_ptr->getJointNum());
+        acc_lims.setOnes(_model_ptr->getNv());
         acc_lims *= 20.;
         
         /**
@@ -104,7 +103,7 @@ public:
          */
         qdotMax = M_PI;
         Eigen::VectorXd vel_lims;
-        vel_lims.setOnes(_model_ptr->getJointNum());
+        vel_lims.setOnes(_model_ptr->getNv());
         vel_lims *= qdotMax;
 
         /**
@@ -187,8 +186,7 @@ public:
         /**
          * @brief Creates a reference in joint space and set to postural task
          */
-        Eigen::VectorXd qref(this->q.size());
-        qref.setZero();
+        Eigen::VectorXd qref = _model_ptr->getNeutralQ();
         this->postural->setReference(qref);
 
         /**
@@ -211,7 +209,7 @@ public:
              * for this reason is not needed to pass anything to the update of the autostack
              * @note Internally all the stacks are updated using the updated model
              */
-            this->autostack->update(Eigen::VectorXd(0));
+            this->autostack->update();
 
             /**
              * @brief 3. Call solve from solver and computes next desired joint acceleration
@@ -226,7 +224,7 @@ public:
             /**
              * @brief Integrates solution to compute next joint position and velocities assuming constant acceleration
              */
-            this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+            this->q = _model_ptr->sum(this->q, this->qdot*this->dT + 0.5*qddot*this->dT*this->dT);
             this->qdot += qddot*this->dT;
 
             /**
@@ -266,7 +264,7 @@ public:
              * for this reason is not needed to pass anything to the update of the autostack
              * @note Internally all the stacks are updated using the updated model
              */
-            this->autostack->update(Eigen::VectorXd(0));
+            this->autostack->update();
             this->autostack->log(this->logger);
 
             /**
@@ -282,7 +280,7 @@ public:
             /**
              * @brief Integrates solution to compute next joint position and velocities assuming constant acceleration
              */
-            this->q += this->qdot*this->dT + 0.5*qddot*this->dT*this->dT;
+            this->q = _model_ptr->sum(this->q, this->qdot*this->dT + 0.5*qddot*this->dT*this->dT);
             this->qdot += qddot*this->dT;
 
             /**

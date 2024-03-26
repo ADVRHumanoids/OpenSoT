@@ -56,33 +56,29 @@ namespace{
          * @param _model of the robot
          * @param q configuration
          */
-        theWalkingStack(XBot::ModelInterface& _model,
-                        const Eigen::VectorXd& q):
-            model_ref(_model),
-            I(q.size(), q.size())
+        theWalkingStack(XBot::ModelInterface& _model):
+            model_ref(_model)
         {
-            I.setIdentity(q.size(), q.size());
-
             using namespace OpenSoT::tasks::velocity;
             /**
               * @brief Creates Cartesian tasks for l_wrist and r_wrist frames w.r.t. DWYTorso frame,
               * and l_sole and r_sole w.r.t. world frame
               **/
-            l_wrist = std::make_shared<Cartesian>("Cartesian::l_wrist", q, model_ref, "l_wrist","DWYTorso");
-            r_wrist = std::make_shared<Cartesian>("Cartesian::r_wrist", q, model_ref, "r_wrist","DWYTorso");
-            l_sole = std::make_shared<Cartesian>("Cartesian::l_sole", q, model_ref, "l_sole","world");
-            r_sole = std::make_shared<Cartesian>("Cartesian::r_sole", q, model_ref, "r_sole","world");
+            l_wrist = std::make_shared<Cartesian>("Cartesian::l_wrist", model_ref, "l_wrist","DWYTorso");
+            r_wrist = std::make_shared<Cartesian>("Cartesian::r_wrist", model_ref, "r_wrist","DWYTorso");
+            l_sole = std::make_shared<Cartesian>("Cartesian::l_sole", model_ref, "l_sole","world");
+            r_sole = std::make_shared<Cartesian>("Cartesian::r_sole", model_ref, "r_sole","world");
 
             /**
               * @brief Creates CoM task always defined in world frame
               **/
-            com = std::make_shared<CoM>(q, model_ref);
+            com = std::make_shared<CoM>(model_ref);
 
             /**
               * @brief Creates gase task in world frame. The active joint mask is used to set columns of the Jacobian to 0.
               * The active joint mask is initialized to false, the Waist joints are the only one set to true.
               **/
-            gaze = std::make_shared<Gaze>("Cartesian::Gaze",q, model_ref, "world");
+            gaze = std::make_shared<Gaze>("Cartesian::Gaze", model_ref, "world");
             std::vector<bool> ajm = gaze->getActiveJointsMask();
             for(unsigned int i = 0; i < ajm.size(); ++i)
                 ajm[i] = false;
@@ -94,7 +90,7 @@ namespace{
             /**
               * @brief Creates postural task
               **/
-            postural = std::make_shared<Postural>(q);
+            postural = std::make_shared<Postural>(model_ref);
             postural->setLambda(0.1);
 
             /**
@@ -102,12 +98,12 @@ namespace{
              */
             Eigen::VectorXd qmin, qmax;
             model_ref.getJointLimits(qmin, qmax);
-            joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
+            joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(model_ref, qmax, qmin);
 
             /**
               * @brief creates joint velocity limits
               **/
-            vel_limits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(2.*M_PI, 0.01, q.size());
+            vel_limits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(model_ref, 2.*M_PI, 0.01);
 
             /**
               * @brief transform CoM tasks into equality constraint
@@ -122,7 +118,7 @@ namespace{
               * and the following constrains: joint position and velocity limits, CoM tracking
               **/
             std::list<unsigned int> indices;
-            for(unsigned int i = 6; i < q.size(); ++i)
+            for(unsigned int i = 6; i < model_ref.getNv(); ++i)
                 indices.push_back(i);
             auto_stack = (l_sole + r_sole)/
                     (l_wrist + r_wrist + gaze)/
@@ -131,7 +127,7 @@ namespace{
             /**
               * @brief updates of the autostack
               **/
-            auto_stack->update(q);
+            auto_stack->update();
 
             /**
               * @brief creates solver inserting the stack with qpOASES by default
@@ -170,10 +166,10 @@ namespace{
          * @brief update set the weight to the posture task and updates the stack
          * @param q actual state of the robot
          */
-        void update(const Eigen::VectorXd& q)
+        void update()
         {
             setInertiaPostureTask();
-            auto_stack->update(q);
+            auto_stack->update();
         }
 
         /**
@@ -200,8 +196,6 @@ namespace{
 
         OpenSoT::solvers::iHQP::Ptr solver;
 
-        Eigen::MatrixXd I;
-
     };
 
     /**
@@ -215,11 +209,11 @@ namespace{
             /**
               * @brief Retrieve model from config file
               **/
-            _model_ptr = GetTestModel("coman");
+            _model_ptr = GetTestModel("coman_floating_base");
             /**
               * @brief Set and update moedl with zero config
               **/
-            _q.setZero(_model_ptr->getJointNum());
+            _q = _model_ptr->getNeutralQ();
             _model_ptr->setJointPosition(_q);
             _model_ptr->update();
 
@@ -347,36 +341,29 @@ namespace{
 
         void publishRobotState()
         {
+
             if(IS_ROSCORE_RUNNING)
             {
                 sensor_msgs::JointState joint_msg;
-                joint_msg.name = _model_ptr->getJointNames();
-
-                for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
-                    joint_msg.position.push_back(0.0);
-
-                for(unsigned int i = 0; i < joint_msg.name.size(); ++i)
+                for(unsigned int i = 1; i < _model_ptr->getJointNames().size(); ++i)
                 {
-                    int id = _model_ptr->getDofIndex(joint_msg.name[i]);
-                    joint_msg.position[id] = _q[i];
+                    joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
+                    joint_msg.position.push_back(_q[_model_ptr->getQIndex(_model_ptr->getJointNames()[i])]);
                 }
 
                 joint_msg.header.stamp = ros::Time::now();
 
-                tf::Transform anchor_T_world;
-                Eigen::Affine3d world_T_anchor = _fb->getAnchorPose();
-                KDL::Frame anchor_T_world_KDL;
-                tf::transformEigenToKDL(world_T_anchor.inverse(), anchor_T_world_KDL);
 
-                anchor_T_world.setOrigin(tf::Vector3(anchor_T_world_KDL.p.x(),
-                    anchor_T_world_KDL.p.y(), anchor_T_world_KDL.p.z()));
-                double x,y,z,w;
-                anchor_T_world_KDL.M.GetQuaternion(x,y,z,w);
-                anchor_T_world.setRotation(tf::Quaternion(x,y,z,w));
+                Eigen::Affine3d world_T_bl;
+                _model_ptr->getPose("Waist",world_T_bl);
+
+                tf::Transform anchor_T_world;
+                tf::transformEigenToTF(world_T_bl, anchor_T_world);
 
                 world_broadcaster->sendTransform(tf::StampedTransform(
-                    anchor_T_world, joint_msg.header.stamp,
-                    _fb->getAnchor(), "world"));
+                    anchor_T_world.inverse(), joint_msg.header.stamp,
+                    "Waist", "world"));
+
 
                 joint_state_pub.publish(joint_msg);
             }
@@ -400,23 +387,23 @@ namespace{
         std::shared_ptr<ros::NodeHandle> _n;
 
         void setGoodInitialPosition() {
-            _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-            _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-            _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-            _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-            _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+            _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
         }
 
@@ -453,11 +440,12 @@ namespace{
             tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
             this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
             this->initTrjPublisher();
-            theWalkingStack ws(*(this->_model_ptr.get()), this->_q);
+            theWalkingStack ws(*_model_ptr);
 
 
             double t = 0.;
-            Eigen::VectorXd dq(this->_q.size());
+            Eigen::VectorXd dq(this->_model_ptr->getNv());
+            dq.setZero();
             std::vector<double> loop_time;
             for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
             {
@@ -487,7 +475,7 @@ namespace{
                 /**
                   * @brief Stack update
                   **/
-                ws.update(this->_q);
+                ws.update();
 
                 uint tic = 0.0;
                 if(IS_ROSCORE_RUNNING)
@@ -497,8 +485,8 @@ namespace{
                   * @brief Solve and integrate state
                   **/
                 if(!ws.solve(dq))
-                    dq.setZero(dq.size());
-                this->_q += dq;
+                    dq.setZero();
+                this->_q = _model_ptr->sum(this->_q, dq);
 
                 uint toc = 0.0;
                 if(IS_ROSCORE_RUNNING){
@@ -549,15 +537,15 @@ namespace{
                 ws.com->setReference(com_d.p);
                 ws.r_wrist->setReference(r_wrist_d);
 
-                ws.update(this->_q);
+                ws.update();
 
                 uint tic = 0.0;
                 if(IS_ROSCORE_RUNNING)
                     tic = ros::Time::now().nsec;
 
                 if(!ws.solve(dq))
-                    dq.setZero(dq.size());
-                this->_q += dq;
+                    dq.setZero();
+                this->_q = _model_ptr->sum(this->_q, dq);
 
                 uint toc = 0.0;
                 if(IS_ROSCORE_RUNNING){
@@ -594,14 +582,18 @@ namespace{
         _model_ptr->update();
         _fb->update();
 
-        ws.update(this->_q);
+        ws.update();
 
         this->_model_ptr->getCOM(com_vector);
-        com_init.p = com_vector;
+        com_init.translation() = com_vector;
         this->_model_ptr->getPose("l_sole", l_foot_init);
         this->_model_ptr->getPose("r_sole", r_foot_init);
 
-        this->initTrj(com_init, l_foot_init, r_foot_init);
+
+        tf::transformEigenToKDL(com_init, com_init_kdl);
+        tf::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
+        tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
+        this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
         this->initTrjPublisher();
 
         t = 0.;
@@ -621,7 +613,7 @@ namespace{
             ws.l_sole->setReference(l_sole_d);
             ws.r_sole->setReference(r_sole_d);
 
-            ws.update(this->_q);
+            ws.update();
 
 
             uint tic = 0.0;
@@ -629,8 +621,8 @@ namespace{
                 tic = ros::Time::now().nsec;
 
             if(!ws.solve(dq))
-                dq.setZero(dq.size());
-            this->_q += dq;
+                dq.setZero();
+            this->_q = _model_ptr->sum(this->_q, dq);
 
             uint toc = 0.0;
             if(IS_ROSCORE_RUNNING){

@@ -60,7 +60,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::FloatingB
 {
     _model->getJointVelocity(_qdot);
 
-    _autostack->update(Eigen::VectorXd::Zero(0));
+    _autostack->update();
 
     if(!_solver->solve(_Qdot)){
         XBot::Logger::error("Solver in floating base estimation return false!\n");

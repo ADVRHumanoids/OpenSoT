@@ -162,7 +162,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::VectorXd&
         model->update();
 
         //2. update the stack
-        stack->update(q);
+        stack->update();
 
         //3. solve the QP
         auto start = high_resolution_clock::now();
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
                 stack = ((TCP%position_ids)/postural)<<joint_limits<<vel_limits;
                }
 
-               stack->update(q_init);
+               stack->update();
 
                double eps = 1e-4;
                OpenSoT::solvers::HCOD::Ptr solver;

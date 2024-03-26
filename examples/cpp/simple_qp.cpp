@@ -60,7 +60,7 @@ int main()
      */
     OpenSoT::AutoStack::Ptr stack = std::make_shared<OpenSoT::AutoStack>(mytask1 + mytask2); // The cost function is the sum of two tasks
     stack << constraint; // Constraints are added to the stack
-    stack->update(Eigen::VectorXd(0)); // Stack update should be called every time tasks or constraints changes
+    stack->update(); // Stack update should be called every time tasks or constraints changes
 
     /**
      * @brief The stack is inserted into a solver using the iHQP technique (inequality Hierarchical QP),

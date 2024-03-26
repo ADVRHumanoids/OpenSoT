@@ -59,19 +59,17 @@ struct solver_statistics{
 void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, const Eigen::Affine3d& goal,
                         const XBot::ModelInterface::Ptr model, ros::NodeHandle& n)
 {
-    sensor_msgs::JointState msg;
-    std::vector<std::string> joint_names = model->getJointNames();
-    unsigned int i = 0;
-    if(model->isFloatingBase())
-        i = 1;
-    for(i; i < joint_names.size(); ++i)
+
+    sensor_msgs::JointState joint_msg;
+    for(unsigned int i = 1; i < model->getJointNames().size(); ++i)
     {
-        msg.name.push_back(joint_names[i]);
-        msg.position.push_back(q[i]);
+        joint_msg.name.push_back(model->getJointNames()[i]);
+        joint_msg.position.push_back(q[model->getQIndex(model->getJointNames()[i])]);
     }
-    msg.header.stamp = ros::Time::now();
+
+    joint_msg.header.stamp = ros::Time::now();
     static auto joint_state_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1000);
-    joint_state_pub.publish(msg);
+    joint_state_pub.publish(joint_msg);
 
     static tf::TransformBroadcaster br;
     tf::Transform transform_start, transform_goal;
@@ -91,9 +89,9 @@ void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, 
     transform_floating_base.setOrigin(pose_floating_base.getOrigin());
     transform_floating_base.setRotation(pose_floating_base.getRotation());
 
-    br.sendTransform(tf::StampedTransform(transform_floating_base, msg.header.stamp, "world", "base_link"));
-    br.sendTransform(tf::StampedTransform(transform_start, msg.header.stamp, "world", "start"));
-    br.sendTransform(tf::StampedTransform(transform_goal, msg.header.stamp, "world", "goal"));
+    br.sendTransform(tf::StampedTransform(transform_floating_base, joint_msg.header.stamp, "world", "base_link"));
+    br.sendTransform(tf::StampedTransform(transform_start, joint_msg.header.stamp, "world", "start"));
+    br.sendTransform(tf::StampedTransform(transform_goal, joint_msg.header.stamp, "world", "goal"));
 }
 
 /**
@@ -165,7 +163,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
      * @brief ik loop
      */
     Eigen::VectorXd dq, q = q_start;
-    dq.setZero(q.size());
+    dq.setZero(model->getNv());
     Eigen::Affine3d TCP_world_pose_init, TCP_world_pose;
     OpenSoT::tasks::velocity::Cartesian::asCartesian(task)->getActualPose(TCP_world_pose_init);
     double position_error_norm = (TCP_world_pose_init.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
@@ -182,7 +180,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
         model->update();
 
         //2. update the stack
-        stack->update(q);
+        stack->update();
 
         //3. solve the QP
         auto start = high_resolution_clock::now();
@@ -194,7 +192,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
             solver_time.push_back(duration_cast<microseconds>(stop - start).count() * 1e-3);
 
         //4. update the state
-        q += dq;
+        q = model->sum(q, dq);
 
         if(IS_ROSCORE_RUNNING)
         {
@@ -259,23 +257,23 @@ void log(XBot::MatLogger2::Ptr logger, solver_statistics& stats)
 }
 
 void setGoodInitialPosition(Eigen::VectorXd& q, const XBot::ModelInterface::Ptr model_ptr) {
-    q[model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    q[model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    q[model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+    q[model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    q[model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-    q[model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+    q[model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
 }
 
@@ -306,7 +304,7 @@ int main(int argc, char **argv)
     /**
       * @brief Retrieve model from config file and generate random initial configuration from qmin and qmax
       **/
-    XBot::ModelInterface::Ptr model_ptr = GetTestModel("coman");
+    XBot::ModelInterface::Ptr model_ptr = GetTestModel("coman_floating_base");
     if(model_ptr->isFloatingBase())
         std::cout<<"floating base is true!"<<std::endl;
     std::cout<<"#DOFs: "<<model_ptr->getJointNum()<<std::endl;
@@ -360,7 +358,7 @@ int main(int argc, char **argv)
                     /**
                      * @brief Given initial pose, we select random delta motion for the r_wrist and we assign as Cartesian goal
                      */
-                    Eigen::VectorXd q(model_ptr->getJointNum()); q.setZero();
+                    Eigen::VectorXd q = model_ptr->getNeutralQ();
                     setGoodInitialPosition(q, model_ptr);
 
                     model_ptr->setJointPosition(q);
@@ -450,7 +448,7 @@ int main(int argc, char **argv)
                                stack = (com/l_wrist/r_wrist/postural)<<joint_limits<<vel_limits<<(l_sole + r_sole);
                            }
 
-                           stack->update(q);
+                           stack->update();
 
                            double eps = 1e6;
                            //if(front_end == front_ends[1])
