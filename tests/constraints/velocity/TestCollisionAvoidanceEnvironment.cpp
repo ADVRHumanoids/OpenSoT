@@ -15,7 +15,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <fstream>
 #include "collision_utils.h"
-#define ENABLE_ROS true
+#define ENABLE_ROS false
 
 #if ENABLE_ROS
 #include <ros/ros.h>
