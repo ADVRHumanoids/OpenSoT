@@ -346,17 +346,3 @@ endif()
      add_dependencies(testqpSWIFTSolver OpenSoT)
      add_test(NAME OpenSoT_solvers_qpswift COMMAND testqpSWIFTSolver)
  endif()
-
-
-
-find_package(MATLAB QUIET)
-find_package(PythonInterp)
-if(MATLAB_FOUND AND PYTHONINTERP_FOUND AND SHOW_TEST_RESULTS)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_CURRENT_BINARY_DIR}/../CTestCustom.cmake)
-endif()
-
-add_custom_target(copy_test_plotter_m ALL
-                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.m" "${CMAKE_CURRENT_BINARY_DIR}/")
-
-add_custom_target(copy_test_plotter_py ALL
-                  ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/plot_test_results.py" "${CMAKE_CURRENT_BINARY_DIR}/")
