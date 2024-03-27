@@ -64,6 +64,8 @@ CollisionAvoidance::CollisionAvoidance(
     // initialize link pair vector
     _lpv = _dist_calc->getCollisionPairs(_include_env);
 
+    update();
+
 }
 
 double CollisionAvoidance::getLinkPairThreshold()
@@ -239,6 +241,11 @@ void CollisionAvoidance::getOrderedDistanceVector(std::vector<double> &d) const
     {
         d.push_back(_distances[ordered_idx[i]]);
     }
+}
+
+const Eigen::MatrixXd& CollisionAvoidance::getCollisionJacobian() const
+{
+    return _distance_J;
 }
 
 CollisionAvoidance::~CollisionAvoidance() = default;

@@ -15,7 +15,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <fstream>
 #include "collision_utils.h"
-#define ENABLE_ROS false
+#define ENABLE_ROS true
 
 #if ENABLE_ROS
 #include <ros/ros.h>
@@ -217,8 +217,16 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     OpenSoT::constraints::velocity::CollisionAvoidance::Ptr environment_collsion_constraint =
             std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance> (
                 *_model_ptr, -1, this->urdf, this->srdf);
+
+
+    EXPECT_TRUE(environment_collsion_constraint->getAineq().rows() == environment_collsion_constraint->getCollisionJacobian().rows());
+    unsigned int max_pairs = environment_collsion_constraint->getAineq().rows();
+
     // we consider only environment collision avoidance
     environment_collsion_constraint->setCollisionList(std::set<std::pair<std::string, std::string>>());
+    environment_collsion_constraint->update();
+    EXPECT_TRUE(environment_collsion_constraint->getAineq().rows() == max_pairs);
+    EXPECT_TRUE(environment_collsion_constraint->getCollisionJacobian().rows() == 0);
 
     Eigen::Affine3d w_T_c; w_T_c.setIdentity();
     w_T_c.translation()<< 0.7, 0, 0.;
@@ -226,12 +234,26 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     box.size<<0.1, 0.6, 1.4;
 
     EXPECT_TRUE(environment_collsion_constraint->addCollisionShape("mybox", "world", box, w_T_c));
+    environment_collsion_constraint->update();
+    EXPECT_TRUE(environment_collsion_constraint->getAineq().rows() == max_pairs);
+    EXPECT_TRUE(environment_collsion_constraint->getCollisionJacobian().rows() == 39)<<"Links are "<<39<<
+                                                                                                 " WHILE environment_collsion_constraint->getCollisionJacobian().rows(): "<<
+                                                                                                 environment_collsion_constraint->getCollisionJacobian().rows()<<std::endl;
 
     std::set<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
 
     environment_collsion_constraint->setLinksVsEnvironment(interested_links);
+    environment_collsion_constraint->update();
+    EXPECT_TRUE(environment_collsion_constraint->getAineq().rows() == max_pairs);
+    EXPECT_TRUE(environment_collsion_constraint->getCollisionJacobian().rows() == interested_links.size())<<"environment_collsion_constraint->getCollisionJacobian().rows(): "<<
+                                                                                                            environment_collsion_constraint->getCollisionJacobian().rows()<<" WHILE "<<
+                                                                                                           "interested_links.size(): "<<interested_links.size()<<std::endl;
 
-    environment_collsion_constraint->setMaxPairs(300);
+    max_pairs = 300;
+    environment_collsion_constraint->setMaxPairs(max_pairs);
+    EXPECT_TRUE(environment_collsion_constraint->getAineq().rows() == max_pairs);
+    EXPECT_TRUE(environment_collsion_constraint->getCollisionJacobian().rows() == interested_links.size());
+
 
 
     environment_collsion_constraint->setDetectionThreshold(1.);
@@ -318,10 +340,15 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     /**
      * Due to environment the final y position of the left arm should be < than the final position of the right arm
      */
-    EXPECT_NEAR(std::fabs(left_arm_task->getActualPose()(0,3) - right_arm_task->getActualPose()(0,3)), 0.00130826, 1e-8); //checked empirically...
-    std::cout<<"std::fabs(left_arm_task->getActualPose()(0,3) - right_arm_task->getActualPose()(0,3)): "<<std::fabs(left_arm_task->getActualPose()(0,3) - right_arm_task->getActualPose()(0,3))<<std::endl;
-    std::cout<<"left_arm_task->getActualPose()(0,3): "<<left_arm_task->getActualPose()(0,3)<<std::endl;
-    std::cout<<"right_arm_task->getActualPose()(0,3): "<<right_arm_task->getActualPose()(0,3)<<std::endl;
+    Eigen::Affine3d w_T_torso;
+    _model_ptr->getPose("torso", w_T_torso);
+    Eigen::Affine3d w_T_la = w_T_torso*Eigen::Affine3d(left_arm_task->getActualPose());
+    Eigen::Affine3d w_T_ra = w_T_torso*Eigen::Affine3d(right_arm_task->getActualPose());
+
+    EXPECT_NEAR(std::fabs(w_T_la.translation()[0] - w_T_ra.translation()[0]), 0.0970416, 1e-7); //checked empirically...
+    std::cout<<"std::fabs(w_T_la.translation()[0] - w_T_ra.translation()[0]): "<<std::fabs(w_T_la.translation()[0] - w_T_ra.translation()[0])<<std::endl;
+    std::cout<<"w_T_la.translation()[0]: "<<w_T_la.translation()[0]<<std::endl;
+    std::cout<<"w_T_ra.translation()[0]: "<<w_T_ra.translation()[0]<<std::endl;
 
 
 

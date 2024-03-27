@@ -166,6 +166,8 @@ public:
      */
     void getOrderedDistanceVector(std::vector<double>& d) const;
 
+    const Eigen::MatrixXd& getCollisionJacobian() const;
+
     ~CollisionAvoidance();
 
 protected:
