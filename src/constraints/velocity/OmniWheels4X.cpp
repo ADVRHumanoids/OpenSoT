@@ -22,7 +22,6 @@ using namespace OpenSoT::constraints::velocity;
 OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
                          const std::vector<std::string> joint_wheels_name,
                          const std::string base_link,
-                         const Eigen::VectorXd &x,
                          XBot::ModelInterface &robot):
     Constraint("OmniWheels4X", robot.getNv()), _robot(robot), _base_link(base_link)
 {
