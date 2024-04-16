@@ -128,6 +128,12 @@ namespace OpenSoT {
            const std::string& getDistalLink() const;
 
            /**
+            * @brief reset position reference to actual, velcoity and accelration to 0
+            * @return true
+            */
+           bool reset();
+
+           /**
             * @brief isAngularMomentum
             * @param task a pointer to a Task
             * @return true if the task is AngularMomentum
