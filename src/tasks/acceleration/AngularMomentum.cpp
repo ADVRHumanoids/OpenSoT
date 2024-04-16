@@ -102,6 +102,14 @@ const std::string& AngularMomentum::getDistalLink() const
     return _distal_link;
 }
 
+bool AngularMomentum::reset()
+{
+    _is_init = false; //this reset _L_d;
+    _Ldot_d.setZero();
+
+    return true;
+}
+
 bool AngularMomentum::isAngularMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)
 {
     return (bool)std::dynamic_pointer_cast<AngularMomentum>(task);
