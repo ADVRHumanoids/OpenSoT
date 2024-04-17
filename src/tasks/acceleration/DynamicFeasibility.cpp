@@ -36,7 +36,7 @@ void OpenSoT::tasks::acceleration::DynamicFeasibility::_update()
         else {
             _robot.getJacobian(_contact_links[i], _Jtmp);
             _Jf = _Jtmp.block<6,6>(0,0).transpose();
-            _dyn_constraint = _dyn_constraint + (-_Jf) * _wrenches[i];
+            _dyn_constraint = _dyn_constraint + (-_Jf.block(0,0,6,_wrenches[i].getM().rows())) * _wrenches[i];
         }
     }
 

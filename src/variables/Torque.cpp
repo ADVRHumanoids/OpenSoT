@@ -42,11 +42,11 @@ void OpenSoT::variables::Torque::update()
         
         _model->getJacobian(_contact_links[i], _Jc[i]);
 
-        self() =  self() + (-_S)*_Jc[i]*_force_vars.at(i);
+        self() =  self() + (-_S)*_Jc[i].block(0,0,_force_vars.at(i).getM().rows(), _Jc[i].cols()).transpose()*_force_vars.at(i);
         
         // previous line is equivalent to the following two lines
-        // _C -= _S * _Jc[i] * _force_vars.at(i).getC();
-        // _d -= _S * _Jc[i] * _force_vars.at(i).getd();
+        // _C -= _S * _Jc[i].transpose() * _force_vars.at(i).getC();
+        // _d -= _S * _Jc[i].transpose() * _force_vars.at(i).getd();
     }
     
     _model->computeNonlinearTerm(_h);

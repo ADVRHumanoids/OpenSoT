@@ -36,7 +36,7 @@ void TorqueLimits::update()
         }
         else {
             _robot.getJacobian(_contact_links[i], _Jtmp);
-            _dyn_constraint = _dyn_constraint + (-_Jtmp.transpose()) * _wrenches[i];
+            _dyn_constraint = _dyn_constraint + (-_Jtmp.block(0,0,_wrenches[i].getM().rows(),_Jtmp.cols()).transpose()) * _wrenches[i];
         }
     }
 
