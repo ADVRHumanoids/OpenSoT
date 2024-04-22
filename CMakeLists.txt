@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 include(ExternalProject)
-project(open_sot VERSION 3.3.0)
+project(open_sot VERSION 4.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
