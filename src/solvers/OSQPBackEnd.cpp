@@ -113,8 +113,8 @@ void OSQPBackEnd::setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A)
     a->n = A.cols();
     a->nzmax = A.nonZeros();
     a->x = A.valuePtr();
-    a->i = reinterpret_cast<int*>(A.innerIndexPtr());
-    a->p = reinterpret_cast<int*>(A.outerIndexPtr());
+    a->i = A.innerIndexPtr();
+    a->p = A.outerIndexPtr();
 }
 
 bool OSQPBackEnd::updateTask(const Eigen::MatrixXd &H, const Eigen::VectorXd &g)
