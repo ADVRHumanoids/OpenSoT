@@ -107,12 +107,12 @@ void OpenSoT::tasks::velocity::Postural::setLambda(double lambda)
     }
 }
 
-Eigen::VectorXd Postural::getError()
+const Eigen::VectorXd& Postural::getError() const
 {
-    return _robot.difference(_q_desired, _q);
+    return _dq;
 }
 
-Eigen::VectorXd OpenSoT::tasks::velocity::Postural::getActualPositions()
+const Eigen::VectorXd &OpenSoT::tasks::velocity::Postural::getActualPositions() const
 {
     return _q;
 }

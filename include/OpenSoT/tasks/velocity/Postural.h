@@ -40,6 +40,7 @@
                 const XBot::ModelInterface& _robot;
 
                 void update_b();
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
             public:
 
@@ -101,21 +102,19 @@
                  * @brief getActualPositions return the actual state position of the task
                  * @return vector of joints positions
                  */
-                Eigen::VectorXd getActualPositions();
+                const Eigen::VectorXd& getActualPositions() const;
 
                 /**
                  * @brief getError return the error between the desired and actual joint position values
                  * @return vector of errors
                  */
-                Eigen::VectorXd getError();
+                const Eigen::VectorXd& getError() const;
 
                 /**
                  * @brief reset set as actual joint reference the actual pose
                  * @return
                  */
                 bool reset();
-
-                virtual void _log(XBot::MatLogger2::Ptr logger);
 
                 static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
