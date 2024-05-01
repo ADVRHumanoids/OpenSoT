@@ -332,7 +332,7 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
 
 } // OpenSoT namespace
 
-OpenSoT::AutoStack::AutoStack(const double x_size) :
+OpenSoT::AutoStack::AutoStack(const int x_size) :
     _stack(),
     _boundsAggregated(
         new OpenSoT::constraints::Aggregated(

@@ -39,21 +39,20 @@ namespace OpenSoT {
     class AutoStack 
     {
         public:
-        typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
+            typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
         private:
-        OpenSoT::solvers::iHQP::Stack _stack;
+            OpenSoT::solvers::iHQP::Stack _stack;
 
-       OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
+            OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
 
-        OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
+            OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
 
-        std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
-                OpenSoT::solvers::iHQP::TaskPtr task);
-
-        protected:
-            AutoStack(const double x_size);
-
+            std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
+                    OpenSoT::solvers::iHQP::TaskPtr task);
         public:
+
+            AutoStack(const int x_size);
+
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
 
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
@@ -64,9 +63,6 @@ namespace OpenSoT {
             AutoStack(OpenSoT::solvers::iHQP::Stack stack,
                       std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
 
-
-            /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
-                      OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
 
             void update();
 
