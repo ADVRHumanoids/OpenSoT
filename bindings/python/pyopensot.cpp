@@ -24,6 +24,7 @@ PYBIND11_MODULE(pyopensot, m) {
     pySolver<Eigen::MatrixXd, Eigen::VectorXd>(m, "Solver");
     pyeHQP(m);
     pyiHQP(m);
+    pynHQP(m);
 
     auto m_t = m.def_submodule("tasks");
 

@@ -4,6 +4,7 @@
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/solvers/iHQP.h>
+#include <OpenSoT/solvers/nHQP.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
 
 namespace py = pybind11;
@@ -76,8 +77,8 @@ void pyiHQP(py::module& m) {
         .def(py::init<OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack&, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr, double, std::vector<OpenSoT::solvers::solver_back_ends>>())
         .def("solve", solve<Eigen::MatrixXd, Eigen::VectorXd>)
         .def("getNumberOfTasks", &solvers::iHQP::getNumberOfTasks)
-        .def("setOptions", &solvers::iHQP::setOptions)
-        .def("getOptions", &solvers::iHQP::getOptions)
+        //.def("setOptions", &solvers::iHQP::setOptions) //TODO!
+        //.def("getOptions", &solvers::iHQP::getOptions) //TODO!
         .def("getObjective", &solvers::iHQP::getObjective)
         .def("setActiveStack", &solvers::iHQP::setActiveStack)
         .def("activateAllStacks", &solvers::iHQP::activateAllStacks)
@@ -85,4 +86,17 @@ void pyiHQP(py::module& m) {
         .def("setEpsRegularisation", py::overload_cast<const double, const unsigned int>(&solvers::iHQP::setEpsRegularisation))
         .def("setEpsRegularisation", py::overload_cast<const double>(&solvers::iHQP::setEpsRegularisation))
         .def("getBackEnd", &solvers::iHQP::getBackEnd);
+}
+
+void pynHQP(py::module& m) {
+py::class_<solvers::nHQP, std::shared_ptr<solvers::nHQP>, Solver<Eigen::MatrixXd, Eigen::VectorXd>>(m, "nHQP")
+       .def(py::init<OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack&, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr, double, OpenSoT::solvers::solver_back_ends>(),
+            py::arg(), py::arg(), py::arg(), py::arg("be_solver") = OpenSoT::solvers::solver_back_ends::qpOASES)
+       .def("solve", solve<Eigen::MatrixXd, Eigen::VectorXd>)
+       .def("setMinSingularValueRatio", py::overload_cast<double>(&solvers::nHQP::setMinSingularValueRatio))
+       .def("setMinSingularValueRatio", py::overload_cast<std::vector<double>>(&solvers::nHQP::setMinSingularValueRatio))
+       .def("setPerformAbRegularization", py::overload_cast<int, bool>(&solvers::nHQP::setPerformAbRegularization))
+       .def("setPerformAbRegularization", py::overload_cast<bool>(&solvers::nHQP::setPerformAbRegularization))
+       .def("setPerformSelectiveNullSpaceRegularization", py::overload_cast<int, bool>(&solvers::nHQP::setPerformSelectiveNullSpaceRegularization))
+       .def("setPerformSelectiveNullSpaceRegularization", py::overload_cast<bool>(&solvers::nHQP::setPerformSelectiveNullSpaceRegularization));
 }
