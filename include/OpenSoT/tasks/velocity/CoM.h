@@ -54,6 +54,10 @@
                 std::string _base_link;
                 std::string _distal_link;
 
+                virtual void _log(XBot::MatLogger2::Ptr logger);
+                virtual void _update();
+
+
             public:
 
 
@@ -69,7 +73,6 @@
 
                 ~CoM();
 
-                virtual void _update();
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -156,8 +159,6 @@
                  */
                 bool reset();
                 
-                virtual void _log(XBot::MatLogger2::Ptr logger);
-
                 static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
                 static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);

@@ -67,6 +67,11 @@ void AngularMomentum::getReference(Eigen::Vector3d& desiredAngularMomentum) cons
     desiredAngularMomentum = _desiredAngularMomentum;
 }
 
+const Eigen::Vector3d& AngularMomentum::getReference() const
+{
+    return _desiredAngularMomentum;
+}
+
 void AngularMomentum::getReference(KDL::Vector& desiredAngularMomentum) const
 {
     desiredAngularMomentum[0] = _desiredAngularMomentum[0];

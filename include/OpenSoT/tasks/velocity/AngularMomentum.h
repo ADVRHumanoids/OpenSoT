@@ -76,6 +76,7 @@ namespace OpenSoT {
             */
            void getReference(Eigen::Vector3d& desiredAngularMomentum) const;
            void getReference(KDL::Vector& desiredAngularMomentum) const;
+           const Eigen::Vector3d& getReference() const;
 
            /**
             * @brief getBaseLink

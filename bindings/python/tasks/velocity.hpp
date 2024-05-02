@@ -3,6 +3,8 @@
 #include <pybind11/stl.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/AngularMomentum.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
 
 namespace py = pybind11;
 using namespace OpenSoT::tasks::velocity;
@@ -50,6 +52,38 @@ void pyVelocityCartesian(py::module& m) {
           .def_property_readonly("distalLink", &Cartesian::getDistalLink)
           .def_property_readonly("baseLink", &Cartesian::getBaseLink)
           .def_property_readonly("baseLinkIsWorld", &Cartesian::baseLinkIsWorld);
+}
+
+void pyVelocityAngularMomentum(py::module& m) {
+py::class_<AngularMomentum, std::shared_ptr<AngularMomentum>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AngularMomentum")
+        .def(py::init<XBot::ModelInterface&>())
+        .def("setReference", py::overload_cast<const Eigen::Vector3d&>(&AngularMomentum::setReference))
+        .def("getReference", py::overload_cast<Eigen::Vector3d&>(&AngularMomentum::getReference, py::const_))
+        .def("getBaseLink", &AngularMomentum::getBaseLink)
+        .def("getDistalLink", &AngularMomentum::getDistalLink);
+}
+
+std::tuple<Eigen::Vector3d, Eigen::Vector3d> com_get_reference(const CoM& com)
+{
+    Eigen::Vector3d pos_ref, vel_ref;
+    com.getReference(pos_ref, vel_ref);
+    return std::make_tuple(pos_ref, vel_ref);
+}
+
+void pyVelocityCoM(py::module& m) {
+    py::class_<CoM, std::shared_ptr<CoM>,  OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CoM")
+        .def(py::init<XBot::ModelInterface&, const std::string&>(),
+             py::arg(), py::arg("id") = "CoM")
+        .def("setReference", py::overload_cast<const Eigen::Vector3d&>(&CoM::setReference))
+        .def("setReference", py::overload_cast<const Eigen::Vector3d&, const Eigen::Vector3d&>(&CoM::setReference))
+        .def("getReference", com_get_reference)
+        .def("getCachedVelocityReference", &CoM::getCachedVelocityReference, py::return_value_policy::reference)
+        .def("getActualPosition", &CoM::getActualPosition, py::return_value_policy::reference)
+        .def("getBaseLink", &CoM::getBaseLink, py::return_value_policy::reference)
+        .def("getDistalLink", &CoM::getDistalLink, py::return_value_policy::reference)
+        .def("setLambda", &CoM::setLambda)
+        .def("getError", &CoM::getError, py::return_value_policy::reference)
+        .def("reset", &CoM::reset);
 }
 
 
