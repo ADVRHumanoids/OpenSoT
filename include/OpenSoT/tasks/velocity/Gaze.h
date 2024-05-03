@@ -86,10 +86,6 @@ public:
         @return the number of rows of A */
     virtual const unsigned int getTaskSize() const;
 
-    /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-        @param x variable state at the current step (input) */
-    virtual void _update();
-
     /**
      * @brief getActiveJointsMask return a vector of length NumberOfDOFs.
      * If an element is false the corresponding column of the task jacobian is set to 0.
@@ -137,6 +133,11 @@ private:
     KDL::Frame _gaze_goal;
     Eigen::Affine3d _tmpEigenM;
     Eigen::Affine3d _tmpEigenM2;
+
+    /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
+        @param x variable state at the current step (input) */
+    virtual void _update();
+
 
 
 

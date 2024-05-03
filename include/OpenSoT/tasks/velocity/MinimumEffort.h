@@ -44,6 +44,16 @@
             protected:
                 const XBot::ModelInterface& _model;
                 Eigen::VectorXd _q;
+
+                /**
+                 * @brief _update updates the minimum effort gradient.
+                 * @detail It also updates the state on the internal robot model so that successive calls to the
+                 * computeEffort() function will take into account the updated posture of the robot.
+                 * @param x the actual posture of the robot
+                 */
+                void _update();
+
+
                 /**
                  * @brief The ComputeGTauGradient class implements a worker class to computes the effort for a certain configuration.
                  * It will take into account the robot as standing on a flat floor, and while computing the gradient,
@@ -100,14 +110,6 @@
                 MinimumEffort(const XBot::ModelInterface& robot_model, const double step = 1E-3);
 
                 ~MinimumEffort();
-
-                /**
-                 * @brief _update updates the minimum effort gradient.
-                 * @detail It also updates the state on the internal robot model so that successive calls to the
-                 * computeEffort() function will take into account the updated posture of the robot.
-                 * @param x the actual posture of the robot
-                 */
-                void _update();
 
                 /**
                  * @brief computeEffort

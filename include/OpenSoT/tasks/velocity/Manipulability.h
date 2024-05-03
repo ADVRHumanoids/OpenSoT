@@ -47,8 +47,6 @@ namespace OpenSoT {
 
                 ~Manipulability();
 
-                void _update();
-
                 /**
                  * @brief ComputeManipulabilityIndex
                  * @return the manipulability index at the actual configuration q (ast from latest update(q))
@@ -82,6 +80,7 @@ namespace OpenSoT {
                 const XBot::ModelInterface& _model;
                 Eigen::VectorXd _q;
 
+                void _update();
 
                 /**
                  * @brief The ComputeManipulabilityIndexGradient class implements a worker class to computes

@@ -5,6 +5,9 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/AngularMomentum.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
+#include <OpenSoT/tasks/velocity/Gaze.h>
+#include <OpenSoT/tasks/velocity/Manipulability.h>
+#include <OpenSoT/tasks/velocity/MinimumEffort.h>
 
 namespace py = pybind11;
 using namespace OpenSoT::tasks::velocity;
@@ -55,7 +58,7 @@ void pyVelocityCartesian(py::module& m) {
 }
 
 void pyVelocityAngularMomentum(py::module& m) {
-py::class_<AngularMomentum, std::shared_ptr<AngularMomentum>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AngularMomentum")
+    py::class_<AngularMomentum, std::shared_ptr<AngularMomentum>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AngularMomentum")
         .def(py::init<XBot::ModelInterface&>())
         .def("setReference", py::overload_cast<const Eigen::Vector3d&>(&AngularMomentum::setReference))
         .def("getReference", py::overload_cast<Eigen::Vector3d&>(&AngularMomentum::getReference, py::const_))
@@ -71,7 +74,7 @@ std::tuple<Eigen::Vector3d, Eigen::Vector3d> com_get_reference(const CoM& com)
 }
 
 void pyVelocityCoM(py::module& m) {
-    py::class_<CoM, std::shared_ptr<CoM>,  OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CoM")
+    py::class_<CoM, std::shared_ptr<CoM>,  Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CoM")
         .def(py::init<XBot::ModelInterface&, const std::string&>(),
              py::arg(), py::arg("id") = "CoM")
         .def("setReference", py::overload_cast<const Eigen::Vector3d&>(&CoM::setReference))
@@ -84,6 +87,43 @@ void pyVelocityCoM(py::module& m) {
         .def("setLambda", &CoM::setLambda)
         .def("getError", &CoM::getError, py::return_value_policy::reference)
         .def("reset", &CoM::reset);
+}
+
+void pyVelocityGaze(py::module& m) {
+    py::class_<Gaze, std::shared_ptr<Gaze>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "Gaze")
+        .def(py::init<std::string, XBot::ModelInterface&, std::string, std::string>())
+        .def("setGaze", py::overload_cast<const Eigen::Affine3d&>(&Gaze::setGaze))
+        .def("setOrientationErrorGain", &Gaze::setOrientationErrorGain)
+        .def("getOrientationErrorGain", &Gaze::getOrientationErrorGain)
+        .def("setWeight", &Gaze::setWeight)
+        .def("getConstraints", &Gaze::getConstraints, py::return_value_policy::reference)
+        .def("getTaskSize", &Gaze::getTaskSize)
+        .def("getActiveJointsMask", &Gaze::getActiveJointsMask)
+        .def("setActiveJointsMask", &Gaze::setActiveJointsMask)
+        .def("getDistalLink", &Gaze::getDistalLink)
+        .def("setLambda", &Gaze::setLambda)
+        .def("setBaseLink", &Gaze::setBaseLink);
+}
+
+void pyVelocityManipulability(py::module& m) {
+    py::class_<Manipulability, std::shared_ptr<Manipulability>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "Manipulability")
+        .def(py::init<const XBot::ModelInterface&, const Cartesian::Ptr, const double>(),
+             py::arg(), py::arg(), py::arg("step") = 1E-3)
+        .def(py::init<const XBot::ModelInterface&, const CoM::Ptr, const double>(),
+             py::arg(), py::arg(), py::arg("step") = 1E-3)
+        .def("ComputeManipulabilityIndex", &Manipulability::ComputeManipulabilityIndex)
+        .def("setW", &Manipulability::setW)
+        .def("getW", &Manipulability::getW)
+        .def("setLambda", &Manipulability::setLambda);
+}
+
+void pyVelocityMinimumEffort(py::module& m) {
+    py::class_<MinimumEffort, std::shared_ptr<MinimumEffort>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "MinimumEffort")
+        .def(py::init<const XBot::ModelInterface&, const double>(), py::arg(), py::arg("step") = 1E-3)
+        .def("ComputeEffort", &MinimumEffort::computeEffort)
+        .def("setW", &MinimumEffort::setW)
+        .def("getW", &MinimumEffort::getW)
+        .def("setLambda", &MinimumEffort::setLambda);
 }
 
 

@@ -33,6 +33,9 @@ PYBIND11_MODULE(pyopensot, m) {
     pyVelocityCartesian(m_tv);
     pyVelocityAngularMomentum(m_tv);
     pyVelocityCoM(m_tv);
+    pyVelocityGaze(m_tv);
+    pyVelocityManipulability(m_tv);
+    pyVelocityMinimumEffort(m_tv);
 
     auto m_c = m.def_submodule("constraints");
 
