@@ -8,6 +8,7 @@
 #include "tasks/velocity.hpp"
 #include "tasks/acceleration.hpp"
 #include "constraints/velocity.hpp"
+#include "constraints/acceleration.hpp"
 
 PYBIND11_MODULE(pyopensot, m) {
     pyTask<Eigen::MatrixXd, Eigen::VectorXd>(m, "Task");
@@ -52,4 +53,9 @@ PYBIND11_MODULE(pyopensot, m) {
     pyVelocityLimits(m_cv);
     pyVelocityOmniWheels4X(m_cv);
     pyVelocityCollisionAvoidance(m_cv);
+
+    auto m_ca = m_c.def_submodule("acceleration");
+    pyAccelerationJointLimits(m_ca);
+    pyTorqueLimits(m_ca);
+    pyAVelocityLimits(m_ca);
 }
