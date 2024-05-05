@@ -47,8 +47,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void setGainType(GainType type);
         GainType getGainType() const;
         
-        virtual void _update();
-        
         /**
          * @brief setReference sets a new reference for the postural actuated part.
          * The task error IS NOT recomputed immediately, you need to call the _update(x) function
@@ -123,8 +121,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         bool reset();
         
-        virtual void _log(XBot::MatLogger2::Ptr logger);
-
         /**
          * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
          * next update()
@@ -194,6 +190,11 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Eigen::MatrixXd _Kp, _Kd;
 
         Eigen::MatrixXd _Mi;
+
+        virtual void _update();
+        virtual void _log(XBot::MatLogger2::Ptr logger);
+
+
         
         
     };

@@ -6,6 +6,7 @@
 #include "autostack.hpp"
 #include "solver.hpp"
 #include "tasks/velocity.hpp"
+#include "tasks/acceleration.hpp"
 #include "constraints/velocity.hpp"
 
 PYBIND11_MODULE(pyopensot, m) {
@@ -37,9 +38,14 @@ PYBIND11_MODULE(pyopensot, m) {
     pyVelocityManipulability(m_tv);
     pyVelocityMinimumEffort(m_tv);
 
+    auto m_ta = m_t.def_submodule("acceleration");
+    pyAccelerationPostural(m_ta);
+
     auto m_c = m.def_submodule("constraints");
 
     auto m_cv = m_c.def_submodule("velocity");
     pyVelocityJointLimits(m_cv);
     pyVelocityLimits(m_cv);
+    pyVelocityOmniWheels4X(m_cv);
+    pyVelocityCollisionAvoidance(m_cv);
 }
