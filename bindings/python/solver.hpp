@@ -5,6 +5,7 @@
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/solvers/nHQP.h>
+#include <OpenSoT/solvers/HCOD.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
 
 namespace py = pybind11;
@@ -89,7 +90,7 @@ void pyiHQP(py::module& m) {
 }
 
 void pynHQP(py::module& m) {
-py::class_<solvers::nHQP, std::shared_ptr<solvers::nHQP>, Solver<Eigen::MatrixXd, Eigen::VectorXd>>(m, "nHQP")
+    py::class_<solvers::nHQP, std::shared_ptr<solvers::nHQP>, Solver<Eigen::MatrixXd, Eigen::VectorXd>>(m, "nHQP")
        .def(py::init<OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack&, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr, double, OpenSoT::solvers::solver_back_ends>(),
             py::arg(), py::arg(), py::arg(), py::arg("be_solver") = OpenSoT::solvers::solver_back_ends::qpOASES)
        .def("solve", solve<Eigen::MatrixXd, Eigen::VectorXd>)
@@ -99,4 +100,15 @@ py::class_<solvers::nHQP, std::shared_ptr<solvers::nHQP>, Solver<Eigen::MatrixXd
        .def("setPerformAbRegularization", py::overload_cast<bool>(&solvers::nHQP::setPerformAbRegularization))
        .def("setPerformSelectiveNullSpaceRegularization", py::overload_cast<int, bool>(&solvers::nHQP::setPerformSelectiveNullSpaceRegularization))
        .def("setPerformSelectiveNullSpaceRegularization", py::overload_cast<bool>(&solvers::nHQP::setPerformSelectiveNullSpaceRegularization));
+}
+
+void pyHCOD(py::module& m) {
+    py::class_<solvers::HCOD, std::shared_ptr<solvers::HCOD>, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>>(m, "HCOD")
+        .def(py::init<OpenSoT::AutoStack&, const double>())
+        .def(py::init<OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack&, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr, const double>())
+        .def("solve", solve<Eigen::MatrixXd, Eigen::VectorXd>)
+        .def("setDisableWeightsComputation", &solvers::HCOD::setDisableWeightsComputation)
+        .def("getDisableWeightsComputation", &solvers::HCOD::getDisableWeightsComputation)
+        .def("setDamping", &solvers::HCOD::setDamping)
+        .def("printSOT", &solvers::HCOD::printSOT);
 }

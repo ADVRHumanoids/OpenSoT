@@ -26,7 +26,7 @@ WrenchLimits::WrenchLimits(const std::string& contact_name,
    this->generateBounds();
 }
 
-void WrenchLimits::getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims)
+void WrenchLimits::getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims) const
 {
     lowerLims = _lowerLims;
     upperLims = _upperLims;

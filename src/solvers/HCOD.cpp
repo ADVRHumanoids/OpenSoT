@@ -223,7 +223,7 @@ void HCOD::setDisableWeightsComputation(const bool disable)
     _disable_weights_computation = disable;
 }
 
-bool HCOD::setDisableWeightsComputation()
+bool HCOD::getDisableWeightsComputation()
 {
     return _disable_weights_computation;
 }

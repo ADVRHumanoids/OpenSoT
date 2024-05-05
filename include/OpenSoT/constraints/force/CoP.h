@@ -49,9 +49,11 @@ namespace OpenSoT {
                 const Eigen::Vector2d& X_Lims,
                 const Eigen::Vector2d& Y_Lims);
 
+            virtual void update();
+
+
        private:
 
-            virtual void update();
 
             std::string _contact_link;
 

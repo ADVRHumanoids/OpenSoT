@@ -62,7 +62,7 @@
                  * @param lowerLims
                  * @param upperLims
                  */
-                void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims);
+                void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims) const;
 
                 /**
                  * @brief setWrenchLimits to set internal limits

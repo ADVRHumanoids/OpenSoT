@@ -26,7 +26,8 @@ if(${pybind11_FOUND})
                                   tasks/velocity.hpp
                                   tasks/acceleration.hpp
                                   constraints/velocity.hpp
-                                  constraints/acceleration.hpp)
+                                  constraints/acceleration.hpp
+                                  constraints/force.hpp)
     target_link_libraries(pyopensot PUBLIC OpenSoT)
 
 
