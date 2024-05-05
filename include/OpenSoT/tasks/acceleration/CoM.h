@@ -81,21 +81,19 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          * @brief getReference
          * @param ref position reference
          */
-        void getReference(Eigen::Vector3d& ref);
+        void getReference(Eigen::Vector3d& ref) const;
+        void getReference(Eigen::Vector3d& pos_ref, Eigen::Vector3d& vel_ref) const;
+        void getReference(Eigen::Vector3d& pos_ref, Eigen::Vector3d& vel_ref, Eigen::Vector3d& acc_ref) const;
 
         /**
          * @brief getActualPose
          * @param actual pose of the CoM
          */
-        void getActualPose(Eigen::Vector3d& actual);
+        void getActualPose(Eigen::Vector3d& actual) const;
 
-        void getPosError(Eigen::Vector3d& error);
+        void getPosError(Eigen::Vector3d& error) const;
 
         bool reset() override;
-
-        virtual void _update();
-
-        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         /**
          * @brief setLambda set position and velocity gains of the feedback errors
@@ -170,6 +168,11 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          * velocity and acceleration references
          */
         void resetReference();
+
+        virtual void _update();
+
+        virtual void _log(XBot::MatLogger2::Ptr logger);
+
 
 
     };

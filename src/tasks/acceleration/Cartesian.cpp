@@ -312,25 +312,25 @@ void Cartesian::_log(XBot::MatLogger2::Ptr logger)
     logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
-void Cartesian::getReference(Eigen::Affine3d& ref)
+void Cartesian::getReference(Eigen::Affine3d& ref) const
 {
     ref = _pose_ref;
 }
 
-void Cartesian::getReference(KDL::Frame& ref)
+void Cartesian::getReference(KDL::Frame& ref) const
 {
     tf::transformEigenToKDL(_pose_ref, ref);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
-                             Eigen::Vector6d& desiredTwist)
+                             Eigen::Vector6d& desiredTwist) const
 {
     desiredPose = _pose_ref;
     desiredTwist = _vel_ref;
 }
 
 void Cartesian::getReference(KDL::Frame& desiredPose,
-                             KDL::Twist& desiredTwist)
+                             KDL::Twist& desiredTwist) const
 {
     tf::transformEigenToKDL(_pose_ref, desiredPose);
     tf::twistEigenToKDL(_vel_ref, desiredTwist);
@@ -338,7 +338,7 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
                              Eigen::Vector6d& desiredTwist,
-                             Eigen::Vector6d& desiredAcceleration)
+                             Eigen::Vector6d& desiredAcceleration) const
 {
     desiredPose = _pose_ref;
     desiredTwist = _vel_ref;
@@ -347,7 +347,7 @@ void Cartesian::getReference(Eigen::Affine3d& desiredPose,
 
 void Cartesian::getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist,
-                             KDL::Twist& desiredAcceleration)
+                             KDL::Twist& desiredAcceleration) const
 {
     tf::transformEigenToKDL(_pose_ref, desiredPose);
     tf::twistEigenToKDL(_vel_ref, desiredTwist);
@@ -355,7 +355,7 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
 }
 
 
-void Cartesian::getActualPose(Eigen::Affine3d& actual)
+void Cartesian::getActualPose(Eigen::Affine3d& actual) const
 {
     actual = _pose_current;
 }
@@ -365,7 +365,12 @@ void Cartesian::getActualPose(KDL::Frame& actual)
     tf::transformEigenToKDL(_pose_current, actual);
 }
 
-void Cartesian::getActualTwist(Eigen::Vector6d& actual)
+const Eigen::Affine3d& Cartesian::getActualPose() const
+{
+    return _pose_current;
+}
+
+void Cartesian::getActualTwist(Eigen::Vector6d& actual) const
 {
     actual = _vel_current;
 }
@@ -373,6 +378,11 @@ void Cartesian::getActualTwist(Eigen::Vector6d& actual)
 void Cartesian::getActualTwist(KDL::Twist& actual)
 {
     tf::twistEigenToKDL(_vel_current, actual);
+}
+
+const Eigen::Vector6d& Cartesian::getActualTwist() const
+{
+    return _vel_current;
 }
 
 const bool Cartesian::baseLinkIsWorld() const

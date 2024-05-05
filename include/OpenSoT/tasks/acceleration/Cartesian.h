@@ -100,20 +100,20 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         void setVirtualForce(const Eigen::Vector6d& virtual_force_ref);
 
 
-        void getReference(Eigen::Affine3d& ref);
-        void getReference(KDL::Frame& ref);
+        void getReference(Eigen::Affine3d& ref) const;
+        void getReference(KDL::Frame& ref) const;
 
         void getReference(Eigen::Affine3d& desiredPose,
-                          Eigen::Vector6d& desiredTwist);
+                          Eigen::Vector6d& desiredTwist) const;
         void getReference(KDL::Frame& desiredPose,
-                          KDL::Twist& desiredTwist);
+                          KDL::Twist& desiredTwist) const;
 
         void getReference(Eigen::Affine3d& desiredPose,
                           Eigen::Vector6d& desiredTwist,
-                          Eigen::Vector6d& desiredAcceleration);
+                          Eigen::Vector6d& desiredAcceleration) const;
         void getReference(KDL::Frame& desiredPose,
                           KDL::Twist& desiredTwist,
-                          KDL::Twist& desiredAcceleration);
+                          KDL::Twist& desiredAcceleration) const;
 
         /**
          * @brief getCachedVelocityReference can be used to get Velocity reference after update(), it will reset
@@ -136,18 +136,15 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
          */
         const Eigen::Vector6d& getCachedVirtualForceReference() const;
 
-
-        void getActualPose(Eigen::Affine3d& actual);
+        const Eigen::Affine3d& getActualPose() const;
+        void getActualPose(Eigen::Affine3d& actual) const;
         void getActualPose(KDL::Frame& actual);
 
-        void getActualTwist(Eigen::Vector6d& actual);
+        const Eigen::Vector6d& getActualTwist() const;
+        void getActualTwist(Eigen::Vector6d& actual) const;
         void getActualTwist(KDL::Twist& actual);
         
         bool reset();
-
-        virtual void _update();
-        
-        virtual void _log(XBot::MatLogger2::Ptr logger);
 
         void setLambda(double lambda1, double lambda2);
         virtual void setLambda(double lambda);
@@ -282,6 +279,10 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
 
         Eigen::MatrixXd _tmpMatrixXd;
         Eigen::MatrixXd _Bi;
+
+        virtual void _update();
+        virtual void _log(XBot::MatLogger2::Ptr logger);
+
     };
     
 } } }

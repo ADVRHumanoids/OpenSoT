@@ -179,17 +179,30 @@ void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger2::Ptr logger)
     logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
-void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
+void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref) const
 {
     ref = _pose_ref;
 }
 
-void OpenSoT::tasks::acceleration::CoM::getActualPose(Eigen::Vector3d& actual)
+void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& pos_ref, Eigen::Vector3d& vel_ref) const
+{
+    pos_ref = _pose_ref;
+    vel_ref = _vel_ref;
+}
+
+void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& pos_ref, Eigen::Vector3d& vel_ref, Eigen::Vector3d& acc_ref) const
+{
+    pos_ref = _pose_ref;
+    vel_ref = _vel_ref;
+    acc_ref = _acc_ref;
+}
+
+void OpenSoT::tasks::acceleration::CoM::getActualPose(Eigen::Vector3d& actual) const
 {
     actual = _pose_current;
 }
 
-void OpenSoT::tasks::acceleration::CoM::getPosError(Eigen::Vector3d& error)
+void OpenSoT::tasks::acceleration::CoM::getPosError(Eigen::Vector3d& error) const
 {
     error = _pose_error;
 }

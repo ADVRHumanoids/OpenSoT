@@ -40,6 +40,10 @@ PYBIND11_MODULE(pyopensot, m) {
 
     auto m_ta = m_t.def_submodule("acceleration");
     pyAccelerationPostural(m_ta);
+    pyAccelerationCartesian(m_ta);
+    pyAccelerationAngularMomentum(m_ta);
+    pyAccelerationCoM(m_ta);
+    pyDynamicFeasibility(m_ta);
 
     auto m_c = m.def_submodule("constraints");
 
