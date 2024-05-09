@@ -8,7 +8,7 @@ using namespace OpenSoT;
 
 void pyAutostack(py::module& m) {
     // Expose AutoStack class
-    py::class_<AutoStack, AutoStack::Ptr>(m, "AutoStack")
+    py::class_<AutoStack, std::shared_ptr<AutoStack>>(m, "AutoStack")
         .def(py::init<const int>())
         .def(py::init<OpenSoT::tasks::Aggregated::TaskPtr>())
         .def(py::init<OpenSoT::tasks::Aggregated::TaskPtr, std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>>())
@@ -23,8 +23,15 @@ void pyAutostack(py::module& m) {
         .def("getRegularisationTask", &AutoStack::getRegularisationTask)
         .def("setBoundsAggregationPolicy", &AutoStack::setBoundsAggregationPolicy)
         .def("getBounds", &AutoStack::getBounds)
-        .def("getTask", &AutoStack::getTask);
-
+        .def("getTask", &AutoStack::getTask)
+        .def("__lshift__", [](OpenSoT::AutoStack::Ptr stack, OpenSoT::constraints::Aggregated::ConstraintPtr bound) {
+            return stack << bound;})
+        .def("__lshift__", [](OpenSoT::AutoStack::Ptr stack, OpenSoT::tasks::Aggregated::TaskPtr constraint) {
+            return stack << constraint;})
+        .def("__truediv__", [](const OpenSoT::AutoStack::Ptr stack, const OpenSoT::tasks::Aggregated::TaskPtr task ) {
+            return stack / task;})
+        .def("__truediv__", [](OpenSoT::AutoStack::Ptr stack1, OpenSoT::AutoStack::Ptr stack2) {
+            return stack1 / stack2;});
 
     m.def("mul", [](const Eigen::MatrixXd& W, OpenSoT::tasks::Aggregated::TaskPtr task) {
         return W * task;

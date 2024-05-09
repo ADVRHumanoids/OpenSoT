@@ -85,8 +85,6 @@ namespace OpenSoT {
                 const std::vector<Eigen::Vector2d>& X_Lims,
                 const std::vector<Eigen::Vector2d>& Y_Lims);
 
-           CoP::Ptr getCoP(const std::string& contact_name);
-
            void update();
 
 

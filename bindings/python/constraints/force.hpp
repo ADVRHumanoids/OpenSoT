@@ -16,7 +16,6 @@ void pyForceCoP(py::module& m) {
 
     py::class_<CoPs, std::shared_ptr<CoPs>, OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CoPs")
         .def(py::init<const std::vector<AffineHelper>&, const std::vector<std::string>&, XBot::ModelInterface&, const std::vector<Eigen::Vector2d>&, const std::vector<Eigen::Vector2d>&>())
-        .def("getCoP", &CoPs::getCoP)
         .def("update", &CoPs::update);
 }
 

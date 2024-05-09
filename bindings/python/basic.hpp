@@ -1,8 +1,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <OpenSoT/Task.h>
 #include <OpenSoT/Constraint.h>
+#include <OpenSoT/utils/AutoStack.h>
 
 using namespace OpenSoT;
 namespace py = pybind11;
@@ -47,7 +49,26 @@ void pyTask(py::module& m, const std::string& className) {
         .def("setActiveJointsMask", &Task<MatrixType, VectorType>::setActiveJointsMask)
         .def("log", &Task<MatrixType, VectorType>::log)
         .def("computeCost", &Task<MatrixType, VectorType>::computeCost)
-        .def("checkConsistency", &Task<MatrixType, VectorType>::checkConsistency);
+        .def("checkConsistency", &Task<MatrixType, VectorType>::checkConsistency)
+        .def("__add__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task1, const std::shared_ptr<Task<MatrixType, VectorType>> task2) {
+            return task1 + task2;})
+        .def("__mod__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const std::list<unsigned int>& rowIndices) {
+            return task % rowIndices;})
+        .def("__rmul__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const float& w) {
+            return w * task;})
+        .def("__truediv__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task1,
+             const std::shared_ptr<Task<MatrixType, VectorType>> task2) {
+            return task1 / task2;})
+        .def("__truediv__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const OpenSoT::AutoStack::Ptr stack) {
+            return task / stack;})
+        .def("__lshift__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const std::shared_ptr<Constraint<MatrixType, VectorType>> constraint) {
+            return task << constraint;})
+        .def("__lshift__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task1,
+             const std::shared_ptr<Task<MatrixType, VectorType>> task2) {
+            return task1 << task2;
+    });
+
+
 }
 
 template<typename MatrixType, typename VectorType>
@@ -72,7 +93,9 @@ void pyConstraint(py::module& m, const std::string& className) {
             .def("getConstraintID", &Constraint<MatrixType, VectorType>::getConstraintID)
             .def("update", &Constraint<MatrixType, VectorType>::update)
             .def("log", &Constraint<MatrixType, VectorType>::log)
-            .def("checkConsistency", &Constraint<MatrixType, VectorType>::checkConsistency);
+            .def("checkConsistency", &Constraint<MatrixType, VectorType>::checkConsistency)
+            .def("__mod__", [](const std::shared_ptr<Constraint<MatrixType, VectorType>> constraint, const std::list<unsigned int>& rowIndices) {
+                return constraint % rowIndices;});
 }
 
 
