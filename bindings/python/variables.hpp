@@ -79,6 +79,13 @@ class OptvarHelperWrapper
         std::shared_ptr<OptvarHelper> _optvar;
 };
 
+Eigen::VectorXd get_value(const AffineHelper& var, const Eigen::VectorXd& x)
+{
+    Eigen::VectorXd val;
+    var.getValue(x, val);
+    return val;
+}
+
 void pyAffineHelper(py::module& m, const std::string& className) {
     py::class_<AffineHelper>(m, className.c_str())
         .def(py::init<>())
@@ -94,6 +101,7 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def("setZero", py::overload_cast<>(&AffineHelper::setZero))
         .def("setZero", py::overload_cast<int, int>(&AffineHelper::setZero))
         .def("update", &AffineHelper::update)
+        .def("getValue", get_value)
         .def("__sub__", [](const AffineHelper &a, const AffineHelper &b) { return diff(a, b); })
         .def("__add__", [](const AffineHelper &a, const AffineHelper &b) { return sum(a, b); })
         .def("__add__", [](const AffineHelper &a, const Eigen::VectorXd &v) { return sum(a, v); })
