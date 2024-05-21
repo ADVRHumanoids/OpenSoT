@@ -54,8 +54,10 @@
                 std::string _base_link;
                 std::string _distal_link;
 
-                virtual void _log(XBot::MatLogger2::Ptr logger);
+
+            protected:
                 virtual void _update();
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
 
             public:
