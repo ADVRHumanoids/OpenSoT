@@ -17,7 +17,7 @@ import subprocess
 try:
     package_path = rospkg.RosPack().get_path('LittleDog')
 except:
-    print("To run this example is needed the anymal_c_simple_description package that can be download here: https://github.com/EnricoMingo/LittleDog")
+    print("To run this example is needed the LittleDog package that can be download here: https://github.com/EnricoMingo/LittleDog")
 
 launch_path = package_path + "/launch/LittleDog.launch"
 print(launch_path)
