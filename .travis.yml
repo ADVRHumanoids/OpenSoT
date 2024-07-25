@@ -95,6 +95,7 @@ before_script:
 script: 
 - source setup.bash  # source forest ws
 - FOREST_ARGS="-m test --clone-protocol https --verbose -j2"
+- forest grow fcl $FOREST_ARGS  # note, first build fcl so we are sure to use our own
 - forest grow OpenSoT $FOREST_ARGS  # compile opensot + dependencies
 - cd build/OpenSoT  # run tests
 - ctest --output-on-failure
