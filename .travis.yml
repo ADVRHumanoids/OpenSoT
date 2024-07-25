@@ -30,7 +30,7 @@ before_script:
 - SRC_FOLDER=$PWD
 - cd .. && mkdir forest_ws && cd forest_ws && forest init  # create forest ws for building
 - ln -s $SRC_FOLDER src/$(basename $SRC_FOLDER)  # symlink original source folder
-- forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git -t master --clone-protocol https  # get recipes
+- forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git -t next --clone-protocol https  # get recipes
 
 # apt update and core packages installation
 - sudo apt-get update
