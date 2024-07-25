@@ -17,7 +17,7 @@ notifications:
     recipients:
       - luca.muratore89@gmail.com
       - arturo.laurenzi@iit.it
-      - enrico.mingo@pal-robotics.com
+      - enrico.mingo-hoffman@inria.fr
     on_success: never
     on_failure: always
 
