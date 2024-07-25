@@ -10,6 +10,7 @@ jobs:
 branches:
   only:
     - devel
+    - 4.0-devel
 
 notifications:
   email:
