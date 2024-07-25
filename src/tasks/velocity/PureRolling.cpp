@@ -1,17 +1,16 @@
 #include <OpenSoT/tasks/velocity/PureRolling.h>
 
-OpenSoT::tasks::velocity::PureRolling::PureRolling(std::string wheel_link_name, 
-                                                   double radius, 
-                                                   const XBot::ModelInterface& model): 
-    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_" + wheel_link_name, model.getJointNum()),
+OpenSoT::tasks::velocity::PureRolling::PureRolling(std::string wheel_link_name,
+                                                   double radius,
+                                                   const XBot::ModelInterface& model):
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_" + wheel_link_name, model.getNv()),
     _model(model),
     _radius(radius),
     _wheel_link_name(wheel_link_name),
     _wheel_axis(0, 0, 1),
     _world_contact_plane_normal(0, 0, 1)
 {
-    Eigen::VectorXd q;
-    model.getJointPosition(q);
+
     _update();
     
     setOutwardNormal(_world_contact_plane_normal);
@@ -91,7 +90,7 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
                                                            double radius,
                                                            const XBot::ModelInterface& model,
                                                            const bool control_z):
-    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_POSITION_" + wheel_link_name, model.getJointNum())
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_POSITION_" + wheel_link_name, model.getNv())
 {
     _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
                             wheel_link_name, radius, model));
@@ -130,7 +129,7 @@ void OpenSoT::tasks::velocity::PureRollingPosition::_log(XBot::MatLogger2::Ptr l
 OpenSoT::tasks::velocity::PureRollingOrientation::PureRollingOrientation(std::string wheel_link_name,
                                                            double radius,
                                                            const XBot::ModelInterface& model):
-    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_ORIENTATION_" + wheel_link_name, model.getJointNum())
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_ORIENTATION_" + wheel_link_name, model.getNv())
 {
     _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
                             wheel_link_name, radius, model));
