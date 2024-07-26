@@ -26,7 +26,7 @@ jobs:
         path: docs/build/html/
     - name: Sphinx:Deploy
       uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/devel'
+      if: github.ref == 'refs/heads/4.0-devel'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/build/html
