@@ -20,12 +20,11 @@ Files
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_cartesian_utils.h`
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h`
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Indices.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h`
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_RtLog.hpp`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_SoLib.h`
 
 

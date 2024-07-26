@@ -32,13 +32,13 @@ Includes
 
 - ``OpenSoT/version.h``
 
-- ``XBotInterface/Logger.hpp``
-
 - ``matlogger2/matlogger2.h``
 
 - ``memory``
 
 - ``string``
+
+- ``xbot2_interface/logger.h``
 
 
 
@@ -93,6 +93,8 @@ Included By
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h`
 
 
 

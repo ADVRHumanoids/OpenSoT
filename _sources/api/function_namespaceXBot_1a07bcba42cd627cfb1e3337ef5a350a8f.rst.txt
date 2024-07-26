@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceXBot_1a07bcba42cd627cfb1e3337ef5a350a8f:
+
+Function XBot::bold_on
+======================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_RtLog.hpp`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: XBot::bold_on(std::ostream&)
+   :project: OpenSoT

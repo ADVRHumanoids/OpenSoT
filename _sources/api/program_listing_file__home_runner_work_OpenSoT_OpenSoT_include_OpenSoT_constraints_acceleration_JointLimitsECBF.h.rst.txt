@@ -70,7 +70,7 @@ Program Listing for File JointLimitsECBF.h
                                const Eigen::VectorXd &jointVelMax,
                                const Eigen::VectorXd &jointAccMax);
    
-                   void update(const Eigen::VectorXd& x);
+                   void update();
    
                    void setAlpha1(const Eigen::VectorXd& a1);
                    void setAlpha1(const double a1);

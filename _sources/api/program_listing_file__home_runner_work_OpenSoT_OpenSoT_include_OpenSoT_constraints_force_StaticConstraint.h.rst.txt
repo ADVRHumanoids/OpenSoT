@@ -13,7 +13,7 @@ Program Listing for File StaticConstraint.h
    #include <OpenSoT/utils/Affine.h>
    #include <OpenSoT/Constraint.h>
    
-   #include <XBotInterface/ModelInterface.h>
+   #include <xbot2_interface/xbotinterface2.h>
    
    namespace OpenSoT { namespace constraints { namespace force {
        
@@ -29,7 +29,7 @@ Program Listing for File StaticConstraint.h
            
        private:
            
-           void update(const Eigen::VectorXd& x) override;
+           void update() override;
            
            const XBot::ModelInterface& _robot;
            std::vector<std::string> _contact_links;

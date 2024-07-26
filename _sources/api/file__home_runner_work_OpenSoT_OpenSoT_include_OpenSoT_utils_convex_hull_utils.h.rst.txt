@@ -30,8 +30,6 @@ Includes
 --------
 
 
-- ``XBotInterface/ModelInterface.h``
-
 - ``kdl/frames.hpp``
 
 - ``pcl/ModelCoefficients.h``
@@ -49,6 +47,10 @@ Includes
 - ``pcl/sample_consensus/model_types.h``
 
 - ``pcl/surface/concave_hull.h``
+
+- ``pcl/surface/convex_hull.h``
+
+- ``xbot2_interface/xbotinterface2.h``
 
 
 

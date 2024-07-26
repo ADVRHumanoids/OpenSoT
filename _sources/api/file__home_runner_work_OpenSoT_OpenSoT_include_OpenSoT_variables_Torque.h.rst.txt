@@ -32,9 +32,9 @@ Includes
 
 - ``OpenSoT/utils/Affine.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`)
 
-- ``XBotInterface/ModelInterface.h``
+- ``xbot2_interface/common/utils.h``
 
-- ``XBotInterface/Utils.h``
+- ``xbot2_interface/xbotinterface2.h``
 
 
 

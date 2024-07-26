@@ -32,7 +32,7 @@ Includes
 
 - ``Eigen/Dense``
 
-- ``XBotInterface/RtLog.hpp``
+- ``xbot2_interface/logger.h``
 
 
 

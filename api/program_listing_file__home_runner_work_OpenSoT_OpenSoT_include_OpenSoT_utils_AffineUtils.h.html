@@ -104,7 +104,7 @@
     <span class="n">AffineTask</span><span class="p">(</span><span class="k">const</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">TaskPtr</span><span class="o">&amp;</span> <span class="n">task</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">var</span><span class="p">);</span>
 
-    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
     <span class="o">~</span><span class="n">AffineTask</span><span class="p">();</span>
 
     <span class="k">static</span> <span class="n">AffineTask</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">toAffine</span><span class="p">(</span><span class="k">const</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">TaskPtr</span><span class="o">&amp;</span> <span class="n">task</span><span class="p">,</span>
@@ -126,7 +126,7 @@
     <span class="n">AffineConstraint</span><span class="p">(</span><span class="k">const</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraints</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">ConstraintPtr</span><span class="o">&amp;</span> <span class="n">constraint</span><span class="p">,</span>
                <span class="k">const</span> <span class="n">AffineHelper</span><span class="o">&amp;</span> <span class="n">var</span><span class="p">);</span>
 
-    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
     <span class="o">~</span><span class="n">AffineConstraint</span><span class="p">();</span>
 
     <span class="k">static</span> <span class="n">AffineConstraint</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">toAffine</span><span class="p">(</span><span class="k">const</span> <span class="n">OpenSoT</span><span class="o">::</span><span class="n">constraints</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">ConstraintPtr</span><span class="o">&amp;</span> <span class="n">constraint</span><span class="p">,</span>

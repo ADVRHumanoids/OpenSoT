@@ -103,7 +103,7 @@
 
 
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Affine.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/constraints/Aggregated.h&gt;</span><span class="cp"></span>
@@ -144,7 +144,7 @@
                              <span class="k">const</span> <span class="n">friction_cone</span> <span class="o">&amp;</span> <span class="n">mu</span><span class="p">);</span>
 
 
-                <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+                <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
 
                 <span class="kt">void</span> <span class="nf">setFrictionCone</span><span class="p">(</span><span class="k">const</span> <span class="n">friction_cone</span><span class="o">&amp;</span> <span class="n">frc</span><span class="p">);</span>
 
@@ -170,7 +170,7 @@
 
                 <span class="n">FrictionCone</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">getFrictionCone</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">contact_name</span><span class="p">);</span>
 
-                <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+                <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
 
             <span class="k">private</span><span class="o">:</span>
                 <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">FrictionCone</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;</span> <span class="n">_friction_cone_map</span><span class="p">;</span>

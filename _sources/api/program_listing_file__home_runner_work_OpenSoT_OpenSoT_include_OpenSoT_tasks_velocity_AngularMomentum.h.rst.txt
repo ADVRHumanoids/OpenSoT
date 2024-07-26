@@ -31,7 +31,7 @@ Program Listing for File AngularMomentum.h
    #define __TASKS_VELOCITY_ANGULAR_MOMENTUM_H__
    
    #include <OpenSoT/Task.h>
-   #include <XBotInterface/ModelInterface.h>
+   #include <xbot2_interface/xbotinterface2.h>
    #include <kdl/frames.hpp>
    #include <Eigen/Dense>
    
@@ -53,13 +53,13 @@ Program Listing for File AngularMomentum.h
    
               Eigen::MatrixXd _Momentum;
    
-              void _update(const Eigen::VectorXd& x);
+              void _update();
    
               std::string _base_link;
               std::string _distal_link;
    
            public:
-              AngularMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot);
+              AngularMomentum(XBot::ModelInterface& robot);
               ~AngularMomentum();
    
               void setReference(const Eigen::Vector3d& desiredAngularMomentum);
@@ -67,6 +67,7 @@ Program Listing for File AngularMomentum.h
    
               void getReference(Eigen::Vector3d& desiredAngularMomentum) const;
               void getReference(KDL::Vector& desiredAngularMomentum) const;
+              const Eigen::Vector3d& getReference() const;
    
               const std::string& getBaseLink() const;
    

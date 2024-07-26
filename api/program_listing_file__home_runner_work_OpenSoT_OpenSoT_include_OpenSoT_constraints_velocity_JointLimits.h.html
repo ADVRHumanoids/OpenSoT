@@ -102,7 +102,7 @@
 <span class="cp">#define __BOUNDS_VELOCITY_JOINTLIMITS_H__</span>
 
  <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
- <span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
 
 
  <span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
@@ -112,16 +112,18 @@
             <span class="k">public</span><span class="o">:</span>
                 <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">JointLimits</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
             <span class="k">private</span><span class="o">:</span>
+                <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_robot</span><span class="p">;</span>
                 <span class="kt">double</span> <span class="n">_boundScaling</span><span class="p">;</span>
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_jointLimitsMin</span><span class="p">;</span>
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_jointLimitsMax</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_dq</span><span class="p">;</span>
             <span class="k">public</span><span class="o">:</span>
-                <span class="n">JointLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">q</span><span class="p">,</span>
+                <span class="n">JointLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">jointBoundMax</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">jointBoundMin</span><span class="p">,</span>
                             <span class="k">const</span> <span class="kt">double</span> <span class="n">boundScaling</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">);</span>
 
-                <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+                <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
                 <span class="kt">void</span> <span class="nf">setBoundScaling</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">boundScaling</span><span class="p">);</span>
             <span class="p">};</span>
         <span class="p">}</span>

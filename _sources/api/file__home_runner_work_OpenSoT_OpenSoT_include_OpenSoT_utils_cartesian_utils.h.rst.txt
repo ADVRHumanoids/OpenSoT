@@ -65,8 +65,6 @@ Classes
 
 - :ref:`exhale_class_classCostFunction`
 
-- :ref:`exhale_class_classGradientVector`
-
 - :ref:`exhale_class_classLDLTInverse`
 
 - :ref:`exhale_class_classquaternion`

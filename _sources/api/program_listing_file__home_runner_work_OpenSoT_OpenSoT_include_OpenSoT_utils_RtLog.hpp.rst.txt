@@ -1,0 +1,230 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_RtLog.hpp:
+
+Program Listing for File RtLog.hpp
+==================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_RtLog.hpp>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/RtLog.hpp``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   /*
+    * Copyright (C) 2017 IIT-ADVR
+    * Author: Arturo Laurenzi
+    * email:  arturo.laurenzi@iit.it
+    *
+    * This program is free software: you can redistribute it and/or modify
+    * it under the terms of the GNU Lesser General Public License as published by
+    * the Free Software Foundation, either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    * GNU Lesser General Public License for more details.
+    *
+    * You should have received a copy of the GNU Lesser General Public License
+    * along with this program. If not, see <http://www.gnu.org/licenses/>
+   */
+   
+   #ifndef __XBOT_RT_LOGGER_HPP__
+   #define __XBOT_RT_LOGGER_HPP__
+   
+   
+   #include <iostream>
+   #include <stdarg.h>
+   #include <stdio.h>
+   
+   #include <functional>
+   
+   #include <boost/iostreams/stream.hpp>
+   #include <boost/iostreams/device/array.hpp>
+   
+   
+   namespace XBot { 
+       
+       /* Modifiers */
+       std::ostream& bold_on(std::ostream& os);
+   
+       std::ostream& bold_off(std::ostream& os);
+       
+       std::ostream& color_green(std::ostream& os);
+       
+       std::ostream& color_red(std::ostream& os);
+       
+       std::ostream& color_yellow(std::ostream& os);
+       
+       std::ostream& color_reset(std::ostream& os);
+       
+       class LoggerClass;
+       
+       
+       class Endl {
+           
+       public:
+           
+           friend class LoggerClass;
+           
+           friend void operator<< ( std::ostream& os, Endl& endl );
+           
+       private:
+           
+           Endl(LoggerClass& logger_handle);
+           
+           LoggerClass& _logger_handle;
+           
+           void print();
+           
+       };
+       
+   
+   
+       class Logger {
+   
+       public:
+   
+           enum class Severity { DEBUG = -1, LOW = 0, MID = 1, HIGH = 2, FATAL = 3 };
+   
+           static std::ostream& log();
+   
+           static std::ostream& info(Logger::Severity s = Logger::Severity::LOW);
+   
+           static void info(Logger::Severity s, const char * fmt, ...);
+   
+           static void info(const char * fmt, ...);
+   
+           static std::ostream& error(Logger::Severity s = Logger::Severity::HIGH);
+   
+           static void error(Logger::Severity s, const char * fmt, ...);
+   
+           static void error(const char * fmt, ...);
+   
+           static std::ostream& warning(Logger::Severity s = Logger::Severity::MID);
+   
+           static void warning(Logger::Severity s, const char * fmt, ...);
+   
+           static void warning(const char * fmt, ...);
+   
+           static std::ostream& success(Logger::Severity s = Logger::Severity::LOW);
+   
+           static void success(Logger::Severity s, const char * fmt, ...);
+   
+           static void success(const char * fmt, ...);
+   
+   
+           static Endl& endl();
+   
+           static void SetVerbosityLevel(Logger::Severity s);
+   
+           static Logger::Severity GetVerbosityLevel();
+   
+           static void SetOnPrintCallback(std::function<void(char*, int, Logger::Severity)> f);
+   
+   
+       protected:
+   
+       private:
+   
+           Logger() = delete;
+   
+           static LoggerClass _logger;
+   
+       };
+       
+       
+       class LoggerClass {
+           
+       public:
+           
+           friend class Endl;
+           
+           friend class Logger;
+           
+           typedef std::shared_ptr<LoggerClass> Ptr;
+   
+           typedef std::function<void(char*, int, Logger::Severity)> OnPrintCallback;
+   
+           static void DefaultOnPrint(char *, int, Logger::Severity);
+           
+           LoggerClass(std::string logger_name);
+           LoggerClass(std::string logger_name, OnPrintCallback f);
+           
+           ~LoggerClass();
+           
+           std::ostream& log();
+           
+           std::ostream& info(Logger::Severity s = Logger::Severity::LOW);
+           
+           void info(Logger::Severity s, const char * fmt, ...);
+           
+           void info(const char * fmt, ...);
+           
+           std::ostream& error(Logger::Severity s = Logger::Severity::HIGH);
+           
+           void error(Logger::Severity s, const char * fmt, ...);
+           
+           void error(const char * fmt, ...);
+           
+           std::ostream& warning(Logger::Severity s = Logger::Severity::MID);
+           
+           void warning(Logger::Severity s, const char * fmt, ...);
+           
+           void warning(const char * fmt, ...);
+           
+           std::ostream& success(Logger::Severity s = Logger::Severity::LOW);
+           
+           void success(Logger::Severity s, const char * fmt, ...);
+           
+           void success(const char * fmt, ...);
+           
+           
+           Endl& endl();
+           
+           void setVerbosityLevel(Logger::Severity s);
+           
+           Logger::Severity getVerbosityLevel() const;
+   
+           void setOnPrintCallback(std::function<void(char*, int, Logger::Severity)> f);
+           
+           
+           
+       private:
+           
+           typedef boost::iostreams::stream<boost::iostreams::array_sink> ostream_t;
+           
+           void print();
+           
+           void init_sink();
+           
+           void __info(Logger::Severity s, const char * fmt, va_list args);
+           void __error(Logger::Severity s, const char * fmt, va_list args);
+           void __warning(Logger::Severity s, const char * fmt, va_list args);
+           void __success(Logger::Severity s, const char * fmt, va_list args);
+           void __fmt_print(const char * fmt, va_list args);
+           
+           static const int BUFFER_SIZE = 4096;
+           
+           char _buffer[BUFFER_SIZE];
+           
+           ostream_t _sink;
+           
+           Endl _endl;
+           
+           std::string _name, _name_tag;
+           Logger::Severity _severity;
+           Logger::Severity _verbosity_level;
+           
+           std::function<void(char*, int, Logger::Severity)> _on_print;
+           
+       };
+   
+       
+   
+   
+   
+   } 
+   
+   
+   #endif

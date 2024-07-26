@@ -102,7 +102,7 @@
 <span class="cp">#define __TASKS_FORCE_COM_H__</span>
 
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Task.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Affine.h&gt;</span><span class="cp"></span>
 
@@ -123,7 +123,6 @@
 
                 <span class="k">virtual</span> <span class="kt">void</span> <span class="n">_log</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">MatLogger2</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">logger</span><span class="p">);</span>
 
-                <span class="n">AffineHelper</span> <span class="n">_wrenches</span><span class="p">;</span>
                 <span class="n">AffineHelper</span> <span class="n">_com_task</span><span class="p">;</span>
 
                 <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_robot</span><span class="p">;</span>
@@ -170,9 +169,7 @@
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">velocityError</span><span class="p">;</span>
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">angularMomentumError</span><span class="p">;</span>
 
-                <span class="n">CoM</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span>
-                    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">links_in_contact</span><span class="p">,</span>
-                    <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">);</span>
+
 
 
                 <span class="n">CoM</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">AffineHelper</span><span class="o">&gt;</span> <span class="n">wrenches</span><span class="p">,</span>
@@ -181,7 +178,7 @@
 
                 <span class="o">~</span><span class="n">CoM</span><span class="p">();</span>
 
-                <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
+                <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
 
 
                 <span class="kt">void</span> <span class="nf">setLinearReference</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">desiredPosition</span><span class="p">);</span>

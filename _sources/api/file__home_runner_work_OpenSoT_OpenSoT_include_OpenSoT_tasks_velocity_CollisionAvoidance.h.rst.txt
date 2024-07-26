@@ -1,0 +1,58 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CollisionAvoidance.h:
+
+File CollisionAvoidance.h
+=========================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/velocity/CollisionAvoidance.h``)
+------------------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CollisionAvoidance.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
+
+- ``OpenSoT/constraints/velocity/CollisionAvoidance.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h`)
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__tasks`
+
+- :ref:`namespace_OpenSoT__tasks__velocity`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CollisionAvoidance`
+
