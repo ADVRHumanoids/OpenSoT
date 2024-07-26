@@ -80,6 +80,10 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22`
 
+- :ref:`exhale_function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
+
 - :ref:`exhale_function_namespaceOpenSoT_1a28dfa90c3909a4091eac86ddf0dba03b`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ae24411e8b9b45d1bf190e8597c709e37`
@@ -88,13 +92,9 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb`
 
-- :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b`
+- :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a9ea285f4bea5b924248306c73e63af0d`
-
-- :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
 
 - :ref:`exhale_function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91`
 

@@ -127,9 +127,9 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1aa4a98577a6a4beef8218ad4cad6bd987`
 
-- :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
-
 - :ref:`exhale_function_namespaceOpenSoT_1a63100ab9d4e96ae9b685df8a15736e8b`
+
+- :ref:`exhale_function_namespaceOpenSoT_1ad853184efb6bc4b883c811907360e04d`
 
 - :ref:`exhale_function_namespaceOpenSoT_1aa42aedbce3a796d28d2d2dc5426a2fbe`
 
