@@ -107,7 +107,7 @@ void OpenSoT::solvers::OSQPBackEnd::update_data_struct()
 }
 
 
-void OSQPBackEnd::setCSCMatrix(csc* a, Eigen::SparseMatrix<double>& A)
+void OSQPBackEnd::setCSCMatrix(csc* a, SparseMatrix& A)
 {
     a->m = A.rows();
     a->n = A.cols();

@@ -37,7 +37,8 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         #search
                                         #io)
                                                                                 
-find_package(eigen_conversions REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_eigen_kdl REQUIRED)
 find_package(xbot2_interface REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
@@ -84,7 +85,6 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/acceleration/TorqueLimits.cpp
     src/constraints/velocity/CartesianPositionConstraint.cpp
     src/constraints/velocity/CartesianVelocity.cpp
-    src/constraints/velocity/CoMVelocity.cpp
     src/constraints/velocity/JointLimits.cpp
     src/constraints/velocity/JointLimitsInvariance.cpp
     src/constraints/velocity/VelocityLimits.cpp
@@ -194,10 +194,10 @@ ADD_LIBRARY(OpenSoT SHARED
 
 set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
 if(${OPENSOT_COMPILE_COLLISION})
-    target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision)
+    target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision moveit_msgs::moveit_msgs__rosidl_generator_cpp tf2_eigen_kdl::tf2_eigen_kdl)
 endif()
 if(${PCL_FOUND})
-    set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
+    set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES} tf2_eigen::tf2_eigen )
 endif()
 
 
@@ -323,8 +323,6 @@ library_install(OpenSoT
     ${PROJECT_VERSION_MINOR}
     ${PROJECT_VERSION_PATCH})
 
-
-add_subdirectory(doc)
 
 include(GenerateDeb)
 

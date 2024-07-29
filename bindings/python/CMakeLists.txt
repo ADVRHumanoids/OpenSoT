@@ -1,12 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
-if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    message("Please consider to switch to latest version to enable
-    more reliable Python3 binaries detection")
-else()
-    #find_package(Python ${PYBIND11_PYTHON_VERSION} COMPONENTS Development Interpreter REQUIRED)
-endif()
-
+find_package(Python ${PYBIND11_PYTHON_VERSION} COMPONENTS Development Interpreter REQUIRED)
 find_package(pybind11 QUIET)
 
 message(STATUS "check for pybind11")

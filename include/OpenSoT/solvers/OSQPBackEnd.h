@@ -141,8 +141,8 @@ public:
 
 private:
     
-    typedef Eigen::SparseMatrix<double> SparseMatrix;
-    typedef Eigen::SparseMatrix<double, Eigen::RowMajor> SparseMatrixRowMajor;
+    typedef Eigen::SparseMatrix<double, Eigen::ColMajor, c_int> SparseMatrix;
+    typedef Eigen::SparseMatrix<double, Eigen::RowMajor, c_int> SparseMatrixRowMajor;
     
     /**
      * @brief __generate_data_struct creates DENSE Hessian and Constraints matrices using a SPARSE representation.

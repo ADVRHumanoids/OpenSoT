@@ -3,6 +3,9 @@
 include(CMakeFindDependencyMacro)
 find_dependency(xbot2_interface)
 find_dependency(matlogger2)
+find_dependency(moveit_msgs)
+find_dependency(tf2_eigen_kdl)
+find_dependency(tf2_eigen)
 
 set_and_check(OpenSoT_TARGETS
     "${CMAKE_CURRENT_LIST_DIR}/OpenSoTTargets.cmake")
