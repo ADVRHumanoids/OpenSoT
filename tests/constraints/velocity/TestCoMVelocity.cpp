@@ -1,18 +1,20 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
-#include <XBotInterface/ModelInterface.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <cmath>
 #define  s                1.0
 #define  dT               0.001* s
 #define  m_s              1.0
 #define  CoMVelocityLimit 0.03 * m_s
+#include "../../common.h"
 
 using namespace OpenSoT::constraints::velocity;
 
 namespace {
 
 // The fixture for testing class CoMVelocity.
-class testCoMVelocity : public ::testing::Test {
+class testCoMVelocity : public TestBase {
 public:
 
 protected:
@@ -20,29 +22,20 @@ protected:
   // You can remove any or all of the following functions if its body
   // is empty.
 
-  testCoMVelocity()
+  testCoMVelocity() : TestBase("coman_floating_base")
   {
-      std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
 
-      _path_to_cfg = relative_path;
-
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-      if(_model_ptr)
-          std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-      else
-          std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-    // You can do set-up work for each test here.
-
-      velocityLimits.resize(3);
-      velocityLimits.setZero(3);
+      velocityLimits.setZero();
       velocityLimits << CoMVelocityLimit, CoMVelocityLimit, CoMVelocityLimit;
 
-      zeros.setZero(_model_ptr->getJointNum());
+      zeros = _model_ptr->getNeutralQ();
+
+      _model_ptr->setJointPosition(zeros);
+      _model_ptr->update();
 
 
-
-      comVelocity = new CoMVelocity(velocityLimits,dT,zeros,*(_model_ptr.get()));
+      comVelocity = new CartesianVelocity(velocityLimits,dT,
+                                          std::make_shared<OpenSoT::tasks::velocity::CoM>(*_model_ptr.get()));
   }
 
   virtual ~testCoMVelocity() {
@@ -59,7 +52,7 @@ protected:
   virtual void SetUp() {
     // Code here will be called immediately after the constructor (right
     // before each test).
-      comVelocity->update(zeros);
+      comVelocity->update();
   }
 
   virtual void TearDown() {
@@ -69,17 +62,15 @@ protected:
 
   // Objects declared here can be used by all tests in the test case for CoMVelocity.
 
-  CoMVelocity* comVelocity;
+  CartesianVelocity* comVelocity;
 
-  Eigen::VectorXd velocityLimits;
+  Eigen::Vector3d velocityLimits;
   Eigen::VectorXd zeros;
   Eigen::VectorXd q;
-  XBot::ModelInterface::Ptr _model_ptr;
-  std::string _path_to_cfg;
 };
 
 TEST_F(testCoMVelocity, sizesAreCorrect) {
-    unsigned int x_size = _model_ptr->getJointNum();
+    unsigned int x_size = _model_ptr->getNv();
 
     Eigen::VectorXd bLowerBound = comVelocity->getbLowerBound();
     Eigen::VectorXd bUpperBound = comVelocity->getbUpperBound();
@@ -134,8 +125,10 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     // a q that causes a CoM velocity which is positive and smaller than velocityLimits
     Eigen::VectorXd qDotOutNeg;
 
-    Eigen::VectorXd q = zeros;
-    comVelocity->update(q);
+    Eigen::VectorXd q = _model_ptr->getNeutralQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    comVelocity->update();
 
     Aineq = comVelocity->getAineq();
 //    pAineq = pinv(Aineq);
@@ -181,7 +174,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
 //        qRight += pinv(JCoM) * dT * velocityLimits;
 
 
-        qRight += JCoM.transpose()*(JCoM*JCoM.transpose()).inverse() * dT * (-velocityLimits);
+        qRight = _model_ptr->sum(qRight, JCoM.transpose()*(JCoM*JCoM.transpose()).inverse() * dT * (-velocityLimits));
     }
 
     _model_ptr->setJointPosition(qRight);
@@ -194,7 +187,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_LE(com_pose_final(i), com_pose_init(i));
 
-    comVelocity->update(qRight);
+    comVelocity->update();
 
     Aineq = comVelocity->getAineq();
 //    pAineq = pinv(Aineq);
@@ -236,7 +229,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
         _model_ptr->getCOMJacobian(JCoM);
 
 
-        qLeft += JCoM.transpose()*(JCoM*JCoM.transpose()).inverse() * dT * velocityLimits;
+        qLeft = _model_ptr->sum(qLeft, JCoM.transpose()*(JCoM*JCoM.transpose()).inverse() * dT * velocityLimits);
 
     }
 
@@ -249,7 +242,7 @@ TEST_F(testCoMVelocity, BoundsAreCorrect) {
     for(unsigned int i = 0; i < 3; ++i)
         EXPECT_LE(com_pose_init(i), com_pose_final(i));
 
-    comVelocity->update(qLeft);
+    comVelocity->update();
 
     Aineq = comVelocity->getAineq();
 //////    pAineq = pinv(Aineq);

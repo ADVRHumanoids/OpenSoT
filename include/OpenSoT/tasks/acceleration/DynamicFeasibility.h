@@ -3,7 +3,7 @@
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT {
     namespace tasks {
@@ -63,7 +63,7 @@ namespace OpenSoT {
             Eigen::VectorXd checkTask(const Eigen::VectorXd& x);
 
         private:
-                virtual void _update(const Eigen::VectorXd& x);
+                virtual void _update();
 
                 const XBot::ModelInterface& _robot;
                 AffineHelper _qddot;

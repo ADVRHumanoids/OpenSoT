@@ -20,7 +20,7 @@ AngularMomentum::AngularMomentum(XBot::ModelInterface &robot, const AffineHelper
     _K.setIdentity(3,3);
 
     _Ldot_d.setZero();
-    _update(Eigen::VectorXd(1));
+    _update();
 }
 
 AngularMomentum::~AngularMomentum()
@@ -28,11 +28,14 @@ AngularMomentum::~AngularMomentum()
 
 }
 
-void AngularMomentum::_update(const Eigen::VectorXd &x)
+void AngularMomentum::_update()
 {
     //1. get centroidal momentum matrix and momentum
-    _robot.getCentroidalMomentumMatrix(_Mom, _Momdot);
-    _robot.getCentroidalMomentum(_L);
+    _robot.computeCentroidalMomentumMatrix(_Mom);
+    _L = _robot.computeCentroidalMomentum();
+
+    // WARN: missing CMMdot*v API !
+    _Momdot.setZero();
 
     //2. if not init, initialize momentum reference with actual momentum
     if(!_is_init)
@@ -97,6 +100,14 @@ const std::string& AngularMomentum::getBaseLink() const
 const std::string& AngularMomentum::getDistalLink() const
 {
     return _distal_link;
+}
+
+bool AngularMomentum::reset()
+{
+    _is_init = false; //this reset _L_d;
+    _Ldot_d.setZero();
+
+    return true;
 }
 
 bool AngularMomentum::isAngularMomentum(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task)

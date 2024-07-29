@@ -22,24 +22,23 @@
 
 using namespace OpenSoT::constraints::velocity;
 
-ConvexHull::ConvexHull(const Eigen::VectorXd& x,
-                       XBot::ModelInterface& robot,
+ConvexHull::ConvexHull(XBot::ModelInterface& robot,
                        const std::list<std::string>& links_in_contact,
                        const double safetyMargin) :
-    Constraint("convex_hull", x.size()),
+    Constraint("convex_hull", robot.getNv()),
     _links_in_contact(links_in_contact),_robot(robot),
     _boundScaling(safetyMargin),
-    _JCoM(3, x.size()),
+    _JCoM(3, _x_size),
     _C(links_in_contact.size(), 2)
 {
     _convex_hull = std::make_shared<convex_hull>();
     _bUpperBound.resize(links_in_contact.size());
     _bLowerBound.resize(links_in_contact.size());
     _bLowerBound = -1.0e20*_bLowerBound.setOnes(_bUpperBound.size());
-    this->update(x);
+    this->update();
 }
 
-void ConvexHull::update(const Eigen::VectorXd &x) {
+void ConvexHull::update() {
 
     /************************ COMPUTING BOUNDS ****************************/
 
@@ -55,11 +54,12 @@ void ConvexHull::update(const Eigen::VectorXd &x) {
     /**********************************************************************/
 }
 
-bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
+bool ConvexHull::getConvexHull(std::vector<Eigen::Vector3d> &ch)
 {
     _points.clear();
     // get support polygon points w.r.t. COM
     if(_convex_hull->getSupportPolygonPoints(_points,_links_in_contact,_robot,"COM")){
+
         if(_points.size() > 2)
         {
             _tmp_ch.clear();
@@ -79,7 +79,7 @@ bool ConvexHull::getConvexHull(std::vector<KDL::Vector> &ch)
 }
 
 
-void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
+void ConvexHull::getConstraints(const std::vector<Eigen::Vector3d> &convex_hull,
                                 Eigen::MatrixXd &A, Eigen::VectorXd &b,
                                 const double boundScaling)
 {
@@ -120,7 +120,7 @@ void ConvexHull::getConstraints(const std::vector<KDL::Vector> &convex_hull,
     //std::cout<<"b_ch: "<<b<<std::endl;
 }
 
-void ConvexHull::getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,
+void ConvexHull::getLineCoefficients(const Eigen::Vector3d &p0, const Eigen::Vector3d &p1,
                                      double &a, double &b, double&c)
 {
     double x1 = p0.x();

@@ -24,8 +24,8 @@
  #include <OpenSoT/Constraint.h>
  #include <assert.h>
  #include <memory>
- #include <XBotInterface/Logger.hpp>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/logger.h>
+ #include <xbot2_interface/xbotinterface2.h>
 
  namespace OpenSoT {
 
@@ -112,9 +112,8 @@
          */
         std::vector<bool> _active_joints_mask;
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-            @param x variable state at the current step (input) */
-        virtual void _update(const Vector_type &x) = 0;
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
+        virtual void _update() = 0;
 
         struct istrue //predicate
         {
@@ -372,14 +371,13 @@
             @return the number of rows of A */
         virtual const unsigned int getTaskSize() const { return _A.rows(); }
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
-            @param x variable state at the current step (input) */
-        void update(const Vector_type &x) {
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
+        void update() {
            
             
             for(typename std::list< ConstraintPtr >::iterator i = this->getConstraints().begin();
-                i != this->getConstraints().end(); ++i) (*i)->update(x);
-            this->_update(x);
+                i != this->getConstraints().end(); ++i) (*i)->update();
+            this->_update();
             
             if(!_is_active){
                 _A_last_active = _A;
@@ -430,29 +428,6 @@
                 return true;
             }
             return false;
-        }
-        
-        /**
-         * @brief setActiveChainsMask set a mask (of true) on the Jacobian of a vector of kinematic chains
-         * @param active_chain_mask vector of kinematic chains to set the active joint mask
-         * @param model to retrieve the joint names from the kinematic chains
-         * @return true
-         */
-        virtual bool setActiveChainsMask(const std::vector<std::string>& active_chain_mask, 
-                                         XBot::ModelInterface::ConstPtr model)
-        {
-            _active_joints_mask.assign(_active_joints_mask.size(), false);
-            
-            for(const auto& ch : active_chain_mask){
-                
-                for(const auto& jid : model->chain(ch).getJointIds())
-                {
-                    _active_joints_mask[ model->getDofIndex(jid) ] = true;
-                }
-            }
-            
-            return true;
-            
         }
 
         /**

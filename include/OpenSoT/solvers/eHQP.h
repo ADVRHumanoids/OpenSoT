@@ -93,9 +93,18 @@ namespace OpenSoT{
         */
         bool solve(Eigen::VectorXd& solution);
         
-        
+        /**
+         * @brief getSigmaMin minimum number considered to apply the damped pseudo-inverse
+         * @return sigma_min
+         */
         double getSigmaMin() const;
         
+        /**
+         * @brief setSigmaMin
+         * @param sigma_min minimum number considered to apply the damped pseudo-inverse
+         * if min(singular_values) < sigma_min then:
+         *      singular_values_inv[i] = singular_values[i]/(singular_values[i]^2 + min(singular_values)^2)
+         */
         void setSigmaMin(const double& sigma_min);        
     };
 }

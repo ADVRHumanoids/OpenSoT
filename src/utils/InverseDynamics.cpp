@@ -10,7 +10,7 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
 {
     /// CREATION OF THE OPTIMIZATION VARIABLES
     OpenSoT::OptvarHelper::VariableVector variable_name_dims;
-    variable_name_dims.emplace_back("qddot", _model.getJointNum());
+    variable_name_dims.emplace_back("qddot", _model.getNv());
 
     if(contact_model == CONTACT_MODEL::SURFACE_CONTACT)
     {
@@ -28,7 +28,7 @@ InverseDynamics::InverseDynamics(const std::vector<std::string> links_in_contact
     _serializer = std::make_shared<OpenSoT::OptvarHelper>(variable_name_dims);
 
     _qddot = _serializer->getVariable("qddot");
-    _qddot_val.setZero(_model.getJointNum());
+    _qddot_val.setZero(_model.getNv());
     _tau_val = _qddot_val;
 
     Eigen::MatrixXd J;

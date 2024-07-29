@@ -46,9 +46,9 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
     }
 }
 
-void SubConstraint::update(const Eigen::VectorXd& x)
+void SubConstraint::update()
 {
-    _constraintPtr->update(x);
+    _constraintPtr->update();
     if(_constraintPtr->isBound()) //1. constraint ptr is a bound, we transform it into a constraint with less rows
     {
         generateBound(this->_constraintPtr->getLowerBound(), this->_bLowerBound);

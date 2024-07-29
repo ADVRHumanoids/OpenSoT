@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_CONTACT_H__
 
  #include <OpenSoT/Task.h>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
  #include <Eigen/Dense>
 
  #define WORLD_FRAME_NAME "world"
@@ -42,7 +42,7 @@ public:
     ~Contact();
     
 
-    void _update(const Eigen::VectorXd& x);
+    void _update();
 
     const std::string& getLinkName() const;
 
@@ -70,7 +70,7 @@ protected:
 
     Eigen::VectorXd _error;
 
-    Eigen::MatrixXd _K, _Jtmp;
+    Eigen::MatrixXd _K, _Jtmp, _Jrot;
 
 };
 

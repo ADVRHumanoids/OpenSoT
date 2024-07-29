@@ -19,17 +19,11 @@
 #define __TASKS_VELOCITY_CARTESIAN_H__
 
  #include <OpenSoT/Task.h>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
 
  #define WORLD_FRAME_NAME "world"
-
-/**
- * @example example_cartesian.cpp
- * The Cartesian class implements a task that tries to impose a pose (position and orientation)
- * of a distal link w.r.t. a base link.
- */
 
  namespace OpenSoT {
     namespace tasks {
@@ -111,14 +105,13 @@
                  * @param base_link the name of the base link as expressed in the robot urdf. Can be set to "world"
                  */
                 Cartesian(std::string task_id,
-                          const Eigen::VectorXd& x,
                           XBot::ModelInterface &robot,
                           const std::string& distal_link,
                           const std::string& base_link);
 
                 ~Cartesian();
 
-                virtual void _update(const Eigen::VectorXd& x);
+                virtual void _update();
 
                 /**
                  * @brief setReference sets a new reference for the Cartesian task.

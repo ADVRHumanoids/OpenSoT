@@ -19,11 +19,11 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-LinearMomentum::LinearMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot):
-    Task("LinearMomentum", x.size()), _robot(robot)
+LinearMomentum::LinearMomentum(XBot::ModelInterface& robot):
+    Task("LinearMomentum", robot.getNv()), _robot(robot)
 {
     _desiredLinearMomentum.setZero();
-    this->_update(x);
+    this->_update();
 
     _W.resize(3,3);
     _W.setIdentity(3,3);
@@ -40,9 +40,9 @@ LinearMomentum::~LinearMomentum()
 
 }
 
-void LinearMomentum::_update(const Eigen::VectorXd& x)
+void LinearMomentum::_update()
 {
-    _robot.getCentroidalMomentumMatrix(_Momentum);
+    _robot.computeCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(0,0,3,_x_size);
     _b = _desiredLinearMomentum;
 }

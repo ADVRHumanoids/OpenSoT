@@ -1,5 +1,5 @@
 #include <OpenSoT/solvers/eiQuadProgBackEnd.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 
 
 using namespace OpenSoT::solvers;

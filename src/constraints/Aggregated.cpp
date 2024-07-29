@@ -27,19 +27,6 @@ const std::string Aggregated::_CONSTRAINT_PLUS_ = "+";
 const std::string Aggregated::_CONSTRAINT_AGGREGATED_ = "AGGR_";
 std::string Aggregated::concatenatedId = "";
 
-Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
-                       const Eigen::VectorXd &q,
-                       const unsigned int aggregationPolicy) :
-    Constraint(concatenateConstraintsIds(bounds), q.rows()),
-               _bounds(bounds), _aggregationPolicy(aggregationPolicy)
-{
-    assert(bounds.size()>0);
-    _number_of_bounds = _bounds.size();
-
-    this->checkSizes();
-    /* calling update to generate bounds */
-    this->update(q);
-}
 
 Aggregated::Aggregated(const std::list<ConstraintPtr> bounds,
                        const unsigned int x_size,
@@ -70,14 +57,14 @@ Aggregated::Aggregated(ConstraintPtr bound1,
     this->generateAll();
 }
 
-void Aggregated::update(const Eigen::VectorXd& x) {
+void Aggregated::update() {
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {
 
         ConstraintPtr &b = *i;
         /* update bounds */
-        b->update(x);
+        b->update();
     }
 
     this->generateAll();

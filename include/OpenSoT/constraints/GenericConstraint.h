@@ -21,7 +21,7 @@
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT { namespace constraints  {
     
@@ -67,7 +67,7 @@ public:
     bool setBounds(const Eigen::VectorXd& upper_bound,
                    const Eigen::VectorXd& lower_bound);
 
-    virtual void update(const Eigen::VectorXd& x);
+    virtual void update();
 
     Type getType(){return _type;}
     

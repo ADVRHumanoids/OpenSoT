@@ -84,30 +84,16 @@ Task(task->getTaskID(),x_size)
     _hessianType = this->computeHessianType();
 }
 
-Aggregated::Aggregated(const std::list<TaskPtr> tasks,
-                       const Eigen::VectorXd& q) :
-    Task(concatenateTaskIds(tasks),q.size()), _tasks(tasks)
-{
-    this->checkSizes();
-    this->_update(q);
-
-    _W.resize(_A.rows(),_A.rows());
-    _W.setIdentity(_A.rows(),_A.rows());
-
-    generateWeight();
-
-    _hessianType = this->computeHessianType();
-}
 
 Aggregated::~Aggregated()
 {
 }
 
-void Aggregated::_update(const Eigen::VectorXd& x) {
+void Aggregated::_update() {
     for(std::list< TaskPtr >::iterator i = _tasks.begin();
         i != _tasks.end(); ++i) {
         TaskPtr t = *i;
-        t->update(x);
+        t->update();
     }
     this->generateAll();
 

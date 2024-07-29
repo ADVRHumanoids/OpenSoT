@@ -5,58 +5,54 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <gtest/gtest.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <XBotInterface/Logger.hpp>
-
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string _path_to_cfg = relative_path;
+#include <xbot2_interface/logger.h>
+#include "../../common.h"
 
 namespace{
 
-class testCoMTask: public ::testing::Test
+class testCoMTask: public TestBase
 {
 protected:
 
-    testCoMTask()
+    testCoMTask() : TestBase("coman_floating_base")
     {
-        _model = XBot::ModelInterface::getModel(_path_to_cfg);
-        _q.setZero(_model->getJointNum());
+        _q = _model_ptr->getNeutralQ();
         setGoodInitialPosition();
-        _dq.setZero(_model->getJointNum());
+        _dq.setZero(_model_ptr->getNv());
 
-        _model->setJointPosition(_q);
-        _model->setJointVelocity(_dq);
-        _model->update();
+        _model_ptr->setJointPosition(_q);
+        _model_ptr->setJointVelocity(_dq);
+        _model_ptr->update();
 
-        KDL::Frame l_sole_T_Waist;
-        _model->getPose("Waist", "l_sole", l_sole_T_Waist);
+        Eigen::Affine3d l_sole_T_Waist;
+        _model_ptr->getPose("Waist", "l_sole", l_sole_T_Waist);
 
-        l_sole_T_Waist.p.x(0.0);
-        l_sole_T_Waist.p.y(0.0);
+        l_sole_T_Waist.translation()[0] = 0.;
+        l_sole_T_Waist.translation()[1] = 0.;
 
         this->setWorld(l_sole_T_Waist, _q);
 
 
-        com.reset(
-            new OpenSoT::tasks::acceleration::CoM(*_model, _q));
+        com.reset(new OpenSoT::tasks::acceleration::CoM(*_model_ptr));
         com->getReference(_com_ref);
         std::cout<<"_com_initial: \n"<<_com_ref.matrix()<<std::endl;
         l_sole.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("l_sole",_q, *_model, "l_sole", "world"));
+            new OpenSoT::tasks::acceleration::Cartesian("l_sole", *_model_ptr, "l_sole", "world"));
         l_sole->getReference(_l_sole_ref);
         std::cout<<"_l_sole_initial: \n"<<_l_sole_ref.matrix()<<std::endl;
         r_sole.reset(
-            new OpenSoT::tasks::acceleration::Cartesian("r_sole",_q, *_model, "r_sole", "world"));
+            new OpenSoT::tasks::acceleration::Cartesian("r_sole", *_model_ptr, "r_sole", "world"));
         r_sole->getReference(_r_sole_ref);
         std::cout<<"_r_sole_initial: \n"<<_r_sole_ref.matrix()<<std::endl;
         OpenSoT::tasks::acceleration::Postural::Ptr postural(new
-            OpenSoT::tasks::acceleration::Postural(*_model,_q.size()));
+            OpenSoT::tasks::acceleration::Postural(*_model_ptr));
 
 
-        OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_q.size());
-        Eigen::VectorXd ddq_max = 20.*Eigen::VectorXd::Ones(_q.size());
+        OpenSoT::AffineHelper var = OpenSoT::AffineHelper::Identity(_model_ptr->getNv());
+        Eigen::VectorXd ddq_max = 20.*Eigen::VectorXd::Ones(_model_ptr->getNv());
         Eigen::VectorXd ddq_min = -ddq_max;
         acc_lims.reset(
             new OpenSoT::constraints::GenericConstraint("acc_lims", var, ddq_max, ddq_min,
@@ -67,7 +63,7 @@ protected:
 
 
         autostack = ((l_sole + r_sole)/(com)/(postural))<<acc_lims;
-        autostack->update(_q);
+        autostack->update();
 
         iHQP.reset(new OpenSoT::solvers::iHQP(autostack->getStack(), autostack->getBounds()));
 
@@ -85,36 +81,35 @@ protected:
 
     }
 
-    void setWorld(const KDL::Frame& l_sole_T_Waist, Eigen::VectorXd& q)
+    void setWorld(const Eigen::Affine3d& l_sole_T_Waist, Eigen::VectorXd& q)
     {
-        _model->setFloatingBasePose(l_sole_T_Waist);
-        _model->update();
-        _model->getJointPosition(q);
+        _model_ptr->setFloatingBasePose(l_sole_T_Waist);
+        _model_ptr->update();
+        _model_ptr->getJointPosition(q);
     }
 
     void setGoodInitialPosition() {
-        _q[_model->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShLat")] = 20.0*M_PI/180.0;
-        _q[_model->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-        _q[_model->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShLat")] = 20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShLat")] = -20.0*M_PI/180.0;
-        _q[_model->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-        _q[_model->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShLat")] = -20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
     }
 
     Eigen::VectorXd _q, _dq;
-    XBot::ModelInterface::Ptr _model;
     Eigen::Affine3d _l_sole_ref, _r_sole_ref;
     Eigen::Vector3d _com_ref;
     OpenSoT::tasks::acceleration::Cartesian::Ptr l_sole, r_sole;
@@ -133,23 +128,23 @@ TEST_F(testCoMTask, testCoMTask_)
     this->com->setReference(_com_ref);
 
     double dt = 0.001;
-    Eigen::VectorXd ddq(_q.size());
-    ddq.setZero(ddq.size());
+    Eigen::VectorXd ddq(_model_ptr->getNv());
+    ddq.setZero();
     std::cout<<"q: "<<_q<<std::endl;
     for(unsigned int i = 0; i < 1000; ++i)
     {
-        this->_model->setJointPosition(_q);
-        this->_model->setJointVelocity(_dq);
-        this->_model->update();
+        this->_model_ptr->setJointPosition(_q);
+        this->_model_ptr->setJointVelocity(_dq);
+        this->_model_ptr->update();
 
-        this->autostack->update(_q);
+        this->autostack->update();
 
 
         if(!(iHQP->solve(ddq)))
             std::cout<<"CAN NOT SOLVE"<<std::endl;
 
         _dq += ddq*dt;
-        _q += _dq*dt + 0.5*ddq*dt*dt;
+        _q = _model_ptr->sum(_q, _dq*dt + 0.5*ddq*dt*dt);
     }
 
     Eigen::Affine3d r_actual, l_actual;

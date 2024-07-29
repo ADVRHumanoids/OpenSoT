@@ -20,10 +20,9 @@
 
 using namespace OpenSoT::constraints::velocity;
 
-VelocityLimits::VelocityLimits(const double qDotLimit,
-                               const double dT,
-                               const unsigned int x_size) :
-    Constraint("velocity_limits", x_size), _dT(dT) {
+VelocityLimits::VelocityLimits(const XBot::v2::ModelInterface &robot, const double qDotLimit,
+                               const double dT) :
+    Constraint("velocity_limits", robot.getNv()), _dT(dT) {
 
     _lowerBound.setZero(_x_size);
     _upperBound.setZero(_x_size);
@@ -33,9 +32,12 @@ VelocityLimits::VelocityLimits(const double qDotLimit,
     this->generateBounds(qDotLimit);
 }
 
-VelocityLimits::VelocityLimits(const Eigen::VectorXd& qDotLimit,
+VelocityLimits::VelocityLimits(const XBot::v2::ModelInterface &robot, const Eigen::VectorXd& qDotLimit,
                                const double dT) :
-    Constraint("velocity_limits", qDotLimit.size()), _dT(dT) {
+    Constraint("velocity_limits", robot.getNv()), _dT(dT)
+{
+    if(qDotLimit.size() != _x_size)
+        throw std::runtime_error("qDotLimit.size() != _x_size()");
 
     _lowerBound.setZero(_x_size);
     _upperBound.setZero(_x_size);

@@ -17,17 +17,17 @@
 
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/utils/cartesian_utils.h>
+#include <xbot2_interface/common/utils.h>
 #include <exception>
 #include <cmath>
 
 using namespace OpenSoT::tasks::velocity;
 
 Cartesian::Cartesian(std::string task_id,
-                     const Eigen::VectorXd& x,
                      XBot::ModelInterface &robot,
                      const std::string& distal_link,
                      const std::string& base_link) :
-    Task(task_id, x.size()), _robot(robot),
+    Task(task_id, robot.getNv()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
     _error(6), _is_body_jacobian(false)
@@ -40,18 +40,18 @@ Cartesian::Cartesian(std::string task_id,
     this->_base_link_is_world = (_base_link == WORLD_FRAME_NAME);
 
     if(!this->_base_link_is_world) {
-        this->_base_link_index = _robot.getLinkID(_base_link);
+        this->_base_link_index = _robot.getLinkId(_base_link);
         //assert(this->_base_link_index >= 0);
     }
 
-    this->_distal_link_index = _robot.getLinkID(_distal_link);
+    this->_distal_link_index = _robot.getLinkId(_distal_link);
     //assert(this->_distal_link_index >= 0);
 
     if(!this->_base_link_is_world)
         assert(this->_distal_link_index != _base_link_index);
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
+    this->_update();
 
     _W.setIdentity(_A.rows(), _A.rows());
 
@@ -65,7 +65,7 @@ Cartesian::~Cartesian()
 {
 }
 
-void Cartesian::_update(const Eigen::VectorXd &x) {
+void Cartesian::_update() {
 
     /************************* COMPUTING TASK *****************************/
     _desiredTwistRef = _desiredTwist;
@@ -93,10 +93,10 @@ void Cartesian::_update(const Eigen::VectorXd &x) {
     if(_is_body_jacobian)
     {
         _tmp_A = _A;
-        _A = XBot::Utils::GetAdjointFromRotation(_actualPose.linear().transpose())*_tmp_A;
+        _A = XBot::Utils::adjointFromRotation(_actualPose.linear().transpose())*_tmp_A;
 
         _tmp_b = _b;
-        _b = XBot::Utils::GetAdjointFromRotation(_actualPose.linear().transpose())*_tmp_b;
+        _b = XBot::Utils::adjointFromRotation(_actualPose.linear().transpose())*_tmp_b;
     }
 
     this->_desiredTwist.setZero(6);
@@ -295,7 +295,7 @@ bool Cartesian::setBaseLink(const std::string& base_link)
         _robot.getPose(base_link, _tmpMatrix2);
         _tmpMatrix = _tmpMatrix2.inverse();
     }
-    else if(_robot.getLinkID(base_link) == -1)
+    else if(_robot.getLinkId(base_link) == -1)
         return false;
     else
         _robot.getPose(_base_link, base_link, _tmpMatrix);
@@ -355,7 +355,7 @@ void Cartesian::_log(XBot::MatLogger2::Ptr logger)
 bool Cartesian::reset()
 {
     _is_initialized = false;
-    _update(Eigen::VectorXd(1));
+    _update();
 
     return true;
 }

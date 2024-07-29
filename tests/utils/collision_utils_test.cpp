@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include "collision_utils.h"
 #include <cmath>
 #include <fcl/narrowphase/detail/primitive_shape_algorithm/capsule_capsule-inl.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <chrono>
 
 #define ENABLE_ROS false
@@ -32,21 +32,22 @@
 #define MAKE_SHARED std::make_shared
 #endif
 
-KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
+
+Eigen::Affine3d fcl2Eigen(const fcl::Transform3<double> &in)
 {
     Eigen::Quaterniond q(in.linear());
     Eigen::Vector3d t = in.translation();
 
-    KDL::Frame f;
-    f.p = KDL::Vector(t[0],t[1],t[2]);
-    f.M = KDL::Rotation::Quaternion(q.x(), q.y(), q.z(), q.w());
+    Eigen::Affine3d T;
+    T.linear() = q.matrix();
+    T.translation() = t;
 
-    return f;
+    return T;
 }
 
 // local version of vectorKDLToEigen since oldest versions are bogous.
 // To use instead of:
-// #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+// #include <eigen_conversions/eigen_kdl.h>
 // tf::vectorKDLToEigen
 void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 {
@@ -56,20 +57,20 @@ void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 
 void getGoodInitialPosition(Eigen::VectorXd& q, const XBot::ModelInterface::Ptr robot) {
 
-    q[robot->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    q[robot->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    q[robot->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
-    q[robot->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    q[robot->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    q[robot->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    q[robot->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    q[robot->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    q[robot->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    q[robot->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    q[robot->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    q[robot->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    q[robot->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    q[robot->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    q[robot->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    q[robot->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    q[robot->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    q[robot->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    q[robot->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    q[robot->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-    q[robot->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    q[robot->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+    q[robot->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+    q[robot->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
 }
 
@@ -93,7 +94,7 @@ public:
         return _computeDistance.getCollisionObjects();
     }
 
-    std::map<std::string,KDL::Frame> getlink_T_shape()
+    std::map<std::string, Eigen::Affine3d> getlink_T_shape()
     {
         return _computeDistance.getLinkToShapeTransforms();
     }
@@ -105,23 +106,23 @@ public:
 
     bool globalToLinkCoordinates(const std::string& linkName,
                                  const fcl::Transform3<double> &fcl_w_T_f,
-                                 KDL::Frame &link_T_f)
+                                 Eigen::Affine3d &link_T_f)
     {
 
         return _computeDistance.globalToLinkCoordinates(linkName, fcl_w_T_f, link_T_f);
     }
 
-    bool globalToLinkCoordinatesKDL(const std::string& linkName,
+    bool globalToLinkCoordinatesE(const std::string& linkName,
                                     const fcl::Transform3<double> &fcl_w_T_f,
-                                    KDL::Frame &link_T_f)
+                                    Eigen::Affine3d &link_T_f)
     {
 
-        KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
+        Eigen::Affine3d w_T_f = fcl2Eigen(fcl_w_T_f);
 
         fcl::Transform3<double> fcl_w_T_shape = _computeDistance.getCollisionObjects()[linkName]->getTransform();
-        KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
+        Eigen::Affine3d w_T_shape = fcl2Eigen(fcl_w_T_shape);
 
-        KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
+        Eigen::Affine3d shape_T_f = w_T_shape.inverse()*w_T_f;
 
         link_T_f = _computeDistance.getLinkToShapeTransforms()[linkName] * shape_T_f;
 
@@ -139,18 +140,19 @@ protected:
 
   testCollisionUtils()
   {
-      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_RBDL.yaml";
+      std::string robot_folder = OPENSOT_TEST_PATH "robots/bigman";
 
-      _path_to_cfg = relative_path;
 
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+      _model_ptr = XBot::ModelInterface::getModel(ReadFile(robot_folder + "/" + "bigman" + ".urdf"),
+                                                  ReadFile(robot_folder + "/" + "bigman" + ".srdf"),
+                                                  OPENSOT_TEST_MODEL_TYPE);
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
       else
           std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
-      q.setZero(_model_ptr->getJointNum());
+      q = _model_ptr->getNeutralQ();
 
 
       std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
@@ -167,6 +169,14 @@ protected:
       compute_distance.reset(new ComputeLinksDistance(*_model_ptr, urdf, srdf));
   }
 
+  std::string ReadFile(std::string path)
+  {
+      std::ifstream t(path);
+      std::stringstream buffer;
+      buffer << t.rdbuf();
+      return buffer.str();
+  }
+
   virtual ~testCollisionUtils() {
   }
 
@@ -179,7 +189,6 @@ protected:
   Eigen::VectorXd q;
   std::shared_ptr<ComputeLinksDistance> compute_distance;
   XBot::ModelInterface::Ptr _model_ptr;
-  std::string _path_to_cfg;
 
 };
 
@@ -203,7 +212,9 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
       LinkPairDistance result2 = results.front();
       ASSERT_EQ(result1.getDistance(), result2.getDistance());
       ASSERT_EQ(result1.getLinkNames(), result2.getLinkNames());
-      ASSERT_EQ(result1.getClosestPoints(), result2.getClosestPoints());
+      for(unsigned int i = 0; i < 3; ++i){
+        ASSERT_EQ(result1.getClosestPoints().first.translation()[i], result2.getClosestPoints().first.translation()[i]);
+        ASSERT_EQ(result1.getClosestPoints().second.translation()[i], result2.getClosestPoints().second.translation()[i]);}
 
 }
 
@@ -211,8 +222,8 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     getGoodInitialPosition(q,_model_ptr);
 
-    q[_model_ptr->getDofIndex("LHipLat")] = -1.4*M_PI/180.;
-    q[_model_ptr->getDofIndex("RHipLat")] = 1.4*M_PI/180.;
+    q[_model_ptr->getQIndex("LHipLat")] = -1.4*M_PI/180.;
+    q[_model_ptr->getQIndex("RHipLat")] = 1.4*M_PI/180.;
 
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
@@ -229,9 +240,12 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     sensor_msgs::JointState msg;
     msg.header.stamp = ros::Time::now();
 
-    msg.name = _model_ptr->getEnabledJointNames();
-    for(unsigned int i = 0; i < q.size(); ++i)
-        msg.position.push_back(q[i]);
+    for(unsigned int i = 0; i < _model_ptr->getJointNames().size(); ++i)
+    {
+        msg.name.push_back(_model_ptr->getJointNames()[i]);
+        msg.position.push_back(q[_model_ptr->getQIndex(_model_ptr->getJointNames()[i])]);
+    }
+
 
     ros::Publisher pub = n.advertise<sensor_msgs::JointState>("joint_states", 1, true);
     ros::Rate rate = 10;
@@ -284,7 +298,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     marker.scale.z = 0.;
     for(const auto& data : results)
     {
-        auto k2p = [](const KDL::Vector &k)->geometry_msgs::Point{
+        auto k2p = [](const Eigen::Vector3d &k)->geometry_msgs::Point{
             geometry_msgs::Point p;
             p.x = k[0]; p.y = k[1]; p.z = k[2];
             return p;
@@ -293,9 +307,9 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 
         // closest point on first link
-        marker.points.push_back(k2p(data.getClosestPoints().first.p));
+        marker.points.push_back(k2p(data.getClosestPoints().first.translation()));
         // closest point on second link
-        marker.points.push_back(k2p(data.getClosestPoints().second.p));
+        marker.points.push_back(k2p(data.getClosestPoints().second.translation()));
     }
 
     for(unsigned int i = 0; i < 100; ++i){
@@ -311,7 +325,7 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
     std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
-    std::map<std::string,KDL::Frame> link_T_shape_test;
+    std::map<std::string,Eigen::Affine3d> link_T_shape_test;
 
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
@@ -320,26 +334,25 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
 
-
-    int left_hand_index = _model_ptr->getLinkID(linkA);
+    int left_hand_index = _model_ptr->getLinkId(linkA);
     if(left_hand_index == -1)
         std::cout << "Failed to get lefthand_index" << std::endl;
 
-    int right_hand_index = _model_ptr->getLinkID(linkB);
+    int right_hand_index = _model_ptr->getLinkId(linkB);
     if(right_hand_index == -1)
         std::cout << "Failed to get righthand_index" << std::endl;
 
 
 
-    KDL::Frame w_T_link_left_hand;
+    Eigen::Affine3d w_T_link_left_hand;
     _model_ptr->getPose(linkA, w_T_link_left_hand);
-    KDL::Frame w_T_link_right_hand;
+    Eigen::Affine3d w_T_link_right_hand;
     _model_ptr->getPose(linkB, w_T_link_right_hand);
 
     double actual_distance_check =
-        (   ( result.getClosestPoints().first ).p -
-            ( result.getClosestPoints().second ).p
-        ).Norm();
+        (   result.getClosestPoints().first.translation() -
+            result.getClosestPoints().second.translation()
+        ).norm();
 
     fcl::DistanceRequest<double> distance_request;
 #if FCL_MINOR_VERSION > 2
@@ -390,7 +403,7 @@ TEST_F(testCollisionUtils, checkTimings)
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
     std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
-    std::map<std::string,KDL::Frame> link_T_shape_test;
+    std::map<std::string,Eigen::Affine3d> link_T_shape_test;
 
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
@@ -398,11 +411,11 @@ TEST_F(testCollisionUtils, checkTimings)
     std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
     std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
-    int left_hand_index = _model_ptr->getLinkID(linkA);
+    int left_hand_index = _model_ptr->getLinkId(linkA);
     if(left_hand_index == -1)
         std::cout << "Failed to get lefthand_index" << std::endl;
 
-    int right_hand_index = _model_ptr->getLinkID(linkB);
+    int right_hand_index = _model_ptr->getLinkId(linkB);
     if(right_hand_index == -1)
         std::cout << "Failed to get righthand_index" << std::endl;
 
@@ -484,7 +497,7 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
     TestCapsuleLinksDistance compute_distance_observer(*compute_distance);
 
     std::map<std::string,std::shared_ptr<fcl::CollisionObject<double>> > collision_objects_test;
-    std::map<std::string,KDL::Frame> link_T_shape_test;
+    std::map<std::string,Eigen::Affine3d> link_T_shape_test;
 
     collision_objects_test = compute_distance_observer.getcollision_objects();
     link_T_shape_test = compute_distance_observer.getlink_T_shape();
@@ -492,11 +505,11 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
     std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_l = collision_objects_test[linkA];
     std::shared_ptr<fcl::CollisionObject<double>> collision_geometry_r = collision_objects_test[linkB];
 
-    int left_hand_index = _model_ptr->getLinkID(linkA);
+    int left_hand_index = _model_ptr->getLinkId(linkA);
     if(left_hand_index == -1)
         std::cout << "Failed to get lefthand_index" << std::endl;
 
-    int right_hand_index = _model_ptr->getLinkID(linkB);
+    int right_hand_index = _model_ptr->getLinkId(linkB);
     if(right_hand_index == -1)
         std::cout << "Failed to get righthand_index" << std::endl;
 
@@ -541,16 +554,22 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
         std::cout << "fcl capsule-capsule t: " << elapsed.count() << std::endl;
 
 
-    KDL::Frame lA_T_pA_KDL;
-    KDL::Frame lA_T_pA;
+    Eigen::Affine3d lA_T_pA_;
+    Eigen::Affine3d lA_T_pA;
 
     fcl::Transform3<double> T; T.setIdentity();
     T.translation() = distance_result.nearest_points[0];
 
-    compute_distance_observer.globalToLinkCoordinatesKDL(linkA,T,lA_T_pA_KDL);
+    compute_distance_observer.globalToLinkCoordinatesE(linkA,T,lA_T_pA_);
     compute_distance_observer.globalToLinkCoordinates(linkA,T,lA_T_pA);
 
-    EXPECT_EQ(lA_T_pA_KDL, lA_T_pA);
+    for(unsigned int i = 0; i < 3; ++i)
+        EXPECT_NEAR(lA_T_pA_.translation()[i], lA_T_pA.translation()[i], 1e-9);
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+        for(unsigned int j = 0; j < 3; ++j)
+            EXPECT_NEAR(lA_T_pA_.linear()(i,j), lA_T_pA.linear()(i,j), 1e-9);
+    }
 }
 
 }

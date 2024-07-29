@@ -45,6 +45,8 @@ JointLimitsViability::JointLimitsViability(XBot::ModelInterface& robot,
         throw std::runtime_error("_jointVelMax.size() != _jointLimitsMin.size()");
     /* calling update to generate bounds */
 
+    _zeros = _robot.getNeutralQ();
+
     _ddq_LB_pos.setZero(jointBoundMax.size());
     _ddq_UB_pos.setZero(jointBoundMax.size());
     _ddq_LB_via.setZero(jointBoundMax.size());
@@ -61,7 +63,7 @@ JointLimitsViability::JointLimitsViability(XBot::ModelInterface& robot,
                 -_jointAccMax,
                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
 
-    update(Eigen::VectorXd(1));
+    update();
 }
 
 void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
@@ -74,7 +76,7 @@ void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
     logger->add("_ddq_UB_via", _ddq_UB_via);
 }
 
-void JointLimitsViability::update(const Eigen::VectorXd &x)
+void JointLimitsViability::update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
@@ -85,7 +87,7 @@ void JointLimitsViability::update(const Eigen::VectorXd &x)
 
     _generic_constraint_internal->setBounds(__upperBound, __lowerBound);
 
-    _generic_constraint_internal->update(x);
+    _generic_constraint_internal->update();
 
     _Aineq = _generic_constraint_internal->getAineq();
     _bLowerBound = _generic_constraint_internal->getbLowerBound();
@@ -127,9 +129,9 @@ void JointLimitsViability::accBoundsFromPosLimits()
 
     _ddq_M1 = -_qdot/dt;
     _ddq_M2 = -(_qdot.array() * _qdot.array()) / (2.0*(_jointLimitsMax.array() - _q.array()));
-    _ddq_M3 = 2.0*(_jointLimitsMax - _q - dt*_qdot)/a;
+    _ddq_M3 = 2.0*(_jointLimitsMax - _robot.difference(_q, _zeros) - dt*_qdot)/a;
     _ddq_m2 = (_qdot.array()*_qdot.array())/(2.0*(_q.array() - _jointLimitsMin.array()));
-    _ddq_m3 = 2.0*(_jointLimitsMin - _q - dt*_qdot)/a;
+    _ddq_m3 = 2.0*(_jointLimitsMin - _robot.difference(_q, _zeros) - dt*_qdot)/a;
 
 
     for(unsigned int it = 0; it < _jointLimitsMax.size(); ++it)
@@ -159,7 +161,7 @@ void JointLimitsViability::accBoundsFromViability()
     double a = dt * dt;
 
     _b_1 = dt*(2.0*_qdot + _jointAccMax*dt);
-    _c_1 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_jointLimitsMax.array() - _q.array() - dt*_qdot.array());
+    _c_1 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_jointLimitsMax.array() - _robot.difference(_q, _zeros).array() - dt*_qdot.array());
     _ddq_1 = -_qdot/dt;
     _delta_1 = _b_1.array()*_b_1.array() - 4.0*a*_c_1.array();
 
@@ -174,7 +176,7 @@ void JointLimitsViability::accBoundsFromViability()
 
 
     _b_2 = dt*(2.0*_qdot - _jointAccMax*dt);
-    _c_2 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_q.array() + dt*_qdot.array() - _jointLimitsMin.array());
+    _c_2 = _qdot.array()*_qdot.array() - 2.0*_jointAccMax.array()*(_robot.difference(_q, _zeros).array() + dt*_qdot.array() - _jointLimitsMin.array());
     _delta_2 = _b_2.array()*_b_2.array() - 4.0*a*_c_2.array();
 
 

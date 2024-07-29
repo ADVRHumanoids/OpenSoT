@@ -2,7 +2,7 @@
      <arg name="gui" default="true" />
 
      <!-- send the bigman robot XML to param server -->
-     <param name="robot_description" command="$(find xacro)/xacro.py 'bigman_capsules.rviz'" />
+     <param name="robot_description" command="$(find xacro)/xacro 'bigman_capsules.rviz'" />
      <!-- param name="robot_description_semantic" textfile="$(find bigman_srdf)/srdf/bigman.srdf" /-->   
         
     <!-- start robot state publisher -->

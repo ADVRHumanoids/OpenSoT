@@ -27,7 +27,7 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
         auto t = stack_of_tasks[i];
 
         // update task (NB: with x = zeros(nx))
-        t->update(_solution);
+        t->update();
 
         // the current layer does not have any dof to move
         // the optimization problem is ill-formed
@@ -122,6 +122,34 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
 OpenSoT::solvers::nHQP::~nHQP()
 {
 
+}
+
+void OpenSoT::solvers::nHQP::setPerformAbRegularization(bool perform_A_b_regularization)
+{
+    for(auto& data : _data_struct)
+        data.set_perform_A_b_regularization(perform_A_b_regularization);
+}
+
+void OpenSoT::solvers::nHQP::setPerformAbRegularization(int hierarchy_level, bool perform_A_b_regularization)
+{
+    if(hierarchy_level >= _data_struct.size())
+        throw std::invalid_argument("hierarchy_level >= # layers");
+    auto& data = _data_struct[hierarchy_level];
+    data.set_perform_A_b_regularization(perform_A_b_regularization);
+}
+
+void OpenSoT::solvers::nHQP::setPerformSelectiveNullSpaceRegularization(bool perform_selective_null_space_regularization)
+{
+    for(auto& data : _data_struct)
+        data.set_perform_selective_null_space_regularization(perform_selective_null_space_regularization);
+}
+
+void OpenSoT::solvers::nHQP::setPerformSelectiveNullSpaceRegularization(int hierarchy_level, bool perform_selective_null_space_regularization)
+{
+    if(hierarchy_level >= _data_struct.size())
+        throw std::invalid_argument("hierarchy_level >= # layers");
+    auto& data = _data_struct[hierarchy_level];
+    data.set_perform_selective_null_space_regularization(perform_selective_null_space_regularization);
 }
 
 bool OpenSoT::solvers::nHQP::solve(Eigen::VectorXd& solution)
@@ -304,7 +332,9 @@ OpenSoT::solvers::nHQP::TaskData::TaskData(int num_free_vars,
     Aineq(num_free_vars), lb(1), ub(1),
     ns_dim(num_free_vars - a_task->getTaskSize()),
     back_end(a_back_end),
-    back_end_initialized(false)
+    back_end_initialized(false),
+    perform_A_b_regularization(true),
+    perform_selective_null_space_regularization(true)
 {
 
 }
@@ -343,15 +373,19 @@ void OpenSoT::solvers::nHQP::TaskData::compute_cost(const Eigen::MatrixXd* N,
 
     svd.compute(AN, Eigen::ComputeFullU|Eigen::ComputeFullV);
 
-    regularize_A_b(min_sv_ratio);
+    if(perform_A_b_regularization)
+        regularize_A_b(min_sv_ratio);
 
     H.noalias() =  AN.transpose() * task->getWeight() * AN;
     g.noalias() = -AN.transpose() * task->getWeight() * b0;
 
     if(compute_nullspace()) // if there is some nullspace left..
     {
-        const double sv_max = svd.singularValues()[0];
-        H.noalias() += sv_max * get_nullspace() * get_nullspace().transpose(); // add selective nullspace regularization
+        if(perform_selective_null_space_regularization)
+        {
+            const double sv_max = svd.singularValues()[0];
+            H.noalias() += sv_max * get_nullspace() * get_nullspace().transpose(); // add selective nullspace regularization
+        }
     }
 }
 
@@ -443,3 +477,16 @@ void OpenSoT::solvers::nHQP::TaskData::set_nullspace_dimension(int a_ns_dim)
 {
     ns_dim = a_ns_dim;
 }
+
+void OpenSoT::solvers::nHQP::TaskData::set_perform_A_b_regularization(bool perform_A_b_regularization_)
+{
+    perform_A_b_regularization = perform_A_b_regularization_;
+}
+
+void OpenSoT::solvers::nHQP::TaskData::set_perform_selective_null_space_regularization(bool perform_selective_null_space_regularization_)
+{
+    perform_selective_null_space_regularization = perform_selective_null_space_regularization_;
+}
+
+
+

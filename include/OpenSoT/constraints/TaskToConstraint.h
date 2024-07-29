@@ -67,7 +67,7 @@
              * @brief update updates the adapted task and the adapter constraint
              * @param q
              */
-            void update(const Eigen::VectorXd &q);
+            void update();
 
         protected:
 

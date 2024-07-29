@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 #include <matlogger2/matlogger2.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 
 #include <OpenSoT/version.h>
 
@@ -177,9 +177,8 @@
          */
         std::string getConstraintID(){ return _constraint_id; }
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices 
-            @param x variable state at the current step (input) */
-        virtual void update(const Vector_type& x) {}
+        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
+        virtual void update() {}
 
         /**
          * @brief log logs common Constraint internal variables

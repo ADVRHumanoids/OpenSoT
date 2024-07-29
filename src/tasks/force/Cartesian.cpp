@@ -26,12 +26,12 @@ Cartesian::Cartesian(const std::string task_id,
     
     I.setIdentity();
     
-    update(Eigen::VectorXd(1));
+    update();
     
     setWeight(Eigen::MatrixXd::Identity(6,6));
 }
 
-void Cartesian::_update(const Eigen::VectorXd& x)
+void Cartesian::_update()
 {
   if (_base_link == world_name)
   {
@@ -41,7 +41,7 @@ void Cartesian::_update(const Eigen::VectorXd& x)
   else
   {
       _robot.getPose(_distal_link, _base_link, _pose_current);
-      _robot.getVelocityTwist(_distal_link, _base_link, _vel_current);
+      _robot.getRelativeVelocityTwist(_distal_link, _base_link, _vel_current);
   }
   
   XBot::Utils::computeOrientationError(_pose_ref.linear(), _pose_current.linear(), _orientation_error);

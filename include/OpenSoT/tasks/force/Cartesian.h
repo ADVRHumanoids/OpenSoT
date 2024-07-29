@@ -3,8 +3,8 @@
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
-#include <XBotInterface/Utils.h>
+#include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/common/utils.h>
 
 namespace OpenSoT { namespace tasks { namespace force {
  
@@ -94,7 +94,7 @@ namespace OpenSoT { namespace tasks { namespace force {
   
     static const std::string world_name;
     
-    virtual void _update(const Eigen::VectorXd& x);
+    virtual void _update();
     virtual void _log(XBot::MatLogger2::Ptr logger);
     
     const XBot::ModelInterface& _robot;

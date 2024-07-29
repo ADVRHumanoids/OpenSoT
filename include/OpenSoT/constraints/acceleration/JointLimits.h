@@ -54,6 +54,8 @@
                 
                 GenericConstraint::Ptr _generic_constraint_internal;
 
+                Eigen::VectorXd _zeros;
+
 
                 /**
                  * @brief _dt
@@ -79,7 +81,7 @@
                             const double dt);
 
 
-                void update(const Eigen::VectorXd& x);
+                void update();
 
                 /**
                  * @brief setJointAccMax updates joint acceleration limits

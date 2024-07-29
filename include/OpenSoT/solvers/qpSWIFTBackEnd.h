@@ -70,6 +70,7 @@ private:
     typedef MatrixPiler VectorPiler;
 
     std::shared_ptr<QP> _qp; //qpSWIFT data structure
+    std::shared_ptr<settings> _user_options;
 
 
     double _eps_regularisation;

@@ -62,7 +62,7 @@
                  * @param lowerLims
                  * @param upperLims
                  */
-                void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims);
+                void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims) const;
 
                 /**
                  * @brief setWrenchLimits to set internal limits
@@ -135,7 +135,7 @@
                  */
                 WrenchLimits::Ptr getWrenchLimits(const std::string& contact_name);
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
             private:
                 std::map<std::string, WrenchLimits::Ptr> _wrench_lims_constraints;

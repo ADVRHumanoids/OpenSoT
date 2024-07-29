@@ -332,7 +332,7 @@ OpenSoT::AutoStack::Ptr operator<<( OpenSoT::AutoStack::Ptr autoStack,
 
 } // OpenSoT namespace
 
-OpenSoT::AutoStack::AutoStack(const double x_size) :
+OpenSoT::AutoStack::AutoStack(const int x_size) :
     _stack(),
     _boundsAggregated(
         new OpenSoT::constraints::Aggregated(
@@ -382,14 +382,14 @@ OpenSoT::AutoStack::AutoStack(OpenSoT::solvers::iHQP::Stack stack,
 
 }
 
-void OpenSoT::AutoStack::update(const Eigen::VectorXd &state)
+void OpenSoT::AutoStack::update()
 {
-    _boundsAggregated->update(state);
+    _boundsAggregated->update();
     typedef std::vector<OpenSoT::tasks::Aggregated::TaskPtr>::iterator it_t;
     for(it_t task = _stack.begin(); task != _stack.end(); ++task)
-        (*task)->update(state);
+        (*task)->update();
     if(_regularisation_task)
-        _regularisation_task->update(state);
+        _regularisation_task->update();
 }
 
 std::list<OpenSoT::constraints::Aggregated::ConstraintPtr>& OpenSoT::AutoStack::getBoundsList()
@@ -446,43 +446,7 @@ std::vector<OpenSoT::solvers::iHQP::TaskPtr> OpenSoT::AutoStack::flattenTask(
     return task_vector;
 }
 
-OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
-        const std::string& base_link, const std::string& distal_link)
-{
-    std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector;
-    for(unsigned int i = 0; i < _stack.size(); ++i)
-    {
-        std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector_tmp = flattenTask(_stack[i]);
-        task_vector.insert(task_vector.begin(), task_vector_tmp.begin(), task_vector_tmp.end());
-    }
-
-    for(unsigned int i = 0; i < task_vector.size(); ++i)
-    {
-        std::shared_ptr<OpenSoT::tasks::velocity::Cartesian> task_Cartesian =
-                std::dynamic_pointer_cast<OpenSoT::tasks::velocity::Cartesian>(task_vector[i]);
-        if(task_Cartesian)
-        {
-            std::string _base_link = task_Cartesian->getBaseLink();
-            std::string _distal_link = task_Cartesian->getDistalLink();
-            if(_base_link.compare(base_link) == 0 && _distal_link.compare(distal_link) == 0)
-                return task_vector[i];
-        }
-
-        std::shared_ptr<OpenSoT::tasks::velocity::CoM> task_CoM =
-                std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CoM>(task_vector[i]);
-        if(task_CoM)
-        {
-            std::string _base_link = task_CoM->getBaseLink();
-            std::string _distal_link = task_CoM->getDistalLink();
-            if(_base_link.compare(base_link) == 0 && _distal_link.compare(distal_link) == 0)
-                return task_vector[i];
-        }
-    }
-    return OpenSoT::solvers::iHQP::TaskPtr();
-}
-
-OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getOperationalSpaceTask(
-        const std::string& task_id)
+OpenSoT::solvers::iHQP::TaskPtr OpenSoT::AutoStack::getTask(const std::string& task_id)
 {
     std::vector<OpenSoT::solvers::iHQP::TaskPtr> task_vector;
     for(unsigned int i = 0; i < _stack.size(); ++i)

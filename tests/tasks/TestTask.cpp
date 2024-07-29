@@ -3,6 +3,8 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <chrono>
 
+#include "../common.h"
+
 namespace {
 class fooTask: public OpenSoT::Task <Eigen::MatrixXd, Eigen::VectorXd>
 {
@@ -26,13 +28,13 @@ public:
     }
 
     ~fooTask(){}
-    void _update(const Eigen::VectorXd &x){}
+    void _update(){}
 };
 
-class testTask: public ::testing::Test
+class testTask: public TestBase
 {
 protected:
-    testTask()
+    testTask(): TestBase("coman_floating_base")
     {
 
     }
@@ -56,8 +58,11 @@ protected:
 TEST_F(testTask, testCheckConsistency)
 {
     OpenSoT::tasks::velocity::Postural::Ptr postural;
-    postural.reset(new OpenSoT::tasks::velocity::Postural(Eigen::VectorXd::Ones(10)));
-    postural->update(Eigen::VectorXd::Ones(10));
+    auto q = _model_ptr->generateRandomQ();
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+    postural.reset(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
+    postural->update();
 
     EXPECT_TRUE(postural->checkConsistency());
 
@@ -66,7 +71,7 @@ TEST_F(testTask, testCheckConsistency)
 
     fooTask::Ptr footask;
     footask.reset(new fooTask(fooA, foob));
-    footask->update(Eigen::VectorXd::Ones(10));
+    footask->update();
 
     EXPECT_FALSE(footask->checkConsistency());
 
@@ -109,18 +114,20 @@ TEST_F(testTask, testCheckConsistency)
 
 TEST_F(testTask, testComputeCost)
 {
-    Eigen::VectorXd q(30);
-    q = 10*q.setOnes();
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
 
     OpenSoT::tasks::velocity::Postural::Ptr postural =
-            std::make_shared<OpenSoT::tasks::velocity::Postural>(q);
+            std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
     postural->setWeight(10.);
     postural->setLambda(1.);
 
-    postural->update(q);
+    postural->update();
 
-    Eigen::VectorXd x(30);
+    Eigen::VectorXd x(_model_ptr->getNv());
     x.setRandom();
 
     double cost = (postural->getA()*x - postural->getb()).transpose()*postural->getWeight()*(postural->getA()*x - postural->getb());
@@ -133,10 +140,15 @@ TEST_F(testTask, testComputeCost)
 
 TEST_F(testTask, testDiagonalWeight)
 {
-    Eigen::VectorXd q(30);
-    q.setRandom(q.size());
+    Eigen::VectorXd q = _model_ptr->generateRandomQ();
+
+    _model_ptr->setJointPosition(q);
+    _model_ptr->update();
+
+
+
     OpenSoT::tasks::velocity::Postural::Ptr postural(
-        new OpenSoT::tasks::velocity::Postural(q));
+        new OpenSoT::tasks::velocity::Postural(*_model_ptr));
 
     EXPECT_FALSE(postural->getWeightIsDiagonalFlag());
 

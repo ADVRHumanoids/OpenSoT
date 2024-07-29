@@ -33,10 +33,10 @@ NormalTorque::NormalTorque(const std::string &contact_link,
     _bUpperBound.setZero(_A.rows());
     _bLowerBound = -1.0e20*Eigen::VectorXd::Ones(_A.rows());
 
-    update(Eigen::VectorXd(1));
+    update();
 }
 
-void NormalTorque::update(const Eigen::VectorXd &x)
+void NormalTorque::update()
 {
     _model.getPose(_contact_link, _T);
     _Ti = _T.inverse();
@@ -98,7 +98,7 @@ NormalTorques::NormalTorques(const std::vector<std::string>& contact_name,
     _internal_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
 NormalTorque::Ptr NormalTorques::getNormalTorque(const std::string& contact_name)
@@ -109,9 +109,9 @@ NormalTorque::Ptr NormalTorques::getNormalTorque(const std::string& contact_name
         return NULL;
 }
 
-void NormalTorques::update(const Eigen::VectorXd &x)
+void NormalTorques::update()
 {
-    _internal_constraint->update(x);
+    _internal_constraint->update();
     generateBounds();
 }
 

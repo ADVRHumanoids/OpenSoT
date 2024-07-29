@@ -21,7 +21,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT {
 namespace tasks {
@@ -42,7 +42,6 @@ public:
     typedef std::shared_ptr<Gaze> Ptr;
 
     Gaze(std::string task_id,
-         const Eigen::VectorXd &x,
          XBot::ModelInterface &robot,
          std::string base_link,
          std::string distal_link = "gaze");
@@ -86,10 +85,6 @@ public:
     /** Gets the task size.
         @return the number of rows of A */
     virtual const unsigned int getTaskSize() const;
-
-    /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
-        @param x variable state at the current step (input) */
-    virtual void _update(const Eigen::VectorXd &x);
 
     /**
      * @brief getActiveJointsMask return a vector of length NumberOfDOFs.
@@ -138,6 +133,11 @@ private:
     KDL::Frame _gaze_goal;
     Eigen::Affine3d _tmpEigenM;
     Eigen::Affine3d _tmpEigenM2;
+
+    /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
+        @param x variable state at the current step (input) */
+    virtual void _update();
+
 
 
 

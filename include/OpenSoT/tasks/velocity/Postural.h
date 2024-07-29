@@ -18,15 +18,9 @@
 #ifndef __TASKS_VELOCITY_POSTURAL_H__
 #define __TASKS_VELOCITY_POSTURAL_H__
 
- #include <OpenSoT/Task.h>
+#include <OpenSoT/Task.h>
 
- #include <kdl/frames.hpp>
-#include <Eigen/Dense>
-
-/**
- * @example example_postural.cpp
- * The Postural class implements a task that tries to bring the robust posture to a reference posture.
- */
+#include <xbot2_interface/xbotinterface2.h>
 
  namespace OpenSoT {
     namespace tasks {
@@ -39,19 +33,23 @@
             public:
                 typedef std::shared_ptr<Postural> Ptr;
             protected:
-                Eigen::VectorXd _x_desired;
-                Eigen::VectorXd _xdot_desired, _xdot_desired_ref;
-                Eigen::VectorXd _x;
+                Eigen::VectorXd _q_desired;
+                Eigen::VectorXd _dq;
+                Eigen::VectorXd _v_desired, _v_desired_ref;
+                Eigen::VectorXd _q;
+                const XBot::ModelInterface& _robot;
 
                 void update_b();
+                virtual void _log(XBot::MatLogger2::Ptr logger);
 
             public:
 
-                Postural(const Eigen::VectorXd& x, const std::string& task_id = "Postural");
+                Postural(const XBot::ModelInterface& robot,
+                         const std::string& task_id = "Postural");
 
                 ~Postural();
 
-                virtual void _update(const Eigen::VectorXd& x);
+                virtual void _update();
 
                 /**
                  * @brief setReference sets a new reference for the Postural task.
@@ -104,21 +102,19 @@
                  * @brief getActualPositions return the actual state position of the task
                  * @return vector of joints positions
                  */
-                Eigen::VectorXd getActualPositions();
+                const Eigen::VectorXd& getActualPositions() const;
 
                 /**
                  * @brief getError return the error between the desired and actual joint position values
                  * @return vector of errors
                  */
-                Eigen::VectorXd getError();
+                const Eigen::VectorXd& getError() const;
 
                 /**
                  * @brief reset set as actual joint reference the actual pose
                  * @return
                  */
                 bool reset();
-
-                virtual void _log(XBot::MatLogger2::Ptr logger);
 
                 static bool isPostural(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 

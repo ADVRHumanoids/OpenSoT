@@ -21,39 +21,56 @@
 
 using namespace OpenSoT::constraints::velocity;
 
-CartesianVelocity::CartesianVelocity(const Eigen::VectorXd velocityLimits,
+CartesianVelocity::CartesianVelocity(const Eigen::Vector6d velocityLimits,
                          			 const double dT,
-                                     OpenSoT::tasks::velocity::Cartesian::Ptr& task) :
+                                     const OpenSoT::tasks::velocity::Cartesian::Ptr& task) :
 Constraint(task->getTaskID()+"_VelocityLimit", task->getXSize()), _dT(dT), _velocityLimits(velocityLimits),
-_task(task) {
-
-    if(_velocityLimits.rows() < 6 )
-        throw "Error: velocityLimits for CoM should be a vector of 3 elements";
+_cartesian_task(task), _is_cartesian(true) {
 
     _Aineq.resize(6,    task->getXSize());
-    _bLowerBound.resize(task->getXSize());
-    _bUpperBound.resize(task->getXSize());
+    _bLowerBound.resize(3);
+    _bUpperBound.resize(3);
 
     this->generatebBounds();
 
     this->generateAineq();
 }
 
-void CartesianVelocity::update(const Eigen::VectorXd &x) {
+CartesianVelocity::CartesianVelocity(const Eigen::Vector3d velocityLimits,
+                  const double dT,
+                  const OpenSoT::tasks::velocity::CoM::Ptr &task) :
+Constraint(task->getTaskID()+"_VelocityLimit", task->getXSize()), _dT(dT), _velocityLimits(velocityLimits),
+_com_task(task), _is_cartesian(false)
+{
+    _Aineq.resize(3,    task->getXSize());
+    _bLowerBound.resize(3);
+    _bUpperBound.resize(3);
+
+    this->generatebBounds();
+
+    this->generateAineq();
+}
+
+
+
+void CartesianVelocity::update() {
 
     this->generateAineq();
 
 }
 
-Eigen::VectorXd OpenSoT::constraints::velocity::CartesianVelocity::getVelocityLimits()
+const Eigen::VectorXd &OpenSoT::constraints::velocity::CartesianVelocity::getVelocityLimits() const
 {
     return _velocityLimits;
 }
 
-void OpenSoT::constraints::velocity::CartesianVelocity::setVelocityLimits(const Eigen::VectorXd velocityLimits)
+void OpenSoT::constraints::velocity::CartesianVelocity::setVelocityLimits(const Eigen::Vector6d &velocityLimits)
 {
-    if(_velocityLimits.rows() < 3 )
-        throw "Error: velocityLimits for CoM should be a vector of 3 elements";
+    _velocityLimits = velocityLimits;
+}
+
+void OpenSoT::constraints::velocity::CartesianVelocity::setVelocityLimits(const Eigen::Vector3d &velocityLimits)
+{
     _velocityLimits = velocityLimits;
 }
 
@@ -70,8 +87,10 @@ void CartesianVelocity::generatebBounds() {
 void CartesianVelocity::generateAineq()
 {
     /************************ COMPUTING BOUNDS ****************************/
-
-	_Aineq = _task->getA();
+    if(_is_cartesian)
+        _Aineq = _cartesian_task->getA();
+    else
+        _Aineq = _com_task->getA();
 
     /**********************************************************************/
 }

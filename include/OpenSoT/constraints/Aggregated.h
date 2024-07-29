@@ -115,18 +115,6 @@ using namespace OpenSoT::utils;
             virtual void _log(XBot::MatLogger2::Ptr logger);
 
         public:
-            /**
-             * @brief Aggregated
-             * @param bounds a std::list of Bounds
-             * @param q the vector of q at which to create the Aggregated bound
-             *          Notice that by specifying q, the Aggregated will automatically call
-             *          update(q) on all tasks he is composed of
-             */
-            Aggregated(const std::list< ConstraintPtr > constraints,
-                       const Eigen::VectorXd &q,
-                       const unsigned int aggregationPolicy =
-                            EQUALITIES_TO_INEQUALITIES |
-                            UNILATERAL_TO_BILATERAL);
 
             /**
              * @brief Aggregated
@@ -154,7 +142,7 @@ using namespace OpenSoT::utils;
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
 
-            void update(const Eigen::VectorXd &x);
+            void update();
 
             void log(XBot::MatLogger2::Ptr logger) override;
 

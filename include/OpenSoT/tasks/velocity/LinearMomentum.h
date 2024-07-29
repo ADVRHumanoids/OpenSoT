@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_LINEAR_MOMENTUM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 
@@ -50,7 +50,7 @@ namespace OpenSoT {
 
            Eigen::MatrixXd _Momentum;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
         public:
            /**
@@ -58,7 +58,7 @@ namespace OpenSoT {
             * @param x joint states
             * @param robot reference to a model
             */
-           LinearMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot);
+           LinearMomentum(XBot::ModelInterface& robot);
            ~LinearMomentum();
 
            /**

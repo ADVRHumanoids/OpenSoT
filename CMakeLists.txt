@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.20)
 include(ExternalProject)
-project(open_sot VERSION 3.2.0)
+project(open_sot VERSION 4.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -21,6 +21,7 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
 set(${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
+add_subdirectory(doc)
 
 #find_package(Boost COMPONENTS system REQUIRED)
 #find_package(Eigen3 REQUIRED)
@@ -35,17 +36,11 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         surface)
                                         #search
                                         #io)
-
-#find_package(eigen_conversions REQUIRED)
-find_package(XBotInterface REQUIRED)
-find_package(fcl 0.6.1 QUIET)
-if(DEFINED FCL_VERSION)
-    set(FCL_FOUND 1)
-else()
-    set(FCL_FOUND 0)
-endif()
+                                                                                
+find_package(eigen_conversions REQUIRED)
+find_package(xbot2_interface REQUIRED)
 find_package(PkgConfig REQUIRED)
-#find_package(matlogger2 REQUIRED)
+find_package(matlogger2 REQUIRED)
 
 
 # compilation flags
@@ -54,6 +49,7 @@ option(OPENSOT_COMPILE_TESTS "Compile OpenSoT tests" FALSE)
 option(OPENSOT_VERBOSE "Some additional prints" FALSE)
 option(OPENSOT_VERBOSE_MATLOG "Log all aggregated tasks/constraints to MAT-file" FALSE)
 option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
+option(OPENSOT_COMPILE_COLLISION "Compile OpenSoT collision avoidance" TRUE)
 
 if(${OPENSOT_DISABLE_VECTORIZATION})
     add_definitions(-DEIGEN_DONT_VECTORIZE)
@@ -90,9 +86,9 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/velocity/CartesianVelocity.cpp
     src/constraints/velocity/CoMVelocity.cpp
     src/constraints/velocity/JointLimits.cpp
+    src/constraints/velocity/JointLimitsInvariance.cpp
     src/constraints/velocity/VelocityLimits.cpp
     src/constraints/velocity/OmniWheels4X.cpp
-    src/constraints/torque/JointLimits.cpp
     src/constraints/force/FrictionCone.cpp
     src/constraints/force/WrenchLimits.cpp
     src/constraints/force/CoP.cpp
@@ -110,11 +106,12 @@ if(${PCL_FOUND} AND ${moveit_core_FOUND})
         src/constraints/velocity/ConvexHull.cpp)
 endif()
 
-if(${FCL_FOUND} AND ${moveit_core_FOUND})
+if(${OPENSOT_COMPILE_COLLISION})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
-        src/constraints/velocity/CollisionAvoidance.cpp)
-    set(PRIVATE_TLL ${PRIVATE_TLL} moveit_core::moveit_planning_scene moveit_msgs::moveit_msgs__rosidl_typesupport_cpp)
+        src/constraints/velocity/CollisionAvoidance.cpp
+        src/tasks/velocity/CollisionAvoidance.cpp)
+
 endif()
 
 ##TASKS
@@ -131,10 +128,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/acceleration/MinJointVel.cpp
     src/tasks/acceleration/AngularMomentum.cpp
     src/tasks/velocity/Cartesian.cpp
-    src/tasks/velocity/CartesianAdmittance.cpp
+    src/tasks/velocity/CartesianAdmittance.cpp #TODO: refactor to better implementation of admittance, not using filters
     src/tasks/velocity/PureRolling.cpp
-    src/tasks/velocity/RigidRotation.cpp
-    src/tasks/velocity/Unicycle.cpp
     src/tasks/velocity/Gaze.cpp
     src/tasks/velocity/Contact.cpp
     src/tasks/velocity/CoM.cpp
@@ -143,9 +138,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/velocity/Manipulability.cpp
     src/tasks/velocity/MinimumEffort.cpp
     src/tasks/velocity/Postural.cpp
-    src/tasks/velocity/JointAdmittance.cpp
-    src/tasks/torque/JointImpedanceCtrl.cpp
-    src/tasks/torque/CartesianImpedanceCtrl.cpp
+    src/tasks/velocity/JointAdmittance.cpp #TODO: refactor to better implementation of admittance, not using filters
     src/tasks/force/CoM.cpp
     src/tasks/force/FloatingBase.cpp
     src/tasks/force/Force.cpp
@@ -153,6 +146,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/floating_base/Contact.cpp
     src/tasks/floating_base/IMU.cpp
     )
+
 ##SOLVERS
 set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/BackEndFactory.cpp
@@ -178,14 +172,8 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/AffineUtils.cpp
     src/utils/Indices.cpp
     src/utils/cartesian_utils.cpp
-    src/utils/ForceOptimization.cpp
     src/utils/InverseDynamics.cpp)
 
-if(${FCL_FOUND} AND ${moveit_core_FOUND})
-    message("Adding src/utils/collision_utils.cpp to compilation")
-    set(OPENSOT_UTILS_SOURCES ${OPENSOT_UTILS_SOURCES}
-        src/utils/collision_utils.cpp)
-endif()
 
 if(${PCL_FOUND})
     message("Adding src/utils/convex_hull_utils.cpp to compilation")
@@ -205,9 +193,8 @@ ADD_LIBRARY(OpenSoT SHARED
     ${sot_INCLUDES})
 
 set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
-if(${FCL_FOUND} AND ${moveit_core_FOUND})
-    set(PRIVATE_TLL ${PRIVATE_TLL} fcl
-        ${moveit_core_LIBRARIES})
+if(${OPENSOT_COMPILE_COLLISION})
+    target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision)
 endif()
 if(${PCL_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES})
@@ -223,7 +210,7 @@ install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
 
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
-    XBotInterface::XBotInterface
+    xbot2_interface::xbot2_interface
     matlogger2::matlogger2
     PRIVATE
     ${PRIVATE_TLL})
@@ -351,13 +338,17 @@ install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
 # Add Testing and Examples target  #
 #######################
 if(OPENSOT_COMPILE_TESTS)
-    enable_testing()
     add_subdirectory(tests)
 endif()
 
 if(OPENSOT_COMPILE_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+##############
+## Bindings ##
+##############
+add_subdirectory(bindings/python)
 
 if(OPENSOT_COMPILE_TESTS OR OPENSOT_COMPILE_EXAMPLES)
     add_custom_target(copy_robot_model_files ALL

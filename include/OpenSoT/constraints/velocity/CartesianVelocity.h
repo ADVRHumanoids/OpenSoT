@@ -20,18 +20,25 @@
 
  #include <OpenSoT/Constraint.h>
  #include <OpenSoT/tasks/velocity/Cartesian.h>
+#include <OpenSoT/tasks/velocity/CoM.h>
 
 
  namespace OpenSoT {
     namespace constraints {
         namespace velocity {
+            /**
+             * @brief The CartesianVelocity class applied Cartesian velocity limits to a Cartesian task
+             */
             class CartesianVelocity: public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
             public:
                 typedef std::shared_ptr<CartesianVelocity> Ptr;
             private:
-                OpenSoT::tasks::velocity::Cartesian::Ptr _task;
+                OpenSoT::tasks::velocity::Cartesian::Ptr _cartesian_task;
+                OpenSoT::tasks::velocity::CoM::Ptr _com_task;
                 Eigen::VectorXd _velocityLimits;
                 double _dT;
+
+                bool _is_cartesian;
 
                 void generatebBounds();
                 void generateAineq();
@@ -45,14 +52,28 @@
                  * @param task a pointer to a Cartesian task. Notice how the task needs to be updated in order
                  *             for the constraint to work
                  */
-                CartesianVelocity(const Eigen::VectorXd velocityLimits,
+                CartesianVelocity(const Eigen::Vector6d velocityLimits,
                                   const double dT,
-                                  OpenSoT::tasks::velocity::Cartesian::Ptr& task);
+                                  const OpenSoT::tasks::velocity::Cartesian::Ptr& task);
 
-                virtual void update(const Eigen::VectorXd &x);
+                CartesianVelocity(const Eigen::Vector3d velocityLimits,
+                                  const double dT,
+                                  const OpenSoT::tasks::velocity::CoM::Ptr& task);
 
-                Eigen::VectorXd getVelocityLimits();
-                void setVelocityLimits(const Eigen::VectorXd velocityLimits);
+                virtual void update();
+
+                /**
+                 * @brief getVelocityLimits
+                 * @return vector of velocity limits
+                 */
+                const Eigen::VectorXd& getVelocityLimits() const;
+
+                /**
+                 * @brief setVelocityLimits
+                 * @param velocityLimits constraints
+                 */
+                void setVelocityLimits(const Eigen::Vector6d& velocityLimits);
+                void setVelocityLimits(const Eigen::Vector3d& velocityLimits);
             };
         }
     }

@@ -3,6 +3,7 @@
 
 #include <OpenSoT/solvers/BackEnd.h>
 #include <boost/make_shared.hpp>
+#include <type_traits>
 
 namespace OpenSoT{
     namespace solvers{
@@ -15,6 +16,28 @@ namespace OpenSoT{
             qpSWIFT,
             proxQP
         };
+
+        template < typename C, C beginVal, C endVal>
+        class Iterator {
+          typedef typename std::underlying_type<C>::type val_t;
+          int val;
+        public:
+          Iterator(const C & f) : val(static_cast<val_t>(f)) {}
+          Iterator() : val(static_cast<val_t>(beginVal)) {}
+          Iterator operator++() {
+            ++val;
+            return *this;
+          }
+          C operator*() { return static_cast<C>(val); }
+          Iterator begin() { return *this; } //default ctor is good
+          Iterator end() {
+              static const Iterator endIter=++Iterator(endVal); // cache it
+              return endIter;
+          }
+          bool operator!=(const Iterator& i) { return val != i.val; }
+        };
+
+        typedef Iterator<solver_back_ends, solver_back_ends::qpOASES, solver_back_ends::proxQP> solver_back_ends_iterator;
 
         /**
          * @brief BackEndFactory creates an instance of an OpenSoT BackEnd

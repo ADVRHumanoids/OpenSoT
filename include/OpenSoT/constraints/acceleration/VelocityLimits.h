@@ -3,36 +3,66 @@
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 
 namespace OpenSoT { namespace constraints { namespace acceleration {
 
+/**
+ * @brief The VelocityLimits class implements joint velocity limits in acceleration
+ */
 class VelocityLimits : public Constraint<Eigen::MatrixXd, Eigen::VectorXd> {
 
 public:
 
     typedef std::shared_ptr<VelocityLimits> Ptr;
 
+    /**
+     * @brief VelocityLimits constructor
+     * @param robot model
+     * @param qddot variables
+     * @param qDotLimit velocity limits applied to all the joints
+     * @param dT control loop time
+     */
     VelocityLimits(XBot::ModelInterface& robot,
                    const AffineHelper& qddot,
                    const double qDotLimit,
                    const double dT);
 
+    /**
+     * @brief VelocityLimits constructor
+     * @param robot model
+     * @param qddot variables
+     * @param qDotLimit limits as a vector
+     * @param dT control loop time
+     */
     VelocityLimits(XBot::ModelInterface& robot,
                    const AffineHelper& qddot,
                    const Eigen::VectorXd& qDotLimit,
                    const double dT);
 
-    virtual void update(const Eigen::VectorXd& x);
+    /**
+     * @brief update
+     * @param x
+     */
+    virtual void update();
 
+    /**
+     * @brief setVelocityLimits update velocity limits
+     * @param qDotLimit applied to all the joints
+     */
     void setVelocityLimits(const double qDotLimit);
+
+    /**
+     * @brief setVelocityLimits update velocity limits
+     * @param qDotLimit as a vector
+     */
     void setVelocityLimits(const Eigen::VectorXd& qDotLimit);
 
     /**
      * @brief setPStepAheadPredictor
      * @param p step predictor coefficient >= 1
-     * @return false if p <1
+     * @return false if p < 1
      */
     bool setPStepAheadPredictor(const double p);
 

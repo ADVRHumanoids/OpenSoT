@@ -20,24 +20,13 @@
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/collision.h>
 
 #include <srdfdom/model.h>
 #include <Eigen/Dense>
 
 #include <moveit_msgs/msg/planning_scene_world.hpp>
-
-class ComputeLinksDistance;
-class LinkPairDistance;
-
-// forward declare fcl collision object
-namespace fcl
-{
-    template <typename Scalar>
-    class CollisionObject;
-
-    using CollisionObjectd = CollisionObject<double>;
-}
 
 namespace OpenSoT { namespace constraints { namespace velocity {
 
@@ -56,6 +45,8 @@ public:
 
     typedef std::shared_ptr<CollisionAvoidance> Ptr;
     typedef std::pair<std::string, std::string> LinksPair;
+    typedef XBot::Collision::CollisionModel::WitnessPointVector WitnessPointVector;
+    typedef XBot::Collision::CollisionModel::LinkPairVector LinkPairVector;
 
     /**
      * @brief SelfCollisionAvoidance
@@ -66,17 +57,22 @@ public:
      * @param collision_srdf srdf used for collision model
      * NOTE: if urdf and srdf are not specified, the one inside the robot model will be used
      */
-    CollisionAvoidance(const Eigen::VectorXd& x,
-                           const XBot::ModelInterface& robot,
-                           int max_pairs = -1,
-                           urdf::ModelConstSharedPtr collision_urdf = nullptr,
-                           srdf::ModelConstSharedPtr collision_srdf = nullptr);
+    CollisionAvoidance(const XBot::ModelInterface& robot,
+                       int max_pairs = -1,
+                       urdf::ModelConstSharedPtr collision_urdf = nullptr,
+                       srdf::ModelConstSharedPtr collision_srdf = nullptr);
 
     /**
      * @brief getLinkPairThreshold distance offset between two link pairs
      * @return _LinkPair_threshold distance offset between two link pairs
      */
     double getLinkPairThreshold();
+
+    /**
+     * @brief getError
+     * @param e
+     */
+    void getError(Eigen::VectorXd& e);
 
     /**
      * @brief getDetectionThreshold
@@ -99,66 +95,39 @@ public:
     /**
      * @brief update recomputes Aineq and bUpperBound if x is different than the
      *  previously stored value
-     * @param x the state vector. It gets cached so that we won't recompute
-     * capsules distances if x didn't change
-     * TODO if the capsules distances are given by a server
-     * (i.e. a separate thread updaing capsules at a given rate)
-     * then the inelegant caching of x is not needed anymore (notice that,
-     * however, it would be nice to have a caching system
-     * at the stack level so that, if two tasks in the same stack are constrained
-     *  by the same constraint, this constraint
-     * gets updated only once per stack update)
+     * @param x the state vector.
      */
-    void update(const Eigen::VectorXd &x);
+    void update();
+
+
+    void setMaxPairs(const unsigned int max_pairs);
+
+    void setCollisionList(std::set<std::pair<std::string, std::string>> collisionList);
+
 
 
     /**
-     * @brief setCollisionWhiteList resets the allowed collision matrix by setting all collision pairs as disabled.
-     *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
-     *        which are disabled in the SRDF
-     * @param whiteList a list of links pairs for which to not check collision detection
-     * @return true on success
+     * @brief collisionModelUpdated must be called after a collision has been added or
+     * removed from the model
      */
-    bool setCollisionWhiteList(std::list<LinksPair> whiteList);
+    void collisionModelUpdated();
 
-    /**
-     * @brief setCollisionBlackList resets the allowed collision matrix by setting all collision pairs
-     *        (for which collision geometries are avaiable) as enabled.
-     *        It then disables all collision pairs specified in the blackList. Lastly it will disable all collision pairs
-     *        which are disabled in the SRDF
-     * @param blackList a list of links pairs for which to not check collision detection
-     * @return true on success
-     */
-    bool setCollisionBlackList(std::list<LinksPair> blackList);
+    bool addCollisionShape(const std::string& name,
+                           const std::string& link,
+                           const XBot::Collision::Shape::Variant& shape,
+                           const Eigen::Affine3d& link_T_shape,
+                           const std::vector<std::string>& disabled_collisions = {});
 
-    /**
-     * @brief add/remove world collision objects according to the given planning
-     * scene world
-     * @return true if all requests (additions, deletions) could be performs
-     * succesfully, false on (partial) insuccess
-     */
-    bool setWorldCollisions(const moveit_msgs::msg::PlanningSceneWorld& wc);
+    // /**
+    //  * @brief remove world collision with given id
+    //  */
+    // bool removeWorldCollision(const std::string& id);
 
-    /**
-     * @brief add single collision to the world
-     * @param id is the unique collision id
-     * @param fcl_obj is the fcl collision object (geometry + transform)
-     * @return true if input is valid
-     */
-    bool addWorldCollision(const std::string& id,
-                           std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
-
-    /**
-     * @brief remove world collision with given id
-     */
-    bool removeWorldCollision(const std::string& id);
-
-    /**
-     * @brief change the transform w.r.t. the world for the given
-     * world collision
-     */
-    bool moveWorldCollision(const std::string& id,
-                            KDL::Frame new_pose);
+     /**
+      * @brief change the transform w.r.t. the world for the given
+      * world collision
+      */
+     bool moveCollisionShape(const std::string& id, const Eigen::Affine3d& new_pose);
 
     /**
      * @brief setBoundScaling sets bound scaling for the capsule constraint
@@ -172,18 +141,47 @@ public:
      * @brief setLinksVsEnvironment
      * @param links
      */
-    void setLinksVsEnvironment(const std::list<std::string>& links);
-
+    void setLinksVsEnvironment(const std::set<std::string>& links);
 
     /**
-     * @brief getLinkPairDistances
-     * @return list of LinkPairDistance which will be used in the task
+     * @brief getter for the internal collision model
      */
-    const std::list<LinkPairDistance>& getLinkPairDistances(){ return _distance_list;}
+    XBot::Collision::CollisionModel& getCollisionModel();
+
+    /**
+     * @brief getter for the internal collision model
+     */
+    const XBot::Collision::CollisionModel& getCollisionModel() const;
+
+    /**
+     * @brief get the vector of witness points used by this constraint
+     * during the last call to update(), in ascending distance order
+     * @param wp
+     */
+    void getOrderedWitnessPointVector(WitnessPointVector& wp) const;
+
+    /**
+     * @brief getOrderedLinkPairVector
+     * @param lp
+     */
+    void getOrderedLinkPairVector(LinkPairVector& lp) const;
+
+    /**
+     * @brief getOrderedDistanceVector
+     * @param d
+     */
+    void getOrderedDistanceVector(std::vector<double>& d) const;
+
+    const Eigen::MatrixXd& getCollisionJacobian() const;
 
     ~CollisionAvoidance();
 
 protected:
+
+    /**
+     * @brief _include_env
+     */
+    bool _include_env;
 
     /**
      * @brief _bound_scaling
@@ -210,25 +208,23 @@ protected:
      */
     const XBot::ModelInterface& _robot;
 
+    XBot::ModelInterface::Ptr _collision_model;
+
     /**
      * @brief _dist_calc
      */
-    std::unique_ptr<ComputeLinksDistance> _dist_calc;
+    std::unique_ptr<XBot::Collision::CollisionModel> _dist_calc;
 
-    /**
-     * @brief _x_cache is a copy of last q vector used to update the constraints.
-     * It is used in order to avoid multiple updated when the constraint is present
-     * in multiple tasks in the same stack. It is a simple speedup waiting for the stack system to support
-     * constraint caching - or for idynutils to support some form of cache system
-     */
-    Eigen::VectorXd _x_cache;
+    Eigen::VectorXd _distances;
+    Eigen::MatrixXd _distance_J;
+    int _num_active_pairs;
+    mutable WitnessPointVector _wpv;
+    mutable LinkPairVector _lpv;
 
     /**
      * @brief _Jtmp
      */
     Eigen::MatrixXd _Jtmp;
-
-    std::list<LinkPairDistance> _distance_list;
 
 };
 

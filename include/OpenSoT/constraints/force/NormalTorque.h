@@ -19,7 +19,7 @@
 #define _CONSTRAINT_NORMAL_TORQUE_LIMITS_H_
 
 #include <OpenSoT/Constraint.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/utils/Piler.h>
@@ -56,7 +56,7 @@ public:
                  const Eigen::Vector2d& Y_Lims,
                  const double& mu);
 
-    void update(const Eigen::VectorXd &x);
+    void update();
 
     /**
      * @brief setMu update friction coefficient
@@ -110,7 +110,7 @@ public:
 
     NormalTorque::Ptr getNormalTorque(const std::string& contact_name);
 
-    void update(const Eigen::VectorXd &x);
+    void update();
 
 private:
     std::map<std::string, NormalTorque::Ptr> _normal_torque_map;

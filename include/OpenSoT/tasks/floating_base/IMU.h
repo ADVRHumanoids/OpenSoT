@@ -19,7 +19,7 @@
 #define _OPENSOT_TASK_FLOATING_BASE_IMU_
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT{
     namespace tasks{
@@ -41,7 +41,7 @@ namespace OpenSoT{
                 IMU(XBot::ModelInterface& robot, XBot::ImuSensor::ConstPtr imu);
                 ~IMU();
 
-                void _update(const Eigen::VectorXd& x);
+                void _update();
 
             private:
                 Eigen::MatrixXd _J;

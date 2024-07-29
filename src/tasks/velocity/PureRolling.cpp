@@ -1,18 +1,17 @@
 #include <OpenSoT/tasks/velocity/PureRolling.h>
 
-OpenSoT::tasks::velocity::PureRolling::PureRolling(std::string wheel_link_name, 
-                                                   double radius, 
-                                                   const XBot::ModelInterface& model): 
-    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_" + wheel_link_name, model.getJointNum()),
+OpenSoT::tasks::velocity::PureRolling::PureRolling(std::string wheel_link_name,
+                                                   double radius,
+                                                   const XBot::ModelInterface& model):
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_" + wheel_link_name, model.getNv()),
     _model(model),
     _radius(radius),
     _wheel_link_name(wheel_link_name),
     _wheel_axis(0, 0, 1),
     _world_contact_plane_normal(0, 0, 1)
 {
-    Eigen::VectorXd q;
-    model.getJointPosition(q);
-    _update(q);
+
+    _update();
     
     setOutwardNormal(_world_contact_plane_normal);
 }
@@ -48,7 +47,7 @@ void OpenSoT::tasks::velocity::PureRolling::setOutwardNormal(const Eigen::Vector
 }
 
 
-void OpenSoT::tasks::velocity::PureRolling::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::velocity::PureRolling::_update()
 {
 
     /* Compute tranforms */
@@ -91,7 +90,7 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
                                                            double radius,
                                                            const XBot::ModelInterface& model,
                                                            const bool control_z):
-    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_POSITION_" + wheel_link_name, model.getJointNum())
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_POSITION_" + wheel_link_name, model.getNv())
 {
     _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
                             wheel_link_name, radius, model));
@@ -105,9 +104,7 @@ OpenSoT::tasks::velocity::PureRollingPosition::PureRollingPosition(std::string w
 	
     _W.setIdentity(_position_indices.size(), _position_indices.size());
 
-    Eigen::VectorXd q;
-    model.getJointPosition(q);
-    _update(q);
+    _update();
 }
 
 void OpenSoT::tasks::velocity::PureRollingPosition::setOutwardNormal(const Eigen::Vector3d& n)
@@ -116,9 +113,9 @@ void OpenSoT::tasks::velocity::PureRollingPosition::setOutwardNormal(const Eigen
 }
 
 
-void OpenSoT::tasks::velocity::PureRollingPosition::_update(const Eigen::VectorXd &x)
+void OpenSoT::tasks::velocity::PureRollingPosition::_update()
 {
-    _subtask->update(x);
+    _subtask->update();
 
     _A = _subtask->getA();
     _b = _subtask->getb();
@@ -132,7 +129,7 @@ void OpenSoT::tasks::velocity::PureRollingPosition::_log(XBot::MatLogger2::Ptr l
 OpenSoT::tasks::velocity::PureRollingOrientation::PureRollingOrientation(std::string wheel_link_name,
                                                            double radius,
                                                            const XBot::ModelInterface& model):
-    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_ORIENTATION_" + wheel_link_name, model.getJointNum())
+    Task<Eigen::MatrixXd, Eigen::VectorXd>("PURE_ROLLING_ORIENTATION_" + wheel_link_name, model.getNv())
 {
     _pure_rolling.reset(new OpenSoT::tasks::velocity::PureRolling(
                             wheel_link_name, radius, model));
@@ -140,14 +137,12 @@ OpenSoT::tasks::velocity::PureRollingOrientation::PureRollingOrientation(std::st
     _orientation_indices.push_back(3);
     _subtask.reset(new OpenSoT::SubTask(_pure_rolling, _orientation_indices));
 
-    Eigen::VectorXd q;
-    model.getJointPosition(q);
-    _update(q);
+    _update();
 }
 
-void OpenSoT::tasks::velocity::PureRollingOrientation::_update(const Eigen::VectorXd &x)
+void OpenSoT::tasks::velocity::PureRollingOrientation::_update()
 {
-    _subtask->update(x);
+    _subtask->update();
 
     _A = _subtask->getA();
     _b = _subtask->getb();

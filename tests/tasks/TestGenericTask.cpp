@@ -107,7 +107,7 @@ TEST_F(testGenericLPTask, testMethods)
     std::cout<<"new_c: "<<new_c<<std::endl;
 
     this->_generic_lp_task->setc(new_c);
-    this->_generic_lp_task->update(Eigen::VectorXd(1));
+    this->_generic_lp_task->update();
 
     EXPECT_TRUE(this->_generic_lp_task->getA() == Eigen::MatrixXd::Zero(0, new_c.size()));
     EXPECT_TRUE(this->_generic_lp_task->getb() == Eigen::VectorXd::Zero(0));
@@ -132,7 +132,7 @@ TEST_F(testGenericTask, testMethods)
     Eigen::MatrixXd newA(this->A.rows(), this->A.cols());
     newA = 2.*this->A;
     EXPECT_TRUE(this->_generic_task->setA(newA));
-    this->_generic_task->update(Eigen::VectorXd(1));
+    this->_generic_task->update();
     EXPECT_EQ(newA, this->_generic_task->getA());
     std::cout<<"newA: "<<newA<<std::endl;
     std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
@@ -143,7 +143,7 @@ TEST_F(testGenericTask, testMethods)
     Eigen::VectorXd newb(this->b.size());
     newb = 3.*this->b;
     EXPECT_TRUE(this->_generic_task->setb(newb));
-    this->_generic_task->update(Eigen::VectorXd(1));
+    this->_generic_task->update();
     EXPECT_EQ(newA, this->_generic_task->getA());
     std::cout<<"newA: "<<newA<<std::endl;
     std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
@@ -159,7 +159,7 @@ TEST_F(testGenericTask, testMethods)
     F.setRandom(4,this->A.cols());
 
     EXPECT_TRUE(this->_generic_task->setAb(F,g));
-    this->_generic_task->update(Eigen::VectorXd(1));
+    this->_generic_task->update();
     EXPECT_EQ(F, this->_generic_task->getA());
     std::cout<<"F: "<<F<<std::endl;
     std::cout<<"this->_generic_task->getA(): "<<this->_generic_task->getA()<<std::endl;
@@ -250,8 +250,8 @@ TEST_F(testGenericTask, testGenericTaskVSMinimizeVariables)
     OpenSoT::tasks::GenericTask::Ptr generic_min_var;
     generic_min_var.reset(new OpenSoT::tasks::GenericTask("generic_min_tas", var.getM(), var.getq()));
 
-    min_var->update(Eigen::VectorXd(1));
-    generic_min_var->update(Eigen::VectorXd(1));
+    min_var->update();
+    generic_min_var->update();
 
     for(unsigned int i = 0; i < M.rows(); ++i)
     {

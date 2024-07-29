@@ -142,19 +142,10 @@ using namespace OpenSoT::utils;
             Aggregated(TaskPtr task,
                        const unsigned int x_size);
 
-            /**
-             * @brief Aggregated
-             * @param bounds a std::list of Tasks
-             * @param q the vector of q at which to create the Aggregated task
-             *          Notice that by specifying q, the Aggregated will automatically call
-             *          update(q) on all tasks he is composed of
-             */
-            Aggregated(const std::list< TaskPtr > tasks,
-                       const Eigen::VectorXd &q);
 
             ~Aggregated();
 
-            void _update(const Eigen::VectorXd &x);
+            void _update();
 
 
             /**

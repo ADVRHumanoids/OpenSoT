@@ -45,7 +45,7 @@ TEST_F(testLProblem, testSingleLPProblem)
     c.setOnes(4);
 
     OpenSoT::tasks::GenericTask::Ptr  lp_task(new OpenSoT::tasks::GenericTask("lp_task", A, b));
-    lp_task->update(Eigen::VectorXd(4));
+    lp_task->update();
     lp_task->setHessianType(OpenSoT::HessianType::HST_ZERO);
     lp_task->setc(c);
     std::cout<<"lp_task->getc(): "<<lp_task->getc()<<std::endl;
@@ -54,7 +54,7 @@ TEST_F(testLProblem, testSingleLPProblem)
     lb = -2*Eigen::VectorXd::Ones(4);
     ub = 2.*Eigen::VectorXd::Ones(4);
     OpenSoT::constraints::GenericConstraint::Ptr constr(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 4));
-    constr->update(Eigen::VectorXd(4));
+    constr->update();
     std::cout<<"lb: "<<constr->getLowerBound().transpose()<<std::endl;
     std::cout<<"ub: "<<constr->getUpperBound().transpose()<<std::endl;
 
@@ -220,18 +220,18 @@ TEST_F(testLProblem, testMILPProblem)
         Eigen::MatrixXd A_qp(1,3); A_qp << 4., 2., 0.;
         Eigen::VectorXd b_qp(1); b_qp<<12;
         OpenSoT::tasks::GenericTask::Ptr task_qp(new OpenSoT::tasks::GenericTask("task_qp",A_qp,b_qp));
-        task_qp->update(Eigen::VectorXd(1));
+        task_qp->update();
 
         Eigen::VectorXd c_CBC(3);
         c_CBC<<-3.,-2.,-1;
         OpenSoT::tasks::GenericLPTask::Ptr task_CBC(new OpenSoT::tasks::GenericLPTask("task_CBC",c_CBC));
-        task_CBC->update(Eigen::VectorXd(1));
+        task_CBC->update();
 
         Eigen::VectorXd lb(3), ub(3);
         lb.setZero(3);
         ub<<1e30, 1e30, 1.;
         OpenSoT::constraints::GenericConstraint::Ptr bounds(new OpenSoT::constraints::GenericConstraint("bounds", ub, lb, 3));
-        bounds->update(Eigen::VectorXd(1));
+        bounds->update();
 
         Eigen::MatrixXd Ac_CBC(1,3);
         Ac_CBC<<1.,1.,1;
@@ -243,7 +243,7 @@ TEST_F(testLProblem, testMILPProblem)
         OpenSoT::constraints::GenericConstraint::Ptr constr(
                                  new OpenSoT::constraints::GenericConstraint("constraint", var, uA_CBC, lA_CBC,
                                                                 OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT));
-        constr->update(Eigen::VectorXd(1));
+        constr->update();
 
         /* _autostack */
         OpenSoT::AutoStack::Ptr _autostack;

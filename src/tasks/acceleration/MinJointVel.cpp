@@ -14,7 +14,7 @@ MinJointVel::MinJointVel(const XBot::ModelInterface &robot, double dT, AffineHel
 
     _hessianType = HST_SEMIDEF;
 
-    _update(Eigen::VectorXd(1));
+    _update();
 
 
     I = _postural->getWeight();
@@ -25,9 +25,9 @@ MinJointVel::MinJointVel(const XBot::ModelInterface &robot, double dT, AffineHel
 
 }
 
-void MinJointVel::_update(const Eigen::VectorXd &x)
+void MinJointVel::_update()
 {
-    _postural->update(x);
+    _postural->update();
 
     _A = _postural->getA();
     _b = _postural->getb();

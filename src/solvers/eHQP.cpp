@@ -11,8 +11,8 @@ using namespace OpenSoT::solvers;
 
 eHQP::eHQP(Stack& stack) : Solver<Eigen::MatrixXd, Eigen::VectorXd>(stack), sigma_min(Eigen::NumTraits<double>::epsilon())
 {
-    if(stack.size() > 0)
-    {
+    //if(stack.size() > 0)
+    //{
         _x_size = _tasks[0]->getXSize();
         // We reserve some memory
         // this goes from 0 to stack.size() !!!
@@ -58,12 +58,12 @@ eHQP::eHQP(Stack& stack) : Solver<Eigen::MatrixXd, Eigen::VectorXd>(stack), sigm
 
         for(unsigned int i = 0; i < stack.size(); ++i)
             printProblemInformation(i, _tasks[i]->getTaskID(), "NONE", "NONE");
-    }
+    //}
 }
 
 bool eHQP::solve(Eigen::VectorXd& solution)
 {
-    solution.setZero(solution.size());
+    solution.setZero(_x_size);
     for(unsigned int i = 1; i <= _tasks.size(); ++i)
     {
         _stack_levels[i]._WChol.compute(_tasks[i-1]->getWeight());

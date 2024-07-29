@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_COM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 
@@ -54,6 +54,12 @@
                 std::string _base_link;
                 std::string _distal_link;
 
+
+            protected:
+                virtual void _update();
+                virtual void _log(XBot::MatLogger2::Ptr logger);
+
+
             public:
 
 
@@ -63,14 +69,12 @@
                  * @param x the initial configuration of the robot
                  * @param robot the robot model
                  */
-                CoM(const Eigen::VectorXd& x,
-                    XBot::ModelInterface& robot,
+                CoM(XBot::ModelInterface& robot,
                     const std::string& id = "CoM"
                    );
 
                 ~CoM();
 
-                virtual void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief setReference sets a new reference for the CoM task.
@@ -157,8 +161,6 @@
                  */
                 bool reset();
                 
-                virtual void _log(XBot::MatLogger2::Ptr logger);
-
                 static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
                 static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);

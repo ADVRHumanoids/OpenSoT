@@ -23,15 +23,9 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/SubConstraint.h>
-
-/**
- * @example example_autostack.cpp
- * The AutoStack class allows to use the MOT (Math of Tasks)
- * to define stacks.
- */
 
 namespace OpenSoT {
     /**
@@ -39,30 +33,26 @@ namespace OpenSoT {
      *        by automatically calling the update() function on all
      *        tasks of the stack. Many operators are defined for the
      *        AutoStack, so that it's possible to concisely write
-     *        stacks. Together with OpenSoT::DefaultHumanoidStack
-     *        it allows to use the MOT (Math of Tasks) to define stacks, e.g.:
-     * AutoStack = (T1 + T2) / (T3 << ConstraintT3 + T4) << Bounds
-     *
-     * You can see an example in @ref example_autostack.cpp
+     *        stacks. It allows to use the MOT (Math of Tasks) to define stacks, e.g.:
+     *        AutoStack = (T1 + T2) / (T3 << ConstraintT3 + T4) << Bounds
      */
     class AutoStack 
     {
         public:
-        typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
+            typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
         private:
-        OpenSoT::solvers::iHQP::Stack _stack;
+            OpenSoT::solvers::iHQP::Stack _stack;
 
-       OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
+            OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
 
-        OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
+            OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
 
-        std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
-                OpenSoT::solvers::iHQP::TaskPtr task);
-
-        protected:
-            AutoStack(const double x_size);
-
+            std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
+                    OpenSoT::solvers::iHQP::TaskPtr task);
         public:
+
+            AutoStack(const int x_size);
+
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
 
             AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
@@ -74,10 +64,7 @@ namespace OpenSoT {
                       std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
 
 
-            /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
-                      OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
-
-            void update(const Eigen::VectorXd & state);
+            void update();
 
             void log(XBot::MatLogger2::Ptr logger);
 
@@ -117,8 +104,7 @@ namespace OpenSoT {
 
             OpenSoT::constraints::Aggregated::ConstraintPtr getBounds();
 
-            OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& base_link, const std::string& distal_link);
-            OpenSoT::solvers::iHQP::TaskPtr getOperationalSpaceTask(const std::string& task_id);
+            OpenSoT::solvers::iHQP::TaskPtr getTask(const std::string& task_id);
     };
 
 

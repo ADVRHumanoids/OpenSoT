@@ -52,9 +52,9 @@ TaskToConstraint::TaskToConstraint(TaskToConstraint::TaskPtr task,
 }
 
 
-void TaskToConstraint::update(const Eigen::VectorXd &q)
+void TaskToConstraint::update()
 {
-    _task->update(q);
+    _task->update();
     this->generateAll();
 }
 

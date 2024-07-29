@@ -18,7 +18,7 @@
 #define __TASKS_FORCE_FB_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/Affine.h>
 
 namespace OpenSoT {
@@ -56,7 +56,7 @@ namespace OpenSoT {
             void setEnabledContacts(const std::vector<bool>& enabled_contacts);
 
             private:
-            virtual void _update(const Eigen::VectorXd& x);
+            virtual void _update();
             virtual void _log(XBot::MatLogger2::Ptr logger);
 
             std::vector<std::string> _contact_links;

@@ -19,12 +19,12 @@
 
 using namespace OpenSoT::tasks::velocity;
 
-AngularMomentum::AngularMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot):
-    Task("AngularMomentum", x.size()), _robot(robot),
+AngularMomentum::AngularMomentum(XBot::ModelInterface& robot):
+    Task("AngularMomentum", robot.getNv()), _robot(robot),
     _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredAngularMomentum.setZero();
-    this->_update(x);
+    this->_update();
 
     _W.resize(3,3);
     _W.setIdentity(3,3);
@@ -41,9 +41,9 @@ AngularMomentum::~AngularMomentum()
 
 }
 
-void AngularMomentum::_update(const Eigen::VectorXd& x)
+void AngularMomentum::_update()
 {
-    _robot.getCentroidalMomentumMatrix(_Momentum);
+    _robot.computeCentroidalMomentumMatrix(_Momentum);
     _A = _Momentum.block(3,0,3,_x_size);
     _b = _desiredAngularMomentum;
     //Reset for safety reasons!
@@ -65,6 +65,11 @@ void AngularMomentum::setReference(const KDL::Vector& desiredAngularMomentum)
 void AngularMomentum::getReference(Eigen::Vector3d& desiredAngularMomentum) const
 {
     desiredAngularMomentum = _desiredAngularMomentum;
+}
+
+const Eigen::Vector3d& AngularMomentum::getReference() const
+{
+    return _desiredAngularMomentum;
 }
 
 void AngularMomentum::getReference(KDL::Vector& desiredAngularMomentum) const

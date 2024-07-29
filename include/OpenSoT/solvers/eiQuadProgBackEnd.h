@@ -13,6 +13,9 @@ using namespace OpenSoT::utils;
 namespace OpenSoT{
 namespace solvers{
 
+/**
+ * @brief The eiQuadProgBackEnd class implements a back-end based on eiQuadProg by B. Stepehn https://www.cs.cmu.edu/~bstephe1/eiquadprog.hpp
+ */
 class eiQuadProgBackEnd:  public BackEnd{
 public:
     typedef MatrixPiler VectorPiler;

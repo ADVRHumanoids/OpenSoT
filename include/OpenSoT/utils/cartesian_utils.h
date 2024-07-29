@@ -41,22 +41,6 @@ public:
     virtual double compute(const Eigen::VectorXd &x) = 0;
 };
 
-/**
- * @brief The GradientVector class pure virtual function used to describe functions for computeHessian method.
- */
-class GradientVector {
-    int _size;
-public:
-    GradientVector(const int x_size) : _size(x_size) {}
-    /**
-     * @brief compute value of function in x
-     * @param x
-     * @return scalar
-     */
-
-    virtual Eigen::VectorXd compute(const Eigen::VectorXd &x) = 0;
-    int size() { return _size; }
-};
 
 /**
   This class implements quaternion error as in the paper:
@@ -268,108 +252,6 @@ class cartesian_utils
 {
 public:
     /**
-     * @brief pnpoly this code is EXACTLY the code of the PNPOLY - Point Inclusion in Polygon Test
-        W. Randolph Franklin (WRF) to test if a point is inside a plygon
-        (https://www.ecse.rpi.edu/~wrf/Research/Short_Notes/pnpoly.html)
-     * @param nvert Number of vertices in the polygon
-     * @param vertx Arrays containing the x-coordinates of the polygon's vertices
-     * @param verty Arrays containing the y-coordinates of the polygon's vertices
-     * @param testx X-coordinate of the test point
-     * @param testy Y-coordinate of the test point
-     * @return
-     *          -1 if the point is outside of the
-     *           0 if the point is on an edge or at a vertes
-     *           1 if the point is inside of the polygon
-     *
-     * REMARKS:
-     *      The vertices may be listed clockwise or anticlockwise.
-     *      The first may optionally be repeated, if so nvert may optionally be increased by 1.
-     *      The input polygon may be a compound polygon constisting of several separate
-     *      subpolygons. If so, the first vertex of each subpolygon must be repeated, and when calculating
-     *      nvert, these first vertices must be counted twice.
-     *      Written by Randolph Franklin, University of Ottawa, 7/70.
-     *
-     * METHOD:
-     *      A vertical line is drawn thru the point in question. If it crosses the polygon an odd number
-     *      of times, then the point is inside of the polygon.
-     */
-    static int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
-    {
-        int i, j, c = 0;
-          for (i = 0, j = nvert-1; i < nvert; j = i++) {
-            if ( ((verty[i]>testy) != (verty[j]>testy)) &&
-             (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
-               c = !c;
-          }
-          return c;
-    }
-
-    /**
-     * @brief computeCapturePoint computes the capture point position in world frame
-     * @param com_velocity is the velocity of the com in world frame
-     * @param com_pose_z is the height of the com in world frame
-     * @return capture point in world frame computed as:
-     *
-     *              p_cp = v_com*sqrt(z_com/g)
-     *
-     * as in "Capture Point: A Step toward Humanoid Push Recovery" by Jerry Pratt et al.
-     */
-    static Eigen::VectorXd computeCapturePoint(const Eigen::VectorXd& com_velocity,
-                                               const Eigen::VectorXd& com_pose);
-
-    /**
-     * @brief computeFootZMP compute the MEASURED ZMP for a foot in contact, given forces and torques measured
-     * from an FT sensor. The formula used is based on:
-     *      "Introduction to Humanoid Robots" by Shuuji Kajita et al., pag. 79-80
-     *
-     *          if fz > fz_threshold
-     *              ZMPx = (-tau_y -fx*d)/fz
-     *              ZMPy = (tau_x - fy*d)/fz
-     *              ZMPz = -d
-     *          else
-     *              ZMPx = 0
-     *              ZMPy = 0
-     *              ZMPz = 0
-     *
-     * where d is the height of the sensor w.r.t. the sole.
-     * NOTE: The ZMP position is computed w.r.t. the sensor frame.
-     *
-     * @param forces vector of forces measured from the FT sensor
-     * @param torques vector of torques measured from the FT sensor
-     * @param d height of the sensor w.r.t. the sole
-     * @param fz_threshold if fz goes over this threshold then ZMP is computed
-     * @return a vector with the ZMP position
-     */
-    static Eigen::VectorXd computeFootZMP(const Eigen::VectorXd& forces, const Eigen::VectorXd& torques,
-                                            const double d, const double fz_threshold);
-
-    /**
-     * @brief computeZMP compute the MEASURED ZMP for BOTH the feet in contact, given the two ZMPs in the SAME
-     * reference frame and the measured force on z.
-     * The formula used is
-     *
-     *      if(fLz > fz_threshold || fRz > fz_threshod)
-     *          ZMPx = (ZMPLx*fLz + ZMPRx*fRz)(fLz + fRz)
-     *          ZMPy = (ZMPLy*fLz + ZMPRy*fRz)(fLz + fRz)
-     *          ZMPz = ZMPLz
-     *      else
-     *          ZMPx = 0
-     *          ZMPy = 0
-     *          ZMPz = 0
-     *
-     *  where ZMP, ZMPL and ZMPR are all expressed in the same reference frame.
-     *
-     * @param Lforces
-     * @param Ltorques
-     * @param Rforces
-     * @param Rtorques
-     * @param fz_threshold
-     * @return
-     */
-    static Eigen::VectorXd computeZMP(const double Lforce_z, const double Rforce_z,
-                                        const Eigen::VectorXd& ZMPL, const Eigen::VectorXd& ZMPR,
-                                        const double fz_threshold);
-    /**
      * @brief computePanTiltMatrix given a gaze vector computes the Homogeneous Matrix to control the
      * YAW-PITCH angles.
      * The algorithm used is based on the paper: "Adaptive Predictive Gaze Control of a Redundant Humanoid
@@ -402,55 +284,7 @@ public:
                                       const Eigen::Affine3d &Td,
                                       Eigen::Vector3d& position_error,
                                       Eigen::Vector3d& orientation_error);
-
-    /**
-     * @brief computeGradient compute numerical gradient of a function using 2 points formula:
-     *
-     *           f(x+h) - f(x-h)
-     *   df(x)= ----------------
-     *                2h
-     * @param x points around gradient is compute
-     * @param fun function to derive
-     * @param step step of gradient
-     * @return vector of gradient
-     */
-    static Eigen::VectorXd computeGradient(const Eigen::VectorXd &x,
-                                              CostFunction &fun,
-                                              const double &step = 1E-3);
-
-    /**
-     * @brief computeGradient compute numerical gradient of a function using 2 points formula:
-     *
-     *           f(x+h) - f(x-h)
-     *   df(x)= ----------------
-     *                2h
-     * @param x points around gradient is compute
-     * @param fun function to derive
-     * @param jointMask the joints over which we want to compute the gradient
-     * @param step step of gradient
-     * @return vector of gradient
-     */
-    static Eigen::VectorXd computeGradient(const Eigen::VectorXd &x,
-                                              CostFunction &fun,
-                                              const std::vector<bool>& jointMask,
-                                              const double &step = 1E-3);
-
-    /**
-     * @brief computeGradient compute numerical gradient of a function using 2 points formula:
-     *
-     *           f(x+h) - f(x-h)
-     *   df(x)= ----------------
-     *                2h
-     * @param x points around gradient is compute
-     * @param fun function to derive
-     * @param step step of gradient
-     * @return vector of gradient
-     */
-    static Eigen::MatrixXd computeHessian( const Eigen::VectorXd &x,
-                                              GradientVector &vec,
-                                              const double &step = 1E-3);
 };
-
 
 
 #endif

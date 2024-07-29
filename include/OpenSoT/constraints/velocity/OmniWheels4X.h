@@ -19,7 +19,7 @@
 #define __BOUNDS_OMNIWHEEL4X_H__
 
  #include <OpenSoT/Constraint.h>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
 
 namespace OpenSoT {
    namespace constraints {
@@ -68,13 +68,12 @@ namespace OpenSoT {
            OmniWheels4X(const double l1, const double l2, const double r,
                        const std::vector<std::string> joint_wheels_name,
                        const std::string base_link,
-                       const Eigen::VectorXd& x,
                        XBot::ModelInterface& robot);
            /**
             * @brief update the constraint
             * @param x state vector
             */
-           virtual void update(const Eigen::VectorXd &x);
+           virtual void update();
 
 
        private:

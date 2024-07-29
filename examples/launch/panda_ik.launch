@@ -1,0 +1,16 @@
+<launch>
+
+     <!-- send the coman robot XML to param server -->
+     <param name="robot_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm.urdf.xacro'" />
+     
+
+    <!-- start robot state publisher -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" >
+        <param name="publish_frequency" type="double" value="50.0" />
+    </node>
+    
+    <node pkg="tf" type="static_transform_publisher" name="base_link" args="0 0 0 0 0 0 /base_link /panda_link0 100"/>
+    
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(env PWD)/panda_ik.rviz" output="screen"/> 
+
+</launch>

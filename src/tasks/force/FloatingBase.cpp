@@ -33,7 +33,7 @@ FloatingBase::FloatingBase(XBot::ModelInterface &model,
     
     _floating_base_torque.setZero();
 
-    update(Eigen::VectorXd());
+    update();
     _W.setIdentity(_A.rows(), _A.rows());
 }
 
@@ -55,7 +55,7 @@ void FloatingBase::_log(XBot::MatLogger2::Ptr logger)
     logger->add(_task_id + "_floating_base_torque", _floating_base_torque);
 }
 
-void FloatingBase::_update(const Eigen::VectorXd &x)
+void FloatingBase::_update()
 {
     _task.setZero(_wrenches[0].getInputSize(), 6);
 

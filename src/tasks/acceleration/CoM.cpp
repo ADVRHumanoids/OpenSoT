@@ -1,16 +1,16 @@
 #include <OpenSoT/tasks/acceleration/CoM.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
 using XBot::Logger;
 
 const std::string OpenSoT::tasks::acceleration::CoM::world_name = "world";
 
-OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const Eigen::VectorXd& x):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >("CoM", x.size()),
+OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot):
+    Task< Eigen::MatrixXd, Eigen::VectorXd >("CoM", robot.getNv()),
     _robot(robot),
     _distal_link("CoM"),
     _base_link(world_name)
 {
-    _qddot = AffineHelper::Identity(x.size());
+    _qddot = AffineHelper::Identity(_x_size);
 
     _hessianType = HST_SEMIDEF;
 
@@ -28,7 +28,7 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface& robot, const 
     _Kd.setIdentity();
 
 
-    update(Eigen::VectorXd(1));
+    update();
 
     setWeight(Eigen::MatrixXd::Identity(3,3));
 }
@@ -56,7 +56,7 @@ OpenSoT::tasks::acceleration::CoM::CoM(const XBot::ModelInterface &robot, const 
     _Kd.setIdentity();
 
 
-    update(Eigen::VectorXd(1));
+    update();
 
     setWeight(Eigen::MatrixXd::Identity(3,3));
 }
@@ -71,14 +71,15 @@ const std::string& OpenSoT::tasks::acceleration::CoM::getDistalLink() const
     return _distal_link;
 }
 
-void OpenSoT::tasks::acceleration::CoM::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::acceleration::CoM::_update()
 {
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
 
-    _robot.getCOMJacobian(_J, _jdotqdot);
-    _robot.getCOM(_pose_current);
-    _robot.getCOMVelocity(_vel_current);
+    _robot.getCOMJacobian(_J);
+    _jdotqdot = _robot.getCOMJdotTimesV();
+    _pose_current = _robot.getCOM();
+    _vel_current = _robot.getCOMVelocity();
 
 
     _pose_error = _pose_ref - _pose_current;
@@ -152,7 +153,7 @@ void OpenSoT::tasks::acceleration::CoM::setLambda(double lambda1, double lambda2
 
 void OpenSoT::tasks::acceleration::CoM::resetReference()
 {
-    _robot.getCOM(_pose_ref);
+    _pose_ref = _robot.getCOM();
     _vel_ref.setZero();
     _acc_ref.setZero();
 
@@ -178,17 +179,30 @@ void OpenSoT::tasks::acceleration::CoM::_log(XBot::MatLogger2::Ptr logger)
     logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
-void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref)
+void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& ref) const
 {
     ref = _pose_ref;
 }
 
-void OpenSoT::tasks::acceleration::CoM::getActualPose(Eigen::Vector3d& actual)
+void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& pos_ref, Eigen::Vector3d& vel_ref) const
+{
+    pos_ref = _pose_ref;
+    vel_ref = _vel_ref;
+}
+
+void OpenSoT::tasks::acceleration::CoM::getReference(Eigen::Vector3d& pos_ref, Eigen::Vector3d& vel_ref, Eigen::Vector3d& acc_ref) const
+{
+    pos_ref = _pose_ref;
+    vel_ref = _vel_ref;
+    acc_ref = _acc_ref;
+}
+
+void OpenSoT::tasks::acceleration::CoM::getActualPose(Eigen::Vector3d& actual) const
 {
     actual = _pose_current;
 }
 
-void OpenSoT::tasks::acceleration::CoM::getPosError(Eigen::Vector3d& error)
+void OpenSoT::tasks::acceleration::CoM::getPosError(Eigen::Vector3d& error) const
 {
     error = _pose_error;
 }

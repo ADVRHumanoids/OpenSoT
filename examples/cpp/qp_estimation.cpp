@@ -60,7 +60,7 @@ bool OpenSoT::floating_base_estimation::qp_estimation::update(OpenSoT::FloatingB
 {
     _model->getJointVelocity(_qdot);
 
-    _autostack->update(Eigen::VectorXd::Zero(0));
+    _autostack->update();
 
     if(!_solver->solve(_Qdot)){
         XBot::Logger::error("Solver in floating base estimation return false!\n");
@@ -98,7 +98,7 @@ OpenSoT::floating_base_estimation::kinematic_estimation::kinematic_estimation(XB
                                                                               const Eigen::Affine3d& anchor_pose):
     _model(model)
 {
-    if(_model->getLinkID(anchor_link) == -1)
+    if(_model->getLinkId(anchor_link) == -1)
         throw std::runtime_error(anchor_link + " for anchor link does not exists!");
     _anchor_link = anchor_link;
 
@@ -116,7 +116,7 @@ const std::string& OpenSoT::floating_base_estimation::kinematic_estimation::getA
 
 bool OpenSoT::floating_base_estimation::kinematic_estimation::setAnchor(const std::string& anchor_link)
 {
-    if(_model->getLinkID(anchor_link) == -1)
+    if(_model->getLinkId(anchor_link) == -1)
         return false;
 
     if(_anchor_link == anchor_link)

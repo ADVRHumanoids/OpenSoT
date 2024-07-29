@@ -40,7 +40,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         OpenSoT::tasks::acceleration::Postural::Ptr _postural;
         Eigen::MatrixXd I;
 
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
 
 
     };

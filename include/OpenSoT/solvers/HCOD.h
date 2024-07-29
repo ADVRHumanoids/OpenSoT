@@ -65,10 +65,21 @@ namespace OpenSoT{
                 void setDisableWeightsComputation(const bool disable);
 
                 /**
-                 * @brief setDisableWeightsComputation
+                 * @brief getDisableWeightsComputation
                  * @return internal disable_weights_computation
                  */
-                bool setDisableWeightsComputation();
+                bool getDisableWeightsComputation();
+
+                /**
+                 * @brief setDamping to all levels
+                 * @param damping > 0.
+                 */
+                void setDamping(double damping);
+
+                /**
+                 * @brief printSOT print some SOT infos
+                 */
+                void printSOT();
 
             private:
                 /**

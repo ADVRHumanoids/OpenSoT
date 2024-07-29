@@ -8,15 +8,15 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
+#include "../common.h"
+
 
 namespace {
-class testl1HQP: public ::testing::Test
+class testl1HQP: public TestBase
 {
 protected:
 
-    testl1HQP()
+    testl1HQP(): TestBase("coman_floating_base")
     {
 
     }
@@ -34,26 +34,22 @@ protected:
     }
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-        Eigen::VectorXd _q(_model_ptr->getJointNum());
-        _q.setZero(_q.size());
-        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+        _q[_model_ptr->getDofIndex("RHipSag") +1 ] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShSag")+1 ] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")+1 ] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")+1 ] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
-
-        _model_ptr->setJointPosition(_q);
-        _model_ptr->update();
+        _q[_model_ptr->getDofIndex("RShSag")+1 ] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")+1 ] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")+1 ] = -80.0*M_PI/180.0;
 
         return _q;
     }
@@ -64,24 +60,25 @@ protected:
 TEST_F(testl1HQP, testContructor)
 {
     XBot::ModelInterface::Ptr model_ptr;
-    model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+    model_ptr = _model_ptr;
 
     Eigen::VectorXd q = this->getGoodInitialPosition(model_ptr);
+    _model_ptr->update();
 
     OpenSoT::tasks::velocity::Cartesian::Ptr l_sole =
-            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", q, *model_ptr, "l_sole", "world");
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("l_sole", *model_ptr, "l_sole", "world");
     OpenSoT::tasks::velocity::Cartesian::Ptr r_sole =
-            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", q, *model_ptr, "r_sole", "world");
+            std::make_shared<OpenSoT::tasks::velocity::Cartesian>("r_sole", *model_ptr, "r_sole", "world");
     OpenSoT::tasks::velocity::CoM::Ptr CoM =
-            std::make_shared<OpenSoT::tasks::velocity::CoM>(q, *model_ptr);
+            std::make_shared<OpenSoT::tasks::velocity::CoM>(*model_ptr);
 
     Eigen::VectorXd qmin, qmax;
     model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits =
-            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(q, qmax, qmin);
+            std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, qmax, qmin);
 
     OpenSoT::AutoStack::Ptr stack = ((l_sole + r_sole)/CoM)<<joint_limits;
-    stack->update(q);
+    stack->update();
 
     OpenSoT::solvers::l1HQP::Ptr l1_solver =
             std::make_shared<OpenSoT::solvers::l1HQP>(*stack);
@@ -140,7 +137,7 @@ TEST_F(testl1HQP, testContructor)
     std::vector<OpenSoT::solvers::priority_constraint::Ptr> priority_constraints = l1_solver->getPriorityConstraints();
     if(priority_constraints.size() > 0)
     {
-        priority_constraints[0]->update(Eigen::VectorXd(0));
+        priority_constraints[0]->update();
         EXPECT_TRUE(priority_constraints.size() == stack->getStack().size()-1);
         EXPECT_EQ(priority_constraints[0]->getAineq().rows(), 1);
         EXPECT_EQ(priority_constraints[0]->getAineq().cols(), linear_tasks["t0"]->getc().size());

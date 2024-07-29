@@ -28,8 +28,9 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/project_inliers.h>
+#include <pcl/surface/concave_hull.h>
 #include <pcl/surface/convex_hull.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
 class convex_hull
 {
@@ -50,7 +51,7 @@ public:
      * - {linkName}
      * @return false if the vector of reference frames is empty. True otherwise.
      */
-    bool getSupportPolygonPoints(std::list<KDL::Vector>& points,
+    bool getSupportPolygonPoints(std::list<Eigen::Vector3d>& points,
                                  const std::list<std::string> links_in_contact,
                                  const XBot::ModelInterface& model,
                                  const std::string referenceFrame = "COM");
@@ -61,8 +62,8 @@ public:
      * @param ch a list of points which are the vertices of the convex hull
      * @return true on success
      */
-    bool getConvexHull(const std::list<KDL::Vector>& points,
-                             std::vector<KDL::Vector>& ch);
+    bool getConvexHull(const std::list<Eigen::Vector3d>& points,
+                             std::vector<Eigen::Vector3d>& ch);
     //void setRansacDistanceThr(const double x){_ransac_distance_thr = x;}
 
 private:
@@ -70,15 +71,15 @@ private:
     pcl::PointCloud<pcl::PointXYZ>::Ptr _pointCloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr _projectedPointCloud;
 
-    KDL::Frame world_T_CoM;
-    KDL::Frame world_T_point;
-    KDL::Frame referenceFrame_T_point;
-    KDL::Frame CoM_T_point;
+    Eigen::Affine3d world_T_CoM;
+    Eigen::Affine3d world_T_point;
+    Eigen::Affine3d referenceFrame_T_point;
+    Eigen::Affine3d CoM_T_point;
     pcl::PointXYZ _tmp_pcl;
     pcl::PointCloud<pcl::PointXYZ> pointsInConvexHull;
     std::vector<pcl::Vertices> indicesOfVertexes;
     pcl::ConvexHull<pcl::PointXYZ> huller;
-    KDL::Vector _tmp_vector;
+    Eigen::Vector3d _tmp_vector;
     pcl::ProjectInliers<pcl::PointXYZ> proj;
 
     /**

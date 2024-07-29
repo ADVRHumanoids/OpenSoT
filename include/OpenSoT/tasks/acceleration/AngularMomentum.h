@@ -19,7 +19,7 @@
 #define __TASKS_ACCELERATION_ANGULAR_MOMENTUM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <Eigen/Dense>
 #include <OpenSoT/utils/Affine.h>
 
@@ -54,7 +54,7 @@ namespace OpenSoT {
            Eigen::MatrixXd _Mom;
            Eigen::Matrix3d _K;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
            std::string _base_link;
            std::string _distal_link;
@@ -126,6 +126,12 @@ namespace OpenSoT {
             * @return "CoM"
             */
            const std::string& getDistalLink() const;
+
+           /**
+            * @brief reset position reference to actual, velcoity and accelration to 0
+            * @return true
+            */
+           bool reset();
 
            /**
             * @brief isAngularMomentum

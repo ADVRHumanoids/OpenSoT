@@ -1,6 +1,6 @@
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/BilateralConstraint.h>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 #include <OpenSoT/utils/AutoStack.h>
 
 

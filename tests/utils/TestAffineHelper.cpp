@@ -1,7 +1,7 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/variables/Torque.h>
 #include <gtest/gtest.h>
-
+#include "../common.h"
 
 namespace {
 
@@ -237,12 +237,10 @@ TEST_F( testAffineHelper, checkOperatorPile )
     
 }
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 TEST_F( testAffineHelper, checkTorque )
 {
-    auto model = XBot::ModelInterface::getModel(_path_to_cfg);
+    auto model = GetTestModel("coman");
     
     model->setJointPosition(Eigen::VectorXd::Random(model->getJointNum()));
     model->setJointVelocity(Eigen::VectorXd::Random(model->getJointNum()));
@@ -275,7 +273,7 @@ TEST_F( testAffineHelper, checkTorque )
     std::cout << "tau val " << tau_value.transpose() << std::endl;
     std::cout << "tau id " << tau_id.transpose() << std::endl;
     
-    EXPECT_NEAR( (tau_id.tail(model->getActuatedJointNum()) - tau_value).norm(), 0, 0.0001 );
+    EXPECT_NEAR( (tau_id.tail(model->getActuatedNv()) - tau_value).norm(), 0, 0.0001 );
     
     Eigen::MatrixXd A(6, tau.getOutputSize());
     Eigen::VectorXd b(6);

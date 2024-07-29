@@ -23,7 +23,7 @@
 #define __OPENSOT_TASKS_VELOCITY_PURE_ROLLING_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/SubTask.h>
 
 namespace OpenSoT { namespace tasks { namespace velocity {
@@ -38,7 +38,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
                     double radius,
                     const XBot::ModelInterface& model);
         
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
         
         void setOutwardNormal(const Eigen::Vector3d& n);
         
@@ -76,7 +76,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
 
         void setOutwardNormal(const Eigen::Vector3d& n);
         
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
 
         virtual void _log(XBot::MatLogger2::Ptr logger);
 
@@ -98,7 +98,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
                     double radius,
                     const XBot::ModelInterface& model);
 
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
 
 
     private:

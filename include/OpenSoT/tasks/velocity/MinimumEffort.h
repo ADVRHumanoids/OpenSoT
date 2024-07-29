@@ -20,14 +20,10 @@
 #define __TASKS_VELOCITY_MINIMUMEFFORT_H__
 
  #include <OpenSoT/Task.h>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
  #include <OpenSoT/utils/cartesian_utils.h>
 
 
-/**
-  * @example example_minimum_effort.cpp
-  * The MinimumEffort class implements a task that tries to bring the robot in a minimum-effort posture.
-  */
  namespace OpenSoT {
     namespace tasks {
         namespace velocity {
@@ -46,7 +42,17 @@
             public:
                 typedef std::shared_ptr<MinimumEffort> Ptr;
             protected:
-                Eigen::VectorXd _x;
+                const XBot::ModelInterface& _model;
+                Eigen::VectorXd _q;
+
+                /**
+                 * @brief _update updates the minimum effort gradient.
+                 * @detail It also updates the state on the internal robot model so that successive calls to the
+                 * computeEffort() function will take into account the updated posture of the robot.
+                 * @param x the actual posture of the robot
+                 */
+                void _update();
+
 
                 /**
                  * @brief The ComputeGTauGradient class implements a worker class to computes the effort for a certain configuration.
@@ -60,45 +66,30 @@
                     XBot::ModelInterface::Ptr _robot;
                     const XBot::ModelInterface& _model;
                     Eigen::MatrixXd _W;
-                    Eigen::VectorXd _zeros, _tau;
+                    Eigen::VectorXd _tau;
                     Eigen::VectorXd _tau_lim;
 
-                    ComputeGTauGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model) :
-                        _robot(XBot::ModelInterface::getModel(robot_model.getConfigOptions())),
+                    ComputeGTauGradient(const XBot::ModelInterface& robot_model) :
+                        _robot(robot_model.clone()),
                         _model(robot_model),
-                        _W(q.rows(),q.rows()),
-                        _zeros(q.rows())
+                        _W(robot_model.getNv(), robot_model.getNv())
                     {
-                        _zeros.setZero(q.rows());
-                        _W.setIdentity(q.rows(),q.rows());
+                        _W.setIdentity();
 
                         _robot->syncFrom(_model);
 
                         _model.getEffortLimits(_tau_lim);
 
-                        for(int i = 0; i < q.size(); ++i){
+                        for(int i = 0; i < robot_model.getNv(); ++i){
                             _W(i,i) = 1.0 / std::pow(_tau_lim(i), 2.0);
                         }
 
-//                         _robot.switchAnchor(_model.getAnchor());
-//                         _robot.setAnchor_T_World(_model.getAnchor_T_World());
                     }
 
                     double compute(const Eigen::VectorXd &q)
                     {
-//                         if(_robot.getAnchor() != _model.getAnchor())
-//                             _robot.switchAnchor(_model.getAnchor());
-
                         _robot->setJointPosition(q);
                         _robot->update();
-//                         _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);
-
-//                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())
-//                         {
-//                             assert("if q and anchor are the same, anchor_t_world should be the same!");
-//
-//                             _robot.setAnchor_T_World(_model.getAnchor_T_World());
-//                         }
 
                         _robot->computeGravityCompensation(_tau);
                         return _tau.transpose()* _W * _tau;
@@ -106,24 +97,19 @@
 
                     void setW(const Eigen::MatrixXd& W) { _W = W; }
 
-                    const Eigen::MatrixXd& getW() {return _W;}
+                    const Eigen::MatrixXd& getW() const {return _W;}
                 };
 
                 ComputeGTauGradient _gTauGradientWorker;
+                double _step;
+                Eigen::VectorXd _gradient;
+                Eigen::VectorXd _deltas;
 
             public:
 
-                MinimumEffort(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model);
+                MinimumEffort(const XBot::ModelInterface& robot_model, const double step = 1E-3);
 
                 ~MinimumEffort();
-
-                /**
-                 * @brief _update updates the minimum effort gradient.
-                 * @detail It also updates the state on the internal robot model so that successive calls to the
-                 * computeEffort() function will take into account the updated posture of the robot.
-                 * @param x the actual posture of the robot
-                 */
-                void _update(const Eigen::VectorXd& x);
 
                 /**
                  * @brief computeEffort
@@ -150,7 +136,7 @@
                 {
                     if(lambda >= 0.0){
                         _lambda = lambda;
-                        this->_update(_x);
+                        this->_update();
                     }
                 }
             };

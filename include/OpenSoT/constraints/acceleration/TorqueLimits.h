@@ -3,7 +3,7 @@
 
 #include <OpenSoT/Constraint.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/constraints/GenericConstraint.h>
 
 namespace OpenSoT { namespace constraints { namespace acceleration {
@@ -32,7 +32,7 @@ public:
                  const std::vector<std::string>& contact_links,
                  const Eigen::VectorXd& torque_limits);
 
-    void update(const Eigen::VectorXd& x);
+    void update();
 
     /**
      * @brief setTorqueLimits to set new torque limits

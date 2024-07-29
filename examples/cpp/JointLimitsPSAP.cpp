@@ -42,13 +42,19 @@ JointLimitsPSAP::JointLimitsPSAP(XBot::ModelInterface &robot,
     __lowerBound = -jointAccMax;
 
     /**
+      * @brief This is the neutral configuration of the robot. In the case of a fixed base robot it may be all zeros, but in the
+      * case of a floating-base one it provides a configuration which is compiant with quaternion manifold for no rotation
+      */
+    _zeros = _robot.getNeutralQ();
+
+    /**
       * @brief Call the update.
       * @note The parameter is not used so we can put whatever
       */
-    update(Eigen::VectorXd(1));
+    update();
 }
 
-void JointLimitsPSAP::update(const Eigen::VectorXd &x)
+void JointLimitsPSAP::update()
 {
     /**
       * @brief Retrieve joint positions and velocities from internal model
@@ -66,8 +72,8 @@ void JointLimitsPSAP::update(const Eigen::VectorXd &x)
      * qnext = q + qdot*dt + 0.5*qddot*dt^2
      * qmin <= qnext <= qmax --> (qmin -q -qdot*dt)/(0.5*dt^2) <= qddot <= (qmax -q -qdot*dt)/(0.5*dt^2)
     */
-    _pmax = (_jointLimitsMax -_q -_qdot*dt)/(0.5*dt*dt);
-    _pmin = (_jointLimitsMin -_q -_qdot*dt)/(0.5*dt*dt);
+    _pmax = (_jointLimitsMax -_robot.difference(_q, _zeros) -_qdot*dt)/(0.5*dt*dt);
+    _pmin = (_jointLimitsMin -_robot.difference(_q, _zeros) -_qdot*dt)/(0.5*dt*dt);
 
     /**
       * @brief COmpute Velocity related limits:
@@ -115,7 +121,7 @@ void JointLimitsPSAP::update(const Eigen::VectorXd &x)
     /**
       *@brief updates the generic bounds
       */
-    _generic_constraint_internal->update(x);
+    _generic_constraint_internal->update();
 
     /**
       *@brief computes final _Aineq, _bLowerBound, and _bUpperBound considering explicit variables, i.e. taking into account

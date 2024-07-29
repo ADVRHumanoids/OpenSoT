@@ -1,4 +1,5 @@
 #include <OpenSoT/tasks/velocity/Contact.h>
+#include <xbot2_interface/common/utils.h>
 
 OpenSoT::tasks::velocity::Contact::Contact(std::string task_id,
                                         const XBot::ModelInterface& model,
@@ -10,18 +11,20 @@ OpenSoT::tasks::velocity::Contact::Contact(std::string task_id,
     _model(model),
     _K(contact_matrix)
 {
-    _update(Eigen::VectorXd());
+    _update();
     _W.setIdentity(getTaskSize(), getTaskSize());
 }
 
 
-void OpenSoT::tasks::velocity::Contact::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::velocity::Contact::_update()
 {
     /* Body jacobian */
-    _model.getJacobian(_distal_link, _distal_link, _Jtmp);
+    _model.getJacobian(_distal_link, _Jtmp);
+    Eigen::Matrix3d w_R_dl = _model.getPose(_distal_link).linear();
+    XBot::Utils::rotate(_Jtmp, w_R_dl.transpose(), _Jrot);
 
     /* Update task A matrix */
-    _A = _K * _Jtmp;
+    _A = _K * _Jrot;
 
 //     std::cout << "_A = _K * _Jtmp\n" << _A.format(Eigen::IOFormat(1)) << std::endl;
 

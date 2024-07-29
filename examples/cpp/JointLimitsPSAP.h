@@ -41,6 +41,7 @@ namespace OpenSoT {
                 Eigen::VectorXd _jointAccMax;
                 Eigen::VectorXd _pmin, _pmax;
                 Eigen::VectorXd _vmin, _vmax;
+                Eigen::VectorXd _zeros;
                 Eigen::VectorXd __upperBound, __lowerBound;
                 XBot::ModelInterface& _robot;
                 Eigen::VectorXd _q, _qdot;
@@ -70,7 +71,7 @@ namespace OpenSoT {
                  * @brief update method from coonstraint base class to be implemented
                  * @param x
                  */
-                void update(const Eigen::VectorXd& x);
+                void update();
 
                 /**
                  * @brief setPStepAheadPredictor

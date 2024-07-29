@@ -3,32 +3,32 @@
 #include <gtest/gtest.h>
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <memory>
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_floating_base.yaml";
-std::string path_to_cfg = relative_path;
+#include "../common.h"
 
 namespace{
 
-class testAffineUtils: public ::testing::Test
+class testAffineUtils: public TestBase
 {
 protected:
 
-    testAffineUtils()
+    testAffineUtils(): TestBase("coman_floating_base")
     {
-        model_ptr = XBot::ModelInterface::getModel(path_to_cfg);
-        q.setZero(model_ptr->getJointNum());
+        model_ptr = _model_ptr;
 
-        q[model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        q[model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        q = model_ptr->getNeutralQ();
+
+        q[model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LShSag")+1 ] =  20.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LShLat")+1 ] = 10.0*M_PI/180.0;
+        q[model_ptr->getDofIndex("LElbj")+1 ] = -80.0*M_PI/180.0;
 
         model_ptr->setJointPosition(q);
         model_ptr->update();
@@ -56,14 +56,14 @@ TEST_F(testAffineUtils, testConstraintsToAffine)
     //1. Creates a CoM Limits constraint
     Eigen::Vector3d com_vel_lims;
     com_vel_lims<<0.1, 0.1, 0.1;
-    OpenSoT::constraints::velocity::CoMVelocity::Ptr constraint =
-            std::make_shared<OpenSoT::constraints::velocity::CoMVelocity>(
-                com_vel_lims, 0.01, this->q, *(this->model_ptr));
+    OpenSoT::constraints::velocity::CartesianVelocity::Ptr constraint =
+            std::make_shared<OpenSoT::constraints::velocity::CartesianVelocity>(
+                com_vel_lims, 0.01, std::make_shared<OpenSoT::tasks::velocity::CoM>(*this->model_ptr.get()));
 
     //2. Creates variables
     std::vector<std::pair<std::string, int>> name_size_pairs;
 
-    name_size_pairs.emplace_back("dq", this->q.size());
+    name_size_pairs.emplace_back("dq", this->model_ptr->getNv());
     int slack_size = 6;
     name_size_pairs.emplace_back("slack", slack_size);
     OpenSoT::OptvarHelper opt_helper(name_size_pairs);
@@ -80,12 +80,12 @@ TEST_F(testAffineUtils, testConstraintsToAffine)
               constraint->getAineq());
 
     //4. Update q and model
-    this->q[model_ptr->getDofIndex("RHipSag")] = -15.0*M_PI/180.0;
-    this->q[model_ptr->getDofIndex("LHipSag")] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("RHipSag")+1] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("LHipSag")+1] = -15.0*M_PI/180.0;
     this->model_ptr->setJointPosition(this->q);
     this->model_ptr->update();
 
-    affine_constraint->update(this->q);
+    affine_constraint->update();
     EXPECT_EQ(affine_constraint->getAineq().rows(), constraint->getAineq().rows());
     EXPECT_EQ(affine_constraint->getAineq().cols(), constraint->getAineq().cols() + slack_size);
     EXPECT_EQ(affine_constraint->getbLowerBound(), constraint->getbLowerBound());
@@ -99,13 +99,13 @@ TEST_F(testAffineUtils, testBoundsToAffine)
 {
     //1. Creates a Velocity Limits constraint
     OpenSoT::constraints::velocity::VelocityLimits::Ptr bound =
-            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(
-                M_PI, 0.01, this->model_ptr->getJointNum());
+            std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*this->model_ptr,
+                M_PI, 0.01);
 
     //2. Creates variables
     std::vector<std::pair<std::string, int>> name_size_pairs;
 
-    name_size_pairs.emplace_back("dq", this->q.size());
+    name_size_pairs.emplace_back("dq", this->model_ptr->getNv());
     int slack_size = 6;
     name_size_pairs.emplace_back("slack", slack_size);
     OpenSoT::OptvarHelper opt_helper(name_size_pairs);
@@ -121,8 +121,8 @@ TEST_F(testAffineUtils, testBoundsToAffine)
 
     //4. Update bound
     bound->setVelocityLimits(M_PI/4.);
-    bound->update(this->q);
-    affine_bound->update(this->q);
+    bound->update();
+    affine_bound->update();
 
     EXPECT_EQ(affine_bound->getAineq().rows(), bound->getLowerBound().rows());
     EXPECT_EQ(affine_bound->getAineq().cols(), bound->getLowerBound().rows() + slack_size);
@@ -138,12 +138,12 @@ TEST_F(testAffineUtils, testCartesianTaskToAffine)
     //1. Creates a Cartesian velocity Task
     OpenSoT::tasks::velocity::Cartesian::Ptr task =
             std::make_shared<OpenSoT::tasks::velocity::Cartesian>(
-                "LSOLE", this->q, *(this->model_ptr), "l_sole", "world");
+                "LSOLE", *this->model_ptr, "l_sole", "world");
 
     //2. Creates variables
     std::vector<std::pair<std::string, int>> name_size_pairs;
 
-    name_size_pairs.emplace_back("dq", this->q.size());
+    name_size_pairs.emplace_back("dq", this->model_ptr->getNv());
     int slack_size = 6;
     name_size_pairs.emplace_back("slack", slack_size);
     OpenSoT::OptvarHelper opt_helper(name_size_pairs);
@@ -162,8 +162,8 @@ TEST_F(testAffineUtils, testCartesianTaskToAffine)
     std::cout<<"task->getb(): "<<task->getb().transpose()<<std::endl;
 
     //4. Update q and model
-    this->q[model_ptr->getDofIndex("RHipSag")] = -15.0*M_PI/180.0;
-    this->q[model_ptr->getDofIndex("LHipSag")] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("RHipSag")+1] = -15.0*M_PI/180.0;
+    this->q[model_ptr->getDofIndex("LHipSag")+1] = -15.0*M_PI/180.0;
     this->model_ptr->setJointPosition(this->q);
     this->model_ptr->update();
 
@@ -171,7 +171,7 @@ TEST_F(testAffineUtils, testCartesianTaskToAffine)
     Eigen::Affine3d T = Eigen::Affine3d::Identity();
     task->setReference(T);
 
-    affine_task->update(Eigen::VectorXd(1));
+    affine_task->update();
 
     Eigen::Affine3d T_ref; task->getReference(T_ref);
     EXPECT_EQ(T.matrix(), T_ref.matrix());

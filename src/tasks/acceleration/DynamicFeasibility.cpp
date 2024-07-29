@@ -1,5 +1,5 @@
 #include <OpenSoT/tasks/acceleration/DynamicFeasibility.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
 using XBot::Logger;
 
 OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::string task_id,
@@ -16,12 +16,12 @@ OpenSoT::tasks::acceleration::DynamicFeasibility::DynamicFeasibility(const std::
     _enabled_contacts.assign(_contact_links.size(), true);
     _W.setIdentity(6,6);
     _hessianType = OpenSoT::HessianType::HST_SEMIDEF;
-    update(_h);
+    update();
 }
 
-void OpenSoT::tasks::acceleration::DynamicFeasibility::_update(const Eigen::VectorXd& x)
+void OpenSoT::tasks::acceleration::DynamicFeasibility::_update()
 {
-    _robot.getInertiaMatrix(_B);
+    _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);
     _Bu = _B.topRows(6);
     _hu = _h.topRows(6);
@@ -36,7 +36,7 @@ void OpenSoT::tasks::acceleration::DynamicFeasibility::_update(const Eigen::Vect
         else {
             _robot.getJacobian(_contact_links[i], _Jtmp);
             _Jf = _Jtmp.block<6,6>(0,0).transpose();
-            _dyn_constraint = _dyn_constraint + (-_Jf) * _wrenches[i];
+            _dyn_constraint = _dyn_constraint + (-_Jf.block(0,0,6,_wrenches[i].getM().rows())) * _wrenches[i];
         }
     }
 

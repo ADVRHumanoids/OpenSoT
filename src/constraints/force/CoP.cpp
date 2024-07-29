@@ -44,10 +44,10 @@ CoP::CoP(const std::string& contact_link,
     __A.resize(4, 6);
     __A.setZero(__A.rows(), __A.cols());
 
-    update(Eigen::VectorXd());
+    update();
 }
 
-void CoP::update(const Eigen::VectorXd& x)
+void CoP::update()
 {
     __A.setZero(__A.rows(), __A.cols());
 
@@ -85,12 +85,12 @@ CoPs::CoPs(const std::vector<AffineHelper>& wrench,
     _internal_constraint = std::make_shared<OpenSoT::constraints::Aggregated>
             (constraint_list, wrench[0].getInputSize());
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
-void CoPs::update(const Eigen::VectorXd &x)
+void CoPs::update()
 {
-    _internal_constraint->update(x);
+    _internal_constraint->update();
     generateBounds();
 }
 

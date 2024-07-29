@@ -23,9 +23,9 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/constraints/velocity/JointLimits.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <OpenSoT/constraints/velocity/CoMVelocity.h>
+#include <OpenSoT/constraints/velocity/CartesianVelocity.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 
  namespace OpenSoT {
 
@@ -46,8 +46,7 @@
                               std::string base_link,
                               std::string l_hand, std::string r_hand,
                               std::string l_foot, std::string r_foot,
-                              double joint_velocity_limits,
-                              const Eigen::VectorXd& state);
+                              double joint_velocity_limits);
 
          virtual ~DefaultHumanoidStack() {}
 
@@ -94,7 +93,7 @@
          tasks::velocity::Postural::Ptr postural;
 
 
-         constraints::velocity::CoMVelocity::Ptr comVelocity;
+         constraints::velocity::CartesianVelocity::Ptr comVelocity;
          constraints::velocity::JointLimits::Ptr jointLimits;
          constraints::velocity::VelocityLimits::Ptr velocityLimits;
      };

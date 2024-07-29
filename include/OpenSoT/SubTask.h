@@ -63,7 +63,7 @@
 
         /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices
             @param x variable state at the current step (input) */
-        virtual void _update(const Eigen::VectorXd &x);
+        virtual void _update();
 
         static const std::string _SUBTASK_SEPARATION_;
 
@@ -119,6 +119,31 @@
          * @return true if success
          */
         virtual bool setActiveJointsMask(const std::vector<bool>& active_joints_mask);
+
+        /**
+         * @brief isSubTask check wether a generic task is a subtask
+         * @param task pointer to generic task
+         * @return true if is a subtask
+         */
+        static bool isSubTask(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task){
+            return (bool)std::dynamic_pointer_cast<OpenSoT::SubTask>(task);
+        }
+
+        /**
+         * @brief asSubTask cast generic task to a subtask
+         * @param task pointer to generic task
+         * @return pointer to subtask casted from given task
+         */
+        static OpenSoT::SubTask::Ptr asSubTask(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task){
+            return std::dynamic_pointer_cast<OpenSoT::SubTask>(task);
+        }
+
+        /**
+         * @brief getTask return the internal pointer of the task used to create the subtask
+         * @return internal pointer to task
+         */
+        TaskPtr getTask() {return _taskPtr;}
+
     };
 
 

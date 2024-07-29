@@ -21,7 +21,7 @@ AffineTask::AffineTask(const OpenSoT::tasks::Aggregated::TaskPtr &task, const Af
     _lambda = 1.;
     _internal_generic_task->setWeight(task->getWeight());
 
-    _update(Eigen::VectorXd(1));
+    _update();
 }
 
 AffineTask::~AffineTask()
@@ -29,17 +29,17 @@ AffineTask::~AffineTask()
 
 }
 
-void AffineTask::_update(const Eigen::VectorXd &x)
+void AffineTask::_update()
 {
     //1. Update original task which will be used to set desired quantities
-    _internal_task->update(x);
+    _internal_task->update();
 
     //2. Update internal generic task and get matrices with affines
     _internal_generic_task->setA(_internal_task->getA());
     _internal_generic_task->setb(_internal_task->getb());
     _internal_generic_task->setc(_internal_task->getc());
     _internal_generic_task->setWeight(_internal_task->getWeight());
-    _internal_generic_task->update(x);
+    _internal_generic_task->update();
 
     //3. Update Affine Task
     _A = _internal_generic_task->getA();
@@ -93,7 +93,7 @@ AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::Const
                        OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
         }
     }
-    update(Eigen::VectorXd(1));
+    update();
 }
 
 AffineConstraint::~AffineConstraint()
@@ -101,10 +101,10 @@ AffineConstraint::~AffineConstraint()
 
 }
 
-void AffineConstraint::update(const Eigen::VectorXd& x)
+void AffineConstraint::update()
 {
     //1. Update internal constraint
-    _internal_constraint->update(x);
+    _internal_constraint->update();
 
     //2. Update internal generic constraint
     if(_internal_constraint->isBound())
@@ -112,7 +112,7 @@ void AffineConstraint::update(const Eigen::VectorXd& x)
         _internal_generic_constraint->setBounds(
                     _internal_constraint->getUpperBound(),
                     _internal_constraint->getLowerBound());
-        _internal_generic_constraint->update(x);
+        _internal_generic_constraint->update();
     }
     else
     {
@@ -123,7 +123,7 @@ void AffineConstraint::update(const Eigen::VectorXd& x)
                     _constraint_affine,
                     _internal_constraint->getbeq(),
                     _internal_constraint->getbeq());
-            _internal_constraint->update(x);
+            _internal_constraint->update();
         }
         else
         {
@@ -132,7 +132,7 @@ void AffineConstraint::update(const Eigen::VectorXd& x)
                     _constraint_affine,
                     _internal_constraint->getbUpperBound(),
                     _internal_constraint->getbLowerBound());
-            _internal_constraint->update(x);
+            _internal_constraint->update();
         }
     }
 

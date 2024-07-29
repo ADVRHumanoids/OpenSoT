@@ -1,24 +1,25 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
-#include <XBotInterface/RtLog.hpp>
+#include <xbot2_interface/logger.h>
+#include <eigen_conversions/eigen_kdl.h>
+
 using XBot::Logger;
 using namespace OpenSoT::tasks::acceleration;
 
 const std::string Cartesian::world_name = "world";
 
 Cartesian::Cartesian(const std::string task_id,
-                     const Eigen::VectorXd& x,
                      const XBot::ModelInterface& robot,
                      const std::string& distal_link,
                      const std::string& base_link
                      ):
-    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, x.size()),
+    Task< Eigen::MatrixXd, Eigen::VectorXd >(task_id, robot.getNv()),
     _robot(robot),
     _distal_link(distal_link),
     _base_link(base_link),
     _orientation_gain(1.0),
     _gain_type(GainType::Acceleration)
 {
-    _qddot = AffineHelper::Identity(x.size());
+    _qddot = AffineHelper::Identity(_x_size);
 
     resetReference();
 
@@ -40,7 +41,7 @@ Cartesian::Cartesian(const std::string task_id,
     _Kp.setIdentity();
     _Kd.setIdentity();
     
-    update(Eigen::VectorXd(1));
+    update();
 
     setWeight(Eigen::MatrixXd::Identity(6,6));
 
@@ -80,7 +81,7 @@ Cartesian::Cartesian(const std::string task_id,
     _Kp.setIdentity();
     _Kd.setIdentity();
     
-    update(Eigen::VectorXd(1));
+    update();
     
     setWeight(Eigen::MatrixXd::Identity(6,6));
     
@@ -123,7 +124,7 @@ const double Cartesian::getOrientationErrorGain() const
 }
 
 
-void Cartesian::_update(const Eigen::VectorXd& x)
+void Cartesian::_update()
 {
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
@@ -133,13 +134,13 @@ void Cartesian::_update(const Eigen::VectorXd& x)
         _robot.getJacobian(_distal_link, _J);
         _robot.getPose(_distal_link, _pose_current);
         _robot.getVelocityTwist(_distal_link, _vel_current);
-        _robot.computeJdotQdot(_distal_link, Eigen::Vector3d::Zero(), _jdotqdot);
+        _robot.getJdotTimesV(_distal_link, _jdotqdot);
     }
     else{
         _robot.getRelativeJacobian(_distal_link, _base_link, _J);
         _robot.getPose(_distal_link, _base_link, _pose_current);
-        _robot.getVelocityTwist(_distal_link, _base_link, _vel_current);
-        _robot.computeRelativeJdotQdot(_distal_link, _base_link, _jdotqdot);
+        _vel_current = _robot.getRelativeVelocityTwist(_distal_link, _base_link);
+        _robot.getRelativeJdotTimesV(_distal_link, _base_link, _jdotqdot);
         //_jdotqdot.setZero(); ///TODO: computeJdotQdot relative!
     }
     
@@ -190,16 +191,6 @@ void Cartesian::setPositionReference(const Eigen::Vector3d& pos_ref)
     _acc_ref_cached = _acc_ref;
 }
 
-void Cartesian::setReference(const KDL::Frame& ref)
-{
-    tf2::transformKDLToEigen(ref, _pose_ref);
-    _vel_ref.setZero();
-    _acc_ref.setZero();
-
-    _vel_ref_cached = _vel_ref;
-    _acc_ref_cached = _acc_ref;
-}
-
 void Cartesian::setReference(const Eigen::Affine3d& ref)
 {
     _pose_ref = ref;
@@ -224,8 +215,8 @@ void Cartesian::setReference(const Eigen::Affine3d& pose_ref,
 void Cartesian::setReference(const KDL::Frame& pose_ref,
                              const KDL::Twist& vel_ref)
 {
-    tf2::transformKDLToEigen(pose_ref, _pose_ref);
-    tf2::twistKDLToEigen(vel_ref, _vel_ref);
+    tf::transformKDLToEigen(pose_ref, _pose_ref);
+    tf::twistKDLToEigen(vel_ref, _vel_ref);
     _acc_ref.setZero();
 
     _vel_ref_cached = _vel_ref;
@@ -248,9 +239,9 @@ void Cartesian::setReference(const KDL::Frame& pose_ref,
                              const KDL::Twist& vel_ref,
                              const KDL::Twist& acc_ref)
 {
-    tf2::transformKDLToEigen(pose_ref, _pose_ref);
-    tf2::twistKDLToEigen(vel_ref, _vel_ref);
-    tf2::twistKDLToEigen(acc_ref, _acc_ref);
+    tf::transformKDLToEigen(pose_ref, _pose_ref);
+    tf::twistKDLToEigen(vel_ref, _vel_ref);
+    tf::twistKDLToEigen(acc_ref, _acc_ref);
 
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
@@ -321,33 +312,33 @@ void Cartesian::_log(XBot::MatLogger2::Ptr logger)
     logger->add(getTaskID() + "_lambda2", _lambda2);
 }
 
-void Cartesian::getReference(Eigen::Affine3d& ref)
+void Cartesian::getReference(Eigen::Affine3d& ref) const
 {
     ref = _pose_ref;
 }
 
-void Cartesian::getReference(KDL::Frame& ref)
+void Cartesian::getReference(KDL::Frame& ref) const
 {
-    tf2::transformEigenToKDL(_pose_ref, ref);
+    tf::transformEigenToKDL(_pose_ref, ref);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
-                             Eigen::Vector6d& desiredTwist)
+                             Eigen::Vector6d& desiredTwist) const
 {
     desiredPose = _pose_ref;
     desiredTwist = _vel_ref;
 }
 
 void Cartesian::getReference(KDL::Frame& desiredPose,
-                             KDL::Twist& desiredTwist)
+                             KDL::Twist& desiredTwist) const
 {
-    tf2::transformEigenToKDL(_pose_ref, desiredPose);
-    tf2::twistEigenToKDL(_vel_ref, desiredTwist);
+    tf::transformEigenToKDL(_pose_ref, desiredPose);
+    tf::twistEigenToKDL(_vel_ref, desiredTwist);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
                              Eigen::Vector6d& desiredTwist,
-                             Eigen::Vector6d& desiredAcceleration)
+                             Eigen::Vector6d& desiredAcceleration) const
 {
     desiredPose = _pose_ref;
     desiredTwist = _vel_ref;
@@ -356,32 +347,42 @@ void Cartesian::getReference(Eigen::Affine3d& desiredPose,
 
 void Cartesian::getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist,
-                             KDL::Twist& desiredAcceleration)
+                             KDL::Twist& desiredAcceleration) const
 {
-    tf2::transformEigenToKDL(_pose_ref, desiredPose);
-    tf2::twistEigenToKDL(_vel_ref, desiredTwist);
-    tf2::twistEigenToKDL(_acc_ref, desiredAcceleration);
+    tf::transformEigenToKDL(_pose_ref, desiredPose);
+    tf::twistEigenToKDL(_vel_ref, desiredTwist);
+    tf::twistEigenToKDL(_acc_ref, desiredAcceleration);
 }
 
 
-void Cartesian::getActualPose(Eigen::Affine3d& actual)
+void Cartesian::getActualPose(Eigen::Affine3d& actual) const
 {
     actual = _pose_current;
 }
 
 void Cartesian::getActualPose(KDL::Frame& actual)
 {
-    tf2::transformEigenToKDL(_pose_current, actual);
+    tf::transformEigenToKDL(_pose_current, actual);
 }
 
-void Cartesian::getActualTwist(Eigen::Vector6d& actual)
+const Eigen::Affine3d& Cartesian::getActualPose() const
+{
+    return _pose_current;
+}
+
+void Cartesian::getActualTwist(Eigen::Vector6d& actual) const
 {
     actual = _vel_current;
 }
 
 void Cartesian::getActualTwist(KDL::Twist& actual)
 {
-    tf2::twistEigenToKDL(_vel_current, actual);
+    tf::twistEigenToKDL(_vel_current, actual);
+}
+
+const Eigen::Vector6d& Cartesian::getActualTwist() const
+{
+    return _vel_current;
 }
 
 const bool Cartesian::baseLinkIsWorld() const
@@ -433,7 +434,7 @@ bool Cartesian::setBaseLink(const std::string& base_link)
         _robot.getPose(base_link, _tmpMatrix2);
         _tmpMatrix = _tmpMatrix2.inverse();
     }
-    else if(_robot.getLinkID(base_link) == -1)
+    else if(_robot.getLinkId(base_link) < 0)
         return false;
     else
         _robot.getPose(_base_link, base_link, _tmpMatrix);
@@ -515,7 +516,7 @@ void Cartesian::getGains(Eigen::Matrix6d& Kp, Eigen::Matrix6d& Kd)
 
 void Cartesian::compute_cartesian_inertia_inverse()
 {
-    _robot.getInertiaInverse(_Bi);
+    _robot.computeInertiaInverse(_Bi);
 
     _tmpMatrixXd.noalias() = _J*_Bi;
 

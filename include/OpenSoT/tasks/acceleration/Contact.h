@@ -20,8 +20,8 @@
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
-#include <XBotInterface/ModelInterface.h>
-#include <XBotInterface/Utils.h>
+#include <xbot2_interface/xbotinterface2.h>
+#include <xbot2_interface/common/utils.h>
 
 
 namespace OpenSoT { namespace tasks { namespace acceleration {
@@ -35,7 +35,6 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
         Contact(const std::string& task_id,
                 const XBot::ModelInterface& robot,
                 const std::string& contact_link,
-                const Eigen::VectorXd& x,
                 const Eigen::MatrixXd& contact_matrix = Eigen::MatrixXd()
                 );
         
@@ -47,7 +46,7 @@ namespace OpenSoT { namespace tasks { namespace acceleration {
                  );
         
 
-        virtual void _update(const Eigen::VectorXd& x);
+        virtual void _update();
         
         virtual void _log(XBot::MatLogger2::Ptr logger);
         

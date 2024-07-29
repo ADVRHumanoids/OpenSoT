@@ -9,16 +9,14 @@
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <qpOASES.hpp>
 #include <fstream>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <chrono>
+#include "../common.h"
 
 #define GREEN "\033[0;32m"
 #define DEFAULT "\033[0m"
 
 
-
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace{
 
@@ -53,12 +51,7 @@ public:
         _distal_link_0("l_wrist"),
         _type(type)
     {
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+        _model_ptr = GetTestModel("coman_floating_base");
 
 
         q = getGoodInitialPosition(_model_ptr);
@@ -66,40 +59,35 @@ public:
         _model_ptr->update();
 
         _model_ptr->getPose(_distal_link_0,_base_link_0, _T_initial_0);
-        _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                        q, *_model_ptr, _distal_link_0, _base_link_0));
+        _cartesian_task_0 = std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::left_wrist",
+                        *_model_ptr, _distal_link_0, _base_link_0);
 
         T_ref_0 = _T_initial_0.matrix();
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
 
         _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->update();
 
-        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
-                    new OpenSoT::tasks::velocity::Postural(q));
+        _postural_task = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
         Eigen::VectorXd q_min, q_max;
         _model_ptr->getJointLimits(q_min, q_max);
 
-        _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(q,
-                               q_max,q_min));
+        _joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr,
+                               q_max,q_min);
 
-        _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
-                    new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
+        _joint_velocity_limits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, 0.3, (double)(1.0/t));
 
         std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
         joint_constraints_list.push_back(_joint_limits);
         joint_constraints_list.push_back(_joint_velocity_limits);
 
-        _joint_constraints = OpenSoT::constraints::Aggregated::Ptr(
-                    new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
+        _joint_constraints = std::make_shared<OpenSoT::constraints::Aggregated>(joint_constraints_list, _model_ptr->getNv());
 
         _stack_of_tasks.push_back(_cartesian_task_0);
         _stack_of_tasks.push_back(_postural_task);
 
-        _sot = OpenSoT::solvers::iHQP::Ptr(new OpenSoT::solvers::iHQP(_stack_of_tasks, _joint_constraints));
+        _sot = std::make_shared<OpenSoT::solvers::iHQP>(_stack_of_tasks, _joint_constraints);
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
@@ -126,11 +114,11 @@ public:
         return dt;
     }
 
-    void update(const Eigen::VectorXd& q)
+    void update()
     {
-        _cartesian_task_0->update(q);
-        _postural_task->update(q);
-        _joint_constraints->update(q);
+        _cartesian_task_0->update();
+        _postural_task->update();
+        _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" ";
     }
@@ -148,23 +136,22 @@ public:
     }
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-        Eigen::VectorXd _q(_model_ptr->getJointNum());
-        _q.setZero(_q.size());
-        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+        _q[_model_ptr->getDofIndex("RHipSag")+1 ] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RKneeSag")+1 ] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LHipSag")+1 ] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LKneeSag")+1 ] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LAnkSag")+1 ] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShSag")+1 ] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LShLat")+1 ] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("LElbj")+1 ] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShSag")+1 ] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RShLat")+1 ] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getDofIndex("RElbj")+1 ] = -80.0*M_PI/180.0;
         return _q;
     }
 
@@ -225,12 +212,8 @@ public:
         _distal_link_1("r_wrist"),
         _type(type)
     {
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+        _model_ptr = GetTestModel("coman_floating_base");
 
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
 
 
         q = getGoodInitialPosition(_model_ptr);
@@ -241,14 +224,12 @@ public:
         _model_ptr->getPose(_distal_link_1,_base_link_1, _T_initial_1);
 
 
-        _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                    q, *_model_ptr,
-                    _distal_link_0, _base_link_0));
-        _cartesian_task_1 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
-                    q, *_model_ptr,
-                    _distal_link_1, _base_link_1));
+        _cartesian_task_0 =std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::left_wrist",
+                    *_model_ptr,
+                    _distal_link_0, _base_link_0);
+        _cartesian_task_1 = std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::right_wrist",
+                    *_model_ptr,
+                    _distal_link_1, _base_link_1);
 
         T_ref_0 = _T_initial_0.matrix();
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
@@ -257,35 +238,32 @@ public:
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
         _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->update();
 
         _cartesian_task_1->setReference(T_ref_1);
-        _cartesian_task_1->update(q);
+        _cartesian_task_1->update();
 
-        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
-                    new OpenSoT::tasks::velocity::Postural(q));
+        _postural_task = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
         Eigen::VectorXd q_min, q_max;
         _model_ptr->getJointLimits(q_min, q_max);
-        _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(q,
-                        q_max,q_min));
+        _joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr,
+                        q_max,q_min);
 
-        _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
-                    new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
+        _joint_velocity_limits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr,
+                                                                                                  0.3, (double)(1.0/t));
 
         std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
         joint_constraints_list.push_back(_joint_limits);
         joint_constraints_list.push_back(_joint_velocity_limits);
 
-        _joint_constraints = OpenSoT::constraints::Aggregated::Ptr(
-                    new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
+        _joint_constraints = std::make_shared<OpenSoT::constraints::Aggregated>(joint_constraints_list, _model_ptr->getNv());
 
         _stack_of_tasks.push_back(_cartesian_task_0);
         _stack_of_tasks.push_back(_cartesian_task_1);
         _stack_of_tasks.push_back(_postural_task);
 
-        _sot = OpenSoT::solvers::iHQP::Ptr(new OpenSoT::solvers::iHQP(_stack_of_tasks, _joint_constraints));
+        _sot = std::make_shared<OpenSoT::solvers::iHQP>(_stack_of_tasks, _joint_constraints);
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
@@ -312,12 +290,12 @@ public:
         return dt;
     }
 
-    void update(const Eigen::VectorXd& q)
+    void update()
     {
-        _cartesian_task_0->update(q);
-        _cartesian_task_1->update(q);
-        _postural_task->update(q);
-        _joint_constraints->update(q);
+        _cartesian_task_0->update();
+        _cartesian_task_1->update();
+        _postural_task->update();
+        _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
     }
@@ -339,23 +317,22 @@ public:
 
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-        Eigen::VectorXd _q(_model_ptr->getJointNum());
-        _q.setZero(_q.size());
-        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+        _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
         return _q;
     }
 
@@ -431,12 +408,7 @@ public:
         _distal_link_1("r_wrist"),
         _type(type)
     {
-        _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-        if(_model_ptr)
-            std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-        else
-            std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
+        _model_ptr = GetTestModel("coman_floating_base");
 
 
         q = getGoodInitialPosition(_model_ptr);
@@ -445,14 +417,12 @@ public:
 
         _model_ptr->getPose(_distal_link_0,_base_link_0, _T_initial_0);
         _model_ptr->getPose(_distal_link_1,_base_link_1, _T_initial_1);
-        _cartesian_task_0 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist",
-                q, *_model_ptr,
-                    _distal_link_0, _base_link_0));
-        _cartesian_task_1 = OpenSoT::tasks::velocity::Cartesian::Ptr(
-                    new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist",
-                    q, *_model_ptr,
-                    _distal_link_1, _base_link_1));
+        _cartesian_task_0 = std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::left_wrist",
+                *_model_ptr,
+                    _distal_link_0, _base_link_0);
+        _cartesian_task_1 = std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::right_wrist",
+                    *_model_ptr,
+                    _distal_link_1, _base_link_1);
 
         T_ref_0 = _T_initial_0.matrix();
         T_ref_0(0,3) = T_ref_0(0,3) + 0.1;
@@ -461,42 +431,35 @@ public:
         T_ref_1(1,3) = T_ref_1(1,3) - 0.05;
 
         _cartesian_task_0->setReference(T_ref_0);
-        _cartesian_task_0->update(q);
+        _cartesian_task_0->update();
 
         _cartesian_task_1->setReference(T_ref_1);
-        _cartesian_task_1->update(q);
+        _cartesian_task_1->update();
 
-        _postural_task = OpenSoT::tasks::velocity::Postural::Ptr(
-                    new OpenSoT::tasks::velocity::Postural(
-                        q));
+        _postural_task = std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
         Eigen::VectorXd q_min, q_max;
         _model_ptr->getJointLimits(q_min, q_max);
-        _joint_limits = OpenSoT::constraints::velocity::JointLimits::Ptr(
-                    new OpenSoT::constraints::velocity::JointLimits(
-                        q,q_max,q_min));
+        _joint_limits = std::make_shared<OpenSoT::constraints::velocity::JointLimits>(*_model_ptr, q_max,q_min);
 
-        _joint_velocity_limits = OpenSoT::constraints::velocity::VelocityLimits::Ptr(
-                    new OpenSoT::constraints::velocity::VelocityLimits(0.3, (double)(1.0/t), q.size()));
+        _joint_velocity_limits = std::make_shared<OpenSoT::constraints::velocity::VelocityLimits>(*_model_ptr, 0.3, (double)(1.0/t));
 
         std::list<OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr> joint_constraints_list;
         joint_constraints_list.push_back(_joint_limits);
         joint_constraints_list.push_back(_joint_velocity_limits);
 
-        _joint_constraints = OpenSoT::constraints::Aggregated::Ptr(
-                    new OpenSoT::constraints::Aggregated(joint_constraints_list, q.size()));
+        _joint_constraints = std::make_shared<OpenSoT::constraints::Aggregated>(joint_constraints_list, _model_ptr->getNv());
 
         std::list<OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr> cartesian_task_list;
         cartesian_task_list.push_back(_cartesian_task_0);
         cartesian_task_list.push_back(_cartesian_task_1);
 
-        _cartesian_tasks = OpenSoT::tasks::Aggregated::Ptr(
-                    new OpenSoT::tasks::Aggregated(cartesian_task_list, q.size()));
+        _cartesian_tasks = std::make_shared<OpenSoT::tasks::Aggregated>(cartesian_task_list, _model_ptr->getNv());
 
         _stack_of_tasks.push_back(_cartesian_tasks);
         _stack_of_tasks.push_back(_postural_task);
 
-        _sot = OpenSoT::solvers::iHQP::Ptr(new OpenSoT::solvers::iHQP(_stack_of_tasks, _joint_constraints));
+        _sot = std::make_shared<OpenSoT::solvers::iHQP>(_stack_of_tasks, _joint_constraints);
 
         for(unsigned int i = 0; i < _sot->getNumberOfTasks(); ++i){
             _sot->setOptions(i, options);
@@ -523,11 +486,11 @@ public:
         return dt;
     }
 
-    void update(const Eigen::VectorXd& q)
+    void update()
     {
-        _cartesian_tasks->update(q);
-        _postural_task->update(q);
-        _joint_constraints->update(q);
+        _cartesian_tasks->update();
+        _postural_task->update();
+        _joint_constraints->update();
 
         _log<<_cartesian_task_0->getb()<<" "<<_cartesian_task_1->getb()<<" ";
     }
@@ -550,23 +513,22 @@ public:
 
 
     Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-        Eigen::VectorXd _q(_model_ptr->getJointNum());
-        _q.setZero(_q.size());
-        _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+        Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+        _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-        _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-        _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+        _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
         return _q;
     }
 
@@ -643,20 +605,20 @@ TEST_F(testQPOases_Options, testOptionMPC)
     std::cout<<GREEN<<"test0 options:"<<DEFAULT<<std::endl;
 
 
-    Eigen::VectorXd dq(test0.q.size());dq.setZero(dq.size());
+    Eigen::VectorXd dq(test0._model_ptr->getNv());dq.setZero();
     double acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
         test0._model_ptr->setJointPosition(test0.q);
         test0._model_ptr->update();
 
-        test0.update(test0.q);
+        test0.update();
 
         bool solved;
         acc += test0.solve(dq, solved);
         if(!solved)
-            dq.setZero(dq.size());
-        test0.q = test0.q + dq;
+            dq.setZero();
+        test0.q = test0._model_ptr->sum(test0.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -668,20 +630,20 @@ TEST_F(testQPOases_Options, testOptionMPC)
 
     std::cout<<GREEN<<"test1 options:"<<DEFAULT<<std::endl;
 
-    dq.setZero(dq.size());
+    dq.setZero();
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
         test1._model_ptr->setJointPosition(test1.q);
         test1._model_ptr->update();
 
-        test1.update(test1.q);
+        test1.update();
 
         bool solved;
         acc += test1.solve(dq, solved);
         if(!solved)
-            dq.setZero(dq.size());
-        test1.q = test1.q + dq;
+            dq.setZero();
+        test1.q = test1._model_ptr->sum(test1.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -693,20 +655,20 @@ TEST_F(testQPOases_Options, testOptionMPC)
 
     std::cout<<GREEN<<"test2 options:"<<DEFAULT<<std::endl;
 
-    dq.setZero(dq.size());
+    dq.setZero();
     acc = 0.0;
     for(unsigned int t = 0; t < T; ++t)
     {
         test2._model_ptr->setJointPosition(test2.q);
         test2._model_ptr->update();
 
-        test2.update(test2.q);
+        test2.update();
 
         bool solved;
         acc += test2.solve(dq, solved);
         if(!solved)
-            dq.setZero(dq.size());
-        test2.q = test2.q + dq;
+            dq.setZero();
+        test2.q = test2._model_ptr->sum(test2.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -738,13 +700,13 @@ TEST_F(testQPOases_Options, testOptionReliable)
         test0._model_ptr->setJointPosition(test0.q);
         test0._model_ptr->update();
 
-        test0.update(test0.q);
+        test0.update();
 
         bool solved;
         acc += test0.solve(dq, solved);
         if(!solved)
             dq.setZero(dq.size());
-        test0.q = test0.q + dq;
+        test0.q = test0._model_ptr->sum(test0.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -761,13 +723,13 @@ TEST_F(testQPOases_Options, testOptionReliable)
     {
         test1._model_ptr->setJointPosition(test1.q);
         test1._model_ptr->update();
-        test1.update(test1.q);
+        test1.update();
 
         bool solved;
         acc += test1.solve(dq, solved);
         if(!solved)
             dq.setZero(dq.size());
-        test1.q = test1.q + dq;
+        test1.q = test1._model_ptr->sum(test1.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -784,13 +746,13 @@ TEST_F(testQPOases_Options, testOptionReliable)
     {
         test2._model_ptr->setJointPosition(test2.q);
         test2._model_ptr->update();
-        test2.update(test2.q);
+        test2.update();
 
         bool solved;
         acc += test2.solve(dq, solved);
         if(!solved)
             dq.setZero(dq.size());
-        test2.q = test2.q + dq;
+        test2.q = test2._model_ptr->sum(test2.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -822,13 +784,13 @@ TEST_F(testQPOases_Options, testOptionDefault)
         test0._model_ptr->setJointPosition(test0.q);
         test0._model_ptr->update();
 
-        test0.update(test0.q);
+        test0.update();
 
         bool solved;
         acc += test0.solve(dq, solved);
         if(!solved)
             dq.setZero(dq.size());
-        test0.q = test0.q + dq;
+        test0.q = test0._model_ptr->sum(test0.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -845,13 +807,13 @@ TEST_F(testQPOases_Options, testOptionDefault)
     {
         test1._model_ptr->setJointPosition(test1.q);
         test1._model_ptr->update();
-        test1.update(test1.q);
+        test1.update();
 
         bool solved;
         acc += test1.solve(dq, solved);
         if(!solved)
             dq.setZero(dq.size());
-        test1.q = test1.q + dq;
+        test1.q = test1._model_ptr->sum(test1.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;
@@ -869,13 +831,13 @@ TEST_F(testQPOases_Options, testOptionDefault)
         test2._model_ptr->setJointPosition(test2.q);
         test2._model_ptr->update();
 
-        test2.update(test2.q);
+        test2.update();
 
         bool solved;
         acc += test2.solve(dq, solved);
         if(!solved)
             dq.setZero(dq.size());
-        test2.q = test2.q + dq;
+        test2.q = test2._model_ptr->sum(test2.q, dq);
     }
     acc = acc/double(T);
     std::cout<<GREEN<<"Average time to solve one step is: "<<acc<<" [s]"<<DEFAULT<<std::endl;

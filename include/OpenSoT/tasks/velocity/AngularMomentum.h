@@ -19,7 +19,7 @@
 #define __TASKS_VELOCITY_ANGULAR_MOMENTUM_H__
 
 #include <OpenSoT/Task.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <Eigen/Dense>
 
@@ -48,7 +48,7 @@ namespace OpenSoT {
 
            Eigen::MatrixXd _Momentum;
 
-           void _update(const Eigen::VectorXd& x);
+           void _update();
 
            std::string _base_link;
            std::string _distal_link;
@@ -59,7 +59,7 @@ namespace OpenSoT {
             * @param x joint states
             * @param robot reference to a model
             */
-           AngularMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot);
+           AngularMomentum(XBot::ModelInterface& robot);
            ~AngularMomentum();
 
            /**
@@ -76,6 +76,7 @@ namespace OpenSoT {
             */
            void getReference(Eigen::Vector3d& desiredAngularMomentum) const;
            void getReference(KDL::Vector& desiredAngularMomentum) const;
+           const Eigen::Vector3d& getReference() const;
 
            /**
             * @brief getBaseLink

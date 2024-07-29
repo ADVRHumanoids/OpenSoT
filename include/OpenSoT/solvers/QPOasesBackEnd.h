@@ -18,7 +18,7 @@ namespace OpenSoT{
 
     /**
      * @brief The QPOasesBackEnd class handle variables, options and execution of a
-     * single qpOases problem. Is implemented using Eigen.
+     * single qpOases problem. Is implemented using Eigen. Based on the qpOASES solver https://github.com/coin-or/qpOASES
      * This represent the Back-End.
      */
     class QPOasesBackEnd:  public BackEnd{

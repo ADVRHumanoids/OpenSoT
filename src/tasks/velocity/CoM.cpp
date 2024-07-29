@@ -26,11 +26,10 @@ using namespace OpenSoT::tasks::velocity;
 
 #define LAMBDA_THS 1E-12
 
-CoM::CoM(   const Eigen::VectorXd& x,
-            XBot::ModelInterface &robot,
+CoM::CoM(XBot::ModelInterface &robot,
             const std::string& id
         ) :
-    Task(id, x.size()), _robot(robot), _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
+    Task(id, robot.getNv()), _robot(robot), _base_link(BASE_LINK_COM), _distal_link(DISTAL_LINK_COM)
 {
     _desiredPosition.setZero();
     _actualPosition.setZero();
@@ -39,7 +38,7 @@ CoM::CoM(   const Eigen::VectorXd& x,
     _desiredVelocityRef = _desiredVelocity;
 
     /* first update. Setting desired pose equal to the actual pose */
-    this->_update(x);
+    this->_update();
 
 
     /* initializing to zero error */
@@ -57,13 +56,13 @@ CoM::~CoM()
 {
 }
 
-void CoM::_update(const Eigen::VectorXd &x)
+void CoM::_update()
 {
 
     /************************* COMPUTING TASK *****************************/
     _desiredVelocityRef = _desiredVelocity;
 
-    _robot.getCOM(_actualPosition);
+    _actualPosition = _robot.getCOM();
 
     _robot.getCOMJacobian(_A);
 
@@ -183,7 +182,7 @@ void OpenSoT::tasks::velocity::CoM::_log(XBot::MatLogger2::Ptr logger)
 
 bool OpenSoT::tasks::velocity::CoM::reset()
 {
-    _robot.getCOM(_actualPosition);
+    _actualPosition = _robot.getCOM();
 
     _robot.getCOMJacobian(_A);
 

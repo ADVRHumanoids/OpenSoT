@@ -2,7 +2,7 @@
 #define _WB_SOT_SOLVERS_BACK_END_H_
 
 #include <Eigen/Dense>
-#include <XBotInterface/Logger.hpp>
+#include <xbot2_interface/logger.h>
 #include <boost/any.hpp>
 #include <OpenSoT/Task.h>
 

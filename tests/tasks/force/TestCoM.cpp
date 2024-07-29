@@ -9,20 +9,19 @@
 #include <ros/ros.h>
 #include <qpOASES.hpp>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/force/Force.h>
 #include <OpenSoT/utils/InverseDynamics.h>
+#include "../../common.h"
 
-std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
-std::string _path_to_cfg = relative_path;
 
 namespace{
 
-class testForceCoM : public ::testing::Test {
+class testForceCoM : public TestBase {
 
  protected:
 
-  testForceCoM()
+  testForceCoM() : TestBase("coman_floating_base")
   {
 
   }
@@ -39,11 +38,11 @@ class testForceCoM : public ::testing::Test {
 
 };
 
-class testWrench : public ::testing::Test {
+class testWrench : public TestBase {
 
  protected:
 
-  testWrench()
+  testWrench() : TestBase("coman_floating_base")
   {
 
   }
@@ -61,34 +60,33 @@ class testWrench : public ::testing::Test {
 };
 
 Eigen::VectorXd getGoodInitialPosition(XBot::ModelInterface::Ptr _model_ptr) {
-    Eigen::VectorXd _q(_model_ptr->getJointNum());
-    _q.setZero(_q.size());
-    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    Eigen::VectorXd _q = _model_ptr->getNeutralQ();
 
-    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RHipSag") ] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RKneeSag") ] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RAnkSag") ] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LShSag")] =  -90.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LForearmPlate")] = -90.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LHipSag") ] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LKneeSag") ] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LAnkSag") ] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("RShSag")] =  -90.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RForearmPlate")] = -90.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShSag") ] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LForearmPlate") ] = -90.0*M_PI/180.0;
+
+    _q[_model_ptr->getQIndex("RShSag") ] =  -90.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RForearmPlate") ] = -90.0*M_PI/180.0;
 
     return _q;
 }
 
 
 TEST_F(testForceCoM, testForceCoM_StaticCase) {
-    XBot::ModelInterface::Ptr _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
-
-    if(_model_ptr)
-        std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
-    else
-        std::cout<<"pointer is NULL "<<_model_ptr.get()<<std::endl;
-
+    std::cout<<"#nq: "<<_model_ptr->getNq()<<std::endl;
+    std::cout<<"#nv: "<<_model_ptr->getNv()<<std::endl;
+    std::cout<<"#joint_num: "<<_model_ptr->getJointNum()<<std::endl;
+    std::cout<<"#joint_name size: "<<_model_ptr->getJointNames().size()<<std::endl;
+    for(auto jn : _model_ptr->getJointNames())
+        std::cout<<jn<<": "<<_model_ptr->getDofIndex(jn)<<std::endl;
 
 
     Eigen::VectorXd q = getGoodInitialPosition(_model_ptr);
@@ -106,12 +104,13 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
         it != links_in_contact.end(); it++)
         std::cout<<"link in contact "<<":"<<*it<<std::endl;
 
+    std::vector<OpenSoT::AffineHelper> contact_wrenches;
+    for(unsigned int i = 0; i < links_in_contact.size(); ++i)
+        contact_wrenches.push_back(OpenSoT::AffineHelper::Identity(6));
 
-    Eigen::VectorXd contact_wrenches_d(6*links_in_contact.size());
-    contact_wrenches_d.setZero(contact_wrenches_d.size());
     OpenSoT::tasks::force::CoM::Ptr force_com_task(
-        new OpenSoT::tasks::force::CoM(contact_wrenches_d, links_in_contact, *(_model_ptr.get())));
-    force_com_task->update(contact_wrenches_d);
+        new OpenSoT::tasks::force::CoM(contact_wrenches, links_in_contact, *(_model_ptr.get())));
+    force_com_task->update();
 
     Eigen::MatrixXd A = force_com_task->getA();
     EXPECT_EQ(A.rows(), 6);
@@ -121,6 +120,8 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     Eigen::VectorXd b = force_com_task->getb();
     EXPECT_EQ(b.rows(), 6);
     std::cout<<"b = [ "<<b<<" ]"<<std::endl;
+    std::cout<<"force_com_task A: ["<<force_com_task->getA().rows()<<" x "<<force_com_task->getA().cols()<<" ]"<<std::endl;
+    std::cout<<"force_com_task b: ["<<force_com_task->getb().size()<<" ]"<<std::endl;
 
 
     OpenSoT::constraints::force::FrictionCones::friction_cones friction_cones;
@@ -153,11 +154,15 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
     std::cout<<"Aineq = ["<<fc->getAineq()<<" ]"<<std::endl;
     std::cout<<"bUpper = ["<<fc->getbUpperBound()<<" "<<std::endl;
     std::cout<<"bLower = ["<<fc->getbLowerBound()<<" "<<std::endl;
+    std::cout<<"fc Aineq: ["<<fc->getAineq().rows()<<" x "<<fc->getAineq().cols()<<" ]"<<std::endl;
+    std::cout<<"fc getbUpperBound(): ["<<fc->getbUpperBound().size()<<"]"<<std::endl;
+    std::cout<<"fc getbLowerBound(): ["<<fc->getbLowerBound().size()<<"]"<<std::endl;
+
 
     Eigen::VectorXd wrench_lims;
-    wrench_lims.setOnes(contact_wrenches_d.size()); wrench_lims *= 300.;
+    wrench_lims.setOnes(contact_wrenches.size()*6); wrench_lims *= 300.;
 
-    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench", contact_wrenches_d.size()}};
+    OpenSoT::OptvarHelper::VariableVector vars = {{"wrench", contact_wrenches.size()*6}};
 
     OpenSoT::OptvarHelper opt(vars);
 
@@ -168,18 +173,20 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
                                                               -wrench_lims,
                                                               wrench_lims,wrench));
 
+    std::cout<<"wrench_limits Aineq: ["<<wrench_limits->getAineq().rows()<<" x "<<wrench_limits->getAineq().cols()<<" ]"<<std::endl;
+    std::cout<<"wrench_limits getbUpperBound(): ["<<wrench_limits->getbUpperBound().size()<<"]"<<std::endl;
+    std::cout<<"wrench_limits getbLowerBound(): ["<<wrench_limits->getbLowerBound().size()<<"]"<<std::endl;
+
+
     force_com_task->getConstraints().push_back(fc);
     force_com_task->getConstraints().push_back(wrench_limits);
-    force_com_task->update(contact_wrenches_d);
+    force_com_task->update();
 
-    Eigen::VectorXd wrench_reference(contact_wrenches_d.size());
-    wrench_reference.setZero(contact_wrenches_d.size());
+    Eigen::VectorXd wrench_reference(contact_wrenches.size()*6);
+    wrench_reference.setZero();
     wrench_reference(2) = 100.;
     wrench_reference(8) = 100.;
     wrench_reference(14) = 100.;
-
-
-
 
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
@@ -187,16 +194,14 @@ TEST_F(testForceCoM, testForceCoM_StaticCase) {
 
 
     OpenSoT::solvers::iHQP::Ptr sot(
-                new OpenSoT::solvers::iHQP(stack_of_tasks,0.));
+                new OpenSoT::solvers::iHQP(stack_of_tasks,1.));
     std::cout<<"Solver started"<<std::endl;
 
     _model_ptr->setJointPosition(q);
     _model_ptr->update();
-    force_com_task->update(contact_wrenches_d);
+    force_com_task->update();
 
-
-
-
+    Eigen::VectorXd contact_wrenches_d;
     EXPECT_TRUE(sot->solve(contact_wrenches_d));
     std::cout<<"contact_wrenches_d = [ "<<contact_wrenches_d<<" ]"<<std::endl;
 
@@ -239,7 +244,7 @@ TEST_F(testWrench, testWrench_) {
     std::cout<<"wrench->getq"<<wrench.getq()<<std::endl;
 
     _wrench_task = std::make_shared<OpenSoT::tasks::force::Wrench>("l_sole_wrench", "l_sole","world", wrench);
-    _wrench_task->update(Eigen::VectorXd(0));
+    _wrench_task->update();
 
     Eigen::VectorXd tmp;
     _wrench_task->getReference(tmp);
@@ -248,7 +253,7 @@ TEST_F(testWrench, testWrench_) {
         EXPECT_DOUBLE_EQ(tmp[i], 0.0);
 
     _wrench_task->setReference(wrench_desired);
-    _wrench_task->update(Eigen::VectorXd(0));
+    _wrench_task->update();
     _wrench_task->getReference(tmp);
     EXPECT_TRUE(tmp.size() == 6)<<"tmp.size(): "<<tmp.size()<<std::endl;
     for(unsigned int i = 0; i < 6; ++i){
@@ -270,7 +275,7 @@ TEST_F(testWrench, testWrench_) {
 
     wrench_desired.setRandom();
     _wrench_task->setReference(wrench_desired);
-    _wrench_task->update(Eigen::VectorXd(0));
+    _wrench_task->update();
 
     EXPECT_TRUE(sot->solve(x));
     std::cout<<"wrench desired: ["<<wrench_desired.transpose()<<"]"<<std::endl;
@@ -296,7 +301,7 @@ TEST_F(testWrench, testWrench_) {
     wrench_desired.setRandom();
     _wrench_task->setReference(wrench_desired);
 
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     OpenSoT::solvers::iHQP::Ptr sot2(new OpenSoT::solvers::iHQP(autostack->getStack(),
                                                                 autostack->getBounds(),0));
@@ -312,7 +317,7 @@ TEST_F(testWrench, testWrench_) {
 
     wrench_lims->releaseContact(true);
 
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     EXPECT_TRUE(sot2->solve(x));
 
@@ -324,7 +329,7 @@ TEST_F(testWrench, testWrench_) {
 
     wrench_lims->releaseContact(false);
 
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     EXPECT_TRUE(sot2->solve(x));
 
@@ -358,7 +363,7 @@ TEST_F(testWrench, testWrenchLim)
     OpenSoT::constraints::force::WrenchLimits::Ptr wrench_lims =
             std::make_shared<OpenSoT::constraints::force::WrenchLimits>
             ("wrench1", lowerLims, upperLims,wrench1);
-    wrench_lims->update(Eigen::VectorXd(0));
+    wrench_lims->update();
 
     std::vector<OpenSoT::AffineHelper> wrenches;
     wrenches.push_back(opt.getVariable("wrench1"));
@@ -370,7 +375,7 @@ TEST_F(testWrench, testWrenchLim)
     OpenSoT::constraints::force::WrenchesLimits::Ptr wrenches_lims =
             std::make_shared<OpenSoT::constraints::force::WrenchesLimits>
             (contacts, lowerLims, upperLims,wrenches);
-    wrenches_lims->update(Eigen::VectorXd(0));
+    wrenches_lims->update();
 
 
 }
@@ -402,7 +407,7 @@ TEST_F(testWrench, testWrenches) {
 
     OpenSoT::tasks::force::Wrenches::Ptr wrenches_task = std::make_shared<OpenSoT::tasks::force::Wrenches>
             ("wrenches", contacts, base_links, wrenches);
-    wrenches_task->update(Eigen::VectorXd(0));
+    wrenches_task->update();
 
     std::cout<<"wrenches_task->getA(): \n"<<wrenches_task->getA()<<std::endl;
     std::cout<<"wrenches_task->getb(): \n"<<wrenches_task->getb().transpose()<<std::endl;
@@ -413,7 +418,7 @@ TEST_F(testWrench, testWrenches) {
     wrench_desired.setRandom();
 
     wrenches_task->getWrenchTask("wrench2")->setReference(wrench_desired);
-    wrenches_task->update(Eigen::VectorXd(0));
+    wrenches_task->update();
 
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
@@ -454,7 +459,7 @@ TEST_F(testWrench, testWrenches) {
     wrenches_task->getWrenchTask("wrench1")->setReference(wrench_desired_1);
     wrenches_task->getWrenchTask("wrench2")->setReference(wrench_desired_2);
 
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
 
     OpenSoT::solvers::iHQP::Ptr sot2(new OpenSoT::solvers::iHQP(autostack->getStack(),
@@ -468,7 +473,7 @@ TEST_F(testWrench, testWrenches) {
         EXPECT_NEAR(x[i+6], lowerLims[i], 1e-9);}
 
     wrenches_lims->getWrenchLimits("wrench2")->releaseContact(true);
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     std::cout<<"wrenches_lims->getbLowerBound()"<<wrenches_lims->getbLowerBound().transpose()<<std::endl;
     std::cout<<"wrenches_lims->getbUpperBound()"<<wrenches_lims->getbUpperBound().transpose()<<std::endl;
@@ -485,7 +490,7 @@ TEST_F(testWrench, testWrenches) {
         EXPECT_NEAR(x[i+6], 0.0, 1e-9);}
 
     wrenches_lims->getWrenchLimits("wrench2")->releaseContact(false);
-    autostack->update(Eigen::VectorXd(0));
+    autostack->update();
 
     EXPECT_TRUE(sot2->solve(x));
     std::cout<<"wrench desired: ["<<wrench_desired_1.transpose()<<" "<<wrench_desired_2.transpose()<<"]"<<std::endl;

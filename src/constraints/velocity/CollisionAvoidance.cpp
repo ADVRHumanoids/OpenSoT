@@ -16,56 +16,66 @@
 */
 
 #include <OpenSoT/constraints/velocity/CollisionAvoidance.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include <xbot2_interface/collision.h>
 
 using namespace OpenSoT::constraints::velocity;
 using namespace XBot;
 
-namespace
-{
-Eigen::Vector3d k2e(const KDL::Vector &k)
-{
-    return Eigen::Vector3d(k[0], k[1], k[2]);
-}
-}
-
 CollisionAvoidance::CollisionAvoidance(
-        const Eigen::VectorXd& x,
         const XBot::ModelInterface& robot,
         int max_pairs,
         urdf::ModelConstSharedPtr collision_urdf,
         srdf::ModelConstSharedPtr collision_srdf):
-    Constraint("self_collision_avoidance", x.size()),
+    Constraint("self_collision_avoidance", robot.getNv()),
     _detection_threshold(std::numeric_limits<double>::max()),
     _distance_threshold(0.001),
     _robot(robot),
-    _x_cache(x),
     _bound_scaling(1.0),
     _max_pairs(max_pairs)
 {
+    // enable collisions vs env
+    _include_env = true;
+
+    // construct custom model for collisions
+    _collision_model =
+        ModelInterface::getModel(collision_urdf ? collision_urdf : robot.getUrdf(),
+                                 collision_srdf ? collision_srdf : robot.getSrdf(),
+                                 robot.getType());
+
     // construct link distance computation util
-    _dist_calc = std::make_unique<ComputeLinksDistance>(robot,
-                                                        collision_urdf,
-                                                        collision_srdf);
+    _dist_calc = std::make_unique<Collision::CollisionModel>(_collision_model);
 
     // if max pairs not specified, set it as number of total
     // link pairs
     if(_max_pairs < 0)
     {
         // note: threshold = inf
-        _max_pairs = _dist_calc->getLinkDistances().size();
+        _max_pairs = _dist_calc->getNumCollisionPairs(_include_env);
     }
+
+    _distance_J.setZero(_dist_calc->getNumCollisionPairs(_include_env), getXSize());
+    _distances.setZero(_distance_J.rows());
 
     // initialize matrices
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setZero(_max_pairs);
     _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
 
+    // initialize link pair vector
+    _lpv = _dist_calc->getCollisionPairs(_include_env);
+
+    update();
+
 }
 
 double CollisionAvoidance::getLinkPairThreshold()
 {
     return _distance_threshold;
+}
+
+void CollisionAvoidance::getError(Eigen::VectorXd &e)
+{
+    e = _distances.array() - _distance_threshold;
 }
 
 double CollisionAvoidance::getDetectionThreshold()
@@ -83,67 +93,48 @@ void CollisionAvoidance::setDetectionThreshold(const double detection_threshold)
     _detection_threshold = std::fabs(detection_threshold);
 }
 
-void CollisionAvoidance::update(const Eigen::VectorXd &x)
+void CollisionAvoidance::update()
 {
+    // update collision model
+    //_collision_model->syncFrom(_robot, ControlMode::POSITION); <-- not updating
+    _collision_model->setJointPosition(_robot.getJointPosition());
+    _collision_model->update();
+    _dist_calc->update();
 
+    // reset constraint
     _Aineq.setZero(_max_pairs, getXSize());
     _bUpperBound.setConstant(_max_pairs, std::numeric_limits<double>::max());
+    _bLowerBound.setConstant(_max_pairs, std::numeric_limits<double>::lowest());
 
-    _distance_list = _dist_calc->getLinkDistances(_detection_threshold);
 
+    _distance_J.setZero(_dist_calc->getNumCollisionPairs(_include_env), _distance_J.cols());
+    _distances.setZero(_distance_J.rows());
+
+    // compute distances
+    _dist_calc->computeDistance(_distances, _include_env, _detection_threshold);
+
+    // compute jacobians
+    _dist_calc->getDistanceJacobian(_distance_J, _include_env);
+
+    // populate Aineq and bUpperBound
     int row_idx = 0;
-
-    for(const auto& data : _distance_list)
+    for(int i : _dist_calc->getOrderedCollisionPairIndices())
     {
-
-        // we filled the task, skip the rest of colliding pairs
         if(row_idx >= _max_pairs)
         {
             break;
         }
 
-        // closest point on first link
-        Eigen::Vector3d p1_world = k2e(data.getClosestPoints().first.p);
-
-        // closest point on second link
-        Eigen::Vector3d p2_world = k2e(data.getClosestPoints().second.p);
-
-        // local closest points on link 1
-        Eigen::Affine3d w_T_l1;
-        _robot.getPose(data.getLinkNames().first, w_T_l1);
-        Eigen::Vector3d p1_local = w_T_l1.inverse()*p1_world;
-
-        // minimum distance direction
-        Eigen::Vector3d p12 = p2_world - p1_world;
-
-        // minimum distance
-        double d12 = data.getDistance();
-
-        // jacobian of p1
-        _robot.getJacobian(data.getLinkNames().first,
-                           p1_local,
-                           _Jtmp);
-
-        _Aineq.row(row_idx) = p12.transpose() * _Jtmp.topRows<3>() / d12;
-
-        // jacobian of p2 only if link2 is a robot link
-        // (it could be part of the environment)
-        if(!data.isLink2WorldObject())
+        // skip if above detection threshold
+        if(_detection_threshold > 0 && _distances(i) > _detection_threshold)
         {
-            // local closest points on link 2
-            Eigen::Affine3d w_T_l2;
-            _robot.getPose(data.getLinkNames().second, w_T_l2);
-            Eigen::Vector3d p2_local = w_T_l2.inverse()*p2_world;
-
-            // jacobian of p2
-            _robot.getJacobian(data.getLinkNames().second,
-                               p2_local,
-                               _Jtmp);
-
-            _Aineq.row(row_idx) -= p12.transpose() * _Jtmp.topRows<3>() / d12;
+            continue;
         }
 
-        _bUpperBound(row_idx) = _bound_scaling*(d12 - _distance_threshold);
+        // DeltaD = J*dq -> DeltaD > -(d - dmin) -> -J*dq < (d - dmin)
+
+        _Aineq.row(row_idx) = -_distance_J.row(i);
+        _bUpperBound(row_idx) = _bound_scaling*(_distances(i) - _distance_threshold);
 
         // to avoid infeasibilities, cap upper bound to zero
         // (i.e. don't change current distance if in collision)
@@ -152,51 +143,116 @@ void CollisionAvoidance::update(const Eigen::VectorXd &x)
             _bUpperBound(row_idx) = 0.0;
         }
 
-        ++row_idx;
-
+        row_idx++;
     }
+
+    // save number of active constraints
+    _num_active_pairs = row_idx;
+
 }
 
-bool CollisionAvoidance::setCollisionWhiteList(std::list<LinkPairDistance::LinksPair> whiteList)
+bool CollisionAvoidance::addCollisionShape(const std::string &name,
+                       const std::string &link,
+                       const XBot::Collision::Shape::Variant &shape,
+                       const Eigen::Affine3d &link_T_shape,
+                       const std::vector<std::string> &disabled_collisions)
 {
-    return _dist_calc->setCollisionWhiteList(whiteList);
+    return _dist_calc->addCollisionShape(name, link, shape, link_T_shape, disabled_collisions);
 }
 
-bool CollisionAvoidance::setCollisionBlackList(std::list<LinkPairDistance::LinksPair> blackList)
+bool CollisionAvoidance::moveCollisionShape(const std::string& id, const Eigen::Affine3d& new_pose)
 {
-    return _dist_calc->setCollisionBlackList(blackList);
+    return _dist_calc->moveCollisionShape(id, new_pose);
 }
 
-bool CollisionAvoidance::setWorldCollisions(const moveit_msgs::msg::PlanningSceneWorld &wc)
+void CollisionAvoidance::setMaxPairs(const unsigned int max_pairs)
 {
-    return _dist_calc->setWorldCollisions(wc);
+    _max_pairs = max_pairs;
+    update();
 }
 
-void CollisionAvoidance::setLinksVsEnvironment(const std::list<std::string>& links)
+void CollisionAvoidance::setCollisionList(std::set<std::pair<std::string, std::string>> collisionList)
 {
-    _dist_calc->setLinksVsEnvironment(links);
+    _dist_calc->setLinkPairs(collisionList);
 }
 
-bool CollisionAvoidance::addWorldCollision(const std::string &id,
-                                               std::shared_ptr<fcl::CollisionObjectd> fcl_obj)
+void CollisionAvoidance::collisionModelUpdated()
 {
-    return _dist_calc->addWorldCollision(id, fcl_obj);
+    _lpv = _dist_calc->getCollisionPairs(_include_env);
 }
 
-bool CollisionAvoidance::removeWorldCollision(const std::string &id)
-{
-    return _dist_calc->removeWorldCollision(id);
-}
 
-bool CollisionAvoidance::moveWorldCollision(const std::string &id,
-                                                KDL::Frame new_pose)
-{
-    return _dist_calc->moveWorldCollision(id, new_pose);
-}
+
+
+
+// bool CollisionAvoidance::removeWorldCollision(const std::string &id)
+// {
+//     return _dist_calc->removeWorldCollision(id);
+// }
+
+
 
 void CollisionAvoidance::setBoundScaling(const double boundScaling)
 {
     _bound_scaling = boundScaling;
+}
+
+void CollisionAvoidance::setLinksVsEnvironment(const std::set<std::string> &links)
+{
+    _dist_calc->setLinksVsEnvironment(links);
+}
+
+Collision::CollisionModel &CollisionAvoidance::getCollisionModel()
+{
+    return *_dist_calc;
+}
+
+const Collision::CollisionModel &CollisionAvoidance::getCollisionModel() const
+{
+    return *_dist_calc;
+}
+
+void CollisionAvoidance::getOrderedWitnessPointVector(WitnessPointVector &wp) const
+{
+    wp.clear();
+
+    _dist_calc->getWitnessPoints(_wpv, _include_env);
+
+    const auto& ordered_idx = _dist_calc->getOrderedCollisionPairIndices();
+
+    for(int i = 0; i < _num_active_pairs && i < _distances.size(); i++)
+    {
+        wp.push_back(_wpv[ordered_idx[i]]);
+    }
+}
+
+void CollisionAvoidance::getOrderedLinkPairVector(LinkPairVector &lp) const
+{
+    lp.clear();
+
+    const auto& ordered_idx = _dist_calc->getOrderedCollisionPairIndices();
+
+    for(int i = 0; i < _num_active_pairs && i < _distances.size(); i++)
+    {
+        lp.push_back(_lpv[ordered_idx[i]]);
+    }
+}
+
+void CollisionAvoidance::getOrderedDistanceVector(std::vector<double> &d) const
+{
+    d.clear();
+
+    const auto& ordered_idx = _dist_calc->getOrderedCollisionPairIndices();
+
+    for(int i = 0; i < _num_active_pairs && i < _distances.size(); i++)
+    {
+        d.push_back(_distances[ordered_idx[i]]);
+    }
+}
+
+const Eigen::MatrixXd& CollisionAvoidance::getCollisionJacobian() const
+{
+    return _distance_J;
 }
 
 CollisionAvoidance::~CollisionAvoidance() = default;

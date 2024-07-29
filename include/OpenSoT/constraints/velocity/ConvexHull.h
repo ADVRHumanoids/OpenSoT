@@ -22,7 +22,7 @@
  #include <OpenSoT/tasks/velocity/CoM.h>
  #include <kdl/frames.hpp>
  #include <Eigen/Dense>
- #include <XBotInterface/ModelInterface.h>
+ #include <xbot2_interface/xbotinterface2.h>
  #include <OpenSoT/utils/convex_hull_utils.h>
 
 #define BOUND_SCALING 0.01
@@ -47,12 +47,12 @@
                 XBot::ModelInterface &_robot;
                 double _boundScaling;
                 std::shared_ptr<convex_hull> _convex_hull;
-                std::vector<KDL::Vector> _ch;
+                std::vector<Eigen::Vector3d> _ch;
                 std::list<std::string> _links_in_contact;
                 Eigen::MatrixXd _JCoM;
                 Eigen::MatrixXd _C;
-                std::list<KDL::Vector> _points;
-                std::vector<KDL::Vector> _tmp_ch;
+                std::list<Eigen::Vector3d> _points;
+                std::vector<Eigen::Vector3d> _tmp_ch;
 
             public:
                 /**
@@ -61,8 +61,7 @@
                  * @param robot the robot model, with floating base link set on the support foot
                  * @param safetyMargin the margin, in [m], of the bounds margins
                  */
-                ConvexHull( const Eigen::VectorXd& x,
-                            XBot::ModelInterface& robot,
+                ConvexHull( XBot::ModelInterface& robot,
                             const std::list<std::string>& links_in_contact,
                             const double safetyMargin = BOUND_SCALING);
 
@@ -72,7 +71,7 @@
                  * @param A the matrix of constraints
                  * @param b the vector of coefficients
                  */
-                static void getConstraints(const std::vector<KDL::Vector> &points,
+                static void getConstraints(const std::vector<Eigen::Vector3d> &points,
                                             Eigen::MatrixXd& A, Eigen::VectorXd& b,
                                             const double boundScaling = BOUND_SCALING);
 
@@ -84,10 +83,10 @@
                  * @param b cofficient in the implicit representation of the rect as ax + by + c = 0
                  * @param c cofficient in the implicit representation of the rect as ax + by + c = 0
                  */
-                static void getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,
+                static void getLineCoefficients(const Eigen::Vector3d &p0, const Eigen::Vector3d &p1,
                                                 double &a, double& b, double &c);
 
-                bool getConvexHull(std::vector<KDL::Vector>& ch);
+                bool getConvexHull(std::vector<Eigen::Vector3d>& ch);
 
                 /**
                  * @brief setSafetyMargin sets a safety margin in [m] for the convex hull
@@ -95,7 +94,7 @@
                  */
                 void setSafetyMargin(const double safetyMargin);
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
                 std::list<std::string> getLinksInContact()
                 {

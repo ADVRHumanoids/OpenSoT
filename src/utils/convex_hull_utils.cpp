@@ -19,15 +19,23 @@
 
 #include <OpenSoT/utils/convex_hull_utils.h>
 #include <pcl/surface/convex_hull.h>
+#include <xbot2_interface/logger.h>
 
-#define MAKE_SHARED std::make_shared
-
+#if PCL_MAJOR_VERSION == 1 && PCL_MINOR_VERSION >= 11
+#include <memory>
+#define make_shared std::make_shared
+#else
+#include <boost/make_shared.hpp>
+#define make_shared boost::make_shared
+#endif
 
 convex_hull::convex_hull():
     _ransac_distance_thr(0.001)
 {
-    _pointCloud = MAKE_SHARED< pcl::PointCloud<pcl::PointXYZ> >();
-    _projectedPointCloud = MAKE_SHARED< pcl::PointCloud<pcl::PointXYZ> >();
+    _pointCloud = make_shared< pcl::PointCloud<pcl::PointXYZ> >();
+    _projectedPointCloud = make_shared< pcl::PointCloud<pcl::PointXYZ> >();
+
+    world_T_CoM.setIdentity();
 }
 
 convex_hull::~convex_hull()
@@ -35,8 +43,8 @@ convex_hull::~convex_hull()
 
 }
 
-bool convex_hull::getConvexHull(const std::list<KDL::Vector>& points,
-                                      std::vector<KDL::Vector>& convex_hull)
+bool convex_hull::getConvexHull(const std::list<Eigen::Vector3d>& points,
+                                      std::vector<Eigen::Vector3d>& convex_hull)
 {
     _pointCloud->clear();
     for(auto point = points.begin(); point != points.end(); point++)
@@ -70,9 +78,9 @@ bool convex_hull::getConvexHull(const std::list<KDL::Vector>& points,
     for(unsigned int j = 0; j < vs.vertices.size(); ++j)
     {
         _tmp_pcl = pointsInConvexHull.at(vs.vertices[j]);
-        _tmp_vector.x(_tmp_pcl.x);
-        _tmp_vector.y(_tmp_pcl.y);
-        _tmp_vector.z(_tmp_pcl.z);
+        _tmp_vector.x() = _tmp_pcl.x;
+        _tmp_vector.y() = _tmp_pcl.y;
+        _tmp_vector.z() = _tmp_pcl.z;
         convex_hull.push_back(_tmp_vector);
     }
 
@@ -86,7 +94,7 @@ bool convex_hull::getConvexHull(const std::list<KDL::Vector>& points,
 void convex_hull::projectPCL2Plane(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, const double ransac_distance_thr,
                                    pcl::PointCloud<pcl::PointXYZ>::Ptr projected_point_cloud)
 {
-    pcl::ModelCoefficients::Ptr coefficients = MAKE_SHARED<pcl::ModelCoefficients>();
+    pcl::ModelCoefficients::Ptr coefficients = make_shared<pcl::ModelCoefficients>();
 
     //We projects ALL the points in the plane (0 0 1)
     coefficients->values.clear();
@@ -131,36 +139,36 @@ void convex_hull::printIndexAndPointsInfo(const pcl::PointCloud<pcl::PointXYZ>& 
     }
 }
 
-bool convex_hull::getSupportPolygonPoints(std::list<KDL::Vector>& points,
+bool convex_hull::getSupportPolygonPoints(std::list<Eigen::Vector3d>& points,
                                           const std::list<std::string> links_in_contact,
                                           const XBot::ModelInterface& model,
                                           const std::string referenceFrame)
 {
-    if(referenceFrame != "COM" && referenceFrame != "world" && model.getLinkID(referenceFrame) < 0)
+    if(referenceFrame != "COM" && referenceFrame != "world" && model.getLinkId(referenceFrame) < 0)
         XBot::Logger::error("ERROR: trying to get support polygon points in unknown reference frame %s \n", referenceFrame.c_str());
 
-    if(links_in_contact.empty() || (referenceFrame != "COM" && referenceFrame != "world" && model.getLinkID(referenceFrame) < 0))
+    if(links_in_contact.empty() || (referenceFrame != "COM" && referenceFrame != "world" && model.getLinkId(referenceFrame) < 0))
         return false;
 
     for(std::list<std::string>::const_iterator it = links_in_contact.begin(); it != links_in_contact.end(); it++)
     {
         if(referenceFrame == "COM" || referenceFrame == "world")
             // get points in world frame
-            model.getPose(*it, world_T_point);
+            world_T_point = model.getPose(*it);
         else
-            model.getPose(*it, referenceFrame, referenceFrame_T_point);
+            referenceFrame_T_point = model.getPose(*it, referenceFrame);
 
         if(referenceFrame == "COM")
         {
             // get CoM in the world frame
-            model.getCOM(world_T_CoM.p);
+            world_T_CoM.translation() = model.getCOM();
 
-            CoM_T_point = world_T_CoM.Inverse() * world_T_point;
-            points.push_back(CoM_T_point.p);
+            CoM_T_point = world_T_CoM.inverse() * world_T_point;
+            points.push_back(CoM_T_point.translation());
         } else if(referenceFrame == "world")
-            points.push_back(world_T_point.p);
+            points.push_back(world_T_point.translation());
         else
-            points.push_back(referenceFrame_T_point.p);
+            points.push_back(referenceFrame_T_point.translation());
     }
     return true;
 }

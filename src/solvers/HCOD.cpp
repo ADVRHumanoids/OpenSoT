@@ -13,6 +13,19 @@ HCOD::HCOD(OpenSoT::AutoStack &stack_of_tasks, const double damping):
     _Wb(stack_of_tasks.getStack().size()),
     _disable_weights_computation(DEFAULT_DISABLE_WEIGHTS_COMPUTATION)
 {
+    std::list<ConstraintPtr> constraints_in_tasks_list;
+    for(auto& task : _tasks)
+    {
+        for(auto& constraint : task->getConstraints())
+            constraints_in_tasks_list.push_back(constraint);
+    }
+
+    if(constraints_in_tasks_list.size() > 0)
+    {
+        constraints_in_tasks_list.push_back(stack_of_tasks.getBounds());
+        _bounds = std::make_shared<constraints::Aggregated>(constraints_in_tasks_list, _tasks[0]->getA().cols());
+    }
+
     init(damping);
 }
 
@@ -23,6 +36,20 @@ HCOD::HCOD(Stack& stack_of_tasks, ConstraintPtr bounds, const double damping):
     _Wb(stack_of_tasks.size()),
     _disable_weights_computation(DEFAULT_DISABLE_WEIGHTS_COMPUTATION)
 {
+    std::list<ConstraintPtr> constraints_in_tasks_list;
+    for(auto& task : _tasks)
+    {
+        for(auto& constraint : task->getConstraints())
+            constraints_in_tasks_list.push_back(constraint);
+    }
+
+    if(constraints_in_tasks_list.size() > 0)
+    {
+        constraints_in_tasks_list.push_back(bounds);
+        _bounds = std::make_shared<constraints::Aggregated>(constraints_in_tasks_list, _tasks[0]->getA().cols());
+    }
+
+
     init(damping);
 }
 
@@ -57,12 +84,24 @@ void HCOD::init(const double damping)
     for (unsigned int i = 0; i < _vector_J.size(); ++i)
     {
         _hcod->pushBackStage(_vector_J[i].rows(), _vector_J[i].data(), _vector_bounds[i].data());
-        _hcod->setNameByOrder("level_");
+        _hcod->setNameByOrder("level_" + i);
     }
 
     // Set damping to all levels and initial active set
     _hcod->setDamping(damping);
     _hcod->setInitialActiveSet();
+
+    printSOT();
+}
+
+void HCOD::printSOT()
+{
+    XBot::Logger::info("HCOD:\n");
+    XBot::Logger::info("    TOTAL STAGES: %i\n", _CL+_tasks.size());
+    XBot::Logger::info("    STACK STAGES: %i\n", _tasks.size());
+    XBot::Logger::info("    CONSTRAINTS: %i\n", _A.rows());
+    for(unsigned int i = _CL; i < _vector_J.size(); ++i)
+        XBot::Logger::info("    TOTAL TASKS STAGE %i: %i\n", i, _vector_J[i].rows());
 }
 
 bool HCOD::solve(Eigen::VectorXd &solution)
@@ -73,8 +112,15 @@ bool HCOD::solve(Eigen::VectorXd &solution)
     copy_tasks();
 
     solution.setZero(_VARS);
-    _hcod->activeSearch(solution.data());
-    return true; ///TODO: HOW TO CHECK IF EVERYTHING WENT FINE???
+    try
+    {
+        _hcod->activeSearch(solution.data());
+    }
+    catch(int)
+    {
+        return false;
+    }
+    return true;
 }
 
 void HCOD::copy_tasks()
@@ -153,6 +199,7 @@ void HCOD::copy_bounds()
         _uA.pile(_bounds->getbeq());
     }
 
+
     _vector_J[0] = _A.generate_and_get();
 
     int s = _lA.generate_and_get().size();
@@ -161,7 +208,14 @@ void HCOD::copy_bounds()
         _vector_bounds[0].resize(s);
 
     for(unsigned int i = 0; i < s; ++i)
-        _vector_bounds[0][i] = soth::Bound(_lA.generate_and_get()(i,0), _uA.generate_and_get()(i,0));
+    {
+        double lAi = _lA.generate_and_get()(i,0);
+        double uAi = _uA.generate_and_get()(i,0);
+        if(std::fabs(lAi-uAi) <= std::numeric_limits<double>::epsilon())
+            _vector_bounds[0][i] = soth::Bound(lAi);
+        else
+            _vector_bounds[0][i] = soth::Bound(lAi, uAi);
+    }
 }
 
 void HCOD::setDisableWeightsComputation(const bool disable)
@@ -169,9 +223,14 @@ void HCOD::setDisableWeightsComputation(const bool disable)
     _disable_weights_computation = disable;
 }
 
-bool HCOD::setDisableWeightsComputation()
+bool HCOD::getDisableWeightsComputation()
 {
     return _disable_weights_computation;
+}
+
+void HCOD::setDamping(double damping)
+{
+    _hcod->setDamping(damping);
 }
 
 

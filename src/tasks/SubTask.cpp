@@ -103,9 +103,9 @@ const unsigned int OpenSoT::SubTask::getTaskSize() const
     return size;
 }
 
-void OpenSoT::SubTask::_update(const Eigen::VectorXd &x)
+void OpenSoT::SubTask::_update()
 {
-    _taskPtr->update(x);
+    _taskPtr->update();
     this->generateA();
     this->generateb();
     this->generateHessianAtype();

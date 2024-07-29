@@ -1,7 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(XBotInterface)
+find_dependency(xbot2_interface)
 find_dependency(matlogger2)
 
 set_and_check(OpenSoT_TARGETS

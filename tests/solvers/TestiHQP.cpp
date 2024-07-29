@@ -82,7 +82,7 @@ TEST_F(testClass, testUserRegularisation)
     _postural = std::make_shared<OpenSoT::tasks::GenericTask>(
                 "_postural", I, (qd-q));
 
-    _postural->update(Eigen::VectorXd(1));
+    _postural->update();
 
     OpenSoT::AutoStack::Ptr stack;
     stack /= _postural;
@@ -115,7 +115,7 @@ TEST_F(testClass, testUserRegularisation)
 
     _minvel = std::make_shared<OpenSoT::tasks::GenericTask>(
                 "minvel", I, -(1./dt)*qdot);
-    _minvel->update(Eigen::VectorXd(1));
+    _minvel->update();
 
     stack->setRegularisationTask(_minvel);
 

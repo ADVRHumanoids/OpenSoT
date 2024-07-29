@@ -6,10 +6,10 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/Postural.h>
 #include <OpenSoT/solvers/iHQP.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include <OpenSoT/utils/collision_utils.h>
+#include "collision_utils.h"
 #include <chrono>
 #define ENABLE_ROS false
 
@@ -19,22 +19,7 @@
 #include <robot_state_publisher/robot_state_publisher.h>
 #endif
 
-#if ROS_VERSION_MINOR <= 12
-#define STATIC_POINTER_CAST boost::static_pointer_cast
-#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
-#define SHARED_PTR boost::shared_ptr
-#define MAKE_SHARED boost::make_shared
-#else
-#define STATIC_POINTER_CAST std::static_pointer_cast
-#define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
-#define SHARED_PTR std::shared_ptr
-#define MAKE_SHARED std::make_shared
-#endif
 
-// local version of vectorKDLToEigen since oldest versions are bogous.
-// To use instead of:
-// #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-// tf::vectorKDLToEigen
 void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 {
   for(int i = 0; i < 3; ++i)
@@ -47,38 +32,37 @@ void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
 
-KDL::Frame fcl2KDL(const fcl::Transform3<double> &in)
+Eigen::Affine3d fcl2Eigen(const fcl::Transform3<double> &in)
 {
     Eigen::Quaterniond q(in.linear());
     Eigen::Vector3d t = in.translation();
 
-    KDL::Frame f;
-    f.p = KDL::Vector(t[0],t[1],t[2]);
-    f.M = KDL::Rotation::Quaternion(q.x(), q.y(), q.z(), q.w());
+    Eigen::Affine3d T;
+    T.linear() = q.matrix();
+    T.translation() = t;
 
-    return f;
+    return T;
 }
 
 Eigen::VectorXd getGoodInitialPosition(const XBot::ModelInterface::Ptr _model_ptr) {
-    Eigen::VectorXd _q(_model_ptr->getJointNum());
-    _q.setZero(_q.size());
-    _q[_model_ptr->getDofIndex("RHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RAnkSag")] = -25.0*M_PI/180.0;
+    Eigen::VectorXd _q = _model_ptr->getNeutralQ();
+    _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LHipSag")] = -25.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LKneeSag")] = 50.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LAnkSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LHipSag")] = -25.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LKneeSag")] = 50.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LAnkSag")] = -25.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("LShSag")] =  20.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LShLat")] = 10.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LShYaw")] = -15.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("LElbj")] = -80.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShLat")] = 10.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LShYaw")] = -15.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("LElbj")] = -80.0*M_PI/180.0;
 
-    _q[_model_ptr->getDofIndex("RShSag")] =  20.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RShLat")] = -10.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RShYaw")] = 15.0*M_PI/180.0;
-    _q[_model_ptr->getDofIndex("RElbj")] = -80.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RShSag")] =  20.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RShLat")] = -10.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RShYaw")] = 15.0*M_PI/180.0;
+    _q[_model_ptr->getQIndex("RElbj")] = -80.0*M_PI/180.0;
 
     return _q;
 }
@@ -190,7 +174,7 @@ public:
 
     bool globalToLinkCoordinates(const std::string& linkName,
                                  const fcl::Transform3<double> &fcl_w_T_f,
-                                 KDL::Frame &link_T_f)
+                                 Eigen::Affine3d &link_T_f)
     {
 
         return _computeDistance.globalToLinkCoordinates(linkName, fcl_w_T_f, link_T_f);
@@ -198,15 +182,15 @@ public:
 
     bool globalToLinkCoordinatesKDL(const std::string& linkName,
                                     const fcl::Transform3<double> &fcl_w_T_f,
-                                    KDL::Frame &link_T_f)
+                                    Eigen::Affine3d &link_T_f)
     {
 
-        KDL::Frame w_T_f = fcl2KDL(fcl_w_T_f);
+        Eigen::Affine3d w_T_f = fcl2Eigen(fcl_w_T_f);
 
         fcl::Transform3<double> fcl_w_T_shape = _computeDistance.getCollisionObjects()[linkName]->getTransform();
-        KDL::Frame w_T_shape = fcl2KDL(fcl_w_T_shape);
+        Eigen::Affine3d w_T_shape = fcl2Eigen(fcl_w_T_shape);
 
-        KDL::Frame shape_T_f = w_T_shape.Inverse()*w_T_f;
+        Eigen::Affine3d shape_T_f = w_T_shape.inverse()*w_T_f;
 
         link_T_f = _computeDistance.getLinkToShapeTransforms()[linkName] * shape_T_f;
 
@@ -242,6 +226,13 @@ void publishJointStates(const Eigen::VectorXd& q)
 
 
  protected:
+std::string ReadFile(std::string path)
+{
+    std::ifstream t(path);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    return buffer.str();
+}
 
   testSelfCollisionAvoidanceConstraint()
   {
@@ -254,23 +245,21 @@ void publishJointStates(const Eigen::VectorXd& q)
       pub2 = n->advertise<visualization_msgs::Marker>("link_distances", 1, true);
 #endif
 
-      std::string relative_path = OPENSOT_TEST_PATH "configs/bigman/configs/config_bigman_capsules.yaml";
       std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
       std::ifstream f(urdf_capsule_path);
       std::stringstream ss;
       ss << f.rdbuf();
 
-      urdf = MAKE_SHARED<urdf::Model>();
+      urdf = std::make_shared<urdf::Model>();
       urdf->initFile(urdf_capsule_path);
 
       std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
-      srdf = MAKE_SHARED<srdf::Model>();
+      srdf = std::make_shared<srdf::Model>();
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
-      _path_to_cfg = relative_path;
 
-      _model_ptr = XBot::ModelInterface::getModel(_path_to_cfg);
+      _model_ptr = XBot::ModelInterface::getModel(ReadFile(urdf_capsule_path), ReadFile(srdf_capsule_path), "pin");
 
       if(_model_ptr)
           std::cout<<"pointer address: "<<_model_ptr.get()<<std::endl;
@@ -285,29 +274,28 @@ void publishJointStates(const Eigen::VectorXd& q)
       n->setParam("/robot_description", ss.str());
 #endif
 
-      q.resize(_model_ptr->getJointNum());
-      q.setZero(q.size());
+      q.resize(_model_ptr->getNq());
+      q = _model_ptr->getNeutralQ();
 
-      urdf = MAKE_SHARED<urdf::Model>();
+      urdf = std::make_shared<urdf::Model>();
       urdf->initFile(urdf_capsule_path);
 
-      srdf = MAKE_SHARED<srdf::Model>();
+      srdf = std::make_shared<srdf::Model>();
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
       compute_distance = std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
 
       sc_constraint = std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance>
-              (q,
-               *_model_ptr,
+              (*_model_ptr,
                -1,
                urdf,
                srdf);
       sc_constraint->setLinkPairThreshold(0.005);
 
 #if ENABLE_ROS
-      for(unsigned int i = 0; i < this->_model_ptr->getEnabledJointNames().size(); ++i){
-          joint_state.name.push_back(this->_model_ptr->getEnabledJointNames()[i]);
+      for(unsigned int i = 0; i < this->_model_ptr->getNq(); ++i){
+          joint_state.name.push_back(this->_model_ptr->getJointNames()[i]);
           joint_state.position.push_back(0.0);}
 #endif
   }
@@ -324,7 +312,6 @@ void publishJointStates(const Eigen::VectorXd& q)
 
 
   XBot::ModelInterface::Ptr _model_ptr;
-  std::string _path_to_cfg;
   Eigen::VectorXd q;
   std::shared_ptr<ComputeLinksDistance> compute_distance;
   OpenSoT::constraints::velocity::CollisionAvoidance::Ptr sc_constraint;
@@ -352,14 +339,12 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
 
-    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_hand", this->q,
-                                                        *(_model_ptr.get()), linkA, "Waist"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm =
+                std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::left_hand",*_model_ptr, linkA, "Waist");
     task_left_arm->setOrientationErrorGain(0.1);
 
-    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_hand", this->q,
-                                                        *(_model_ptr.get()), linkB, "Waist"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm =
+                std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::right_hand",*_model_ptr, linkB, "Waist");
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -384,8 +369,8 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
        new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural_task(
-                new OpenSoT::tasks::velocity::Postural(this->q));
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task =
+                std::make_shared<OpenSoT::tasks::velocity::Postural>(*_model_ptr);
 
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
@@ -397,31 +382,31 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
     Eigen::VectorXd qmin, qmax;
     this->_model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-        new OpenSoT::constraints::velocity::JointLimits(this->q, qmax, qmin));
+        new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, qmax, qmin));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
-                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+                new OpenSoT::constraints::velocity::VelocityLimits(*_model_ptr, 0.6, (double)(1.0/t)));
 
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
-                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
+                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, _model_ptr->getNv()));
 
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
         new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
-    Eigen::VectorXd dq(this->q.size()); dq.setZero(dq.size());
+    Eigen::VectorXd dq(_model_ptr->getNv()); dq.setZero();
     for(unsigned int i = 0; i < 50*t; ++i)
     {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(this->q);
-        postural_task->update(this->q);
-        bounds->update(this->q);
+        taskCartesianAggregated->update();
+        postural_task->update();
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
             dq.setZero(dq.size());}
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q,  dq);
     }
 
     std::cout << "Q_final: " << this->q.transpose() << std::endl;
@@ -452,12 +437,15 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithoutSC){
             EXPECT_NEAR(task_right_arm->getActualPose()(i,j), T_reference_r_arm(i,j), 1E-4);
 
     // check the distance betweem hands
-    KDL::Frame w_T_link_left_hand, w_T_link_right_hand;
+    Eigen::Affine3d w_T_link_left_hand, w_T_link_right_hand;
     _model_ptr->getPose(linkA, w_T_link_left_hand);
     _model_ptr->getPose(linkB, w_T_link_right_hand);
 
 
-    double actual_distance = ( w_T_link_left_hand.p - w_T_link_right_hand.p ).Norm();
+    std::cout<<"w_T_link_left_hand.translation(): "<<w_T_link_left_hand.translation().transpose()<<std::endl;
+    std::cout<<"w_T_link_right_hand.translation(): "<<w_T_link_right_hand.translation().transpose()<<std::endl;
+
+    double actual_distance = ( w_T_link_left_hand.translation() - w_T_link_right_hand.translation() ).norm();
 
     EXPECT_NEAR(0.0, actual_distance, 1E-4);
 
@@ -473,14 +461,12 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     std::string linkA = "LSoftHandLink";
     std::string linkB = "RSoftHandLink";
 
-    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_hand", this->q,
-                                                        *(_model_ptr.get()), linkA, "Waist"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm =
+                std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::left_hand",*_model_ptr, linkA, "Waist");
     task_left_arm->setOrientationErrorGain(0.1);
 
-    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_hand", this->q,
-                                                        *(_model_ptr.get()), linkB, "Waist"));
+    OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm =
+                std::make_shared<OpenSoT::tasks::velocity::Cartesian>("cartesian::right_hand",*_model_ptr, linkB, "Waist");
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -500,19 +486,20 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     task_right_arm->setReference(T_reference_r_arm);
 
     std::cout << "xxx Setting whitelist" << std::endl;
-    std::list<std::pair<std::string,std::string> > whiteList;
-    whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
-    this->sc_constraint->setCollisionWhiteList(whiteList);
+    std::set<std::pair<std::string,std::string> > whiteList;
+    whiteList.insert(std::pair<std::string, std::string>(linkA,linkB));
+    this->sc_constraint->setCollisionList(whiteList);
+    this->sc_constraint->setMaxPairs(whiteList.size());
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
     cartesianTasks.push_back(task_left_arm);
     cartesianTasks.push_back(task_right_arm);
     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
-                new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
+                new OpenSoT::tasks::Aggregated(cartesianTasks,_model_ptr->getNv()));
     taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
@@ -526,37 +513,37 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     Eigen::VectorXd qmin, qmax;
     this->_model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-                new OpenSoT::constraints::velocity::JointLimits(this->q, qmax, qmin));
+                new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, qmax, qmin));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
-                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+                new OpenSoT::constraints::velocity::VelocityLimits(*_model_ptr, 0.6, (double)(1.0/t)));
 
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
-                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
+                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, _model_ptr->getNv()));
 
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
                 new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
-    Eigen::VectorXd dq(this->q.size()); dq.setZero(dq.size());
+    Eigen::VectorXd dq(_model_ptr->getNv()); dq.setZero();
     for(unsigned int i = 0; i < 10*t; ++i)
     {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
         auto tic = std::chrono::steady_clock::now();
-        this->sc_constraint->update(this->q);
+        this->sc_constraint->update();
         auto toc = std::chrono::steady_clock::now();
         auto time_for_update = std::chrono::duration_cast<std::chrono::microseconds>(toc-tic).count();
         std::cout<<"SCA Update time: "<<time_for_update/1000.<<" [ms]"<<std::endl;
 
-        taskCartesianAggregated->update(this->q);
-        postural_task->update(this->q);
-        bounds->update(this->q);
+        taskCartesianAggregated->update();
+        postural_task->update();
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
             dq.setZero(dq.size());}
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q, dq);
 
 #if ENABLE_ROS
     visualization_msgs::Marker marker;
@@ -579,9 +566,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     marker.scale.x = 0.005;
     marker.scale.y = 0.;
     marker.scale.z = 0.;
-    for(const auto& data : this->sc_constraint->getLinkPairDistances())
+
+
+    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> points;
+    this->sc_constraint->getCollisionModel().getWitnessPoints(points);
+
+    for(const auto& point : points)
     {
-        auto k2p = [](const KDL::Vector &k)->geometry_msgs::Point{
+        auto e2p = [](const Eigen::Vector3d &k)->geometry_msgs::Point{
             geometry_msgs::Point p;
             p.x = k[0]; p.y = k[1]; p.z = k[2];
             return p;
@@ -590,9 +582,9 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
 
         // closest point on first link
-        marker.points.push_back(k2p(data.getClosestPoints().first.p));
+        marker.points.push_back(e2p(point.first));
         // closest point on second link
-        marker.points.push_back(k2p(data.getClosestPoints().second.p));
+        marker.points.push_back(e2p(point.second));
     }
 
 
@@ -628,7 +620,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     // check the actual distance between the hand capsule pair
     std::shared_ptr<ComputeLinksDistance> compute_distance =
             std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
-    compute_distance->setCollisionWhiteList(whiteList);
+    compute_distance->setCollisionWhiteList(std::list<std::pair<std::string, std::string>>(whiteList.begin(), whiteList.end()));
     std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
     LinkPairDistance result = results.front();
     double reference_distance;
@@ -665,11 +657,11 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
     // arm task
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, *(_model_ptr.get()),linkA, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", *_model_ptr, linkA, "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, *(_model_ptr.get()),linkB, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", *_model_ptr,linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -695,7 +687,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     // coincident with those of their child links, i.e., LFoot and RFoot.
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", this->q, *(_model_ptr.get()),"LFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", *_model_ptr,"LFoot", "Waist"));
     task_left_leg->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd W = task_left_leg->getWeight();
@@ -705,7 +697,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     task_left_leg->setWeight(W);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", this->q, *(_model_ptr.get()),"RFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", *_model_ptr,"RFoot", "Waist"));
     task_right_leg->setOrientationErrorGain(0.1);
 
     task_right_leg->setWeight(W);
@@ -729,10 +721,11 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     // set whitelist
 
     std::cout << "xxx Setting whitelist" << std::endl;
-    std::list<std::pair<std::string,std::string> > whiteList;
-    whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
-    whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
-    this->sc_constraint->setCollisionWhiteList(whiteList);
+    std::set<std::pair<std::string,std::string> > whiteList;
+    whiteList.insert(std::pair<std::string,std::string>(linkA,linkB));
+    whiteList.insert(std::pair<std::string,std::string>(linkC,linkD));
+    this->sc_constraint->setCollisionList(whiteList);
+    this->sc_constraint->setMaxPairs(whiteList.size());
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
@@ -741,10 +734,10 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     cartesianTasks.push_back(task_left_leg);
     cartesianTasks.push_back(task_right_leg);
     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
-                new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
+                new OpenSoT::tasks::Aggregated(cartesianTasks,this->_model_ptr->getNv()));
     taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
@@ -757,31 +750,31 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     Eigen::VectorXd qmin, qmax;
     _model_ptr->getJointLimits(qmin, qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-                new OpenSoT::constraints::velocity::JointLimits(this->q, qmax, qmin));
+                new OpenSoT::constraints::velocity::JointLimits(*_model_ptr, qmax, qmin));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
-                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+                new OpenSoT::constraints::velocity::VelocityLimits(*_model_ptr, 0.6, (double)(1.0/t)));
 
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
-                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
+                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->_model_ptr->getNv()));
 
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
                 new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
 
-    Eigen::VectorXd dq(this->q.size()); dq.setZero(dq.size());
+    Eigen::VectorXd dq(this->_model_ptr->getNv()); dq.setZero();
     for(unsigned int i = 0; i < 50*t; ++i)
     {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(this->q);
-        postural_task->update(this->q);
-        bounds->update(this->q);
+        taskCartesianAggregated->update();
+        postural_task->update();
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
             dq.setZero(dq.size());}
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q, dq);
 #if ENABLE_ROS
         this->publishJointStates(this->q);
         usleep(50000);
@@ -834,7 +827,6 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
     CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
 
 
-    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
 
     int i;
     for (i=0; i < CasulePairs_vec.size(); i++)
@@ -889,11 +881,11 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
     // arm task
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", this->q, *(this->_model_ptr.get()), linkA, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_wrist", *_model_ptr, linkA, "Waist"));
     task_left_arm->setOrientationErrorGain(0.1);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_arm(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", this->q, *(this->_model_ptr.get()), linkB, "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_wrist", *_model_ptr, linkB, "Waist"));
     task_right_arm->setOrientationErrorGain(0.1);
 
     Eigen::MatrixXd T_init_l_arm(4,4);
@@ -919,7 +911,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // coincident with those of their child links, i.e., LFoot and RFoot.
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_left_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg", this->q, *(this->_model_ptr.get()),"LFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::left_leg",  *_model_ptr,"LFoot", "Waist"));
     task_left_leg->setOrientationErrorGain(0.1);
     Eigen::MatrixXd W = task_left_leg->getWeight();
     //W(1,1) = 1.1;
@@ -928,7 +920,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     task_left_leg->setWeight(W);
 
     OpenSoT::tasks::velocity::Cartesian::Ptr task_right_leg(
-                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", this->q, *(this->_model_ptr.get()),"RFoot", "Waist"));
+                new OpenSoT::tasks::velocity::Cartesian("cartesian::right_leg", *_model_ptr,"RFoot", "Waist"));
     task_right_leg->setOrientationErrorGain(0.1);
     task_right_leg->setWeight(W);
 
@@ -951,10 +943,11 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // set whitelist
 
     std::cout << "xxx Setting whitelist" << std::endl;
-    std::list<std::pair<std::string,std::string> > whiteList;
-    whiteList.push_back(std::pair<std::string,std::string>(linkA,linkB));
-    whiteList.push_back(std::pair<std::string,std::string>(linkC,linkD));
-    this->sc_constraint->setCollisionWhiteList(whiteList);
+    std::set<std::pair<std::string,std::string> > whiteList;
+    whiteList.insert(std::pair<std::string,std::string>(linkA,linkB));
+    whiteList.insert(std::pair<std::string,std::string>(linkC,linkD));
+    this->sc_constraint->setCollisionList(whiteList);
+    this->sc_constraint->setMaxPairs(whiteList.size());
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
     std::list<OpenSoT::tasks::velocity::Cartesian::TaskPtr> cartesianTasks;
@@ -963,10 +956,10 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     cartesianTasks.push_back(task_left_leg);
     cartesianTasks.push_back(task_right_leg);
     OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr taskCartesianAggregated = OpenSoT::tasks::Aggregated::TaskPtr(
-                new OpenSoT::tasks::Aggregated(cartesianTasks,this->q.size()));
+                new OpenSoT::tasks::Aggregated(cartesianTasks,this->_model_ptr->getNv()));
     taskCartesianAggregated->getConstraints().push_back(this->sc_constraint);
 
-    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(this->q));
+    OpenSoT::tasks::velocity::Postural::Ptr postural_task(new OpenSoT::tasks::velocity::Postural(*_model_ptr));
     postural_task->getConstraints().push_back(this->sc_constraint);
 
 
@@ -979,13 +972,13 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     Eigen::VectorXd qmin,qmax;
     this->_model_ptr->getJointLimits(qmin,qmax);
     OpenSoT::constraints::velocity::JointLimits::Ptr joint_limits(
-                new OpenSoT::constraints::velocity::JointLimits(q,qmax,qmin));
+                new OpenSoT::constraints::velocity::JointLimits(*_model_ptr,qmax,qmin));
 
     OpenSoT::constraints::velocity::VelocityLimits::Ptr joint_velocity_limits(
-                new OpenSoT::constraints::velocity::VelocityLimits(0.6, (double)(1.0/t), this->q.size()));
+                new OpenSoT::constraints::velocity::VelocityLimits(*_model_ptr, 0.6, (double)(1.0/t)));
 
     OpenSoT::constraints::Aggregated::Ptr bounds = OpenSoT::constraints::Aggregated::Ptr(
-                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->q.size()));
+                new OpenSoT::constraints::Aggregated(joint_limits, joint_velocity_limits, this->_model_ptr->getNv()));
 
     OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr sot = OpenSoT::solvers::iHQP::Ptr(
                 new OpenSoT::solvers::iHQP(stack_of_tasks, bounds));
@@ -996,14 +989,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(this->q);
-        postural_task->update(this->q);
-        bounds->update(this->q);
+        taskCartesianAggregated->update();
+        postural_task->update();
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
             dq.setZero(dq.size());}
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q, dq);
 #if ENABLE_ROS
         this->publishJointStates(this->q);
         usleep(10000);
@@ -1056,8 +1049,6 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
 
 
-    TestCapsuleLinksDistance compute_distance_observer(*(compute_distance.get()));
-
     for (int i=0; i < CasulePairs_vec.size(); i++)
     {
 
@@ -1098,26 +1089,26 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     // change whitelist: release the foot pair
 
     // reset whitelist
-
-    std::cout << "xxx Resetting whitelist" << std::endl;
-    whiteList.pop_back();
-    this->sc_constraint->setCollisionWhiteList(whiteList);
+    std::cout << "xxx Setting whitelist" << std::endl;
+    std::set<std::pair<std::string,std::string> > whiteList2;
+    whiteList2.insert(std::pair<std::string,std::string>(linkA,linkB));
+    this->sc_constraint->setCollisionList(whiteList2);
     std::cout << "xxx Whitelist of size " << whiteList.size() << " set. Constraint automatically updated" << std::endl;
 
-    dq.setZero(dq.size());
+    dq.setZero();
     for(unsigned int i = 0; i < 50*t; ++i)
     {
         this->_model_ptr->setJointPosition(this->q);
         this->_model_ptr->update();
 
-        taskCartesianAggregated->update(this->q);
-        postural_task->update(this->q);
-        bounds->update(this->q);
+        taskCartesianAggregated->update();
+        postural_task->update();
+        bounds->update();
 
         if(!sot->solve(dq)){
             std::cout<<"error"<<std::endl;
             dq.setZero(dq.size());}
-        this->q += dq;
+        this->q = _model_ptr->sum(this->q, dq);
 #if ENABLE_ROS
         this->publishJointStates(this->q);
         usleep(10000);
@@ -1169,14 +1160,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
 
 
-    urdf::ModelSharedPtr urdf = MAKE_SHARED<urdf::Model>();
+    urdf::ModelSharedPtr urdf = std::make_shared<urdf::Model>();
     urdf->initFile(urdf_capsule_path);
 
-    srdf::ModelSharedPtr srdf = MAKE_SHARED<srdf::Model>();
+    srdf::ModelSharedPtr srdf = std::make_shared<srdf::Model>();
     srdf->initFile(*urdf, srdf_capsule_path);
     std::shared_ptr<ComputeLinksDistance> compute_distance =
             std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
-    compute_distance->setCollisionWhiteList(whiteList);
+    compute_distance->setCollisionWhiteList(std::list<std::pair<std::string,std::string>>(whiteList2.begin(), whiteList2.end()));
     std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
     LinkPairDistance result = results.front();
     double reference_distance;

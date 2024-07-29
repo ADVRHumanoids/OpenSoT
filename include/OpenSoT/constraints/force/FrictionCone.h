@@ -20,7 +20,7 @@
 
 
 #include <OpenSoT/Constraint.h>
-#include <XBotInterface/ModelInterface.h>
+#include <xbot2_interface/xbotinterface2.h>
 #include <kdl/frames.hpp>
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/constraints/Aggregated.h>
@@ -70,7 +70,7 @@
                              const friction_cone & mu);
 
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
                 void setFrictionCone(const friction_cone& frc);
 
@@ -101,7 +101,7 @@
 
                 FrictionCone::Ptr getFrictionCone(const std::string& contact_name);
 
-                void update(const Eigen::VectorXd &x);
+                void update();
 
             private:
                 std::map<std::string, FrictionCone::Ptr> _friction_cone_map;

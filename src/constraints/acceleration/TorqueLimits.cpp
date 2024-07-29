@@ -19,12 +19,12 @@ TorqueLimits::TorqueLimits(const XBot::ModelInterface &robot,
 
     _enabled_contacts.assign(_contact_links.size(), true);
 
-    update(Eigen::VectorXd(0));
+    update();
 }
 
-void TorqueLimits::update(const Eigen::VectorXd &x)
+void TorqueLimits::update()
 {
-    _robot.getInertiaMatrix(_B);
+    _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);
 
     _dyn_constraint = _B*_qddot;
@@ -36,7 +36,7 @@ void TorqueLimits::update(const Eigen::VectorXd &x)
         }
         else {
             _robot.getJacobian(_contact_links[i], _Jtmp);
-            _dyn_constraint = _dyn_constraint + (-_Jtmp.transpose()) * _wrenches[i];
+            _dyn_constraint = _dyn_constraint + (-_Jtmp.block(0,0,_wrenches[i].getM().rows(),_Jtmp.cols()).transpose()) * _wrenches[i];
         }
     }
 

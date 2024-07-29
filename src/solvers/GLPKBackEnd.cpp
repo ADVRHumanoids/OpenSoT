@@ -1,5 +1,5 @@
 #include <OpenSoT/solvers/GLPKBackEnd.h>
-#include <XBotInterface/SoLib.h>
+#include <OpenSoT/utils/SoLib.h>
 #include <memory>
 #include <boost/date_time.hpp>
 
