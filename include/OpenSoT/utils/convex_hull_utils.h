@@ -20,6 +20,7 @@
 #ifndef _CONVEX_HULL_H__
 #define _CONVEX_HULL_H__
 
+#include <list>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <kdl/frames.hpp>
