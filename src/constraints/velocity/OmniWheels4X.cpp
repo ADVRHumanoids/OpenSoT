@@ -69,8 +69,9 @@ OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
 
 void OmniWheels4X::update()
 {
-    _robot.getPose(_base_link, _w_T_b);
-    _Aineq.rightCols(_x_size-6).noalias() = _w_T_b.linear() * _J.rightCols(_x_size-6);
+    // _robot.getPose(_base_link, _w_T_b);
+    // _Aineq.rightCols(_x_size-6).noalias() = _w_T_b.linear() * _J.rightCols(_x_size-6);
+    _Aineq.rightCols(_x_size-6).noalias() = _J.rightCols(_x_size-6);
 }
 
 
