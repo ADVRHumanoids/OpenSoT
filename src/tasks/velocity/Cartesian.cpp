@@ -30,7 +30,7 @@ Cartesian::Cartesian(std::string task_id,
     Task(task_id, robot.getNv()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
-    _error(6), _rotate_to_local(false)
+    _error(6), _rotate_to_local(false), _velocity_refs_are_local(false)
 {
     _error.setZero(6);
 
@@ -87,6 +87,12 @@ void Cartesian::_update() {
         _is_initialized = true;
     }
 
+    if(_velocity_refs_are_local)
+    {
+        _tmp_twist = _desiredTwist;
+        _desiredTwist = XBot::Utils::adjointFromRotation(_actualPose.linear()) * _tmp_twist;
+    }
+
     this->update_b();
 
     //Here we rotate A and b
@@ -100,8 +106,15 @@ void Cartesian::_update() {
     }
 
     this->_desiredTwist.setZero(6);
-
+    _velocity_refs_are_local = false;
     /**********************************************************************/
+}
+
+void Cartesian::setVelocityLocalReference(const Eigen::Vector6d& desiredTwist)
+{
+    _velocity_refs_are_local = true;
+    _desiredTwist = desiredTwist;
+    _desiredTwistRef = _desiredTwist;
 }
 
 void Cartesian::setReference(const Eigen::Affine3d& desiredPose)

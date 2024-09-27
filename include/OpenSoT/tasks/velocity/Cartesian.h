@@ -85,9 +85,12 @@
                 Eigen::Vector3d orientationError;
 
                 bool _rotate_to_local;
+                bool _velocity_refs_are_local;
 
                 Eigen::MatrixXd _tmp_A;
                 Eigen::VectorXd _tmp_b;
+
+                Eigen::Vector6d _tmp_twist;
 
             public:
                 /*********** TASK PARAMETERS ************/
@@ -131,7 +134,7 @@
                  * since THE _update() RESETS THE FEED-FORWARD VELOCITY TERM for safety reasons.
                  * @param desiredPose the \f$R^{4x4}\f$ homogeneous transform matrix describing the desired pose
                  * for the distal_link in the base_link frame of reference.
-                 * @param desireVelocity is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
+                 * @param desireTwist is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
                  * a feed-forward term in the cartesian task computation. NOTICE how the velocities are in units/sample,
                  * instead of units/s. This means that if you have a twist expressed in SI units, you have to call the function as
                  * setReference(desiredPose, desiredTwist*dt)
@@ -142,6 +145,15 @@
                                   const Eigen::Vector6d& desiredTwist);
                 void setReference(const KDL::Frame& desiredPose,
                                   const KDL::Twist& desiredTwist);
+
+                /**
+                 * @brief setVelocityLocalReference permits to set velocity expressed in local (ee) distal frame
+                 * @param desireTwist is a \f$R^{6}\f$ twist describing the desired trajectory velocity, and it represents
+                 * a feed-forward term in the cartesian task computation. NOTICE how the velocities are in units/sample,
+                 * instead of units/s. This means that if you have a twist expressed in SI units, you have to call the function as
+                 * setVelocityLocalReference(desiredTwist*dt)
+                 */
+                void setVelocityLocalReference(const Eigen::Vector6d& desiredTwist);
 
                 /**
                  * @brief getReference returns the Cartesian task reference
