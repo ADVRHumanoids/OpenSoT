@@ -71,6 +71,8 @@ void OmniWheels4X::update()
 {
     // _robot.getPose(_base_link, _w_T_b);
     // _Aineq.rightCols(_x_size-6).noalias() = _w_T_b.linear() * _J.rightCols(_x_size-6);
+
+    //todo: here we assumes velocity of the floating base are in local frame!
     _Aineq.rightCols(_x_size-6).noalias() = _J.rightCols(_x_size-6);
 }
 
