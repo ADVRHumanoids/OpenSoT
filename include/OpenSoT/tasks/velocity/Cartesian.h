@@ -84,7 +84,7 @@
                 Eigen::Vector3d positionError;
                 Eigen::Vector3d orientationError;
 
-                bool _is_body_jacobian;
+                bool _rotate_to_local;
 
                 Eigen::MatrixXd _tmp_A;
                 Eigen::VectorXd _tmp_b;
@@ -219,10 +219,10 @@
                 virtual bool reset();
 
                 /**
-                 * @brief setIsBodyJacobian
-                 * @param is_body_jacobian if true jacobians are in body (ee reference)
+                 * @brief rotateToLocal rotates both Jacobian and references to local (ee) distal frame, this is mostly used for local subtasks
+                 * @param rotate_to_local default is false
                  */
-                void setIsBodyJacobian(const bool is_body_jacobian);
+                void rotateToLocal(const bool rotate_to_local);
                 
                 static bool isCartesian(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
 
