@@ -60,6 +60,23 @@ if(${pybind11_FOUND})
             RUNTIME DESTINATION "bin")
     endif()
 
+    if(${OPENSOT_SOTH_FRONT_END})
+        set(OPENSOT_BINDINGS_HCOD_SOURCES pyopensot_hcod.cpp solver_hcod.hpp)
+
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+        pybind11_add_module(pyopensot_hcod ${OPENSOT_BINDINGS_HCOD_SOURCES})
+
+        target_link_libraries(pyopensot_hcod PUBLIC OpenSoT)
+
+        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+        install(TARGETS pyopensot_hcod
+            COMPONENT python
+            LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+            ARCHIVE DESTINATION "lib"
+            RUNTIME DESTINATION "bin")
+    endif()
+
 
 
 else()

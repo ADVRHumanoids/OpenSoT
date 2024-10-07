@@ -28,7 +28,6 @@ PYBIND11_MODULE(pyopensot, m) {
     pyeHQP(m);
     pyiHQP(m);
     pynHQP(m);
-    pyHCOD(m);
 
     auto m_t = m.def_submodule("tasks");
 
