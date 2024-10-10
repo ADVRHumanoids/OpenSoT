@@ -30,7 +30,7 @@ Cartesian::Cartesian(std::string task_id,
     Task(task_id, robot.getNv()), _robot(robot),
     _distal_link(distal_link), _base_link(base_link),
     _orientationErrorGain(1.0), _is_initialized(false),
-    _error(6), _is_body_jacobian(false)
+    _error(6), _rotate_to_local(false), _velocity_refs_are_local(false)
 {
     _error.setZero(6);
 
@@ -87,10 +87,16 @@ void Cartesian::_update() {
         _is_initialized = true;
     }
 
+    if(_velocity_refs_are_local)
+    {
+        _tmp_twist = _desiredTwist;
+        _desiredTwist = XBot::Utils::adjointFromRotation(_actualPose.linear()) * _tmp_twist;
+    }
+
     this->update_b();
 
     //Here we rotate A and b
-    if(_is_body_jacobian)
+    if(_rotate_to_local)
     {
         _tmp_A = _A;
         _A = XBot::Utils::adjointFromRotation(_actualPose.linear().transpose())*_tmp_A;
@@ -100,8 +106,15 @@ void Cartesian::_update() {
     }
 
     this->_desiredTwist.setZero(6);
-
+    _velocity_refs_are_local = false;
     /**********************************************************************/
+}
+
+void Cartesian::setVelocityLocalReference(const Eigen::Vector6d& desiredTwist)
+{
+    _velocity_refs_are_local = true;
+    _desiredTwist = desiredTwist;
+    _desiredTwistRef = _desiredTwist;
 }
 
 void Cartesian::setReference(const Eigen::Affine3d& desiredPose)
@@ -136,6 +149,7 @@ void Cartesian::setReference(const KDL::Frame& desiredPose)
 void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
                   const Eigen::Vector6d& desiredTwist)
 {
+    _velocity_refs_are_local = false;
     _desiredPose = desiredPose;
     _desiredTwist = desiredTwist;
     _desiredTwistRef = _desiredTwist;
@@ -145,6 +159,7 @@ void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
 void Cartesian::setReference(const Eigen::Matrix4d &desiredPose,
                              const Eigen::Vector6d &desiredTwist)
 {
+    _velocity_refs_are_local = false;
     _desiredPose.matrix() = desiredPose;
     _desiredTwist = desiredTwist;
     _desiredTwistRef = _desiredTwist;
@@ -154,6 +169,7 @@ void Cartesian::setReference(const Eigen::Matrix4d &desiredPose,
 void Cartesian::setReference(const KDL::Frame& desiredPose,
                   const KDL::Twist& desiredTwist)
 {
+    _velocity_refs_are_local = false;
     _desiredPose(0,3) = desiredPose.p.x();
     _desiredPose(1,3) = desiredPose.p.y();
     _desiredPose(2,3) = desiredPose.p.z();
@@ -360,7 +376,7 @@ bool Cartesian::reset()
     return true;
 }
 
-void Cartesian::setIsBodyJacobian(const bool is_body_jacobian)
+void Cartesian::rotateToLocal(const bool rotate_to_local)
 {
-    _is_body_jacobian = is_body_jacobian;
+    _rotate_to_local = rotate_to_local;
 }

@@ -75,12 +75,25 @@ namespace OpenSoT {
             */
            virtual void update();
 
+           /**
+            * @brief setIsGlobalVelocity set the flag to consider the velocity in the global frame
+            * @param is_global_velocity default is false
+            */
+           void setIsGlobalVelocity(bool is_global_velocity) { _is_global_velocity = is_global_velocity; }
+
+           /**
+            * @brief getIsGlobalVelocity get the flag to consider the velocity in the global frame
+            * @return true or false
+            */
+           bool getIsGlobalVelocity() const { return _is_global_velocity; }
+
 
        private:
            XBot::ModelInterface& _robot;
            Eigen::MatrixXd _J;
            Eigen::Affine3d _w_T_b;
            const std::string _base_link;
+           bool _is_global_velocity;
        };
 
        }
