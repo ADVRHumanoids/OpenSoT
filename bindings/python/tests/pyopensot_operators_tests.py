@@ -4,10 +4,12 @@ from pyopensot.constraints.velocity import JointLimits, VelocityLimits
 import pyopensot as pysot
 import numpy as np
 import unittest
+import os
 
 utest = unittest.TestCase()
 
-urdf = open(f'/home/enrico/catkin_ws/src/franka_cartesio_config/urdf/panda.urdf', 'r').read()
+urdf_path = os.getcwd() + '/panda.urdf'
+urdf = open(urdf_path, 'r').read()
 model = xbi.ModelInterface2(urdf)
 
 q = [0., -0.7, 0., -2.1, 0., 1.4, 0.]
