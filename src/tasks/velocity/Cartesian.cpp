@@ -149,6 +149,7 @@ void Cartesian::setReference(const KDL::Frame& desiredPose)
 void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
                   const Eigen::Vector6d& desiredTwist)
 {
+    _velocity_refs_are_local = false;
     _desiredPose = desiredPose;
     _desiredTwist = desiredTwist;
     _desiredTwistRef = _desiredTwist;
@@ -158,6 +159,7 @@ void Cartesian::setReference(const Eigen::Affine3d& desiredPose,
 void Cartesian::setReference(const Eigen::Matrix4d &desiredPose,
                              const Eigen::Vector6d &desiredTwist)
 {
+    _velocity_refs_are_local = false;
     _desiredPose.matrix() = desiredPose;
     _desiredTwist = desiredTwist;
     _desiredTwistRef = _desiredTwist;
@@ -167,6 +169,7 @@ void Cartesian::setReference(const Eigen::Matrix4d &desiredPose,
 void Cartesian::setReference(const KDL::Frame& desiredPose,
                   const KDL::Twist& desiredTwist)
 {
+    _velocity_refs_are_local = false;
     _desiredPose(0,3) = desiredPose.p.x();
     _desiredPose(1,3) = desiredPose.p.y();
     _desiredPose(2,3) = desiredPose.p.z();
