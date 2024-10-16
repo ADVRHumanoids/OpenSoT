@@ -14,7 +14,7 @@
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <XBotInterface/ModelInterface.h>
 #include <OpenSoT/utils/AutoStack.h>
-
+#include <kdl/frames_io.hpp>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = relative_path;

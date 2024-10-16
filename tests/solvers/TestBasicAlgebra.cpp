@@ -4,7 +4,7 @@
 #include <qpOASES/SQProblem.hpp>
 #include <chrono>
 #include <gtest/gtest.h>
-#include <XBotInterface/MatLogger.hpp>
+#include <matlogger2/matlogger2.h>
 
 namespace{
 class testBasicAlgebra: public ::testing::Test{
@@ -281,7 +281,7 @@ TEST_F(testBasicAlgebra, testqpOASES)
 
 TEST_F(testBasicAlgebra, checkProductOptimization)
 {
-    auto logger = XBot::MatLogger::getLogger("/tmp/checkProductOptimization");
+    auto logger = XBot::MatLogger2::MakeLogger("/tmp/checkProductOptimization");
     
     
     
@@ -472,9 +472,6 @@ TEST_F(testBasicAlgebra, checkProductOptimization)
 
         EXPECT_NEAR((H-H_naive).norm(), 0.0, 1e-9);
     }
-    
-    
-    logger->flush();
     
 }
 

@@ -9,6 +9,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
+#include <kdl/frames_io.hpp>
 
 std::string relative_path = OPENSOT_TEST_PATH "configs/coman/configs/config_coman_RBDL.yaml";
 std::string _path_to_cfg = relative_path;
