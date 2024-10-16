@@ -35,7 +35,7 @@ Program Listing for File AutoStack.h
    #include <OpenSoT/solvers/iHQP.h>
    #include <OpenSoT/tasks/velocity/Cartesian.h>
    #include <OpenSoT/tasks/velocity/CoM.h>
-   #include <xbot2_interface/logger.h>
+   #include <XBotInterface/Logger.hpp>
    #include <OpenSoT/SubTask.h>
    #include <OpenSoT/SubConstraint.h>
    
@@ -43,20 +43,21 @@ Program Listing for File AutoStack.h
        class AutoStack 
        {
            public:
-               typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
+           typedef std::shared_ptr<OpenSoT::AutoStack> Ptr;
            private:
-               OpenSoT::solvers::iHQP::Stack _stack;
+           OpenSoT::solvers::iHQP::Stack _stack;
    
-               OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
+          OpenSoT::tasks::Aggregated::TaskPtr _regularisation_task;
    
-               OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
+           OpenSoT::constraints::Aggregated::Ptr _boundsAggregated;
    
-               std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
-                       OpenSoT::solvers::iHQP::TaskPtr task);
+           std::vector<OpenSoT::solvers::iHQP::TaskPtr> flattenTask(
+                   OpenSoT::solvers::iHQP::TaskPtr task);
+   
+           protected:
+               AutoStack(const double x_size);
+   
            public:
-   
-               AutoStack(const int x_size);
-   
                AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task);
    
                AutoStack(OpenSoT::tasks::Aggregated::TaskPtr task,
@@ -68,7 +69,10 @@ Program Listing for File AutoStack.h
                          std::list<OpenSoT::constraints::Aggregated::ConstraintPtr> bounds);
    
    
-               void update();
+               /*AutoStack(OpenSoT::solvers::iHQP::Stack stack,
+                         OpenSoT::constraints::Aggregated::ConstraintPtr bound);*/
+   
+               void update(const Eigen::VectorXd & state);
    
                void log(XBot::MatLogger2::Ptr logger);
    

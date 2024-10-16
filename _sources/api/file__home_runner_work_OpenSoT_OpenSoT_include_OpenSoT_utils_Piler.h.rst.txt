@@ -32,7 +32,7 @@ Includes
 
 - ``Eigen/Dense``
 
-- ``xbot2_interface/logger.h``
+- ``XBotInterface/RtLog.hpp``
 
 
 
@@ -46,6 +46,8 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_NormalTorque.h`
 
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
+
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eiQuadProgBackEnd.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h`
@@ -53,8 +55,6 @@ Included By
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h`
 

@@ -102,7 +102,7 @@
 <span class="cp">#define __TASKS_ACCELERATION_ANGULAR_MOMENTUM_H__</span>
 
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Task.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Affine.h&gt;</span><span class="cp"></span>
 
@@ -127,7 +127,7 @@
            <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_Mom</span><span class="p">;</span>
            <span class="n">Eigen</span><span class="o">::</span><span class="n">Matrix3d</span> <span class="n">_K</span><span class="p">;</span>
 
-           <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
+           <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
            <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_base_link</span><span class="p">;</span>
            <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_distal_link</span><span class="p">;</span>
@@ -157,8 +157,6 @@
            <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">getBaseLink</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 
            <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">getDistalLink</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
-
-           <span class="kt">bool</span> <span class="nf">reset</span><span class="p">();</span>
 
            <span class="k">static</span> <span class="kt">bool</span> <span class="nf">isAngularMomentum</span><span class="p">(</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;::</span><span class="n">TaskPtr</span> <span class="n">task</span><span class="p">);</span>
 

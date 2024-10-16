@@ -14,233 +14,18 @@ Program Listing for File CartesianAdmittance.h
    #define __TASKS_VELOCITY_CARTESIAN_ADMITTANCE_H__
    
    #include <OpenSoT/tasks/velocity/Cartesian.h>
-   #include <xbot2_interface/common/utils.h>
    
    using namespace XBot::Utils;
    
    namespace OpenSoT {
       namespace tasks {
           namespace velocity {
-          template <typename SignalType>
-          class SecondOrderFilter {
-   
-          public:
-   
-              typedef std::shared_ptr<SecondOrderFilter<SignalType>> Ptr;
-   
-              SecondOrderFilter():
-                  _omega(1.0),
-                  _eps(0.8),
-                  _ts(0.01),
-                  _reset_has_been_called(false)
-              {
-                  computeCoeff();
-              }
-   
-              SecondOrderFilter(double omega, double eps, double ts, const SignalType& initial_state):
-                  _omega(omega),
-                  _eps(eps),
-                  _ts(ts),
-                  _reset_has_been_called(false)
-              {
-                  computeCoeff();
-                  reset(initial_state);
-              }
-   
-              void reset(const SignalType& initial_state){
-                  _reset_has_been_called = true;
-                  _u = initial_state;
-                  _y = initial_state;
-                  _yd = initial_state;
-                  _ydd = initial_state;
-                  _udd = initial_state;
-                  _ud = initial_state;
-              }
-   
-              const SignalType& process(const SignalType& input){
-   
-                  if(!_reset_has_been_called) reset(input*0);
-   
-   
-                  _ydd = _yd;
-                  _yd = _y;
-                  _udd = _ud;
-                  _ud = _u;
-   
-   
-                  _u = input;
-                  _y = 1.0/_a0 * ( _u + _b1*_ud + _b2*_udd - _a1*_yd - _a2*_ydd );
-   
-                  return _y;
-              }
-   
-              const SignalType& getOutput() const {
-                  return _y;
-              }
-   
-              void setOmega(double omega){
-                  _omega = omega;
-                  computeCoeff();
-              }
-   
-              double getOmega()
-              {
-                  return _omega;
-              }
-   
-              void setDamping(double eps){
-                  _eps = eps;
-                  computeCoeff();
-              }
-   
-              double getDamping()
-              {
-                  return _eps;
-              }
-   
-              void setTimeStep(double ts){
-                  _ts = ts;
-                  computeCoeff();
-              }
-   
-              double getTimeStep()
-              {
-                  return _ts;
-              }
-   
-          private:
-   
-              void computeCoeff()
-              {
-                  _b1 = 2.0;
-                  _b2 = 1.0;
-   
-                  _a0 = 1.0 + 4.0*_eps/(_omega*_ts) + 4.0/std::pow(_omega*_ts, 2.0);
-                  _a1 = 2 - 8.0/std::pow(_omega*_ts, 2.0);
-                  _a2 = 1.0 + 4.0/std::pow(_omega*_ts, 2.0) - 4.0*_eps/(_omega*_ts);
-   
-              }
-   
-              double _omega;
-              double _eps;
-              double _ts;
-   
-              double _b1, _b2;
-              double _a0, _a1, _a2;
-   
-              bool _reset_has_been_called;
-   
-              SignalType _y, _yd, _ydd, _u, _ud, _udd;
-   
-          };
-   
-          template<class SignalType>
-          class SecondOrderFilterArray
-          {
-          public:
-              SecondOrderFilterArray(const int channels):
-                  _channels(channels)
-              {
-                  SecondOrderFilter<SignalType> filter;
-                  SignalType tmp;
-                  for(unsigned int i = 0; i < _channels; ++i){
-                      _filters.push_back(filter);
-                      _output.push_back(tmp);
-                  }
-              }
-   
-              const std::vector<SignalType>& process(const std::vector<SignalType>& input)
-              {
-                  if(input.size() != _channels)
-                      throw std::runtime_error("input size != filters size");
-   
-                  for(unsigned int i = 0; i < _channels; ++i){
-                      _filters[i].process(input[i]);
-                      _output[i] = _filters[i].getOutput();
-                  }
-                  return _output;
-              }
-   
-              const std::vector<SignalType>& getOutput() const {
-                  return _output;
-              }
-   
-              void reset(const SignalType& init)
-              {
-                  for(unsigned int i = 0; i < _channels; ++i){
-                      _filters[i].reset(init);
-                      _output[i] = init;
-                  }
-              }
-   
-              bool setTimeStep(const double time_step, const int channel)
-              {
-                  if(channel >= _channels)
-                      return false;
-                  else
-                      _filters[channel].setTimeStep(time_step);
-                  return true;
-              }
-   
-              double getTimeStep(const int channel)
-              {
-                  if(channel >= _channels)
-                      throw std::runtime_error("channel out of channels range!");
-                  else
-                      return _filters[channel].getTimeStep();
-              }
-   
-              bool setDamping(const double damping, const int channel)
-              {
-                  if(channel >= _channels)
-                      return false;
-                  else
-                      _filters[channel].setDamping(damping);
-                  return true;
-              }
-   
-              double getDamping(const int channel)
-              {
-                  if(channel >= _channels)
-                      throw std::runtime_error("channel out of channels range!");
-                  else
-                      return _filters[channel].getDamping();
-              }
-   
-              bool setOmega(const double omega, const int channel)
-              {
-                  if(channel >= _channels)
-                      return false;
-                  else
-                      _filters[channel].setOmega(omega);
-                  return true;
-              }
-   
-              double getOmega(const int channel)
-              {
-                  if(channel >= _channels)
-                      throw std::runtime_error("channel out of channels range!");
-                  else
-                      return _filters[channel].getOmega();
-              }
-   
-              int getNumberOfChannels()
-              {
-                  return _channels;
-              }
-   
-          private:
-              std::vector<SecondOrderFilter<SignalType>> _filters;
-              std::vector<SignalType> _output;
-              int _channels;
-   
-          };
-   
           class CartesianAdmittance: public Cartesian {
             public:
                typedef std::shared_ptr<CartesianAdmittance> Ptr;
    
                CartesianAdmittance(std::string task_id,
+                                   const Eigen::VectorXd& x,
                                    XBot::ModelInterface &robot,
                                    std::string base_link,
                                    XBot::ForceTorqueSensor::ConstPtr ft_sensor);
@@ -307,9 +92,10 @@ Program Listing for File CartesianAdmittance.h
               Eigen::Vector6d _deadzone;
               std::vector<double> _tmp;
    
-              void _update();
+              void _update(const Eigen::VectorXd& x);
    
-              SecondOrderFilterArray<double> _filter;
+              //XBot::Utils::SecondOrderFilter<Eigen::Vector6d> _filter;
+              XBot::Utils::SecondOrderFilterArray<double> _filter;
    
               Eigen::Vector6d _C;
    

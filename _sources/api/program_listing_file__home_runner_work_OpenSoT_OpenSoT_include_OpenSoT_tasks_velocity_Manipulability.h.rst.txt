@@ -44,11 +44,12 @@ Program Listing for File Manipulability.h
                public:
                    typedef std::shared_ptr<Manipulability> Ptr;
    
-                   Manipulability(const XBot::ModelInterface& robot_model, const Cartesian::Ptr CartesianTask, const double step = 1E-3);
-                   Manipulability(const XBot::ModelInterface& robot_model, const CoM::Ptr CartesianTask, const double step = 1E-3);
-   
+                   Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const Cartesian::Ptr CartesianTask);
+                   Manipulability(const Eigen::VectorXd& x, const XBot::ModelInterface& robot_model, const CoM::Ptr CartesianTask);
    
                    ~Manipulability();
+   
+                   void _update(const Eigen::VectorXd& x);
    
                    double ComputeManipulabilityIndex();
    
@@ -56,7 +57,7 @@ Program Listing for File Manipulability.h
                        _manipulabilityIndexGradientWorker.setW(W);
                    }
    
-                   const Eigen::MatrixXd&  getW() const{
+                   Eigen::MatrixXd getW(){
                        return _manipulabilityIndexGradientWorker.getW();
                    }
    
@@ -64,15 +65,13 @@ Program Listing for File Manipulability.h
                    {
                        if(lambda >= 0.0){
                            _lambda = lambda;
-                           this->_update();
+                           this->_update(_x);
                        }
                    }
    
                protected:
-                   const XBot::ModelInterface& _model;
-                   Eigen::VectorXd _q;
    
-                   void _update();
+                   Eigen::VectorXd _x;
    
                    class ComputeManipulabilityIndexGradient: public CostFunction{
                    public:
@@ -82,53 +81,53 @@ Program Listing for File Manipulability.h
                        Eigen::VectorXd _zeros;
                        OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr _CartesianTask;
    
-                       ComputeManipulabilityIndexGradient(const XBot::ModelInterface& robot_model,
+                       ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
                                                           const Cartesian::Ptr CartesianTask) :
-                           _robot(robot_model.clone()),
+                           _robot(XBot::ModelInterface::getModel(robot_model.getConfigOptions())),
                            _model(robot_model),
-                           _W(_model.getNv(), _model.getNv()),
-                           _zeros(_model.getNv())
+                           _W(q.rows(),q.rows()),
+                           _zeros(q.rows())
                        {
-                           _W.setIdentity();
+                           _W.setIdentity(_W.rows(), _W.cols());
    
-                           _zeros.setZero();
+                           _zeros.setZero(_zeros.rows());
    
                            _robot->syncFrom(_model);
    
-                           _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(),
-                                                   *_robot, CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
+                           _CartesianTask = Cartesian::Ptr(new Cartesian(CartesianTask->getTaskID(), q,
+                                                   *(_robot.get()), CartesianTask->getDistalLink(), CartesianTask->getBaseLink()));
                        }
    
-                       ComputeManipulabilityIndexGradient(const XBot::ModelInterface& robot_model,
+                       ComputeManipulabilityIndexGradient(const Eigen::VectorXd& q, const XBot::ModelInterface& robot_model,
                                                           const CoM::Ptr CartesianTask) :
-                           _robot(robot_model.clone()),
+                           _robot(XBot::ModelInterface::getModel(robot_model.getPathToConfig())),
                            _model(robot_model),
-                           _W(_model.getNv(), _model.getNv()),
-                           _zeros(_model.getNv())
+                           _W(q.rows(),q.rows()),
+                           _zeros(q.rows())
                        {
-                           _W.setIdentity();
+                           _W.setIdentity(_W.rows(), _W.cols());
    
-                           _zeros.setZero();
+                           _zeros.setZero(_zeros.rows());
    
                            _robot->syncFrom(_model);
    
-                           _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(*(_robot.get())));
+                           _CartesianTask = CoM::Ptr(new OpenSoT::tasks::velocity::CoM(q, *(_robot.get())));
                        }
    
                        double compute(const Eigen::VectorXd &q)
                        {
                            _robot->setJointPosition(q);
-                           _robot->update();
+                           _robot->update(true);
    
    
-                           _CartesianTask->update();
+                           _CartesianTask->update(q);
    
                            return computeManipulabilityIndex();
                        }
    
                        void setW(const Eigen::MatrixXd& W) { _W = W; }
    
-                       const Eigen::MatrixXd& getW() const {return _W;}
+                       Eigen::MatrixXd& getW() {return _W;}
    
                        double computeManipulabilityIndex()
                        {
@@ -137,10 +136,6 @@ Program Listing for File Manipulability.h
                            return sqrt(fabs((J*_W*J.transpose()).determinant()));
                        }
                    };
-   
-                   double _step;
-                   Eigen::VectorXd _gradient;
-                   Eigen::VectorXd _deltas;
    
                    ComputeManipulabilityIndexGradient _manipulabilityIndexGradientWorker;
                };

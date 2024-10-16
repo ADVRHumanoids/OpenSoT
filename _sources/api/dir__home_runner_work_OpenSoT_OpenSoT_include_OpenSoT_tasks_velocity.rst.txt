@@ -19,7 +19,6 @@ Files
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_AngularMomentum.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h`
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CollisionAvoidance.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Contact.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Gaze.h`

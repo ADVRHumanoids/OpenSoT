@@ -23,8 +23,6 @@ Classes
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance`
 
-- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CollisionAvoidance`
-
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CoM`
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1Contact`
@@ -50,7 +48,3 @@ Classes
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation`
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition`
-
-- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilter`
-
-- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray`

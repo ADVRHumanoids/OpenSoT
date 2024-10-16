@@ -31,7 +31,7 @@ Program Listing for File LinearMomentum.h
    #define __TASKS_VELOCITY_LINEAR_MOMENTUM_H__
    
    #include <OpenSoT/Task.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    #include <kdl/frames.hpp>
    #include <Eigen/Dense>
    
@@ -53,10 +53,10 @@ Program Listing for File LinearMomentum.h
    
               Eigen::MatrixXd _Momentum;
    
-              void _update();
+              void _update(const Eigen::VectorXd& x);
    
            public:
-              LinearMomentum(XBot::ModelInterface& robot);
+              LinearMomentum(const Eigen::VectorXd& x, XBot::ModelInterface& robot);
               ~LinearMomentum();
    
               void setReference(const Eigen::Vector3d& desiredLinearMomentum);

@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceOpenSoT_1ab7b31c5b7546ce935b8c9beddf86b96c:
+
+Function OpenSoT::operator<<(std::ostream&, const AffineHelper&)
+================================================================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: OpenSoT::operator<<(std::ostream&, const AffineHelper&)
+   :project: OpenSoT

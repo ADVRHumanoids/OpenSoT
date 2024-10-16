@@ -31,7 +31,7 @@ Program Listing for File Cartesian.h
    #define __TASKS_VELOCITY_CARTESIAN_H__
    
     #include <OpenSoT/Task.h>
-    #include <xbot2_interface/xbotinterface2.h>
+    #include <XBotInterface/ModelInterface.h>
     #include <kdl/frames.hpp>
     #include <Eigen/Dense>
    
@@ -92,13 +92,14 @@ Program Listing for File Cartesian.h
                    /****************************************/
    
                    Cartesian(std::string task_id,
+                             const Eigen::VectorXd& x,
                              XBot::ModelInterface &robot,
                              const std::string& distal_link,
                              const std::string& base_link);
    
                    ~Cartesian();
    
-                   virtual void _update();
+                   virtual void _update(const Eigen::VectorXd& x);
    
                    void setReference(const Eigen::Affine3d& desiredPose);
                    void setReference(const Eigen::Matrix4d& desiredPose);

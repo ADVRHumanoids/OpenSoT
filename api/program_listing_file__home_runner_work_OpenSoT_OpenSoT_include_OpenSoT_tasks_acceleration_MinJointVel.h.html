@@ -109,7 +109,7 @@
         <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">acceleration</span><span class="o">::</span><span class="n">Postural</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_postural</span><span class="p">;</span>
         <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">I</span><span class="p">;</span>
 
-        <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
+        <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
 
     <span class="p">};</span>

@@ -58,7 +58,7 @@ Program Listing for File TaskToConstraint.h
                                 const Eigen::VectorXd& err_lb, 
                                 const Eigen::VectorXd& err_ub);
    
-               void update();
+               void update(const Eigen::VectorXd &q);
    
            protected:
    

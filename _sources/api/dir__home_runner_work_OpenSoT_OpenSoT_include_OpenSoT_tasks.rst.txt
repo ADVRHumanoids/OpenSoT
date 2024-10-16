@@ -25,7 +25,6 @@ Files
 -----
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`

@@ -1,0 +1,49 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h:
+
+Program Listing for File LinkPairDistance.h
+===========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/utils/LinkPairDistance.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef OPENSOT_LINKPAIRDISTANCE_H_
+   #define OPENSOT_LINKPAIRDISTANCE_H_
+   
+   class LinkPairDistance
+   {
+   
+   public:
+   
+       typedef std::pair<std::string, std::string> LinksPair;
+   
+       LinkPairDistance(const std::string& link1,
+                        const std::string& link2,
+                        const KDL::Frame& w_T_closestPoint1,
+                        const KDL::Frame& w_T_closestPoint2,
+                        const double& distance);
+   
+       bool isLink2WorldObject() const;
+   
+       const double& getDistance() const;
+   
+       const std::pair<KDL::Frame, KDL::Frame>& getClosestPoints() const;
+   
+       const std::pair<std::string, std::string>& getLinkNames() const;
+   
+       bool operator <(const LinkPairDistance& second) const;
+   
+   private:
+       LinksPair _link_pair;
+   
+       std::pair<KDL::Frame, KDL::Frame> _closest_points;
+   
+       double distance;
+   
+   };
+   
+   #endif // OPENSOT_LINKPAIRDISTANCE_H_
+   

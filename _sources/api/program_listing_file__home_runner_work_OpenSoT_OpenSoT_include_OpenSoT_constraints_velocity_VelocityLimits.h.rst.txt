@@ -32,8 +32,6 @@ Program Listing for File VelocityLimits.h
    
     #include <OpenSoT/Constraint.h>
    #include <Eigen/Dense>
-   #include <xbot2_interface/xbotinterface2.h>
-   
    
     namespace OpenSoT {
        namespace constraints {
@@ -45,12 +43,10 @@ Program Listing for File VelocityLimits.h
                    double _qDotLimit;
                    double _dT;
                public:
-                   VelocityLimits(const XBot::ModelInterface& robot,
-                                  const double qDotLimit,
-                                  const double dT);
-   
-                   VelocityLimits(const XBot::ModelInterface& robot,
-                                  const Eigen::VectorXd& qDotLimit,
+                   VelocityLimits(const double qDotLimit,
+                                  const double dT,
+                                  const unsigned int x_size);
+                   VelocityLimits(const Eigen::VectorXd& qDotLimit,
                                   const double dT);
    
                    Eigen::VectorXd getVelocityLimits();

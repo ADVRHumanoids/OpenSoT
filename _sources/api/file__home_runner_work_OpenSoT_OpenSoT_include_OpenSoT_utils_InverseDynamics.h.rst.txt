@@ -34,7 +34,7 @@ Includes
 
 - ``OpenSoT/utils/AutoStack.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AutoStack.h`)
 
-- ``xbot2_interface/xbotinterface2.h``
+- ``XBotInterface/ModelInterface.h``
 
 
 

@@ -16,7 +16,7 @@ Program Listing for File GenericLPTask.h
    #include <OpenSoT/Task.h>
    #include <OpenSoT/utils/Affine.h>
    #include <OpenSoT/tasks/GenericTask.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    
    namespace OpenSoT { namespace tasks  {
    
@@ -32,7 +32,7 @@ Program Listing for File GenericLPTask.h
    
        ~GenericLPTask();
    
-       virtual void _update();
+       virtual void _update(const Eigen::VectorXd &x);
    
        bool setc(const Eigen::VectorXd& c);
    

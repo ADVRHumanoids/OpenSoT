@@ -54,5 +54,3 @@ Classes
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance`
 
-- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilter`
-

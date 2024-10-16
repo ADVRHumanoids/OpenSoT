@@ -14,7 +14,7 @@ Program Listing for File Piler.h
    #define _OPENSOT_UTILS_PILER_H_
    
    #include <Eigen/Dense>
-   #include <xbot2_interface/logger.h>
+   #include <XBotInterface/RtLog.hpp>
    
    using XBot::Logger;
    

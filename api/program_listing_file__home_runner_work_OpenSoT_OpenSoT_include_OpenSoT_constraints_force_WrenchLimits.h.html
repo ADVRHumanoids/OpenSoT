@@ -130,7 +130,7 @@
                              <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">upperLims</span><span class="p">,</span>
                              <span class="n">AffineHelper</span> <span class="n">wrench</span><span class="p">);</span>
 
-                <span class="kt">void</span> <span class="nf">getWrenchLimits</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">lowerLims</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">upperLims</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+                <span class="kt">void</span> <span class="nf">getWrenchLimits</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">lowerLims</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">upperLims</span><span class="p">);</span>
 
                 <span class="kt">void</span> <span class="nf">setWrenchLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">lowerLims</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">upperLims</span><span class="p">);</span>
 
@@ -162,7 +162,7 @@
 
                 <span class="n">WrenchLimits</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">getWrenchLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">contact_name</span><span class="p">);</span>
 
-                <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
+                <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
 
             <span class="k">private</span><span class="o">:</span>
                 <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">WrenchLimits</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;</span> <span class="n">_wrench_lims_constraints</span><span class="p">;</span>

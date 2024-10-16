@@ -170,12 +170,12 @@ Files
 .. toctree::
    :maxdepth: 5
 
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h.rst
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h.rst
 
 .. toctree::
    :maxdepth: 5
 
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CollisionAvoidance.h.rst
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h.rst
 
 .. toctree::
    :maxdepth: 5
@@ -196,11 +196,6 @@ Files
    :maxdepth: 5
 
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h.rst
 
 .. toctree::
    :maxdepth: 5
@@ -256,6 +251,11 @@ Files
    :maxdepth: 5
 
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h.rst
 
 .. toctree::
    :maxdepth: 5
@@ -360,6 +360,11 @@ Files
 .. toctree::
    :maxdepth: 5
 
+   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h.rst
+
+.. toctree::
+   :maxdepth: 5
+
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Manipulability.h.rst
 
 .. toctree::
@@ -431,16 +436,6 @@ Files
    :maxdepth: 5
 
    file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_RtLog.hpp.rst
-
-.. toctree::
-   :maxdepth: 5
-
-   file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_SoLib.h.rst
 
 .. toctree::
    :maxdepth: 5

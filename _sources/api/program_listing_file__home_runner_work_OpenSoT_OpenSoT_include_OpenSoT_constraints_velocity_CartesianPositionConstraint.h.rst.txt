@@ -65,7 +65,7 @@ Program Listing for File CartesianPositionConstraint.h
                                                 const Eigen::VectorXd& b_Cartesian,
                                                const double boundScaling = 1.0);
    
-                   void update();
+                   void update(const Eigen::VectorXd &x);
    
                    void getCurrentPosition(Eigen::VectorXd& current_position);
    

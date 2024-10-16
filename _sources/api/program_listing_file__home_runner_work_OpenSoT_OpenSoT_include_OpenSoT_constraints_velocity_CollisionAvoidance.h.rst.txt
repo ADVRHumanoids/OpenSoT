@@ -32,13 +32,24 @@ Program Listing for File CollisionAvoidance.h
    
    #include <OpenSoT/Constraint.h>
    #include <OpenSoT/tasks/velocity/Cartesian.h>
-   #include <xbot2_interface/xbotinterface2.h>
-   #include <xbot2_interface/collision.h>
+   #include <XBotInterface/ModelInterface.h>
    
    #include <srdfdom/model.h>
    #include <Eigen/Dense>
    
    #include <moveit_msgs/PlanningSceneWorld.h>
+   
+   class ComputeLinksDistance;
+   class LinkPairDistance;
+   
+   // forward declare fcl collision object
+   namespace fcl
+   {
+       template <typename Scalar>
+       class CollisionObject;
+   
+       using CollisionObjectd = CollisionObject<double>;
+   }
    
    namespace OpenSoT { namespace constraints { namespace velocity {
    
@@ -49,17 +60,14 @@ Program Listing for File CollisionAvoidance.h
    
        typedef std::shared_ptr<CollisionAvoidance> Ptr;
        typedef std::pair<std::string, std::string> LinksPair;
-       typedef XBot::Collision::CollisionModel::WitnessPointVector WitnessPointVector;
-       typedef XBot::Collision::CollisionModel::LinkPairVector LinkPairVector;
    
-       CollisionAvoidance(const XBot::ModelInterface& robot,
-                          int max_pairs = -1,
-                          urdf::ModelConstSharedPtr collision_urdf = nullptr,
-                          srdf::ModelConstSharedPtr collision_srdf = nullptr);
+       CollisionAvoidance(const Eigen::VectorXd& x,
+                              const XBot::ModelInterface& robot,
+                              int max_pairs = -1,
+                              urdf::ModelConstSharedPtr collision_urdf = nullptr,
+                              srdf::ModelConstSharedPtr collision_srdf = nullptr);
    
        double getLinkPairThreshold();
-   
-       void getError(Eigen::VectorXd& e);
    
        double getDetectionThreshold();
    
@@ -67,51 +75,33 @@ Program Listing for File CollisionAvoidance.h
    
        void setDetectionThreshold(const double detection_threshold);
    
-       void update();
+       void update(const Eigen::VectorXd &x);
    
    
-       void setMaxPairs(const unsigned int max_pairs);
+       bool setCollisionWhiteList(std::list<LinksPair> whiteList);
    
-       void setCollisionList(std::set<std::pair<std::string, std::string>> collisionList);
+       bool setCollisionBlackList(std::list<LinksPair> blackList);
    
+       bool setWorldCollisions(const moveit_msgs::PlanningSceneWorld& wc);
    
+       bool addWorldCollision(const std::string& id,
+                              std::shared_ptr<fcl::CollisionObjectd> fcl_obj);
    
-       void collisionModelUpdated();
+       bool removeWorldCollision(const std::string& id);
    
-       bool addCollisionShape(const std::string& name,
-                              const std::string& link,
-                              const XBot::Collision::Shape::Variant& shape,
-                              const Eigen::Affine3d& link_T_shape,
-                              const std::vector<std::string>& disabled_collisions = {});
-   
-       // /**
-       //  * @brief remove world collision with given id
-       //  */
-       // bool removeWorldCollision(const std::string& id);
-   
-        bool moveCollisionShape(const std::string& id, const Eigen::Affine3d& new_pose);
+       bool moveWorldCollision(const std::string& id,
+                               KDL::Frame new_pose);
    
        void setBoundScaling(const double boundScaling);
    
-       void setLinksVsEnvironment(const std::set<std::string>& links);
+       void setLinksVsEnvironment(const std::list<std::string>& links);
    
-       XBot::Collision::CollisionModel& getCollisionModel();
    
-       const XBot::Collision::CollisionModel& getCollisionModel() const;
-   
-       void getOrderedWitnessPointVector(WitnessPointVector& wp) const;
-   
-       void getOrderedLinkPairVector(LinkPairVector& lp) const;
-   
-       void getOrderedDistanceVector(std::vector<double>& d) const;
-   
-       const Eigen::MatrixXd& getCollisionJacobian() const;
+       const std::list<LinkPairDistance>& getLinkPairDistances(){ return _distance_list;}
    
        ~CollisionAvoidance();
    
    protected:
-   
-       bool _include_env;
    
        double _bound_scaling;
    
@@ -123,17 +113,13 @@ Program Listing for File CollisionAvoidance.h
    
        const XBot::ModelInterface& _robot;
    
-       XBot::ModelInterface::Ptr _collision_model;
+       std::unique_ptr<ComputeLinksDistance> _dist_calc;
    
-       std::unique_ptr<XBot::Collision::CollisionModel> _dist_calc;
-   
-       Eigen::VectorXd _distances;
-       Eigen::MatrixXd _distance_J;
-       int _num_active_pairs;
-       mutable WitnessPointVector _wpv;
-       mutable LinkPairVector _lpv;
+       Eigen::VectorXd _x_cache;
    
        Eigen::MatrixXd _Jtmp;
+   
+       std::list<LinkPairDistance> _distance_list;
    
    };
    

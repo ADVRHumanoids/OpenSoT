@@ -108,6 +108,11 @@ Program Listing for File Aggregated.h
                virtual void _log(XBot::MatLogger2::Ptr logger);
    
            public:
+               Aggregated(const std::list< ConstraintPtr > constraints,
+                          const Eigen::VectorXd &q,
+                          const unsigned int aggregationPolicy =
+                               EQUALITIES_TO_INEQUALITIES |
+                               UNILATERAL_TO_BILATERAL);
    
                Aggregated(const std::list<ConstraintPtr> constraints,
                           const unsigned int x_size,
@@ -122,7 +127,7 @@ Program Listing for File Aggregated.h
                                EQUALITIES_TO_INEQUALITIES |
                                UNILATERAL_TO_BILATERAL);
    
-               void update();
+               void update(const Eigen::VectorXd &x);
    
                void log(XBot::MatLogger2::Ptr logger) override;
    

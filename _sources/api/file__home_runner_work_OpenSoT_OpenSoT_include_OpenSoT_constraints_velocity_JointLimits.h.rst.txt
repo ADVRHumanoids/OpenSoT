@@ -30,9 +30,9 @@ Includes
 --------
 
 
-- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
+- ``Eigen/Dense``
 
-- ``xbot2_interface/xbotinterface2.h``
+- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
 
 
 

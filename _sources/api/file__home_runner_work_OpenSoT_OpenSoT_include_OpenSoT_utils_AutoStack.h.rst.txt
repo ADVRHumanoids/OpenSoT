@@ -44,7 +44,7 @@ Includes
 
 - ``OpenSoT/tasks/velocity/CoM.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h`)
 
-- ``xbot2_interface/logger.h``
+- ``XBotInterface/Logger.hpp``
 
 
 
@@ -55,6 +55,8 @@ Included By
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_HCOD.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h`
 
@@ -79,15 +81,15 @@ Functions
 ---------
 
 
+- :ref:`exhale_function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013`
+
 - :ref:`exhale_function_namespaceOpenSoT_1a49d7bab96e0b74e7412c617a7d06a1c6`
 
-- :ref:`exhale_function_namespaceOpenSoT_1a35f3ae25b8630915d1768f610ae80013`
+- :ref:`exhale_function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a062f99e2d6db737dd7f13f156574a1d0`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a2c5d7dd14b11e588a36c0eecb0ed6ed5`
-
-- :ref:`exhale_function_namespaceOpenSoT_1aa1ff64c5260ccbe2f64c4b126a85bb22`
 
 - :ref:`exhale_function_namespaceOpenSoT_1a28dfa90c3909a4091eac86ddf0dba03b`
 
@@ -97,23 +99,23 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1a5795e43e2896c1e1b1ad9a7ff10dddeb`
 
-- :ref:`exhale_function_namespaceOpenSoT_1a9a9f6cea5ef3d3d8c3efdac6814fd29f`
-
 - :ref:`exhale_function_namespaceOpenSoT_1a4c31d7dd8eccb05044007ba7448dd263`
 
 - :ref:`exhale_function_namespaceOpenSoT_1adaea99bdf94335a8999e430d8746e7d3`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ac8b11062807f3c28362a3ebec6966c48`
 
+- :ref:`exhale_function_namespaceOpenSoT_1a9a9f6cea5ef3d3d8c3efdac6814fd29f`
+
 - :ref:`exhale_function_namespaceOpenSoT_1ace43b0e0f96fed6c9d0d6c7f85f722bf`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153`
-
-- :ref:`exhale_function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083`
 
 - :ref:`exhale_function_namespaceOpenSoT_1ab831211523cf9d0c5c9ec1d4968ef6a7`
 
+- :ref:`exhale_function_namespaceOpenSoT_1a61aa6ca24b3a5cdbdad8656907e80153`
+
 - :ref:`exhale_function_namespaceOpenSoT_1af8aa6bbf8c8362fe1372db8ae2099071`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a422e1a9b98b71861968d14a251c54083`
+
+- :ref:`exhale_function_namespaceOpenSoT_1a501cda32286c6a526b42ec3b2690eef2`
 

@@ -89,10 +89,12 @@ Program Listing for File Aggregated.h
                Aggregated(TaskPtr task,
                           const unsigned int x_size);
    
+               Aggregated(const std::list< TaskPtr > tasks,
+                          const Eigen::VectorXd &q);
    
                ~Aggregated();
    
-               void _update();
+               void _update(const Eigen::VectorXd &x);
    
    
                std::list< ConstraintPtr >& getOwnConstraints() { return _ownConstraints; }

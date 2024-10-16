@@ -38,11 +38,11 @@ Includes
 
 - ``OpenSoT/utils/Affine.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Affine.h`)
 
+- ``XBotInterface/ModelInterface.h``
+
 - ``kdl/frames.hpp``
 
 - ``memory``
-
-- ``xbot2_interface/xbotinterface2.h``
 
 
 
@@ -51,6 +51,8 @@ Included By
 
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_NormalTorque.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
 
 
 

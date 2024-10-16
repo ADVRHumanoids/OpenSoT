@@ -122,7 +122,7 @@
 
     <span class="k">virtual</span> <span class="o">~</span><span class="n">SubConstraint</span><span class="p">(){}</span>
 
-    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">();</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
 <span class="k">protected</span><span class="o">:</span>
     <span class="n">Indices</span> <span class="n">_subConstraintMap</span><span class="p">;</span>

@@ -31,7 +31,7 @@ Program Listing for File CoP.h
    #define _CONSTRAINT_FORCE_COP_H_
    
    #include <OpenSoT/Constraint.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    #include <kdl/frames.hpp>
    #include <OpenSoT/utils/Affine.h>
    #include <OpenSoT/utils/Piler.h>
@@ -53,11 +53,9 @@ Program Listing for File CoP.h
                    const Eigen::Vector2d& X_Lims,
                    const Eigen::Vector2d& Y_Lims);
    
-               virtual void update();
-   
-   
           private:
    
+               virtual void update(const Eigen::VectorXd& x);
    
                std::string _contact_link;
    
@@ -89,7 +87,9 @@ Program Listing for File CoP.h
                    const std::vector<Eigen::Vector2d>& X_Lims,
                    const std::vector<Eigen::Vector2d>& Y_Lims);
    
-              void update();
+              CoP::Ptr getCoP(const std::string& contact_name);
+   
+              void update(const Eigen::VectorXd &x);
    
    
           private:

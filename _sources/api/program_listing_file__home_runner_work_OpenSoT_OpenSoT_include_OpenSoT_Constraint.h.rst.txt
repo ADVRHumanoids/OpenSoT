@@ -33,7 +33,7 @@ Program Listing for File Constraint.h
    #include <memory>
    #include <string>
    #include <matlogger2/matlogger2.h>
-   #include <xbot2_interface/logger.h>
+   #include <XBotInterface/Logger.hpp>
    
    #include <OpenSoT/version.h>
    
@@ -104,7 +104,7 @@ Program Listing for File Constraint.h
    
            std::string getConstraintID(){ return _constraint_id; }
    
-           virtual void update() {}
+           virtual void update(const Vector_type& x) {}
    
            virtual void log(XBot::MatLogger2::Ptr logger)
            {

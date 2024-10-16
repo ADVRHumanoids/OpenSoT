@@ -51,7 +51,7 @@ Program Listing for File SubConstraint.h
    
        virtual ~SubConstraint(){}
    
-       virtual void update();
+       virtual void update(const Eigen::VectorXd& x);
    
    protected:
        Indices _subConstraintMap;

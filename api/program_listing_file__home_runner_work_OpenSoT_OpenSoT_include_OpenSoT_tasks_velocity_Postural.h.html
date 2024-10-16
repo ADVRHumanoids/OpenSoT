@@ -101,9 +101,11 @@
 <span class="cp">#ifndef __TASKS_VELOCITY_POSTURAL_H__</span>
 <span class="cp">#define __TASKS_VELOCITY_POSTURAL_H__</span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Task.h&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Task.h&gt;</span><span class="cp"></span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
+
 
  <span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
     <span class="k">namespace</span> <span class="n">tasks</span> <span class="p">{</span>
@@ -112,23 +114,19 @@
             <span class="k">public</span><span class="o">:</span>
                 <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Postural</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
             <span class="k">protected</span><span class="o">:</span>
-                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_q_desired</span><span class="p">;</span>
-                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_dq</span><span class="p">;</span>
-                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_v_desired</span><span class="p">,</span> <span class="n">_v_desired_ref</span><span class="p">;</span>
-                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_q</span><span class="p">;</span>
-                <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_robot</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_x_desired</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_xdot_desired</span><span class="p">,</span> <span class="n">_xdot_desired_ref</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_x</span><span class="p">;</span>
 
                 <span class="kt">void</span> <span class="nf">update_b</span><span class="p">();</span>
-                <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_log</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">MatLogger2</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">logger</span><span class="p">);</span>
 
             <span class="k">public</span><span class="o">:</span>
 
-                <span class="n">Postural</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
-                         <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">task_id</span> <span class="o">=</span> <span class="s">&quot;Postural&quot;</span><span class="p">);</span>
+                <span class="n">Postural</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">task_id</span> <span class="o">=</span> <span class="s">&quot;Postural&quot;</span><span class="p">);</span>
 
                 <span class="o">~</span><span class="n">Postural</span><span class="p">();</span>
 
-                <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
+                <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
                 <span class="kt">void</span> <span class="nf">setReference</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x_desired</span><span class="p">);</span>
 
@@ -144,11 +142,13 @@
 
                 <span class="kt">void</span> <span class="nf">setLambda</span><span class="p">(</span><span class="kt">double</span> <span class="n">lambda</span><span class="p">);</span>
 
-                <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">getActualPositions</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">getActualPositions</span><span class="p">();</span>
 
-                <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">getError</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">getError</span><span class="p">();</span>
 
                 <span class="kt">bool</span> <span class="nf">reset</span><span class="p">();</span>
+
+                <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_log</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">MatLogger2</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">logger</span><span class="p">);</span>
 
                 <span class="k">static</span> <span class="kt">bool</span> <span class="nf">isPostural</span><span class="p">(</span><span class="n">OpenSoT</span><span class="o">::</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;::</span><span class="n">TaskPtr</span> <span class="n">task</span><span class="p">);</span>
 

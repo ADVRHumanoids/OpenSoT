@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class LinkPairDistance &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Template Class AffineHelperBase" href="classOpenSoT_1_1AffineHelperBase.html" />
+    <link rel="prev" title="Template Class LDLTInverse" href="classLDLTInverse.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stack.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../variables.html">Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aknowledge.html">Aknowledge</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#page-hierarchy">Page Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1OptvarHelper_1_1VarInfo.html">Struct OptvarHelper::VarInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html">Struct GLPKBackEnd::GLPKBackEndOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1stack__level.html">Struct stack_level</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1Task_1_1istrue.html">Struct Task::istrue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classcartesian__utils.html">Class cartesian_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classComputeLinksDistance.html">Class ComputeLinksDistance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classComputeLinksDistance_1_1LinksPair.html">Class ComputeLinksDistance::LinksPair</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classconvex__hull.html">Class convex_hull</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classCostFunction.html">Class CostFunction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classfcl_1_1CollisionObject.html">Template Class CollisionObject</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classGradientVector.html">Class GradientVector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classLDLTInverse.html">Template Class LDLTInverse</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Class LinkPairDistance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AffineHelperBase.html">Template Class AffineHelperBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html">Class AffineConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html">Class AffineTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AutoStack.html">Class AutoStack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Constraint.html">Template Class Constraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html">Class JointLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html">Class JointLimitsECBF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html">Class JointLimitsViability</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html">Class TorqueLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html">Class VelocityLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html">Class Aggregated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html">Class BilateralConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html">Class CoP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html">Class CoPs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html">Class FrictionCone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html">Class FrictionCones</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html">Class NormalTorque</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html">Class NormalTorques</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html">Class StaticConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html">Class WrenchesLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html">Class WrenchLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html">Class GenericConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html">Class TaskToConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html">Class CartesianPositionConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html">Class CartesianVelocity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html">Class CollisionAvoidance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html">Class ConvexHull</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html">Class JointLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html">Class JointLimitsInvariance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html">Class OmniWheels4X</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html">Class VelocityLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Indices.html">Class Indices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html">Class OptvarHelper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Solver.html">Template Class Solver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html">Class BackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1constraint__helper.html">Class constraint_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eHQP.html">Class eHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html">Class eiQuadProgBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html">Class GLPKBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html">Class HCOD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html">Class iHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1Iterator.html">Template Class Iterator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html">Class l1HQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html">Class nHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html">Class nHQP::TaskData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html">Class OSQPBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1priority__constraint.html">Class priority_constraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html">Class proxQPBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html">Class QPOasesBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html">Class qpSWIFTBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html">Class task_to_constraint_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1SubConstraint.html">Class SubConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1SubTask.html">Class SubTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Task.html">Template Class Task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html">Class AngularMomentum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html">Class Cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html">Class CoM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html">Class Contact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html">Class DynamicFeasibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html">Class MinJointVel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html">Class Postural</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1Aggregated.html">Class Aggregated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html">Class Contact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html">Class IMU</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html">Class Cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html">Class CoM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html">Class FloatingBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html">Class Wrench</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html">Class Wrenches</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html">Class GenericLPTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericTask.html">Class GenericTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html">Class MinimizeVariable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html">Class AngularMomentum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html">Class Cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html">Class CartesianAdmittance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html">Class CoM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html">Class Contact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html">Class Gaze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html">Class JointAdmittance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html">Class LinearMomentum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html">Class Manipulability</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html">Class Manipulability::ComputeManipulabilityIndexGradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html">Class MinimumEffort</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html">Class MinimumEffort::ComputeGTauGradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html">Class Postural</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html">Class PureRolling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html">Class PureRollingOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html">Class PureRollingPosition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1ForceOptimization.html">Class ForceOptimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1InverseDynamics.html">Class InverseDynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1MatrixPiler.html">Class MatrixPiler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html">Class Torque</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classquaternion.html">Class quaternion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classSVDPseudoInverse.html">Template Class SVDPseudoInverse</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Class LinkPairDistance</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classLinkPairDistance.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="class-linkpairdistance">
+<span id="exhale-class-classlinkpairdistance"></span><h1>Class LinkPairDistance<a class="headerlink" href="#class-linkpairdistance" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_LinkPairDistance.h.html#file-home-runner-work-opensot-opensot-include-opensot-utils-linkpairdistance-h"><span class="std std-ref">File LinkPairDistance.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv416LinkPairDistance">
+<span id="_CPPv316LinkPairDistance"></span><span id="_CPPv216LinkPairDistance"></span><span id="LinkPairDistance"></span><span class="target" id="classLinkPairDistance"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinkPairDistance</span></span></span><a class="headerlink" href="#_CPPv416LinkPairDistance" title="Permalink to this definition"></a><br /></dt>
+<dd><p>The <a class="reference internal" href="#classLinkPairDistance"><span class="std std-ref">LinkPairDistance</span></a> class represents the minimum distance information between two links. </p>
+<p>The two links must have shape (i.e. collision) information. Instances of this class will contain the name of both links in the pair, the actual minimum distance between the two, and the homogeneous transforms in the respective link frame reference system of the minimum distance point in each shape. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N16LinkPairDistance9LinksPairE">
+<span id="_CPPv3N16LinkPairDistance9LinksPairE"></span><span id="_CPPv2N16LinkPairDistance9LinksPairE"></span><span id="LinkPairDistance::LinksPair"></span><span class="target" id="classLinkPairDistance_1a3fe8c8b8032b5b79ab7240bef3d80010"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">pair</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinksPair</span></span></span><a class="headerlink" href="#_CPPv4N16LinkPairDistance9LinksPairE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N16LinkPairDistance16LinkPairDistanceERKNSt6stringERKNSt6stringERKN3KDL5FrameERKN3KDL5FrameERKd">
+<span id="_CPPv3N16LinkPairDistance16LinkPairDistanceERKNSt6stringERKNSt6stringERKN3KDL5FrameERKN3KDL5FrameERKd"></span><span id="_CPPv2N16LinkPairDistance16LinkPairDistanceERKNSt6stringERKNSt6stringERKN3KDL5FrameERKN3KDL5FrameERKd"></span><span id="LinkPairDistance::LinkPairDistance__ssCR.ssCR.KDL::FrameCR.KDL::FrameCR.doubleCR"></span><span class="target" id="classLinkPairDistance_1a387de21ae4bb8473a734c8dfeb6af24d"></span><span class="sig-name descname"><span class="n"><span class="pre">LinkPairDistance</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">link1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">link2</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Frame</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">w_T_closestPoint1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Frame</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">w_T_closestPoint2</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">distance</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N16LinkPairDistance16LinkPairDistanceERKNSt6stringERKNSt6stringERKN3KDL5FrameERKN3KDL5FrameERKd" title="Permalink to this definition"></a><br /></dt>
+<dd><p><a class="reference internal" href="#classLinkPairDistance"><span class="std std-ref">LinkPairDistance</span></a> creates an instance of a link pair distance data structure. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>link1</strong> – the first link name </p></li>
+<li><p><strong>link2</strong> – the second link name </p></li>
+<li><p><strong>w_T_closestPoint1</strong> – the transform from the world frame to the closest point on its shape </p></li>
+<li><p><strong>w_T_closesPoint2</strong> – the transform from the world frame to the closest point on its shape </p></li>
+<li><p><strong>distance</strong> – the distance between the two minimum distance points </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK16LinkPairDistance18isLink2WorldObjectEv">
+<span id="_CPPv3NK16LinkPairDistance18isLink2WorldObjectEv"></span><span id="_CPPv2NK16LinkPairDistance18isLink2WorldObjectEv"></span><span id="LinkPairDistance::isLink2WorldObjectC"></span><span class="target" id="classLinkPairDistance_1a0af5f37dd78d23dfe09c987795b4b5b7"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">isLink2WorldObject</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK16LinkPairDistance18isLink2WorldObjectEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>isLink2WorldObject returns true if link2 refers to an environment object, and not a robot link. </p>
+<p>On the other hand, link1 is always a robot link </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK16LinkPairDistance11getDistanceEv">
+<span id="_CPPv3NK16LinkPairDistance11getDistanceEv"></span><span id="_CPPv2NK16LinkPairDistance11getDistanceEv"></span><span id="LinkPairDistance::getDistanceC"></span><span class="target" id="classLinkPairDistance_1ae37083f4e3989923d9cfc93d513dff62"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getDistance</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK16LinkPairDistance11getDistanceEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getDistance returns the minimum distance between the two link shapes </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a double representing the minimum distance </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK16LinkPairDistance16getClosestPointsEv">
+<span id="_CPPv3NK16LinkPairDistance16getClosestPointsEv"></span><span id="_CPPv2NK16LinkPairDistance16getClosestPointsEv"></span><span id="LinkPairDistance::getClosestPointsC"></span><span class="target" id="classLinkPairDistance_1a5fcc53b280be64e5041d486db4cbbc35"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">pair</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Frame</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">KDL</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Frame</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getClosestPoints</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK16LinkPairDistance16getClosestPointsEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLink_T_closestPoint returns a pair of homogeneous transformation from a link reference frame to the closest point on the respective link shape </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a pair of homogeneous transformations </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK16LinkPairDistance12getLinkNamesEv">
+<span id="_CPPv3NK16LinkPairDistance12getLinkNamesEv"></span><span id="_CPPv2NK16LinkPairDistance12getLinkNamesEv"></span><span id="LinkPairDistance::getLinkNamesC"></span><span class="target" id="classLinkPairDistance_1a0647267749caf837d4e01cf52d0fd7bf"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">pair</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getLinkNames</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK16LinkPairDistance12getLinkNamesEv" title="Permalink to this definition"></a><br /></dt>
+<dd><p>getLinkNames returns the pair of links between which we want express the distance information </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a pair of strings </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK16LinkPairDistanceltERK16LinkPairDistance">
+<span id="_CPPv3NK16LinkPairDistanceltERK16LinkPairDistance"></span><span id="_CPPv2NK16LinkPairDistanceltERK16LinkPairDistance"></span><span id="LinkPairDistance::lt-operator__LinkPairDistanceCRC"></span><span class="target" id="classLinkPairDistance_1a80b6d207e58b655b526ea51d01f3eba1"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">&lt;</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv416LinkPairDistance" title="LinkPairDistance"><span class="n"><span class="pre">LinkPairDistance</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">second</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK16LinkPairDistanceltERK16LinkPairDistance" title="Permalink to this definition"></a><br /></dt>
+<dd><p>operator&lt; is the comparison operator between two LinkDIstancePairs. </p>
+<p>It returns true if the first link pair is closer than the second pair. If the distance is exactly the same, the pairs will be sorted by alphabetic order using the first link name in each pair </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>second</strong> – the second link pair </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if first pair is closer than second pair </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classLDLTInverse.html" class="btn btn-neutral float-left" title="Template Class LDLTInverse" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1AffineHelperBase.html" class="btn btn-neutral float-right" title="Template Class AffineHelperBase" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

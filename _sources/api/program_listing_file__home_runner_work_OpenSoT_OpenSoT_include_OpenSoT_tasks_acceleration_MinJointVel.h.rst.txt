@@ -38,7 +38,7 @@ Program Listing for File MinJointVel.h
            OpenSoT::tasks::acceleration::Postural::Ptr _postural;
            Eigen::MatrixXd I;
    
-           virtual void _update();
+           virtual void _update(const Eigen::VectorXd& x);
    
    
        };

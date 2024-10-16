@@ -1,0 +1,14 @@
+.. _exhale_function_collision__utils_8h_1a7c6a03d0eba1d42095a9bfe884ee4158:
+
+Function toKdl(urdf::Pose)
+==========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_collision_utils.h`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: toKdl(urdf::Pose)
+   :project: OpenSoT

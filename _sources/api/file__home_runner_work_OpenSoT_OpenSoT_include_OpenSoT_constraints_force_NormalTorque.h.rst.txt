@@ -40,9 +40,9 @@ Includes
 
 - ``OpenSoT/utils/Piler.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_Piler.h`)
 
-- ``kdl/frames.hpp``
+- ``XBotInterface/ModelInterface.h``
 
-- ``xbot2_interface/xbotinterface2.h``
+- ``kdl/frames.hpp``
 
 
 

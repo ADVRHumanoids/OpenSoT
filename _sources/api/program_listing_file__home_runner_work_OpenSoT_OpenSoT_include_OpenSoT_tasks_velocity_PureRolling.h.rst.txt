@@ -35,7 +35,7 @@ Program Listing for File PureRolling.h
    #define __OPENSOT_TASKS_VELOCITY_PURE_ROLLING_H__
    
    #include <OpenSoT/Task.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    #include <OpenSoT/SubTask.h>
    
    namespace OpenSoT { namespace tasks { namespace velocity {
@@ -50,7 +50,7 @@ Program Listing for File PureRolling.h
                        double radius,
                        const XBot::ModelInterface& model);
            
-           virtual void _update();
+           virtual void _update(const Eigen::VectorXd& x);
            
            void setOutwardNormal(const Eigen::Vector3d& n);
            
@@ -88,7 +88,7 @@ Program Listing for File PureRolling.h
    
            void setOutwardNormal(const Eigen::Vector3d& n);
            
-           virtual void _update();
+           virtual void _update(const Eigen::VectorXd& x);
    
            virtual void _log(XBot::MatLogger2::Ptr logger);
    
@@ -110,7 +110,7 @@ Program Listing for File PureRolling.h
                        double radius,
                        const XBot::ModelInterface& model);
    
-           virtual void _update();
+           virtual void _update(const Eigen::VectorXd& x);
    
    
        private:

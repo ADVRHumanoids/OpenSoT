@@ -33,7 +33,7 @@ Program Listing for File Postural.h
    
    #include <OpenSoT/Task.h>
    #include <OpenSoT/utils/Affine.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    #include <OpenSoT/tasks/acceleration/GainType.h>
    
    namespace OpenSoT { namespace tasks { namespace acceleration {
@@ -45,13 +45,15 @@ Program Listing for File Postural.h
            typedef std::shared_ptr<Postural> Ptr;
            
            Postural(const XBot::ModelInterface& robot,
-                    AffineHelper qddot, const std::string task_id = "Postural");
+                    AffineHelper qddot = AffineHelper(), const std::string task_id = "Postural");
    
            Postural(const XBot::ModelInterface& robot,
-                    const std::string task_id = "Postural");
+                    const int x_size, const std::string task_id = "Postural");
    
            void setGainType(GainType type);
            GainType getGainType() const;
+           
+           virtual void _update(const Eigen::VectorXd& x);
            
            void setReference(const Eigen::VectorXd& qref);
            void setReference(const Eigen::VectorXd& qref, const Eigen::VectorXd& dqref);
@@ -83,6 +85,8 @@ Program Listing for File Postural.h
    
            bool reset();
            
+           virtual void _log(XBot::MatLogger2::Ptr logger);
+   
            const Eigen::VectorXd& getCachedVelocityReference() const;
    
            const Eigen::VectorXd& getCachedAccelerationReference() const;
@@ -110,17 +114,13 @@ Program Listing for File Postural.h
            AffineHelper _postural_task;
            
            Eigen::VectorXd _qddot_d, _qddot_ref, _qref, _qdot, _q, _qdot_ref, _qdot_ref_cached, _qddot_ref_cached;
+           Eigen::MatrixXd _Jpostural;
    
            double _lambda2;
    
            Eigen::MatrixXd _Kp, _Kd;
    
            Eigen::MatrixXd _Mi;
-   
-           virtual void _update();
-           virtual void _log(XBot::MatLogger2::Ptr logger);
-   
-   
            
            
        };

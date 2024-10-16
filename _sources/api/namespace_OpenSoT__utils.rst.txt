@@ -17,6 +17,8 @@ Classes
 -------
 
 
+- :ref:`exhale_class_classOpenSoT_1_1utils_1_1ForceOptimization`
+
 - :ref:`exhale_class_classOpenSoT_1_1utils_1_1InverseDynamics`
 
 - :ref:`exhale_class_classOpenSoT_1_1utils_1_1MatrixPiler`

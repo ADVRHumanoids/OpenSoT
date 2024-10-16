@@ -15,7 +15,7 @@ Program Listing for File DynamicFeasibility.h
    
    #include <OpenSoT/Task.h>
    #include <OpenSoT/utils/Affine.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    
    namespace OpenSoT {
        namespace tasks {
@@ -43,7 +43,7 @@ Program Listing for File DynamicFeasibility.h
                Eigen::VectorXd checkTask(const Eigen::VectorXd& x);
    
            private:
-                   virtual void _update();
+                   virtual void _update(const Eigen::VectorXd& x);
    
                    const XBot::ModelInterface& _robot;
                    AffineHelper _qddot;

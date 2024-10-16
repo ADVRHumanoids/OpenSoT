@@ -30,9 +30,11 @@ Includes
 --------
 
 
+- ``Eigen/Dense``
+
 - ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
 
-- ``xbot2_interface/xbotinterface2.h``
+- ``kdl/frames.hpp``
 
 
 

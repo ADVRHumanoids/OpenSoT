@@ -32,6 +32,10 @@ Includes
 
 - ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
 
+- ``XBotInterface/Logger.hpp``
+
+- ``XBotInterface/ModelInterface.h``
+
 - ``assert.h``
 
 - ``list``
@@ -42,33 +46,37 @@ Includes
 
 - ``vector``
 
-- ``xbot2_interface/logger.h``
-
-- ``xbot2_interface/xbotinterface2.h``
-
 
 
 Included By
 -----------
 
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`
 
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_TaskToConstraint.h`
+
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEnd.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_iHQP.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_nHQP.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubTask.h`
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_AngularMomentum.h`
 
@@ -84,10 +92,6 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_Postural.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_Aggregated.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base_Contact.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_floating_base_IMU.h`
@@ -100,17 +104,9 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_AngularMomentum.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CollisionAvoidance.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CoM.h`
 
@@ -125,6 +121,8 @@ Included By
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Postural.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_PureRolling.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
 
 
 

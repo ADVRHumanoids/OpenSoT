@@ -15,7 +15,7 @@ Program Listing for File GenericTask.h
    
    #include <OpenSoT/Task.h>
    #include <OpenSoT/utils/Affine.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    
    namespace OpenSoT { namespace tasks  {
    
@@ -33,7 +33,7 @@ Program Listing for File GenericTask.h
    
        ~GenericTask();
    
-       virtual void _update();
+       virtual void _update(const Eigen::VectorXd &x);
    
        bool setA(const Eigen::MatrixXd& A);
    

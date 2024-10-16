@@ -33,7 +33,7 @@ Program Listing for File AffineUtils.h
        AffineTask(const OpenSoT::tasks::Aggregated::TaskPtr& task,
                   const AffineHelper& var);
    
-       virtual void _update();
+       virtual void _update(const Eigen::VectorXd &x);
        ~AffineTask();
    
        static AffineTask::Ptr toAffine(const OpenSoT::tasks::Aggregated::TaskPtr& task,
@@ -55,7 +55,7 @@ Program Listing for File AffineUtils.h
        AffineConstraint(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,
                   const AffineHelper& var);
    
-       virtual void update();
+       virtual void update(const Eigen::VectorXd& x);
        ~AffineConstraint();
    
        static AffineConstraint::Ptr toAffine(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,

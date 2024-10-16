@@ -126,7 +126,7 @@
             <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">getDistalLink</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
             <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">getBaseLink</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
         <span class="k">protected</span><span class="o">:</span>
-            <span class="k">virtual</span> <span class="kt">void</span> <span class="n">_update</span><span class="p">();</span>
+            <span class="k">virtual</span> <span class="kt">void</span> <span class="n">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
         <span class="k">private</span><span class="o">:</span>
             <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_distal_link</span><span class="p">,</span> <span class="n">_base_link</span><span class="p">;</span>
             <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">MinimizeVariable</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_min_var</span><span class="p">;</span>
@@ -149,7 +149,7 @@
         <span class="k">private</span><span class="o">:</span>
             <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">Wrench</span><span class="o">::</span><span class="n">Ptr</span><span class="o">&gt;</span> <span class="n">wrench_tasks</span><span class="p">;</span>
             <span class="n">OpenSoT</span><span class="o">::</span><span class="n">tasks</span><span class="o">::</span><span class="n">Aggregated</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_aggregated_task</span><span class="p">;</span>
-            <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
+            <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
 
         <span class="p">};</span>

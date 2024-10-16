@@ -32,10 +32,10 @@ Program Listing for File Cartesian.h
    
    #include <OpenSoT/Task.h>
    #include <OpenSoT/utils/Affine.h>
-   #include <xbot2_interface/xbotinterface2.h>
-   #include <xbot2_interface/common/utils.h>
+   #include <XBotInterface/ModelInterface.h>
+   #include <XBotInterface/Utils.h>
    #include <OpenSoT/tasks/acceleration/GainType.h>
-   #include <kdl/frames.hpp>
+   
    
    namespace OpenSoT { namespace tasks { namespace acceleration {
        
@@ -46,6 +46,7 @@ Program Listing for File Cartesian.h
            typedef std::shared_ptr<Cartesian> Ptr;
    
            Cartesian(const std::string task_id,
+                     const Eigen::VectorXd& x,
                      const XBot::ModelInterface& robot,
                      const std::string& distal_link,
                      const std::string& base_link
@@ -85,20 +86,20 @@ Program Listing for File Cartesian.h
            void setVirtualForce(const Eigen::Vector6d& virtual_force_ref);
    
    
-           void getReference(Eigen::Affine3d& ref) const;
-           void getReference(KDL::Frame& ref) const;
+           void getReference(Eigen::Affine3d& ref);
+           void getReference(KDL::Frame& ref);
    
            void getReference(Eigen::Affine3d& desiredPose,
-                             Eigen::Vector6d& desiredTwist) const;
+                             Eigen::Vector6d& desiredTwist);
            void getReference(KDL::Frame& desiredPose,
-                             KDL::Twist& desiredTwist) const;
+                             KDL::Twist& desiredTwist);
    
            void getReference(Eigen::Affine3d& desiredPose,
                              Eigen::Vector6d& desiredTwist,
-                             Eigen::Vector6d& desiredAcceleration) const;
+                             Eigen::Vector6d& desiredAcceleration);
            void getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist,
-                             KDL::Twist& desiredAcceleration) const;
+                             KDL::Twist& desiredAcceleration);
    
            const Eigen::Vector6d& getCachedVelocityReference() const;
    
@@ -106,15 +107,18 @@ Program Listing for File Cartesian.h
    
            const Eigen::Vector6d& getCachedVirtualForceReference() const;
    
-           const Eigen::Affine3d& getActualPose() const;
-           void getActualPose(Eigen::Affine3d& actual) const;
+   
+           void getActualPose(Eigen::Affine3d& actual);
            void getActualPose(KDL::Frame& actual);
    
-           const Eigen::Vector6d& getActualTwist() const;
-           void getActualTwist(Eigen::Vector6d& actual) const;
+           void getActualTwist(Eigen::Vector6d& actual);
            void getActualTwist(KDL::Twist& actual);
            
            bool reset();
+   
+           virtual void _update(const Eigen::VectorXd& x);
+           
+           virtual void _log(XBot::MatLogger2::Ptr logger);
    
            void setLambda(double lambda1, double lambda2);
            virtual void setLambda(double lambda);
@@ -194,10 +198,6 @@ Program Listing for File Cartesian.h
    
            Eigen::MatrixXd _tmpMatrixXd;
            Eigen::MatrixXd _Bi;
-   
-           virtual void _update();
-           virtual void _log(XBot::MatLogger2::Ptr logger);
-   
        };
        
    } } }

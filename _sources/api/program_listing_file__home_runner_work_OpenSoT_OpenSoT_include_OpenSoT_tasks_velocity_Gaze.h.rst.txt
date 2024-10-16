@@ -33,7 +33,7 @@ Program Listing for File Gaze.h
    #include <OpenSoT/tasks/velocity/Cartesian.h>
    #include <OpenSoT/SubTask.h>
    #include <OpenSoT/utils/cartesian_utils.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    
    namespace OpenSoT {
    namespace tasks {
@@ -46,6 +46,7 @@ Program Listing for File Gaze.h
        typedef std::shared_ptr<Gaze> Ptr;
    
        Gaze(std::string task_id,
+            const Eigen::VectorXd &x,
             XBot::ModelInterface &robot,
             std::string base_link,
             std::string distal_link = "gaze");
@@ -66,6 +67,8 @@ Program Listing for File Gaze.h
        virtual std::list< ConstraintPtr >& getConstraints();
    
        virtual const unsigned int getTaskSize() const;
+   
+       virtual void _update(const Eigen::VectorXd &x);
    
        virtual std::vector<bool> getActiveJointsMask();
    
@@ -91,9 +94,6 @@ Program Listing for File Gaze.h
        KDL::Frame _gaze_goal;
        Eigen::Affine3d _tmpEigenM;
        Eigen::Affine3d _tmpEigenM2;
-   
-       virtual void _update();
-   
    
    
    

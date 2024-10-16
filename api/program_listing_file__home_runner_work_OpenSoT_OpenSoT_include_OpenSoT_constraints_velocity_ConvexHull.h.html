@@ -105,7 +105,7 @@
  <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/tasks/velocity/CoM.h&gt;</span><span class="cp"></span>
  <span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
  <span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
- <span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
  <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/convex_hull_utils.h&gt;</span><span class="cp"></span>
 
 <span class="cp">#define BOUND_SCALING 0.01</span>
@@ -125,30 +125,31 @@
                 <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span> <span class="o">&amp;</span><span class="n">_robot</span><span class="p">;</span>
                 <span class="kt">double</span> <span class="n">_boundScaling</span><span class="p">;</span>
                 <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">convex_hull</span><span class="o">&gt;</span> <span class="n">_convex_hull</span><span class="p">;</span>
-                <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;</span> <span class="n">_ch</span><span class="p">;</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;</span> <span class="n">_ch</span><span class="p">;</span>
                 <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">_links_in_contact</span><span class="p">;</span>
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_JCoM</span><span class="p">;</span>
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_C</span><span class="p">;</span>
-                <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;</span> <span class="n">_points</span><span class="p">;</span>
-                <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;</span> <span class="n">_tmp_ch</span><span class="p">;</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;</span> <span class="n">_points</span><span class="p">;</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;</span> <span class="n">_tmp_ch</span><span class="p">;</span>
 
             <span class="k">public</span><span class="o">:</span>
-                <span class="n">ConvexHull</span><span class="p">(</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
+                <span class="n">ConvexHull</span><span class="p">(</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span>
+                            <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
                             <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">links_in_contact</span><span class="p">,</span>
                             <span class="k">const</span> <span class="kt">double</span> <span class="n">safetyMargin</span> <span class="o">=</span> <span class="n">BOUND_SCALING</span><span class="p">);</span>
 
-                <span class="k">static</span> <span class="kt">void</span> <span class="nf">getConstraints</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">points</span><span class="p">,</span>
+                <span class="k">static</span> <span class="kt">void</span> <span class="nf">getConstraints</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">points</span><span class="p">,</span>
                                             <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span>
                                             <span class="k">const</span> <span class="kt">double</span> <span class="n">boundScaling</span> <span class="o">=</span> <span class="n">BOUND_SCALING</span><span class="p">);</span>
 
-                <span class="k">static</span> <span class="kt">void</span> <span class="nf">getLineCoefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="o">&amp;</span><span class="n">p0</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="o">&amp;</span><span class="n">p1</span><span class="p">,</span>
+                <span class="k">static</span> <span class="kt">void</span> <span class="nf">getLineCoefficients</span><span class="p">(</span><span class="k">const</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="o">&amp;</span><span class="n">p0</span><span class="p">,</span> <span class="k">const</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="o">&amp;</span><span class="n">p1</span><span class="p">,</span>
                                                 <span class="kt">double</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="kt">double</span><span class="o">&amp;</span> <span class="n">b</span><span class="p">,</span> <span class="kt">double</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">);</span>
 
-                <span class="kt">bool</span> <span class="nf">getConvexHull</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;&amp;</span> <span class="n">ch</span><span class="p">);</span>
+                <span class="kt">bool</span> <span class="nf">getConvexHull</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;&amp;</span> <span class="n">ch</span><span class="p">);</span>
 
                 <span class="kt">void</span> <span class="nf">setSafetyMargin</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">safetyMargin</span><span class="p">);</span>
 
-                <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
+                <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
 
                 <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">getLinksInContact</span><span class="p">()</span>
                 <span class="p">{</span>

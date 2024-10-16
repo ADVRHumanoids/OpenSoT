@@ -34,7 +34,7 @@ Program Listing for File ConvexHull.h
     #include <OpenSoT/tasks/velocity/CoM.h>
     #include <kdl/frames.hpp>
     #include <Eigen/Dense>
-    #include <xbot2_interface/xbotinterface2.h>
+    #include <XBotInterface/ModelInterface.h>
     #include <OpenSoT/utils/convex_hull_utils.h>
    
    #define BOUND_SCALING 0.01
@@ -54,30 +54,31 @@ Program Listing for File ConvexHull.h
                    XBot::ModelInterface &_robot;
                    double _boundScaling;
                    std::shared_ptr<convex_hull> _convex_hull;
-                   std::vector<Eigen::Vector3d> _ch;
+                   std::vector<KDL::Vector> _ch;
                    std::list<std::string> _links_in_contact;
                    Eigen::MatrixXd _JCoM;
                    Eigen::MatrixXd _C;
-                   std::list<Eigen::Vector3d> _points;
-                   std::vector<Eigen::Vector3d> _tmp_ch;
+                   std::list<KDL::Vector> _points;
+                   std::vector<KDL::Vector> _tmp_ch;
    
                public:
-                   ConvexHull( XBot::ModelInterface& robot,
+                   ConvexHull( const Eigen::VectorXd& x,
+                               XBot::ModelInterface& robot,
                                const std::list<std::string>& links_in_contact,
                                const double safetyMargin = BOUND_SCALING);
    
-                   static void getConstraints(const std::vector<Eigen::Vector3d> &points,
+                   static void getConstraints(const std::vector<KDL::Vector> &points,
                                                Eigen::MatrixXd& A, Eigen::VectorXd& b,
                                                const double boundScaling = BOUND_SCALING);
    
-                   static void getLineCoefficients(const Eigen::Vector3d &p0, const Eigen::Vector3d &p1,
+                   static void getLineCoefficients(const KDL::Vector &p0, const KDL::Vector &p1,
                                                    double &a, double& b, double &c);
    
-                   bool getConvexHull(std::vector<Eigen::Vector3d>& ch);
+                   bool getConvexHull(std::vector<KDL::Vector>& ch);
    
                    void setSafetyMargin(const double safetyMargin);
    
-                   void update();
+                   void update(const Eigen::VectorXd &x);
    
                    std::list<std::string> getLinksInContact()
                    {

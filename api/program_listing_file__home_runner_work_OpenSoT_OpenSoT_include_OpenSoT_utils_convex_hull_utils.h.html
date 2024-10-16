@@ -112,8 +112,7 @@
 <span class="cp">#include</span> <span class="cpf">&lt;pcl/filters/passthrough.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;pcl/filters/project_inliers.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;pcl/surface/concave_hull.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;pcl/surface/convex_hull.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
 
 <span class="k">class</span> <span class="nc">convex_hull</span>
 <span class="p">{</span>
@@ -121,13 +120,13 @@
     <span class="n">convex_hull</span><span class="p">();</span>
     <span class="o">~</span><span class="n">convex_hull</span><span class="p">();</span>
 
-    <span class="kt">bool</span> <span class="nf">getSupportPolygonPoints</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;&amp;</span> <span class="n">points</span><span class="p">,</span>
+    <span class="kt">bool</span> <span class="nf">getSupportPolygonPoints</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;&amp;</span> <span class="n">points</span><span class="p">,</span>
                                  <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">links_in_contact</span><span class="p">,</span>
                                  <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">model</span><span class="p">,</span>
                                  <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">referenceFrame</span> <span class="o">=</span> <span class="s">&quot;COM&quot;</span><span class="p">);</span>
 
-    <span class="kt">bool</span> <span class="nf">getConvexHull</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;&amp;</span> <span class="n">points</span><span class="p">,</span>
-                             <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&gt;&amp;</span> <span class="n">ch</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getConvexHull</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;&amp;</span> <span class="n">points</span><span class="p">,</span>
+                             <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span><span class="o">&gt;&amp;</span> <span class="n">ch</span><span class="p">);</span>
     <span class="c1">//void setRansacDistanceThr(const double x){_ransac_distance_thr = x;}</span>
 
 <span class="k">private</span><span class="o">:</span>
@@ -135,15 +134,15 @@
     <span class="n">pcl</span><span class="o">::</span><span class="n">PointCloud</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span><span class="o">&gt;::</span><span class="n">Ptr</span> <span class="n">_pointCloud</span><span class="p">;</span>
     <span class="n">pcl</span><span class="o">::</span><span class="n">PointCloud</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span><span class="o">&gt;::</span><span class="n">Ptr</span> <span class="n">_projectedPointCloud</span><span class="p">;</span>
 
-    <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="n">world_T_CoM</span><span class="p">;</span>
-    <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="n">world_T_point</span><span class="p">;</span>
-    <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="n">referenceFrame_T_point</span><span class="p">;</span>
-    <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="n">CoM_T_point</span><span class="p">;</span>
+    <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">world_T_CoM</span><span class="p">;</span>
+    <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">world_T_point</span><span class="p">;</span>
+    <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">referenceFrame_T_point</span><span class="p">;</span>
+    <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">CoM_T_point</span><span class="p">;</span>
     <span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span> <span class="n">_tmp_pcl</span><span class="p">;</span>
     <span class="n">pcl</span><span class="o">::</span><span class="n">PointCloud</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span><span class="o">&gt;</span> <span class="n">pointsInConvexHull</span><span class="p">;</span>
     <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">Vertices</span><span class="o">&gt;</span> <span class="n">indicesOfVertexes</span><span class="p">;</span>
     <span class="n">pcl</span><span class="o">::</span><span class="n">ConvexHull</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span><span class="o">&gt;</span> <span class="n">huller</span><span class="p">;</span>
-    <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span> <span class="n">_tmp_vector</span><span class="p">;</span>
+    <span class="n">KDL</span><span class="o">::</span><span class="n">Vector</span> <span class="n">_tmp_vector</span><span class="p">;</span>
     <span class="n">pcl</span><span class="o">::</span><span class="n">ProjectInliers</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span><span class="o">&gt;</span> <span class="n">proj</span><span class="p">;</span>
 
     <span class="kt">void</span> <span class="nf">projectPCL2Plane</span><span class="p">(</span><span class="k">const</span> <span class="n">pcl</span><span class="o">::</span><span class="n">PointCloud</span><span class="o">&lt;</span><span class="n">pcl</span><span class="o">::</span><span class="n">PointXYZ</span><span class="o">&gt;::</span><span class="n">ConstPtr</span> <span class="n">cloud</span><span class="p">,</span>

@@ -46,6 +46,8 @@ Included By
 -----------
 
 
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`
+
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimitsECBF.h`
@@ -64,9 +66,13 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_acceleration_AngularMomentum.h`
 
@@ -88,13 +94,9 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_force_Force.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericLPTask.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_GenericTask.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_MinimizeVariable.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_AffineUtils.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_ForceOptimization.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_InverseDynamics.h`
 
@@ -137,7 +139,7 @@ Functions
 
 - :ref:`exhale_function_namespaceOpenSoT_1af94ac41af43695e55a0e7eef9563bd91`
 
-- :ref:`exhale_function_namespaceOpenSoT_1ae09fdd160f5f703ffc121938239120b0`
+- :ref:`exhale_function_namespaceOpenSoT_1ab7b31c5b7546ce935b8c9beddf86b96c`
 
 
 Typedefs

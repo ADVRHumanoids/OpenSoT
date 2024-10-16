@@ -1,0 +1,17 @@
+.. _exhale_class_classfcl_1_1CollisionObject:
+
+Template Class CollisionObject
+==============================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CollisionAvoidance.h`
+
+
+Class Documentation
+-------------------
+
+
+.. doxygenclass:: fcl::CollisionObject
+   :project: OpenSoT
+   :members:
+   :protected-members:
+   :undoc-members:

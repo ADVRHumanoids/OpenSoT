@@ -31,7 +31,7 @@ Program Listing for File CoM.h
    #define __TASKS_FORCE_COM_H__
    
    #include <OpenSoT/Task.h>
-   #include <xbot2_interface/xbotinterface2.h>
+   #include <XBotInterface/ModelInterface.h>
    #include <kdl/frames.hpp>
    #include <OpenSoT/utils/Affine.h>
    
@@ -52,6 +52,7 @@ Program Listing for File CoM.h
                    
                    virtual void _log(XBot::MatLogger2::Ptr logger);
                    
+                   AffineHelper _wrenches;
                    AffineHelper _com_task;
                    
                    XBot::ModelInterface& _robot;
@@ -98,7 +99,9 @@ Program Listing for File CoM.h
                    Eigen::Vector3d velocityError;
                    Eigen::Vector3d angularMomentumError;
    
-   
+                   CoM(const Eigen::VectorXd& x, 
+                       std::vector<std::string>& links_in_contact,
+                       XBot::ModelInterface& robot);
                    
                    
                    CoM(std::vector<AffineHelper> wrenches,
@@ -107,7 +110,7 @@ Program Listing for File CoM.h
    
                    ~CoM();
    
-                   void _update();
+                   void _update(const Eigen::VectorXd& x);
    
    
                    void setLinearReference(const Eigen::Vector3d& desiredPosition);

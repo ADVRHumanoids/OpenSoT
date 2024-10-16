@@ -31,7 +31,7 @@ Program Listing for File OmniWheels4X.h
    #define __BOUNDS_OMNIWHEEL4X_H__
    
     #include <OpenSoT/Constraint.h>
-    #include <xbot2_interface/xbotinterface2.h>
+    #include <XBotInterface/ModelInterface.h>
    
    namespace OpenSoT {
       namespace constraints {
@@ -43,8 +43,9 @@ Program Listing for File OmniWheels4X.h
               OmniWheels4X(const double l1, const double l2, const double r,
                           const std::vector<std::string> joint_wheels_name,
                           const std::string base_link,
+                          const Eigen::VectorXd& x,
                           XBot::ModelInterface& robot);
-              virtual void update();
+              virtual void update(const Eigen::VectorXd &x);
    
    
           private:

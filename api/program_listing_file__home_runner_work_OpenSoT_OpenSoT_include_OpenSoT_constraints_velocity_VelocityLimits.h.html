@@ -103,8 +103,6 @@
 
  <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
-
 
  <span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span>
     <span class="k">namespace</span> <span class="n">constraints</span> <span class="p">{</span>
@@ -116,12 +114,10 @@
                 <span class="kt">double</span> <span class="n">_qDotLimit</span><span class="p">;</span>
                 <span class="kt">double</span> <span class="n">_dT</span><span class="p">;</span>
             <span class="k">public</span><span class="o">:</span>
-                <span class="n">VelocityLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="kt">double</span> <span class="n">qDotLimit</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="kt">double</span> <span class="n">dT</span><span class="p">);</span>
-
-                <span class="n">VelocityLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
-                               <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">qDotLimit</span><span class="p">,</span>
+                <span class="n">VelocityLimits</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">qDotLimit</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="kt">double</span> <span class="n">dT</span><span class="p">,</span>
+                               <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x_size</span><span class="p">);</span>
+                <span class="n">VelocityLimits</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">qDotLimit</span><span class="p">,</span>
                                <span class="k">const</span> <span class="kt">double</span> <span class="n">dT</span><span class="p">);</span>
 
                 <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">getVelocityLimits</span><span class="p">();</span>
