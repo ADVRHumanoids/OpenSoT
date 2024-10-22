@@ -15,7 +15,7 @@ Program Listing for File VelocityLimits.h
    
    #include <OpenSoT/Constraint.h>
    #include <OpenSoT/utils/Affine.h>
-   #include <XBotInterface/ModelInterface.h>
+   #include <xbot2_interface/xbotinterface2.h>
    #include <OpenSoT/constraints/GenericConstraint.h>
    
    namespace OpenSoT { namespace constraints { namespace acceleration {
@@ -36,7 +36,7 @@ Program Listing for File VelocityLimits.h
                       const Eigen::VectorXd& qDotLimit,
                       const double dT);
    
-       virtual void update(const Eigen::VectorXd& x);
+       virtual void update();
    
        void setVelocityLimits(const double qDotLimit);
    

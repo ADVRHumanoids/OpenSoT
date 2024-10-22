@@ -38,9 +38,9 @@ Includes
 
 - ``OpenSoT/utils/convex_hull_utils.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_convex_hull_utils.h`)
 
-- ``XBotInterface/ModelInterface.h``
-
 - ``kdl/frames.hpp``
+
+- ``xbot2_interface/xbotinterface2.h``
 
 
 

@@ -103,24 +103,13 @@
 
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/tasks/velocity/Cartesian.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/collision.h&gt;</span><span class="cp"></span>
 
 <span class="cp">#include</span> <span class="cpf">&lt;srdfdom/model.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;Eigen/Dense&gt;</span><span class="cp"></span>
 
 <span class="cp">#include</span> <span class="cpf">&lt;moveit_msgs/PlanningSceneWorld.h&gt;</span><span class="cp"></span>
-
-<span class="k">class</span> <span class="nc">ComputeLinksDistance</span><span class="p">;</span>
-<span class="k">class</span> <span class="nc">LinkPairDistance</span><span class="p">;</span>
-
-<span class="c1">// forward declare fcl collision object</span>
-<span class="k">namespace</span> <span class="n">fcl</span>
-<span class="p">{</span>
-    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Scalar</span><span class="o">&gt;</span>
-    <span class="k">class</span> <span class="nc">CollisionObject</span><span class="p">;</span>
-
-    <span class="k">using</span> <span class="n">CollisionObjectd</span> <span class="o">=</span> <span class="n">CollisionObject</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">;</span>
-<span class="p">}</span>
 
 <span class="k">namespace</span> <span class="n">OpenSoT</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">constraints</span> <span class="p">{</span> <span class="k">namespace</span> <span class="n">velocity</span> <span class="p">{</span>
 
@@ -131,14 +120,17 @@
 
     <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">CollisionAvoidance</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
     <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">LinksPair</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="n">XBot</span><span class="o">::</span><span class="n">Collision</span><span class="o">::</span><span class="n">CollisionModel</span><span class="o">::</span><span class="n">WitnessPointVector</span> <span class="n">WitnessPointVector</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="n">XBot</span><span class="o">::</span><span class="n">Collision</span><span class="o">::</span><span class="n">CollisionModel</span><span class="o">::</span><span class="n">LinkPairVector</span> <span class="n">LinkPairVector</span><span class="p">;</span>
 
-    <span class="n">CollisionAvoidance</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span>
-                           <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
-                           <span class="kt">int</span> <span class="n">max_pairs</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
-                           <span class="n">urdf</span><span class="o">::</span><span class="n">ModelConstSharedPtr</span> <span class="n">collision_urdf</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">,</span>
-                           <span class="n">srdf</span><span class="o">::</span><span class="n">ModelConstSharedPtr</span> <span class="n">collision_srdf</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">);</span>
+    <span class="n">CollisionAvoidance</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot</span><span class="p">,</span>
+                       <span class="kt">int</span> <span class="n">max_pairs</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                       <span class="n">urdf</span><span class="o">::</span><span class="n">ModelConstSharedPtr</span> <span class="n">collision_urdf</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">,</span>
+                       <span class="n">srdf</span><span class="o">::</span><span class="n">ModelConstSharedPtr</span> <span class="n">collision_srdf</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">);</span>
 
     <span class="kt">double</span> <span class="nf">getLinkPairThreshold</span><span class="p">();</span>
+
+    <span class="kt">void</span> <span class="nf">getError</span><span class="p">(</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">e</span><span class="p">);</span>
 
     <span class="kt">double</span> <span class="nf">getDetectionThreshold</span><span class="p">();</span>
 
@@ -146,33 +138,51 @@
 
     <span class="kt">void</span> <span class="nf">setDetectionThreshold</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">detection_threshold</span><span class="p">);</span>
 
-    <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
 
 
-    <span class="kt">bool</span> <span class="nf">setCollisionWhiteList</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">LinksPair</span><span class="o">&gt;</span> <span class="n">whiteList</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">setMaxPairs</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">max_pairs</span><span class="p">);</span>
 
-    <span class="kt">bool</span> <span class="nf">setCollisionBlackList</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">LinksPair</span><span class="o">&gt;</span> <span class="n">blackList</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">setCollisionList</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">collisionList</span><span class="p">);</span>
 
-    <span class="kt">bool</span> <span class="nf">setWorldCollisions</span><span class="p">(</span><span class="k">const</span> <span class="n">moveit_msgs</span><span class="o">::</span><span class="n">PlanningSceneWorld</span><span class="o">&amp;</span> <span class="n">wc</span><span class="p">);</span>
 
-    <span class="kt">bool</span> <span class="nf">addWorldCollision</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">,</span>
-                           <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">fcl</span><span class="o">::</span><span class="n">CollisionObjectd</span><span class="o">&gt;</span> <span class="n">fcl_obj</span><span class="p">);</span>
 
-    <span class="kt">bool</span> <span class="nf">removeWorldCollision</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">collisionModelUpdated</span><span class="p">();</span>
 
-    <span class="kt">bool</span> <span class="nf">moveWorldCollision</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">,</span>
-                            <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span> <span class="n">new_pose</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">addCollisionShape</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">name</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">link</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">Collision</span><span class="o">::</span><span class="n">Shape</span><span class="o">::</span><span class="n">Variant</span><span class="o">&amp;</span> <span class="n">shape</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span><span class="o">&amp;</span> <span class="n">link_T_shape</span><span class="p">,</span>
+                           <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">disabled_collisions</span> <span class="o">=</span> <span class="p">{});</span>
+
+    <span class="c1">// /**</span>
+    <span class="c1">//  * @brief remove world collision with given id</span>
+    <span class="c1">//  */</span>
+    <span class="c1">// bool removeWorldCollision(const std::string&amp; id);</span>
+
+     <span class="kt">bool</span> <span class="nf">moveCollisionShape</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">id</span><span class="p">,</span> <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span><span class="o">&amp;</span> <span class="n">new_pose</span><span class="p">);</span>
 
     <span class="kt">void</span> <span class="nf">setBoundScaling</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span> <span class="n">boundScaling</span><span class="p">);</span>
 
-    <span class="kt">void</span> <span class="nf">setLinksVsEnvironment</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">links</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">setLinksVsEnvironment</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span> <span class="n">links</span><span class="p">);</span>
 
+    <span class="n">XBot</span><span class="o">::</span><span class="n">Collision</span><span class="o">::</span><span class="n">CollisionModel</span><span class="o">&amp;</span> <span class="n">getCollisionModel</span><span class="p">();</span>
 
-    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">LinkPairDistance</span><span class="o">&gt;&amp;</span> <span class="n">getLinkPairDistances</span><span class="p">(){</span> <span class="k">return</span> <span class="n">_distance_list</span><span class="p">;}</span>
+    <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">Collision</span><span class="o">::</span><span class="n">CollisionModel</span><span class="o">&amp;</span> <span class="n">getCollisionModel</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">getOrderedWitnessPointVector</span><span class="p">(</span><span class="n">WitnessPointVector</span><span class="o">&amp;</span> <span class="n">wp</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">getOrderedLinkPairVector</span><span class="p">(</span><span class="n">LinkPairVector</span><span class="o">&amp;</span> <span class="n">lp</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="nf">getOrderedDistanceVector</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">d</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+
+    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">getCollisionJacobian</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
 
     <span class="o">~</span><span class="n">CollisionAvoidance</span><span class="p">();</span>
 
 <span class="k">protected</span><span class="o">:</span>
+
+    <span class="kt">bool</span> <span class="n">_include_env</span><span class="p">;</span>
 
     <span class="kt">double</span> <span class="n">_bound_scaling</span><span class="p">;</span>
 
@@ -184,13 +194,17 @@
 
     <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_robot</span><span class="p">;</span>
 
-    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">ComputeLinksDistance</span><span class="o">&gt;</span> <span class="n">_dist_calc</span><span class="p">;</span>
+    <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_collision_model</span><span class="p">;</span>
 
-    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_x_cache</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">XBot</span><span class="o">::</span><span class="n">Collision</span><span class="o">::</span><span class="n">CollisionModel</span><span class="o">&gt;</span> <span class="n">_dist_calc</span><span class="p">;</span>
+
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_distances</span><span class="p">;</span>
+    <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_distance_J</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">_num_active_pairs</span><span class="p">;</span>
+    <span class="k">mutable</span> <span class="n">WitnessPointVector</span> <span class="n">_wpv</span><span class="p">;</span>
+    <span class="k">mutable</span> <span class="n">LinkPairVector</span> <span class="n">_lpv</span><span class="p">;</span>
 
     <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_Jtmp</span><span class="p">;</span>
-
-    <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">LinkPairDistance</span><span class="o">&gt;</span> <span class="n">_distance_list</span><span class="p">;</span>
 
 <span class="p">};</span>
 

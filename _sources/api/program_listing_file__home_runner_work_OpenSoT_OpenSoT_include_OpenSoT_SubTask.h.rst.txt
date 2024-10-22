@@ -62,7 +62,7 @@ Program Listing for File SubTask.h
    
            void generateWeight();
    
-           virtual void _update(const Eigen::VectorXd &x);
+           virtual void _update();
    
            static const std::string _SUBTASK_SEPARATION_;
    

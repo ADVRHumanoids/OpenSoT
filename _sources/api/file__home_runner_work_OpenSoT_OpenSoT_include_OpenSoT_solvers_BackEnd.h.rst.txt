@@ -34,9 +34,9 @@ Includes
 
 - ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
 
-- ``XBotInterface/Logger.hpp``
-
 - ``boost/any.hpp``
+
+- ``xbot2_interface/logger.h``
 
 
 
@@ -46,17 +46,17 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_BackEndFactory.h`
 
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h`
-
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_eiQuadProgBackEnd.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_GLPKBackEnd.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_l1HQP.h`
 
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_OSQPBackEnd.h`
+
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_proxQPBackEnd.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_QPOasesBackEnd.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_solvers_qpSWIFTBackEnd.h`
 

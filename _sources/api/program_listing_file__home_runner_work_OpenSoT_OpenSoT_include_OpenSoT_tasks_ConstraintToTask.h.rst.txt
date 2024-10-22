@@ -1,0 +1,39 @@
+
+.. _program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h:
+
+Program Listing for File ConstraintToTask.h
+===========================================
+
+|exhale_lsh| :ref:`Return to documentation for file <file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/ConstraintToTask.h``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+.. code-block:: cpp
+
+   #ifndef OPENSOT_CONSTRAINTTOTASK_H
+   #define OPENSOT_CONSTRAINTTOTASK_H
+   
+   #include <OpenSoT/Constraint.h>
+   #include <OpenSoT/Task.h>
+   
+   namespace OpenSoT { namespace tasks {
+   
+   class ConstraintToTask : public Task<Eigen::MatrixXd, Eigen::VectorXd>
+   {
+   
+   public:
+   
+       ConstraintToTask(ConstraintPtr constraint,
+                        std::function<const Eigen::VectorXd&()> );
+   
+       void _update() override;
+   
+   private:
+   
+       ConstraintPtr _constr;
+   
+   };
+   } }
+   
+   
+   #endif // CONSTRAINTTOTASK_H

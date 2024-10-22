@@ -102,7 +102,7 @@
 <span class="cp">#define _CONSTRAINT_FORCE_COP_H_</span>
 
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Constraint.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;kdl/frames.hpp&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Affine.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/Piler.h&gt;</span><span class="cp"></span>
@@ -124,9 +124,11 @@
                 <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector2d</span><span class="o">&amp;</span> <span class="n">X_Lims</span><span class="p">,</span>
                 <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector2d</span><span class="o">&amp;</span> <span class="n">Y_Lims</span><span class="p">);</span>
 
+            <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
+
+
        <span class="k">private</span><span class="o">:</span>
 
-            <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
             <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">_contact_link</span><span class="p">;</span>
 
@@ -158,9 +160,7 @@
                 <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector2d</span><span class="o">&gt;&amp;</span> <span class="n">X_Lims</span><span class="p">,</span>
                 <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">Vector2d</span><span class="o">&gt;&amp;</span> <span class="n">Y_Lims</span><span class="p">);</span>
 
-           <span class="n">CoP</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">getCoP</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">contact_name</span><span class="p">);</span>
-
-           <span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">);</span>
+           <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
 
 
        <span class="k">private</span><span class="o">:</span>

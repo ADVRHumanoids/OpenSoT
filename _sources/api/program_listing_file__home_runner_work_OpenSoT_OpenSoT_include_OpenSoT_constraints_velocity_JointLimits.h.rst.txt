@@ -31,7 +31,7 @@ Program Listing for File JointLimits.h
    #define __BOUNDS_VELOCITY_JOINTLIMITS_H__
    
     #include <OpenSoT/Constraint.h>
-    #include <Eigen/Dense>
+    #include <xbot2_interface/xbotinterface2.h>
    
    
     namespace OpenSoT {
@@ -41,16 +41,18 @@ Program Listing for File JointLimits.h
                public:
                    typedef std::shared_ptr<JointLimits> Ptr;
                private:
+                   const XBot::ModelInterface& _robot;
                    double _boundScaling;
                    Eigen::VectorXd _jointLimitsMin;
                    Eigen::VectorXd _jointLimitsMax;
+                   Eigen::VectorXd _dq;
                public:
-                   JointLimits(const Eigen::VectorXd &q,
+                   JointLimits(const XBot::ModelInterface& robot,
                                const Eigen::VectorXd &jointBoundMax,
                                const Eigen::VectorXd &jointBoundMin,
                                const double boundScaling = 1.0);
    
-                   void update(const Eigen::VectorXd &x);
+                   void update();
                    void setBoundScaling(const double boundScaling);
                };
            }

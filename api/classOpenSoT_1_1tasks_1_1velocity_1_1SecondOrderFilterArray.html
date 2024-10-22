@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Class SecondOrderFilterArray &mdash; OpenSoT  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/collapsible-lists/css/tree_view.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/collapsible-lists/js/CollapsibleLists.compressed.js"></script>
+        <script src="../_static/collapsible-lists/js/apply-collapsible-lists.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class InverseDynamics" href="classOpenSoT_1_1utils_1_1InverseDynamics.html" />
+    <link rel="prev" title="Template Class SecondOrderFilter" href="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/openSoT_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../task.html">Task</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../constraint.html">Constraint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stack.html">Stack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../solver.html">Solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../variables.html">Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../aknowledge.html">Aknowledge</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="library_root.html">Library API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#page-hierarchy">Page Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#class-hierarchy">Class Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="library_root.html#file-hierarchy">File Hierarchy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="library_root.html#full-api">Full API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#namespaces">Namespaces</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="library_root.html#classes-and-structs">Classes and Structs</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1OptvarHelper_1_1VarInfo.html">Struct OptvarHelper::VarInfo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1GLPKBackEnd_1_1GLPKBackEndOptions.html">Struct GLPKBackEnd::GLPKBackEndOptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1solvers_1_1stack__level.html">Struct stack_level</a></li>
+<li class="toctree-l4"><a class="reference internal" href="structOpenSoT_1_1Task_1_1istrue.html">Struct Task::istrue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classcartesian__utils.html">Class cartesian_utils</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classconvex__hull.html">Class convex_hull</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classCostFunction.html">Class CostFunction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classLDLTInverse.html">Template Class LDLTInverse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AffineHelperBase.html">Template Class AffineHelperBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineConstraint.html">Class AffineConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AffineUtils_1_1AffineTask.html">Class AffineTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1AutoStack.html">Class AutoStack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Constraint.html">Template Class Constraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimits.html">Class JointLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsECBF.html">Class JointLimitsECBF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1JointLimitsViability.html">Class JointLimitsViability</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1TorqueLimits.html">Class TorqueLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1acceleration_1_1VelocityLimits.html">Class VelocityLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1Aggregated.html">Class Aggregated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1BilateralConstraint.html">Class BilateralConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoP.html">Class CoP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1CoPs.html">Class CoPs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCone.html">Class FrictionCone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1FrictionCones.html">Class FrictionCones</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorque.html">Class NormalTorque</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1NormalTorques.html">Class NormalTorques</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1StaticConstraint.html">Class StaticConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchesLimits.html">Class WrenchesLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1force_1_1WrenchLimits.html">Class WrenchLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1GenericConstraint.html">Class GenericConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1TaskToConstraint.html">Class TaskToConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianPositionConstraint.html">Class CartesianPositionConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CartesianVelocity.html">Class CartesianVelocity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance.html">Class CollisionAvoidance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1ConvexHull.html">Class ConvexHull</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimits.html">Class JointLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1JointLimitsInvariance.html">Class JointLimitsInvariance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1OmniWheels4X.html">Class OmniWheels4X</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1constraints_1_1velocity_1_1VelocityLimits.html">Class VelocityLimits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Indices.html">Class Indices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1OptvarHelper.html">Class OptvarHelper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Solver.html">Template Class Solver</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1BackEnd.html">Class BackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1constraint__helper.html">Class constraint_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eHQP.html">Class eHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1eiQuadProgBackEnd.html">Class eiQuadProgBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1GLPKBackEnd.html">Class GLPKBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1HCOD.html">Class HCOD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1iHQP.html">Class iHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1Iterator.html">Template Class Iterator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1l1HQP.html">Class l1HQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP.html">Class nHQP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1nHQP_1_1TaskData.html">Class nHQP::TaskData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1OSQPBackEnd.html">Class OSQPBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1priority__constraint.html">Class priority_constraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1proxQPBackEnd.html">Class proxQPBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1QPOasesBackEnd.html">Class QPOasesBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1qpSWIFTBackEnd.html">Class qpSWIFTBackEnd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1solvers_1_1task__to__constraint__helper.html">Class task_to_constraint_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1SubConstraint.html">Class SubConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1SubTask.html">Class SubTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1Task.html">Template Class Task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1AngularMomentum.html">Class AngularMomentum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Cartesian.html">Class Cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1CoM.html">Class CoM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Contact.html">Class Contact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1DynamicFeasibility.html">Class DynamicFeasibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1MinJointVel.html">Class MinJointVel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1acceleration_1_1Postural.html">Class Postural</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1Aggregated.html">Class Aggregated</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1ConstraintToTask.html">Class ConstraintToTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1Contact.html">Class Contact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1floating__base_1_1IMU.html">Class IMU</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Cartesian.html">Class Cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1CoM.html">Class CoM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1FloatingBase.html">Class FloatingBase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrench.html">Class Wrench</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1force_1_1Wrenches.html">Class Wrenches</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericLPTask.html">Class GenericLPTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1GenericTask.html">Class GenericTask</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1MinimizeVariable.html">Class MinimizeVariable</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1AngularMomentum.html">Class AngularMomentum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Cartesian.html">Class Cartesian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance.html">Class CartesianAdmittance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CollisionAvoidance.html">Class CollisionAvoidance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1CoM.html">Class CoM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Contact.html">Class Contact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Gaze.html">Class Gaze</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1JointAdmittance.html">Class JointAdmittance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1LinearMomentum.html">Class LinearMomentum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability.html">Class Manipulability</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Manipulability_1_1ComputeManipulabilityIndexGradient.html">Class Manipulability::ComputeManipulabilityIndexGradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort.html">Class MinimumEffort</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1MinimumEffort_1_1ComputeGTauGradient.html">Class MinimumEffort::ComputeGTauGradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1Postural.html">Class Postural</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRolling.html">Class PureRolling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingOrientation.html">Class PureRollingOrientation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1PureRollingPosition.html">Class PureRollingPosition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilter.html">Template Class SecondOrderFilter</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Template Class SecondOrderFilterArray</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1InverseDynamics.html">Class InverseDynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1utils_1_1MatrixPiler.html">Class MatrixPiler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classOpenSoT_1_1variables_1_1Torque.html">Class Torque</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classquaternion.html">Class quaternion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classSVDPseudoInverse.html">Template Class SVDPseudoInverse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classXBot_1_1Endl.html">Class Endl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classXBot_1_1Logger.html">Class Logger</a></li>
+<li class="toctree-l4"><a class="reference internal" href="classXBot_1_1LoggerClass.html">Class LoggerClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#enums">Enums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#defines">Defines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="library_root.html#typedefs">Typedefs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OpenSoT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="library_root.html">Library API</a></li>
+      <li class="breadcrumb-item active">Template Class SecondOrderFilterArray</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="template-class-secondorderfilterarray">
+<span id="exhale-class-classopensot-1-1tasks-1-1velocity-1-1secondorderfilterarray"></span><h1>Template Class SecondOrderFilterArray<a class="headerlink" href="#template-class-secondorderfilterarray" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Defined in <a class="reference internal" href="file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CartesianAdmittance.h.html#file-home-runner-work-opensot-opensot-include-opensot-tasks-velocity-cartesianadmittance-h"><span class="std std-ref">File CartesianAdmittance.h</span></a></p></li>
+</ul>
+<div class="section" id="class-documentation">
+<h2>Class Documentation<a class="headerlink" href="#class-documentation" title="Permalink to this headline"></a></h2>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE">
+<span id="_CPPv3I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE"></span><span id="_CPPv2I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SignalType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SecondOrderFilterArray</span></span></span><a class="headerlink" href="#_CPPv4I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray22SecondOrderFilterArrayEKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray22SecondOrderFilterArrayEKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray22SecondOrderFilterArrayEKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::SecondOrderFilterArray__iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a0385562751b89a95798e68aad89cffee"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SecondOrderFilterArray</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channels</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray22SecondOrderFilterArrayEKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray7processERKNSt6vectorI10SignalTypeEE">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray7processERKNSt6vectorI10SignalTypeEE"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray7processERKNSt6vectorI10SignalTypeEE"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::process__std::vector:SignalType:CR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1abfe06c62df45d3bbfbf7c64d72906ff2"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE" title="OpenSoT::tasks::velocity::SecondOrderFilterArray::SignalType"><span class="n"><span class="pre">SignalType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">process</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE" title="OpenSoT::tasks::velocity::SecondOrderFilterArray::SignalType"><span class="n"><span class="pre">SignalType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">input</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray7processERKNSt6vectorI10SignalTypeEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK7OpenSoT5tasks8velocity22SecondOrderFilterArray9getOutputEv">
+<span id="_CPPv3NK7OpenSoT5tasks8velocity22SecondOrderFilterArray9getOutputEv"></span><span id="_CPPv2NK7OpenSoT5tasks8velocity22SecondOrderFilterArray9getOutputEv"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::getOutputC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a812714a735c6cfd127dc9358948ca6cc"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE" title="OpenSoT::tasks::velocity::SecondOrderFilterArray::SignalType"><span class="n"><span class="pre">SignalType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">getOutput</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK7OpenSoT5tasks8velocity22SecondOrderFilterArray9getOutputEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray5resetERK10SignalType">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray5resetERK10SignalType"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray5resetERK10SignalType"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::reset__SignalTypeCR"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a5a313593c5b6ee5ad4910f566d1447f0"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">reset</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN7OpenSoT5tasks8velocity22SecondOrderFilterArrayE" title="OpenSoT::tasks::velocity::SecondOrderFilterArray::SignalType"><span class="n"><span class="pre">SignalType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">init</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray5resetERK10SignalType" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray11setTimeStepEKdKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray11setTimeStepEKdKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray11setTimeStepEKdKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::setTimeStep__doubleC.iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1aa47b404d695888b0dcf6b9142985f634"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setTimeStep</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">time_step</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray11setTimeStepEKdKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray11getTimeStepEKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray11getTimeStepEKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray11getTimeStepEKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::getTimeStep__iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a2554792a8d9a3142f771fe2a6bb70a61"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getTimeStep</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray11getTimeStepEKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray10setDampingEKdKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray10setDampingEKdKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray10setDampingEKdKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::setDamping__doubleC.iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a5bb367d1993070790ebb4d49d3419d51"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setDamping</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">damping</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray10setDampingEKdKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray10getDampingEKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray10getDampingEKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray10getDampingEKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::getDamping__iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a8be2654906727330226ff901478b073c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getDamping</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray10getDampingEKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray8setOmegaEKdKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray8setOmegaEKdKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray8setOmegaEKdKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::setOmega__doubleC.iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1af11da22292878420b4df5c5ef01ad41e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setOmega</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">omega</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray8setOmegaEKdKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray8getOmegaEKi">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray8getOmegaEKi"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray8getOmegaEKi"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::getOmega__iC"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a82bad020c6581362bd244b3592331272"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getOmega</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">channel</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray8getOmegaEKi" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray19getNumberOfChannelsEv">
+<span id="_CPPv3N7OpenSoT5tasks8velocity22SecondOrderFilterArray19getNumberOfChannelsEv"></span><span id="_CPPv2N7OpenSoT5tasks8velocity22SecondOrderFilterArray19getNumberOfChannelsEv"></span><span id="OpenSoT::tasks::velocity::SecondOrderFilterArray::getNumberOfChannels"></span><span class="target" id="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray_1a4ecf28ee563c82f251ac5cc9def9ed6c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">getNumberOfChannels</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N7OpenSoT5tasks8velocity22SecondOrderFilterArray19getNumberOfChannelsEv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilter.html" class="btn btn-neutral float-left" title="Template Class SecondOrderFilter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classOpenSoT_1_1utils_1_1InverseDynamics.html" class="btn btn-neutral float-right" title="Class InverseDynamics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Enrico Mingo Hoffman.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

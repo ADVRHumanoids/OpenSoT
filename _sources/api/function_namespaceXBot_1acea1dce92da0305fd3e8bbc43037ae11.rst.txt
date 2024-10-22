@@ -1,0 +1,14 @@
+.. _exhale_function_namespaceXBot_1acea1dce92da0305fd3e8bbc43037ae11:
+
+Function XBot::color_red
+========================
+
+- Defined in :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_utils_RtLog.hpp`
+
+
+Function Documentation
+----------------------
+
+
+.. doxygenfunction:: XBot::color_red(std::ostream&)
+   :project: OpenSoT

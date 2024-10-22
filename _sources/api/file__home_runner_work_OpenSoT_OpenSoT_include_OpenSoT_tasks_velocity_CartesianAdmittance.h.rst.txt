@@ -32,6 +32,8 @@ Includes
 
 - ``OpenSoT/tasks/velocity/Cartesian.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`)
 
+- ``xbot2_interface/common/utils.h``
+
 
 
 
@@ -55,4 +57,8 @@ Classes
 
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1CartesianAdmittance`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilter`
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1velocity_1_1SecondOrderFilterArray`
 

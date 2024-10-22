@@ -32,6 +32,8 @@ Classes
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1Aggregated`
 
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1ConstraintToTask`
+
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1GenericLPTask`
 
 - :ref:`exhale_class_classOpenSoT_1_1tasks_1_1GenericTask`

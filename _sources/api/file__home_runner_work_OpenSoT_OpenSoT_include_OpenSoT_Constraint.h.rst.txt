@@ -32,31 +32,19 @@ Includes
 
 - ``OpenSoT/version.h``
 
-- ``XBotInterface/Logger.hpp``
-
 - ``matlogger2/matlogger2.h``
 
 - ``memory``
 
 - ``string``
 
+- ``xbot2_interface/logger.h``
+
 
 
 Included By
 -----------
 
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_BilateralConstraint.h`
-
-- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_JointLimits.h`
 
@@ -68,6 +56,10 @@ Included By
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_acceleration_VelocityLimits.h`
 
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_Aggregated.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_BilateralConstraint.h`
+
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_CoP.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_FrictionCone.h`
@@ -77,6 +69,8 @@ Included By
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_StaticConstraint.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_force_WrenchLimits.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_GenericConstraint.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_CartesianPositionConstraint.h`
 
@@ -93,6 +87,14 @@ Included By
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_OmniWheels4X.h`
 
 - :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_constraints_velocity_VelocityLimits.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Solver.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_SubConstraint.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h`
 
 
 

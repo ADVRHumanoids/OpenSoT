@@ -115,13 +115,6 @@
     <span class="k">virtual</span> <span class="kt">double</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">};</span>
 
-<span class="k">class</span> <span class="nc">GradientVector</span> <span class="p">{</span>
-    <span class="kt">int</span> <span class="n">_size</span><span class="p">;</span>
-<span class="k">public</span><span class="o">:</span>
-    <span class="n">GradientVector</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="n">x_size</span><span class="p">)</span> <span class="o">:</span> <span class="n">_size</span><span class="p">(</span><span class="n">x_size</span><span class="p">)</span> <span class="p">{}</span>
-    <span class="k">virtual</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="kt">int</span> <span class="nf">size</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">_size</span><span class="p">;</span> <span class="p">}</span>
-<span class="p">};</span>
 
 <span class="k">class</span> <span class="nc">quaternion</span>
 <span class="p">{</span>
@@ -281,17 +274,6 @@
 <span class="k">class</span> <span class="nc">cartesian_utils</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-    <span class="k">static</span> <span class="kt">int</span> <span class="n">pnpoly</span><span class="p">(</span><span class="kt">int</span> <span class="n">nvert</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">vertx</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">verty</span><span class="p">,</span> <span class="kt">float</span> <span class="n">testx</span><span class="p">,</span> <span class="kt">float</span> <span class="n">testy</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-          <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">nvert</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nvert</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span> <span class="p">((</span><span class="n">verty</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span><span class="n">testy</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">verty</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span><span class="n">testy</span><span class="p">))</span> <span class="o">&amp;&amp;</span>
-             <span class="p">(</span><span class="n">testx</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">vertx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="n">vertx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">testy</span><span class="o">-</span><span class="n">verty</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">verty</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="n">verty</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">vertx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">)</span>
-               <span class="n">c</span> <span class="o">=</span> <span class="o">!</span><span class="n">c</span><span class="p">;</span>
-          <span class="p">}</span>
-          <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
-    <span class="p">}</span>
-
     <span class="k">static</span> <span class="kt">void</span> <span class="n">computePanTiltMatrix</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">gaze</span><span class="p">,</span> <span class="n">KDL</span><span class="o">::</span><span class="n">Frame</span><span class="o">&amp;</span> <span class="n">pan_tilt_matrix</span><span class="p">);</span>
 
     <span class="k">static</span> <span class="kt">void</span> <span class="nf">computeCartesianError</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Matrix4d</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">,</span>
@@ -302,17 +284,7 @@
                                       <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">Affine3d</span> <span class="o">&amp;</span><span class="n">Td</span><span class="p">,</span>
                                       <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">position_error</span><span class="p">,</span>
                                       <span class="n">Eigen</span><span class="o">::</span><span class="n">Vector3d</span><span class="o">&amp;</span> <span class="n">orientation_error</span><span class="p">);</span>
-
-    <span class="k">static</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">computeGradient</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span>
-                                              <span class="n">CostFunction</span> <span class="o">&amp;</span><span class="n">fun</span><span class="p">,</span>
-                                              <span class="k">const</span> <span class="kt">double</span> <span class="o">&amp;</span><span class="n">step</span> <span class="o">=</span> <span class="mf">1E-3</span><span class="p">);</span>
-
-    <span class="k">static</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">computeGradient</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">x</span><span class="p">,</span>
-                                              <span class="n">CostFunction</span> <span class="o">&amp;</span><span class="n">fun</span><span class="p">,</span>
-                                              <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span> <span class="n">jointMask</span><span class="p">,</span>
-                                              <span class="k">const</span> <span class="kt">double</span> <span class="o">&amp;</span><span class="n">step</span> <span class="o">=</span> <span class="mf">1E-3</span><span class="p">);</span>
 <span class="p">};</span>
-
 
 
 <span class="cp">#endif</span>

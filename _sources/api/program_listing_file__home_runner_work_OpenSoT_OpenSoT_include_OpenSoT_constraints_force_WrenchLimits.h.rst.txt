@@ -59,7 +59,7 @@ Program Listing for File WrenchLimits.h
                                 const Eigen::VectorXd& upperLims,
                                 AffineHelper wrench);
    
-                   void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims);
+                   void getWrenchLimits(Eigen::VectorXd& lowerLims, Eigen::VectorXd& upperLims) const;
    
                    void setWrenchLimits(const Eigen::VectorXd& lowerLims, const Eigen::VectorXd& upperLims);
    
@@ -91,7 +91,7 @@ Program Listing for File WrenchLimits.h
    
                    WrenchLimits::Ptr getWrenchLimits(const std::string& contact_name);
    
-                   void update(const Eigen::VectorXd &x);
+                   void update();
    
                private:
                    std::map<std::string, WrenchLimits::Ptr> _wrench_lims_constraints;

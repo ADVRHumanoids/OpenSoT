@@ -36,13 +36,21 @@ Includes
 
 - ``OpenSoT/tasks/velocity/Cartesian.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_Cartesian.h`)
 
-- ``XBotInterface/ModelInterface.h``
-
 - ``moveit_msgs/PlanningSceneWorld.h``
 
 - ``srdfdom/model.h``
 
+- ``xbot2_interface/collision.h``
 
+- ``xbot2_interface/xbotinterface2.h``
+
+
+
+Included By
+-----------
+
+
+- :ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_velocity_CollisionAvoidance.h`
 
 
 
@@ -50,8 +58,6 @@ Includes
 Namespaces
 ----------
 
-
-- :ref:`namespace_fcl`
 
 - :ref:`namespace_OpenSoT`
 
@@ -64,14 +70,5 @@ Classes
 -------
 
 
-- :ref:`exhale_class_classfcl_1_1CollisionObject`
-
 - :ref:`exhale_class_classOpenSoT_1_1constraints_1_1velocity_1_1CollisionAvoidance`
-
-
-Typedefs
---------
-
-
-- :ref:`exhale_typedef_namespacefcl_1ad8615572c5e4ddaf74ecafd812f6798d`
 

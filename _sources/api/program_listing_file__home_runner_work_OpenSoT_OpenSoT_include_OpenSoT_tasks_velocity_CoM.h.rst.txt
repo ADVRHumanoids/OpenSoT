@@ -31,7 +31,7 @@ Program Listing for File CoM.h
    #define __TASKS_VELOCITY_COM_H__
    
    #include <OpenSoT/Task.h>
-   #include <XBotInterface/ModelInterface.h>
+   #include <xbot2_interface/xbotinterface2.h>
    #include <kdl/frames.hpp>
    #include <Eigen/Dense>
    
@@ -59,18 +59,22 @@ Program Listing for File CoM.h
                    std::string _base_link;
                    std::string _distal_link;
    
+   
+               protected:
+                   virtual void _update();
+                   virtual void _log(XBot::MatLogger2::Ptr logger);
+   
+   
                public:
    
    
    
-                   CoM(const Eigen::VectorXd& x,
-                       XBot::ModelInterface& robot,
+                   CoM(XBot::ModelInterface& robot,
                        const std::string& id = "CoM"
                       );
    
                    ~CoM();
    
-                   virtual void _update(const Eigen::VectorXd& x);
    
                    virtual void setReference(const Eigen::Vector3d& desiredPosition);
                    virtual void setReference(const KDL::Vector& desiredPosition);
@@ -102,8 +106,6 @@ Program Listing for File CoM.h
    
                    bool reset();
                    
-                   virtual void _log(XBot::MatLogger2::Ptr logger);
-   
                    static bool isCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);
    
                    static OpenSoT::tasks::velocity::CoM::Ptr asCoM(OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>::TaskPtr task);

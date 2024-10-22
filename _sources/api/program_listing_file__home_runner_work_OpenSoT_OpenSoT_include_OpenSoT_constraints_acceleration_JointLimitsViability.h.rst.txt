@@ -57,6 +57,8 @@ Program Listing for File JointLimitsViability.h
    
                    GenericConstraint::Ptr _generic_constraint_internal;
    
+                   Eigen::VectorXd _zeros;
+   
    
                    double _dt;
                    double _p;
@@ -85,7 +87,7 @@ Program Listing for File JointLimitsViability.h
                                const double dt);
    
    
-                   void update(const Eigen::VectorXd& x);
+                   void update();
    
                    void setJointAccMax(const Eigen::VectorXd& jointAccMax);
    

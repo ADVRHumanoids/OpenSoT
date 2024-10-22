@@ -1,0 +1,56 @@
+
+.. _file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h:
+
+File ConstraintToTask.h
+=======================
+
+|exhale_lsh| :ref:`Parent directory <dir__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks>` (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks``)
+
+.. |exhale_lsh| unicode:: U+021B0 .. UPWARDS ARROW WITH TIP LEFTWARDS
+
+
+.. contents:: Contents
+   :local:
+   :backlinks: none
+
+Definition (``/home/runner/work/OpenSoT/OpenSoT/include/OpenSoT/tasks/ConstraintToTask.h``)
+-------------------------------------------------------------------------------------------
+
+
+.. toctree::
+   :maxdepth: 1
+
+   program_listing_file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_tasks_ConstraintToTask.h.rst
+
+
+
+
+
+Includes
+--------
+
+
+- ``OpenSoT/Constraint.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Constraint.h`)
+
+- ``OpenSoT/Task.h`` (:ref:`file__home_runner_work_OpenSoT_OpenSoT_include_OpenSoT_Task.h`)
+
+
+
+
+
+
+Namespaces
+----------
+
+
+- :ref:`namespace_OpenSoT`
+
+- :ref:`namespace_OpenSoT__tasks`
+
+
+Classes
+-------
+
+
+- :ref:`exhale_class_classOpenSoT_1_1tasks_1_1ConstraintToTask`
+

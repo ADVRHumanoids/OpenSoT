@@ -102,7 +102,7 @@
 <span class="cp">#define __TASKS_VELOCITY_MINIMUMEFFORT_H__</span>
 
  <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/Task.h&gt;</span><span class="cp"></span>
- <span class="cp">#include</span> <span class="cpf">&lt;XBotInterface/ModelInterface.h&gt;</span><span class="cp"></span>
+ <span class="cp">#include</span> <span class="cpf">&lt;xbot2_interface/xbotinterface2.h&gt;</span><span class="cp"></span>
  <span class="cp">#include</span> <span class="cpf">&lt;OpenSoT/utils/cartesian_utils.h&gt;</span><span class="cp"></span>
 
 
@@ -113,52 +113,41 @@
             <span class="k">public</span><span class="o">:</span>
                 <span class="k">typedef</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">MinimumEffort</span><span class="o">&gt;</span> <span class="n">Ptr</span><span class="p">;</span>
             <span class="k">protected</span><span class="o">:</span>
-                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_x</span><span class="p">;</span>
+                <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_model</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_q</span><span class="p">;</span>
+
+                <span class="kt">void</span> <span class="nf">_update</span><span class="p">();</span>
+
 
                 <span class="k">class</span> <span class="nc">ComputeGTauGradient</span> <span class="o">:</span> <span class="k">public</span> <span class="n">CostFunction</span> <span class="p">{</span>
                     <span class="k">public</span><span class="o">:</span>
                     <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">::</span><span class="n">Ptr</span> <span class="n">_robot</span><span class="p">;</span>
                     <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">_model</span><span class="p">;</span>
                     <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">_W</span><span class="p">;</span>
-                    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_zeros</span><span class="p">,</span> <span class="n">_tau</span><span class="p">;</span>
+                    <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_tau</span><span class="p">;</span>
                     <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_tau_lim</span><span class="p">;</span>
 
-                    <span class="n">ComputeGTauGradient</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">q</span><span class="p">,</span> <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot_model</span><span class="p">)</span> <span class="o">:</span>
-                        <span class="n">_robot</span><span class="p">(</span><span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">::</span><span class="n">getModel</span><span class="p">(</span><span class="n">robot_model</span><span class="p">.</span><span class="n">getConfigOptions</span><span class="p">())),</span>
+                    <span class="n">ComputeGTauGradient</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot_model</span><span class="p">)</span> <span class="o">:</span>
+                        <span class="n">_robot</span><span class="p">(</span><span class="n">robot_model</span><span class="p">.</span><span class="n">clone</span><span class="p">()),</span>
                         <span class="n">_model</span><span class="p">(</span><span class="n">robot_model</span><span class="p">),</span>
-                        <span class="n">_W</span><span class="p">(</span><span class="n">q</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span><span class="n">q</span><span class="p">.</span><span class="n">rows</span><span class="p">()),</span>
-                        <span class="n">_zeros</span><span class="p">(</span><span class="n">q</span><span class="p">.</span><span class="n">rows</span><span class="p">())</span>
+                        <span class="n">_W</span><span class="p">(</span><span class="n">robot_model</span><span class="p">.</span><span class="n">getNv</span><span class="p">(),</span> <span class="n">robot_model</span><span class="p">.</span><span class="n">getNv</span><span class="p">())</span>
                     <span class="p">{</span>
-                        <span class="n">_zeros</span><span class="p">.</span><span class="n">setZero</span><span class="p">(</span><span class="n">q</span><span class="p">.</span><span class="n">rows</span><span class="p">());</span>
-                        <span class="n">_W</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">(</span><span class="n">q</span><span class="p">.</span><span class="n">rows</span><span class="p">(),</span><span class="n">q</span><span class="p">.</span><span class="n">rows</span><span class="p">());</span>
+                        <span class="n">_W</span><span class="p">.</span><span class="n">setIdentity</span><span class="p">();</span>
 
                         <span class="n">_robot</span><span class="o">-&gt;</span><span class="n">syncFrom</span><span class="p">(</span><span class="n">_model</span><span class="p">);</span>
 
                         <span class="n">_model</span><span class="p">.</span><span class="n">getEffortLimits</span><span class="p">(</span><span class="n">_tau_lim</span><span class="p">);</span>
 
-                        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">q</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+                        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">robot_model</span><span class="p">.</span><span class="n">getNv</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
                             <span class="n">_W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">std</span><span class="o">::</span><span class="n">pow</span><span class="p">(</span><span class="n">_tau_lim</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">);</span>
                         <span class="p">}</span>
 
-<span class="c1">//                         _robot.switchAnchor(_model.getAnchor());</span>
-<span class="c1">//                         _robot.setAnchor_T_World(_model.getAnchor_T_World());</span>
                     <span class="p">}</span>
 
                     <span class="kt">double</span> <span class="n">compute</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="o">&amp;</span><span class="n">q</span><span class="p">)</span>
                     <span class="p">{</span>
-<span class="c1">//                         if(_robot.getAnchor() != _model.getAnchor())</span>
-<span class="c1">//                             _robot.switchAnchor(_model.getAnchor());</span>
-
                         <span class="n">_robot</span><span class="o">-&gt;</span><span class="n">setJointPosition</span><span class="p">(</span><span class="n">q</span><span class="p">);</span>
                         <span class="n">_robot</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
-<span class="c1">//                         _robot.updateiDyn3Model(cartesian_utils::fromEigentoYarp(q), true);</span>
-
-<span class="c1">//                         if(_model.getAnchor_T_World() != _robot.getAnchor_T_World())</span>
-<span class="c1">//                         {</span>
-<span class="c1">//                             assert(&quot;if q and anchor are the same, anchor_t_world should be the same!&quot;);</span>
-<span class="c1">//</span>
-<span class="c1">//                             _robot.setAnchor_T_World(_model.getAnchor_T_World());</span>
-<span class="c1">//                         }</span>
 
                         <span class="n">_robot</span><span class="o">-&gt;</span><span class="n">computeGravityCompensation</span><span class="p">(</span><span class="n">_tau</span><span class="p">);</span>
                         <span class="k">return</span> <span class="n">_tau</span><span class="p">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">*</span> <span class="n">_W</span> <span class="o">*</span> <span class="n">_tau</span><span class="p">;</span>
@@ -166,18 +155,19 @@
 
                     <span class="kt">void</span> <span class="n">setW</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">W</span><span class="p">)</span> <span class="p">{</span> <span class="n">_W</span> <span class="o">=</span> <span class="n">W</span><span class="p">;</span> <span class="p">}</span>
 
-                    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">getW</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="n">_W</span><span class="p">;}</span>
+                    <span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&amp;</span> <span class="n">getW</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span><span class="k">return</span> <span class="n">_W</span><span class="p">;}</span>
                 <span class="p">};</span>
 
                 <span class="n">ComputeGTauGradient</span> <span class="n">_gTauGradientWorker</span><span class="p">;</span>
+                <span class="kt">double</span> <span class="n">_step</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_gradient</span><span class="p">;</span>
+                <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span> <span class="n">_deltas</span><span class="p">;</span>
 
             <span class="k">public</span><span class="o">:</span>
 
-                <span class="n">MinimumEffort</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">,</span> <span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot_model</span><span class="p">);</span>
+                <span class="n">MinimumEffort</span><span class="p">(</span><span class="k">const</span> <span class="n">XBot</span><span class="o">::</span><span class="n">ModelInterface</span><span class="o">&amp;</span> <span class="n">robot_model</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span> <span class="n">step</span> <span class="o">=</span> <span class="mf">1E-3</span><span class="p">);</span>
 
                 <span class="o">~</span><span class="n">MinimumEffort</span><span class="p">();</span>
-
-                <span class="kt">void</span> <span class="nf">_update</span><span class="p">(</span><span class="k">const</span> <span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&amp;</span> <span class="n">x</span><span class="p">);</span>
 
                 <span class="kt">double</span> <span class="nf">computeEffort</span><span class="p">();</span>
 
@@ -193,7 +183,7 @@
                 <span class="p">{</span>
                     <span class="k">if</span><span class="p">(</span><span class="n">lambda</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">){</span>
                         <span class="n">_lambda</span> <span class="o">=</span> <span class="n">lambda</span><span class="p">;</span>
-                        <span class="k">this</span><span class="o">-&gt;</span><span class="n">_update</span><span class="p">(</span><span class="n">_x</span><span class="p">);</span>
+                        <span class="k">this</span><span class="o">-&gt;</span><span class="n">_update</span><span class="p">();</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">};</span>
