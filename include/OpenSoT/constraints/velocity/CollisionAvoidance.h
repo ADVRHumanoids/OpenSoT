@@ -68,6 +68,12 @@ public:
     double getLinkPairThreshold();
 
     /**
+     * @brief getError
+     * @param e
+     */
+    void getError(Eigen::VectorXd& e);
+
+    /**
      * @brief getDetectionThreshold
      * @return _Detection_threshold the maximum distance which we use to look for link pairs
      */

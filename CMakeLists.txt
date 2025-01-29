@@ -109,7 +109,8 @@ endif()
 if(${OPENSOT_COMPILE_COLLISION})
     message("Adding src/constraints/velocity/SelfCollisionAvoidance.cpp to compilation")
     set(OPENSOT_CONSTRAINTS_SOURCES ${OPENSOT_CONSTRAINTS_SOURCES}
-        src/constraints/velocity/CollisionAvoidance.cpp)
+        src/constraints/velocity/CollisionAvoidance.cpp
+        src/tasks/velocity/CollisionAvoidance.cpp)
 
 endif()
 

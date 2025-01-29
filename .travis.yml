@@ -10,13 +10,14 @@ jobs:
 branches:
   only:
     - devel
+    - 4.0-devel
 
 notifications:
   email:
     recipients:
       - luca.muratore89@gmail.com
       - arturo.laurenzi@iit.it
-      - enrico.mingo@pal-robotics.com
+      - enrico.mingo-hoffman@inria.fr
     on_success: never
     on_failure: always
 
@@ -29,7 +30,7 @@ before_script:
 - SRC_FOLDER=$PWD
 - cd .. && mkdir forest_ws && cd forest_ws && forest init  # create forest ws for building
 - ln -s $SRC_FOLDER src/$(basename $SRC_FOLDER)  # symlink original source folder
-- forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git -t master --clone-protocol https  # get recipes
+- forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git -t next --clone-protocol https  # get recipes
 
 # apt update and core packages installation
 - sudo apt-get update
@@ -85,6 +86,7 @@ before_script:
 - wget -q -O - http://xbot.cloud/xbot2/ubuntu/KEY.gpg | sudo apt-key add -  
 - sudo apt update
 - sudo apt install xbot2_desktop_full
+- sudo apt remove xbotinterface
 
 # source xbot2 framework
 - . /opt/xbot/setup.sh

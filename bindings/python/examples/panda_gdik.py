@@ -1,14 +1,30 @@
 import os
+import time
 
 import rospkg
 from xbot2_interface import pyxbot2_interface as xbi
-from pyopensot.tasks.velocity import Postural, Cartesian, Manipulability, MinimumEffort
-from pyopensot.constraints.velocity import JointLimits, VelocityLimits
+from pyopensot.tasks.velocity import Cartesian
 import pyopensot as pysot
+from scipy.spatial.transform import Rotation as R
 import numpy as np
 import rospy
 from sensor_msgs.msg import JointState
 import subprocess
+import tf
+from geometry_msgs.msg import TransformStamped
+
+from random import seed
+from random import random
+
+# seed random number generator
+seed(1)
+# generate random numbers between 0-1
+
+def generate_random_delta(min, max):
+    val = np.zeros(3)
+    for i in range(3):
+        val[i] = random()
+    return min + (val * (max - min))
 
 # Check for franka_cartesio_condif package
 try:
@@ -36,76 +52,81 @@ q = [0., -0.7, 0., -2.1, 0., 1.4, 0.]
 model.setJointPosition(q)
 model.update()
 
-# Get Joint Limits and Velocity Limits, define dt
-qmin, qmax = model.getJointLimits()
-qlims = JointLimits(model, qmax, qmin)
 
-dqmax = model.getVelocityLimits()
-dt = 1./100.
-dqlims = VelocityLimits(model, dqmax, dt)
-
-# Create postural task (it is created at the q configuration previously set
-p = Postural(model)
 
 # Create a Cartesian task at frame panda_link7, set lambda gain
 c = Cartesian("Cartesian", model, "panda_link8", "world")
-c.setLambda(0.1)
+c.setLambda(1.)
 
-# Retrieve actual pose of the frame to be used as reference
-ref = c.getActualPose().copy()
-
-# Create the stack:
-# 1st priority Cartesian position
-# 2nd priority Cartesian orientation
-# 3rd priority postural
-s = ( (c%[0,1,2]) / (c%[3,4,5]) / p) << qlims
-#s<<dqlims
-s.update()
 
 # Get the actual reference for postural and Cartesian task
-qref, dqref = p.getReference()
-print(f"qref: {qref}")
-print(f"dqref: {dqref}")
 pose_ref, vel_ref = c.getReference()
+dp = generate_random_delta(-0.2, 0.2)
+pose_ref.translation += dp
+pose_ref.linear = R.random().as_matrix()
+
 print(f"pose_ref: {pose_ref}")
-print(f"vel_ref: {vel_ref}")
-
-# Creates iHQP solver with stack (using qpOASES as backend)
-solver = pysot.iHQP(s)
-#import pyopensot_hcod
-#solver = pyopensot_hcod.HCOD(s, 1e-3)
-
 
 # IK loop
+dt = 1./1000.
 rate = rospy.Rate(1./dt)
 pub = rospy.Publisher('joint_states', JointState, queue_size=10)
 msg = JointState()
 msg.name = model.getJointNames()
 t = 0.
-alpha = 0.01
+gamma = 0.1
+epsilon = 1e-6
+
+br = tf.TransformBroadcaster()
+w_T_b = TransformStamped()
+w_T_b.header.frame_id = "world"
+w_T_b.child_frame_id = "goal"
+
+iter = 0
+max_iter=10000
 while not rospy.is_shutdown():
     # Update actual position in the model
     model.setJointPosition(q)
     model.update()
 
-    # Compute new reference for Cartesian task
-    pose_ref.translation[0] += alpha * np.sin(2.*3.1415 * t)
-    pose_ref.translation[1] += alpha * np.cos(2.*3.1415 * t)
-    t = t + alpha
-    if t > 1.:
-        t = 0
     c.setReference(pose_ref)
+    c.update()
 
-    # Update Stack
-    s.update()
-
-    # Solve
-    dq = solver.solve()
-    q += dq # Is fixed base so we can siply sum the result
+    J = c.getA()
+    e = c.getb()
+    q += gamma * np.matmul(J.transpose(), e)
 
     # Publish joint states
     msg.position = q
     msg.header.stamp = rospy.get_rostime()
+
+    w_T_b.header.stamp = msg.header.stamp
+    w_T_b.transform.translation.x = pose_ref.translation[0]
+    w_T_b.transform.translation.y = pose_ref.translation[1]
+    w_T_b.transform.translation.z = pose_ref.translation[2]
+    r = R.from_matrix(pose_ref.linear)
+    w_T_b.transform.rotation.x = r.as_quat()[0]
+    w_T_b.transform.rotation.y = r.as_quat()[1]
+    w_T_b.transform.rotation.z = r.as_quat()[2]
+    w_T_b.transform.rotation.w = r.as_quat()[3]
+
+    br.sendTransformMessage(w_T_b)
+
+    if np.linalg.norm(e, 2) <= epsilon:
+        dp = generate_random_delta(-0.2, 0.2)
+        pose_ref.translation += dp
+        pose_ref.linear = R.random().as_matrix()
+        print(f"GOAL REACHED in {iter} iterations, error norm: {np.linalg.norm(e, 2)}")
+        iter = 0
+    elif iter >= max_iter:
+        dp = generate_random_delta(-0.2, 0.2)
+        pose_ref.translation += dp
+        pose_ref.linear = R.random().as_matrix()
+        print(f"MAX ITERATION REACHED, error norm: {np.linalg.norm(e, 2)}")
+        iter = 0
+    else:
+        iter += 1
+
     pub.publish(msg)
 
     rate.sleep()

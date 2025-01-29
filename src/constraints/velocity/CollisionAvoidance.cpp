@@ -73,6 +73,11 @@ double CollisionAvoidance::getLinkPairThreshold()
     return _distance_threshold;
 }
 
+void CollisionAvoidance::getError(Eigen::VectorXd &e)
+{
+    e = _distances.array() - _distance_threshold;
+}
+
 double CollisionAvoidance::getDetectionThreshold()
 {
     return _detection_threshold;
@@ -125,6 +130,8 @@ void CollisionAvoidance::update()
         {
             continue;
         }
+
+        // DeltaD = J*dq -> DeltaD > -(d - dmin) -> -J*dq < (d - dmin)
 
         _Aineq.row(row_idx) = -_distance_J.row(i);
         _bUpperBound(row_idx) = _bound_scaling*(_distances(i) - _distance_threshold);
