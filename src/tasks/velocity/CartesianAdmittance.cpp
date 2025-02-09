@@ -248,12 +248,6 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
                                                                  const double lambda, 
                                                                  const double dt)
 {
-
-    if(lambda != 0)
-    {
-        throw std::invalid_argument("TBD lambda > 0");
-    }
-
     if((C.array() < 0).any())
     {
         return false;
