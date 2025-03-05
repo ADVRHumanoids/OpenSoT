@@ -40,8 +40,7 @@ using CollisionAvoidanceC = OpenSoT::constraints::velocity::CollisionAvoidance;
 
 std::shared_ptr<CollisionAvoidanceC> make_collision_avoidance(
     const XBot::ModelInterface& model, int max_pairs, 
-    std::string collision_urdf_str, std::string collision_srdf_str,
-    bool skip_infeasible_pairs)
+    std::string collision_urdf_str, std::string collision_srdf_str)
 {
     urdf::ModelSharedPtr collision_urdf;
     if(!collision_urdf_str.empty()){
@@ -60,7 +59,7 @@ std::shared_ptr<CollisionAvoidanceC> make_collision_avoidance(
         }
     }
 
-    return std::make_shared<CollisionAvoidanceC>(model, max_pairs, collision_urdf, collision_srdf, skip_infeasible_pairs);
+    return std::make_shared<CollisionAvoidanceC>(model, max_pairs, collision_urdf, collision_srdf);
 }
 
 
@@ -70,7 +69,8 @@ void pyVelocityCollisionAvoidance(py::module& m) {
 
     py::class_<CollisionAvoidance, std::shared_ptr<CollisionAvoidance>, OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CollisionAvoidance")
         .def(py::init(&make_collision_avoidance),
-             py::arg(), py::arg("max_pairs") = -1, py::arg("collision_urdf") = "", py::arg("collision_srdf") = "", py::arg("skip_infeasible_pairs") = true)
+             py::arg(), py::arg("max_pairs") = -1, py::arg("collision_urdf") = "", py::arg("collision_srdf") = "")
+        .def("setInfeasiblePairWeight", &CollisionAvoidance::setInfeasiblePairWeight)
         .def("getLinkPairThreshold", &CollisionAvoidance::getLinkPairThreshold)
         .def("getDetectionThreshold", &CollisionAvoidance::getDetectionThreshold)
         .def("setLinkPairThreshold", &CollisionAvoidance::setLinkPairThreshold)
