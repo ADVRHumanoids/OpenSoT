@@ -29,10 +29,10 @@ OSQPBackEnd::OSQPBackEnd(const int number_of_variables,
     _eps_regularisation(eps_regularisation*BASE_REGULARISATION) //TO HAVE COMPATIBILITY WITH THE QPOASES ONE!
 {
     
-    #ifdef DLONG
+/*    #ifdef DLONG
         throw std::runtime_error("DLONG option in OSQP should be set to OFF in CMakeLists!");
     #endif
-    
+*/    
     _P_values.resize(getNumVariables()*(getNumVariables() + 1)/2);
     
     _settings = std::make_shared<OSQPSettings>();
