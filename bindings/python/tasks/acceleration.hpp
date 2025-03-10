@@ -152,6 +152,7 @@ void pyAccelerationCoM(py::module& m) {
             .def("getDistalLink", &acceleration::CoM::getDistalLink)
             .def("setReference", py::overload_cast<const Eigen::Vector3d&>(&acceleration::CoM::setReference))
             .def("setReference", py::overload_cast<const Eigen::Vector3d&, const Eigen::Vector3d&>(&acceleration::CoM::setReference))
+            .def("setReference", py::overload_cast<const Eigen::Vector3d&, const Eigen::Vector3d&, const Eigen::Vector3d&>(&acceleration::CoM::setReference))
             .def("getReference", com_get_reference_)
             .def("getActualPose", com_get_actual_pos)
             .def("getPosError", com_get_pos_error)
