@@ -30,7 +30,7 @@ bool OpenSoT::tasks::MinimizeVariable::setReference(const Eigen::VectorXd& ref)
     
 }
 
-void OpenSoT::tasks::MinimizeVariable::getReference(Eigen::VectorXd& ref)
+void OpenSoT::tasks::MinimizeVariable::getReference(Eigen::VectorXd& ref) const
 {
     ref = _ref;
 }

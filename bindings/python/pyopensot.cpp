@@ -7,6 +7,7 @@
 #include "solver.hpp"
 #include "tasks/velocity.hpp"
 #include "tasks/acceleration.hpp"
+#include "tasks/minimize_variable.hpp"
 #include "constraints/velocity.hpp"
 #include "constraints/acceleration.hpp"
 #include "constraints/force.hpp"
@@ -30,6 +31,7 @@ PYBIND11_MODULE(pyopensot, m) {
     pynHQP(m);
 
     auto m_t = m.def_submodule("tasks");
+    pyMinimizeVariable(m_t);
 
     auto m_tv = m_t.def_submodule("velocity");
     pyVelocityPostural(m_tv);

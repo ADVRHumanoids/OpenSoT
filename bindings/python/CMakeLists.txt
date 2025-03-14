@@ -24,6 +24,7 @@ if(${pybind11_FOUND})
                                     solver.hpp
                                     tasks/velocity.hpp
                                     tasks/acceleration.hpp
+                                    tasks/minimize_variable.hpp
                                     constraints/velocity.hpp
                                     constraints/acceleration.hpp
                                     constraints/force.hpp)

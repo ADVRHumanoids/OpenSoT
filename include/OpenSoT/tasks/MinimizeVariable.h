@@ -39,7 +39,7 @@ public:
     
     virtual void _update();
 
-    void getReference(Eigen::VectorXd& ref);
+    void getReference(Eigen::VectorXd& ref) const;
     
     
     
