@@ -88,6 +88,8 @@ set(OPENSOT_CONSTRAINTS_SOURCES src/constraints/Aggregated.cpp
     src/constraints/velocity/JointLimits.cpp
     src/constraints/velocity/JointLimitsInvariance.cpp
     src/constraints/velocity/VelocityLimits.cpp
+    src/constraints/velocity/AccelerationLimits.cpp
+    src/constraints/velocity/JerkLimits.cpp
     src/constraints/velocity/OmniWheels4X.cpp
     src/constraints/force/FrictionCone.cpp
     src/constraints/force/WrenchLimits.cpp
