@@ -27,7 +27,8 @@ if(${pybind11_FOUND})
                                     tasks/minimize_variable.hpp
                                     constraints/velocity.hpp
                                     constraints/acceleration.hpp
-                                    constraints/force.hpp)
+                                    constraints/force.hpp
+                                    variables/torque.hpp)
 
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
     pybind11_add_module(pyopensot ${OPENSOT_BINDINGS_SOURCES})

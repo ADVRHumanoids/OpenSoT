@@ -87,7 +87,7 @@ Eigen::VectorXd get_value(const AffineHelper& var, const Eigen::VectorXd& x)
 }
 
 void pyAffineHelper(py::module& m, const std::string& className) {
-    py::class_<AffineHelper>(m, className.c_str())
+    py::class_<AffineHelper, std::shared_ptr<AffineHelper>>(m, className.c_str())
         .def(py::init<>())
         .def(py::init<int, int>())
         .def(py::init<const Eigen::MatrixXd&, const Eigen::VectorXd&>())

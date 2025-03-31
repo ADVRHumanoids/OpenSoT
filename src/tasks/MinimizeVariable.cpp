@@ -3,7 +3,10 @@
 
 void OpenSoT::tasks::MinimizeVariable::_update()
 {
+    _var.update();
 
+    _A = _var.getM();
+    _b = _ref - _var.getq();
 }
 
 OpenSoT::tasks::MinimizeVariable::MinimizeVariable(std::string task_id, 
@@ -14,6 +17,8 @@ OpenSoT::tasks::MinimizeVariable::MinimizeVariable(std::string task_id,
     _A = _var.getM();
     _b = -_var.getq();
     _W.setIdentity(_A.rows(), _A.rows());
+
+    _ref.setZero(_var.getq().rows());
 }
 
 bool OpenSoT::tasks::MinimizeVariable::setReference(const Eigen::VectorXd& ref)

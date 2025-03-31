@@ -11,6 +11,7 @@
 #include "constraints/velocity.hpp"
 #include "constraints/acceleration.hpp"
 #include "constraints/force.hpp"
+#include "variables/torque.hpp"
 
 PYBIND11_MODULE(pyopensot, m) {
     pyTask<Eigen::MatrixXd, Eigen::VectorXd>(m, "Task");
@@ -66,4 +67,8 @@ PYBIND11_MODULE(pyopensot, m) {
     pyForceFrictionCone(m_cf);
     pyForceNormalTorque(m_cf);
     pyWrenchLimits(m_cf);
+
+    auto m_v = m.def_submodule("variables");
+    pyTorqueVariable(m_v);
+
 }

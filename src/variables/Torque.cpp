@@ -15,6 +15,11 @@ OpenSoT::variables::Torque::Torque(XBot::ModelInterface::Ptr model,
     if( _qddot_var.getOutputSize() != model->getNv() ){
         throw std::runtime_error("_qddot_var.getOutputSize() != model->getNv()");
     }
+
+    for(unsigned int i = 0; i < _num_contacts; ++i){
+        _Jc.push_back(Eigen::MatrixXd::Zero(6, model->getNv()));
+    }
+
     _S.setZero(model->getActuatedNv(), model->getNv());
     _S.rightCols(model->getActuatedNv()) = Eigen::MatrixXd::Identity(model->getActuatedNv(), model->getActuatedNv());
     update();
@@ -38,8 +43,8 @@ void OpenSoT::variables::Torque::update()
     // _d += _S * _B * _qddot_var.getd();
     
     
-    for(int i = 0; i < _num_contacts; i++){
-        
+    for(int i = 0; i < _num_contacts; i++)
+     {
         _model->getJacobian(_contact_links[i], _Jc[i]);
 
         self() =  self() + (-_S)*_Jc[i].block(0,0,_force_vars.at(i).getM().rows(), _Jc[i].cols()).transpose()*_force_vars.at(i);

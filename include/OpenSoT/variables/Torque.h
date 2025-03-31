@@ -19,6 +19,7 @@ public:
 
     virtual void update();
     
+
     
 private:
     
@@ -33,11 +34,6 @@ private:
     Eigen::VectorXd _h;
     std::vector<Eigen::MatrixXd> _Jc;
     Eigen::MatrixXd _B, _S;
-    
-    Eigen::MatrixXd _C;
-    Eigen::VectorXd _d;
-    
-    AffineHelper _tau;
     
     
 };
