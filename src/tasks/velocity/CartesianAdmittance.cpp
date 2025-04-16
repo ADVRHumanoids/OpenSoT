@@ -109,10 +109,20 @@ OpenSoT::tasks::velocity::CartesianAdmittance::Ptr CartesianAdmittance::asCartes
     return std::dynamic_pointer_cast<OpenSoT::tasks::velocity::CartesianAdmittance>(task);
 }
 
+const Eigen::Vector6d& CartesianAdmittance::getFilterOmega()
+{
+    return _w;
+}
+
 const Eigen::Matrix6d& CartesianAdmittance::getCartesianCompliance()
 {
     _tmp_mat6 = _C.asDiagonal();
     return _tmp_mat6;
+}
+
+double CartesianAdmittance::getLambda()
+{
+    return _lambda;
 }
 
 void CartesianAdmittance::getCartesianCompliance(Eigen::Matrix6d& C)
@@ -120,10 +130,23 @@ void CartesianAdmittance::getCartesianCompliance(Eigen::Matrix6d& C)
     C = _C.asDiagonal();
 }
 
-
 double CartesianAdmittance::getFilterTimeStep()
 {
-    return _dt;
+    int channel = 0;
+    for(unsigned int i = 1; i < _filter.getNumberOfChannels(); ++i)
+    {
+        if(_filter.getTimeStep(i) != _filter.getTimeStep(channel))
+        {
+            XBot::Logger::error("Filter time step is not the same for all channels! \nChannel %d has time step %f, while channel %d has time step %f\n", i, _filter.getTimeStep(i), channel, _filter.getTimeStep(channel));
+            return -1;
+        }
+    }
+    if(_filter.getTimeStep(channel) != _dt)
+    {
+        XBot::Logger::error("Filter time step is not equal to Admittance Task dt! \nFilter time step: %f, Admittance Task dt: %f\n", _filter.getTimeStep(channel), _dt);
+        return -1;
+    }
+    return _filter.getTimeStep(channel);
 }
 
 void CartesianAdmittance::setFilterDamping(const double damping)
@@ -166,8 +189,6 @@ const Eigen::Matrix6d CartesianAdmittance::getDamping()
     return _D.asDiagonal();
 }
 
-
-
 bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K, 
                                             const Eigen::Vector6d& D, 
                                             const double lambda, 
@@ -197,8 +218,6 @@ bool CartesianAdmittance::computeParameters(const Eigen::Vector6d& K,
 
     return true;
 }
-
-
 
 void CartesianAdmittance::setImpedanceParams(const Eigen::Vector6d& K, 
                                              const Eigen::Vector6d& D, 
@@ -238,6 +257,7 @@ void CartesianAdmittance::setImpedanceParams(const Eigen::Vector6d& K,
             _D = D;
             _K = K;
             _dt = dt;
+            setFilterTimeStep(_dt);
             setFilterOmega(_w);
         }
    }
@@ -269,12 +289,9 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
     }
     
     _C = C;
-    
-    for(unsigned int i = 0; i < _filter.getNumberOfChannels(); ++i)
-    {
-        _filter.setTimeStep(dt, i);
-        _filter.setOmega(omega[i], i);
-    }
+
+    setFilterTimeStep(dt);
+    setFilterOmega(omega);
     
     _lambda = lambda;
     
@@ -284,7 +301,6 @@ bool OpenSoT::tasks::velocity::CartesianAdmittance::setRawParams(const Eigen::Ve
     _w = omega;
     _dt = dt;
     
-    
     return true;
 }
 
@@ -292,6 +308,12 @@ void CartesianAdmittance::setFilterOmega(const Eigen::Vector6d& w)
 {
     for(unsigned int i = 0; i < CHANNELS; ++i)
         _filter.setOmega(w[i], i);
+}
+
+void CartesianAdmittance::setFilterTimeStep(const double dt)
+{
+    for(unsigned int i = 0; i < CHANNELS; ++i)
+        _filter.setTimeStep(dt, i);
 }
 
 void CartesianAdmittance::apply_deadzone(Eigen::Vector6d& data)

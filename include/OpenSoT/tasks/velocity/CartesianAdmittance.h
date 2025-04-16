@@ -274,6 +274,12 @@ namespace OpenSoT {
                                 XBot::ForceTorqueSensor::ConstPtr ft_sensor);
 
            /**
+            * @brief getFilterOmega
+            * @return the filter omega vector
+            */
+           const Eigen::Vector6d& getFilterOmega();           
+            
+           /**
             * @brief getCartesianCompliance
             * @return the actual Compliance matrix
             */
@@ -345,6 +351,14 @@ namespace OpenSoT {
            const Eigen::Matrix6d getDamping();
            
            double getFilterTimeStep();
+
+           void setFilterTimeStep(const double time_step);
+
+           /**
+            * @brief getLambda
+            * @return lambda of Cartesian Task
+            */
+           double getLambda();
            
            void setFilterDamping(const double damping);
            
