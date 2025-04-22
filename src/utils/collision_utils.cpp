@@ -86,6 +86,14 @@ bool ComputeLinksDistance::parseCollisionObjects()
     // loop over links
     for(auto link : links)
     {
+        // link does not exist in model, skip
+        Eigen::Affine3d T_unused;
+        if(!_model.getPose(link->name, T_unused))
+        {
+            std::cout << "Link not defined in model: " << link->name << std::endl;
+            continue;
+        }
+
         // no collision defined, skip
         if(!link->collision)
         {
