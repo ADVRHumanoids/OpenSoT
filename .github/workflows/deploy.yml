@@ -1,0 +1,22 @@
+name: Build and Publish Debian Package
+
+on:
+  push:
+    branches:
+      - 4.0-devel
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Send push notification to packaging workflow
+        uses: peter-evans/repository-dispatch@v3.0.0
+        with:
+          token: ${{ secrets.REMOTE_TRIGGER_PACKAGING }}
+          repository: Gauss-Robotics/opensot-packager
+          event-type: rebuilt-opensot
+          client-payload: |
+            {
+              "ref": "${{ github.ref }}",
+              "sha": "${{ github.sha }}"
+            }
