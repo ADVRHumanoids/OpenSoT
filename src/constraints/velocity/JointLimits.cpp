@@ -34,7 +34,7 @@ JointLimits::JointLimits(   const XBot::ModelInterface& robot,
     JointLimits::update();
 }
 
-void JointLimits::update()
+void JointLimits::_update()
 {
     _robot.difference(_robot.getJointPosition(),
                       _robot.getNeutralQ(),

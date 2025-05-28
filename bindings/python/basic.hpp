@@ -20,6 +20,18 @@ public:
     }
 };
 
+template <class MatrixType, class VectorType>
+class pyConstraintTrampoline : public Constraint<MatrixType, VectorType> {
+public:
+    using Constraint<MatrixType, VectorType>::Constraint;
+    typedef Constraint<MatrixType, VectorType> CMV;
+
+    void _update() override {
+        PYBIND11_OVERLOAD_PURE(void, CMV, _update);
+    }
+};
+
+
 template<typename MatrixType, typename VectorType>
 void pyTask(py::module& m, const std::string& className) {
     py::class_<Task<MatrixType, VectorType>, std::shared_ptr<Task<MatrixType, VectorType>>, pyTaskTrampoline<MatrixType, VectorType>>(m, className.c_str())
@@ -73,7 +85,7 @@ void pyTask(py::module& m, const std::string& className) {
 
 template<typename MatrixType, typename VectorType>
 void pyConstraint(py::module& m, const std::string& className) {
-    py::class_<Constraint<MatrixType, VectorType>, std::shared_ptr<Constraint<MatrixType, VectorType>>> (m, className.c_str())
+    py::class_<Constraint<MatrixType, VectorType>, std::shared_ptr<Constraint<MatrixType, VectorType>>, pyConstraintTrampoline<MatrixType, VectorType>> (m, className.c_str())
             .def(py::init<const std::string&, const unsigned int>())
             .def("getXSize", &Constraint<MatrixType, VectorType>::getXSize)
             .def("getLowerBound", &Constraint<MatrixType, VectorType>::getLowerBound, py::return_value_policy::reference)

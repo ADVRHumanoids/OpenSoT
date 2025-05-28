@@ -32,8 +32,6 @@ public:
                  const std::vector<std::string>& contact_links,
                  const Eigen::VectorXd& torque_limits);
 
-    void update();
-
     /**
      * @brief setTorqueLimits to set new torque limits
      * @param torque_limits
@@ -74,6 +72,8 @@ private:
 
     Eigen::VectorXd _h;
     Eigen::MatrixXd _B, _Jtmp;
+
+    void _update();
 };
 }
 }

@@ -55,7 +55,7 @@ JointLimits::JointLimits(   XBot::ModelInterface& robot,
 }
 
 
-void JointLimits::update()
+void JointLimits::_update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);

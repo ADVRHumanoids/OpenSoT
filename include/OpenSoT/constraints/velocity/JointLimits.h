@@ -37,6 +37,8 @@
                 Eigen::VectorXd _jointLimitsMin;
                 Eigen::VectorXd _jointLimitsMax;
                 Eigen::VectorXd _dq;
+
+                void _update();
             public:
                 /**
                  * @brief JointLimits constructor
@@ -54,7 +56,7 @@
                             const Eigen::VectorXd &jointBoundMin,
                             const double boundScaling = 1.0);
 
-                void update();
+
                 void setBoundScaling(const double boundScaling);
             };
         }

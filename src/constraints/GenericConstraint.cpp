@@ -77,7 +77,7 @@ bool OpenSoT::constraints::GenericConstraint::setConstraint(const AffineHelper& 
 }
 
 
-void OpenSoT::constraints::GenericConstraint::update()
+void OpenSoT::constraints::GenericConstraint::_update()
 {
 
 }

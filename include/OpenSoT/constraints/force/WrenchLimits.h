@@ -87,6 +87,7 @@
 
             private:
                 void generateBounds();
+                void _update(){};
             };
 
             /**
@@ -135,12 +136,12 @@
                  */
                 WrenchLimits::Ptr getWrenchLimits(const std::string& contact_name);
 
-                void update();
 
             private:
                 std::map<std::string, WrenchLimits::Ptr> _wrench_lims_constraints;
                 OpenSoT::constraints::Aggregated::Ptr _aggregated_constraint;
                 virtual void generateBounds();
+                void _update();
 
             };
         }

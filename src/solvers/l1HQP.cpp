@@ -227,7 +227,7 @@ task_to_constraint_helper::task_to_constraint_helper(std::string id, OpenSoT::ta
     update();
 }
 
-void task_to_constraint_helper::update()
+void task_to_constraint_helper::_update()
 {
     _AA.pile(_task->getWA());
     _AA.pile(-_task->getWA());
@@ -257,7 +257,7 @@ constraint_helper::constraint_helper(std::string id, OpenSoT::constraints::Aggre
     update();
 }
 
-void constraint_helper::update()
+void constraint_helper::_update()
 {
 
 
@@ -307,7 +307,7 @@ priority_constraint::priority_constraint(const std::string& id,
     _Aineq = _ones.transpose();
 }
 
-void priority_constraint::update()
+void priority_constraint::_update()
 {
 
 }

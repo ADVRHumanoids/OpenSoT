@@ -48,6 +48,12 @@ namespace OpenSoT {
                 GenericConstraint::Ptr _generic_constraint_internal;
                 double _dt, _p;
 
+                /**
+                 * @brief update method from coonstraint base class to be implemented
+                 * @param x
+                 */
+                void _update();
+
             public:
                 /**
                  * @brief JointLimitsPSAP constructor
@@ -66,12 +72,6 @@ namespace OpenSoT {
                             const Eigen::VectorXd &jointVelMax,
                             const Eigen::VectorXd &jointAccMax,
                             const double dt);
-
-                /**
-                 * @brief update method from coonstraint base class to be implemented
-                 * @param x
-                 */
-                void update();
 
                 /**
                  * @brief setPStepAheadPredictor

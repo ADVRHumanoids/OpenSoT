@@ -52,7 +52,7 @@ TaskToConstraint::TaskToConstraint(TaskToConstraint::TaskPtr task,
 }
 
 
-void TaskToConstraint::update()
+void TaskToConstraint::_update()
 {
     _task->update();
     this->generateAll();

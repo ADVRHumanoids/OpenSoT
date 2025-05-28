@@ -69,11 +69,6 @@ namespace OpenSoT {
                        const std::vector<std::string> joint_wheels_name,
                        const std::string base_link,
                        XBot::ModelInterface& robot);
-           /**
-            * @brief update the constraint
-            * @param x state vector
-            */
-           virtual void update();
 
            /**
             * @brief setIsGlobalVelocity set the flag to consider the velocity in the global frame
@@ -94,6 +89,12 @@ namespace OpenSoT {
            Eigen::Affine3d _w_T_b;
            const std::string _base_link;
            bool _is_global_velocity;
+
+           /**
+            * @brief _update the constraint
+            * @param x state vector
+            */
+           void _update();
        };
 
        }

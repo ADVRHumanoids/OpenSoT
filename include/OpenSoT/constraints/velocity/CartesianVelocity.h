@@ -43,6 +43,8 @@
                 void generatebBounds();
                 void generateAineq();
 
+                void _update();
+
             public:
                 /**
                  * @brief CartesianVelocity constructor
@@ -60,7 +62,6 @@
                                   const double dT,
                                   const OpenSoT::tasks::velocity::CoM::Ptr& task);
 
-                virtual void update();
 
                 /**
                  * @brief getVelocityLimits

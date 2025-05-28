@@ -55,7 +55,7 @@ namespace OpenSoT {
 
 
 
-       void FrictionCone::update()
+       void FrictionCone::_update()
        {
 
        }
@@ -121,7 +121,7 @@ namespace OpenSoT {
                return NULL;
        }
 
-       void FrictionCones::update()
+       void FrictionCones::_update()
        {
            _internal_constraint->update();
            generateBounds();

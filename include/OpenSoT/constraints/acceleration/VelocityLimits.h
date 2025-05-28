@@ -41,11 +41,6 @@ public:
                    const Eigen::VectorXd& qDotLimit,
                    const double dT);
 
-    /**
-     * @brief update
-     * @param x
-     */
-    virtual void update();
 
     /**
      * @brief setVelocityLimits update velocity limits
@@ -77,6 +72,11 @@ private:
     double _dT;
     double _p;
 
+    /**
+     * @brief _update
+     * @param x
+     */
+    virtual void _update();
 };
 
 } } }

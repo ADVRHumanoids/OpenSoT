@@ -32,12 +32,12 @@ namespace solvers {
         priority_constraint(const std::string& id,
                             const OpenSoT::tasks::GenericLPTask::Ptr high_priority_task,
                             const OpenSoT::tasks::GenericLPTask::Ptr low_priority_task);
-        void update();
     private:
         std::weak_ptr<OpenSoT::tasks::GenericLPTask> _high_task;
         std::weak_ptr<OpenSoT::tasks::GenericLPTask> _low_task;
 
         Eigen::MatrixXd _ones;
+        void _update();
     };
 
     class constraint_helper: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
@@ -48,7 +48,6 @@ namespace solvers {
         constraint_helper(std::string id, OpenSoT::constraints::Aggregated::ConstraintPtr constraints,
                           const AffineHelper& x);
 
-        void update();
     private:
         OpenSoT::constraints::Aggregated::ConstraintPtr _constraints;
         AffineHelper _constraint;
@@ -59,6 +58,7 @@ namespace solvers {
         OpenSoT::utils::MatrixPiler _b_lower;
         OpenSoT::utils::MatrixPiler _b_upper;
 
+        void _update();
     };
 
     class task_to_constraint_helper: public Constraint<Eigen::MatrixXd, Eigen::VectorXd>
@@ -79,7 +79,6 @@ namespace solvers {
         task_to_constraint_helper(std::string id, OpenSoT::tasks::Aggregated::TaskPtr& task,
                                   const AffineHelper& x, const AffineHelper& t);
 
-        void update();
     private:
         OpenSoT::tasks::Aggregated::TaskPtr& _task;
         AffineHelper _constraint;
@@ -93,6 +92,8 @@ namespace solvers {
         Eigen::VectorXd o, inf, ones;
         Eigen::MatrixXd O;
         double M = 10.; //This is for the Big-M constraint
+
+        void _update();
     };
 
     class l1HQP: public Solver<Eigen::MatrixXd, Eigen::VectorXd>

@@ -93,13 +93,6 @@ public:
      */
     void setDetectionThreshold(const double detection_threshold);
 
-    /**
-     * @brief update recomputes Aineq and bUpperBound if x is different than the
-     *  previously stored value
-     * @param x the state vector.
-     */
-    void update();
-
 
     void setMaxPairs(const unsigned int max_pairs);
 
@@ -178,6 +171,12 @@ public:
     ~CollisionAvoidance();
 
 protected:
+    /**
+     * @brief _update recomputes Aineq and bUpperBound if x is different than the
+     *  previously stored value
+     * @param x the state vector.
+     */
+    void _update();
 
     /**
      * @brief _include_env

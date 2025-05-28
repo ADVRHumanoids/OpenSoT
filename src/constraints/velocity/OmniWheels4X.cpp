@@ -67,7 +67,7 @@ OmniWheels4X::OmniWheels4X(const double l1, const double l2, const double r,
 
 }
 
-void OmniWheels4X::update()
+void OmniWheels4X::_update()
 {
     _w_T_b.setIdentity();
 

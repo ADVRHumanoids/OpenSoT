@@ -101,7 +101,7 @@ AffineConstraint::~AffineConstraint()
 
 }
 
-void AffineConstraint::update()
+void AffineConstraint::_update()
 {
     //1. Update internal constraint
     _internal_constraint->update();

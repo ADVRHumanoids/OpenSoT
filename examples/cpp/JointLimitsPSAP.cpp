@@ -54,7 +54,7 @@ JointLimitsPSAP::JointLimitsPSAP(XBot::ModelInterface &robot,
     update();
 }
 
-void JointLimitsPSAP::update()
+void JointLimitsPSAP::_update()
 {
     /**
       * @brief Retrieve joint positions and velocities from internal model

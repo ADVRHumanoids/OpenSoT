@@ -108,6 +108,9 @@
 
         }
 
+        /** Updates the matrices and vector of the constraint */
+        virtual void _update() = 0;
+
     public:
         Constraint(const std::string constraint_id,
                    const unsigned int x_size) :
@@ -177,8 +180,11 @@
          */
         std::string getConstraintID(){ return _constraint_id; }
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
-        virtual void update() {}
+        /** Updates the constraint matrices and vectors*/
+        void update()
+        {
+            this->_update();
+        }
 
         /**
          * @brief log logs common Constraint internal variables

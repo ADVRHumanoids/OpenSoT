@@ -44,7 +44,7 @@ JointLimitsInvariance::JointLimitsInvariance(const Eigen::VectorXd &jointBoundMa
     update();
 }
 
-void JointLimitsInvariance::update()
+void JointLimitsInvariance::_update()
 {
     _robot.getJointVelocity(_qdot_prev);
     _robot.getJointPosition(_q);
