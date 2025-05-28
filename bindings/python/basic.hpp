@@ -106,6 +106,8 @@ void pyConstraint(py::module& m, const std::string& className) {
             .def("update", &Constraint<MatrixType, VectorType>::update)
             .def("log", &Constraint<MatrixType, VectorType>::log)
             .def("checkConsistency", &Constraint<MatrixType, VectorType>::checkConsistency)
+            .def("getActiveJointsMask", &Constraint<MatrixType, VectorType>::getActiveJointsMask)
+            .def("setActiveJointsMask", &Constraint<MatrixType, VectorType>::setActiveJointsMask)
             .def("__mod__", [](const std::shared_ptr<Constraint<MatrixType, VectorType>> constraint, const std::list<unsigned int>& rowIndices) {
                 return constraint % rowIndices;});
 }

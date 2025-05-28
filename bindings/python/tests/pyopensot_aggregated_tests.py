@@ -79,3 +79,16 @@ print(f"sc4.getAineq(): {sc4.getAineq()}")
 print(f"sc4.getbUpperBound(): {sc4.getbUpperBound()}")
 print(f"sc4.getbLowerBound(): {sc4.getbLowerBound()}")
 
+c1_joint_mask = c1.getActiveJointsMask()
+print(f"c1_joint_mask: {c1_joint_mask}")
+c1_joint_mask[1] = False
+c1.setActiveJointsMask(c1_joint_mask)
+
+c4.update()
+print(f"c4.getAineq(): {c4.getAineq()}")
+
+c4.setActiveJointsMask(c1_joint_mask)
+c4.update()
+print(f"c4.getAineq(): {c4.getAineq()}")
+
+
