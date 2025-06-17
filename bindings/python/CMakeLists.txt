@@ -38,7 +38,7 @@ if(${pybind11_FOUND})
 
     install(TARGETS pyopensot
         COMPONENT python
-        LIBRARY DESTINATION "/usr/local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/dist-packages"
+        LIBRARY DESTINATION "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
         ARCHIVE DESTINATION "lib"
         RUNTIME DESTINATION "bin")
 

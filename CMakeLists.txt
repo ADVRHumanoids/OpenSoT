@@ -2,7 +2,7 @@
 # Authors: Enrico Mingo Hoffman, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 include(ExternalProject)
 project(open_sot VERSION 4.0.0)
 
