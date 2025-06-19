@@ -34,8 +34,7 @@ void AngularMomentum::_update()
     _robot.computeCentroidalMomentumMatrix(_Mom);
     _L = _robot.computeCentroidalMomentum();
 
-    // WARN: missing CMMdot*v API !
-    _Momdot.setZero();
+    _Momdot = _robot.computeCentroidalMomentumdotTimesV();
 
     //2. if not init, initialize momentum reference with actual momentum
     if(!_is_init)
