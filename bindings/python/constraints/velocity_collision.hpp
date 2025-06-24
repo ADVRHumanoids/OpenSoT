@@ -43,7 +43,6 @@ void pyVelocityCollisionAvoidance(py::module& m) {
     py::class_<CollisionAvoidance, std::shared_ptr<CollisionAvoidance>, OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CollisionAvoidance")
         .def(py::init(&make_collision_avoidance),
              py::arg(), py::arg("max_pairs") = -1, py::arg("collision_urdf") = "", py::arg("collision_srdf") = "")
-        .def("setInfeasiblePairWeight", &CollisionAvoidance::setInfeasiblePairWeight)
         .def("getLinkPairThreshold", &CollisionAvoidance::getLinkPairThreshold)
         .def("getDetectionThreshold", &CollisionAvoidance::getDetectionThreshold)
         .def("setLinkPairThreshold", &CollisionAvoidance::setLinkPairThreshold)
