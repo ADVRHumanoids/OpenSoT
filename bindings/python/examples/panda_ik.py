@@ -72,6 +72,9 @@ print(f"vel_ref: {vel_ref}")
 
 # Creates iHQP solver with stack (using qpOASES as backend)
 solver = pysot.iHQP(s)
+#import pyopensot_hcod
+#solver = pyopensot_hcod.HCOD(s, 1e-3)
+
 
 # IK loop
 rate = rospy.Rate(1./dt)
