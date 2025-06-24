@@ -55,6 +55,8 @@ namespace OpenSoT {
 
                 Eigen::VectorXd _ones;
 
+                void _update();
+
             public:
                 /**
                  * @brief JointLimitsECBF constructor
@@ -72,7 +74,6 @@ namespace OpenSoT {
                             const Eigen::VectorXd &jointVelMax,
                             const Eigen::VectorXd &jointAccMax);
 
-                void update();
 
                 /**
                  * @brief setAlpha1 gain applied to joint position limits

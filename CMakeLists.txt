@@ -51,6 +51,7 @@ option(OPENSOT_VERBOSE "Some additional prints" FALSE)
 option(OPENSOT_VERBOSE_MATLOG "Log all aggregated tasks/constraints to MAT-file" FALSE)
 option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
 option(OPENSOT_COMPILE_COLLISION "Compile OpenSoT collision avoidance" TRUE)
+option(OPENSOT_COMPILE_OSQP_BACKEND "Compile OpenSotBackEndOSQP" TRUE)
 
 if(${OPENSOT_DISABLE_VECTORIZATION})
     add_definitions(-DEIGEN_DONT_VECTORIZE)
@@ -261,7 +262,7 @@ if(${qpOASES_FOUND})
 endif()
 
 find_package(osqp QUIET)
-if(${osqp_FOUND})
+if(${osqp_FOUND} AND ${OPENSOT_COMPILE_OSQP_BACKEND})
     message("Adding src/solvers/OSQPBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)

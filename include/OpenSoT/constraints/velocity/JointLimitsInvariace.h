@@ -67,6 +67,7 @@
 
                 double _p;
 
+                void _update();
             public:
                 /**
                  * @brief JointLimitsInvariance constructor
@@ -83,8 +84,6 @@
                             XBot::ModelInterface& robot,
                             const double dt);
 
-
-                void update();
 
                 /**
                  * @brief setJointAccMax updates joint acceleration limits

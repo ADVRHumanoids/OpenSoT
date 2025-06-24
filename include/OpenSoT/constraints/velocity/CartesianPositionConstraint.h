@@ -54,6 +54,8 @@
                 Eigen::MatrixXd J;
                 Eigen::VectorXd currentPosition;
 
+                void _update();
+
             public:
                 /**
                  * @brief CartesianPositionConstraint
@@ -84,8 +86,6 @@
                                              const Eigen::MatrixXd& A_Cartesian,
                                              const Eigen::VectorXd& b_Cartesian,
                                             const double boundScaling = 1.0);
-
-                void update();
 
                 /**
                  * @brief getCurrentPosition return the current Cartesian position of the bounded Task

@@ -53,7 +53,7 @@ _com_task(task), _is_cartesian(false)
 
 
 
-void CartesianVelocity::update() {
+void CartesianVelocity::_update() {
 
     this->generateAineq();
 

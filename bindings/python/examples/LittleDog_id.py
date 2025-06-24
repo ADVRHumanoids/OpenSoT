@@ -5,6 +5,8 @@ from xbot2_interface import pyxbot2_interface as xbi
 from pyopensot.tasks.acceleration import Cartesian, CoM, DynamicFeasibility
 from pyopensot.constraints.acceleration import JointLimits, VelocityLimits
 from pyopensot.constraints.force import FrictionCone
+from pyopensot.variables import Torque
+from pyopensot.tasks import MinimizeVariable
 import pyopensot as pysot
 import numpy as np
 import rospy
@@ -72,6 +74,9 @@ force_variables = list()
 for i in range(len(contact_frames)):
     stack = stack + 10.*(contact_tasks[i]%[0, 1, 2])
     force_variables.append(variables.getVariable(contact_frames[i]))
+
+torques = Torque(model=model, qddot_var=variables.getVariable("qddot"), contact_links=contact_frames, force_vars=force_variables)
+stack = stack + 1e-3 * MinimizeVariable("min_torques", torques)
 
 # Creates the stack.
 # Notice:  we do not need to keep track of the DynamicFeasibility constraint so it is created when added into the stack.

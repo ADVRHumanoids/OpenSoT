@@ -69,6 +69,32 @@ protected:
   Eigen::VectorXd q;
 };
 
+TEST_F(testCoMVelocity, activeJointMask) {
+    comVelocity->update();
+    auto A1 = comVelocity->getAineq();
+    std::cout<<"Beofore Active Joint Mask: \n"<<A1<<std::endl;
+
+    auto joint_mask = comVelocity->getActiveJointsMask();
+    joint_mask[5] = false;
+    joint_mask[12] = false;
+    joint_mask[22] = false;
+    comVelocity->setActiveJointsMask(joint_mask);
+    comVelocity->update();
+
+    auto A2 = comVelocity->getAineq();
+    std::cout<<"After Active Joint Mask: \n"<<A2<<std::endl;
+
+    for(unsigned int i = 0; i < A2.cols(); ++i) {
+        if(i == 5 || i == 12 || i == 22) {
+            EXPECT_TRUE(A2.col(i).isZero()) << "Col " << i << " should be zero after setting active joint mask"<<std::endl;
+        } else {
+            EXPECT_TRUE(A2.col(i) == A1.col(i)) << "Col " << i << " should be equal to its original value but is not equal to the original value. Original value was: "
+                                                << A1.col(i).transpose() << " and new value is: "<< A2.col(i).transpose()<<std::endl;
+        }
+    }
+
+}
+
 TEST_F(testCoMVelocity, sizesAreCorrect) {
     unsigned int x_size = _model_ptr->getNv();
 

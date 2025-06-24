@@ -49,11 +49,9 @@ namespace OpenSoT {
                 const Eigen::Vector2d& X_Lims,
                 const Eigen::Vector2d& Y_Lims);
 
-            virtual void update();
-
 
        private:
-
+            void _update();
 
             std::string _contact_link;
 
@@ -85,12 +83,11 @@ namespace OpenSoT {
                 const std::vector<Eigen::Vector2d>& X_Lims,
                 const std::vector<Eigen::Vector2d>& Y_Lims);
 
-           void update();
-
 
        private:
            OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
            void generateBounds();
+           void _update();
 
        };
 

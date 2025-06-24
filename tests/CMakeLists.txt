@@ -122,7 +122,7 @@ TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver   OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
-if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
+if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND} AND ${OPENSOT_COMPILE_OSQP_BACKEND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs} osqp::osqpstatic)
     add_dependencies(testOSQPSolver   OpenSoT)

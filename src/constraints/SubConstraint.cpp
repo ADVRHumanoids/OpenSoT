@@ -46,7 +46,7 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
     }
 }
 
-void SubConstraint::update()
+void SubConstraint::_update()
 {
     _constraintPtr->update();
     if(_constraintPtr->isBound()) //1. constraint ptr is a bound, we transform it into a constraint with less rows

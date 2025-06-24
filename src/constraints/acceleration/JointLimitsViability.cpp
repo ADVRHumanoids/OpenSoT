@@ -76,7 +76,7 @@ void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
     logger->add("_ddq_UB_via", _ddq_UB_via);
 }
 
-void JointLimitsViability::update()
+void JointLimitsViability::_update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);

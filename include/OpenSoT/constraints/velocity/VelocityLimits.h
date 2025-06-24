@@ -72,6 +72,8 @@
             private:
                 void generateBounds(const double qDotLimit);
                 void generateBounds(const Eigen::VectorXd& qDotLimit);
+
+                void _update(){}
             };
         }
     }

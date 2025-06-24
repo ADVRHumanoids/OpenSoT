@@ -57,7 +57,7 @@ Aggregated::Aggregated(ConstraintPtr bound1,
     this->generateAll();
 }
 
-void Aggregated::update() {
+void Aggregated::_update() {
     /* iterating on all bounds.. */
     for(typename std::list< ConstraintPtr >::iterator i = _bounds.begin();
         i != _bounds.end(); i++) {

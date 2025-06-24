@@ -136,7 +136,7 @@ WrenchLimits::Ptr WrenchesLimits::getWrenchLimits(const std::string& contact_nam
         return NULL;
 }
 
-void WrenchesLimits::update()
+void WrenchesLimits::_update()
 {
     _aggregated_constraint->update();
     generateBounds();

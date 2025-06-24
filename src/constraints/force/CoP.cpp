@@ -47,7 +47,7 @@ CoP::CoP(const std::string& contact_link,
     update();
 }
 
-void CoP::update()
+void CoP::_update()
 {
     __A.setZero(__A.rows(), __A.cols());
 
@@ -88,7 +88,7 @@ CoPs::CoPs(const std::vector<AffineHelper>& wrench,
     update();
 }
 
-void CoPs::update()
+void CoPs::_update()
 {
     _internal_constraint->update();
     generateBounds();

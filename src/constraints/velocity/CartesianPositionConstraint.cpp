@@ -78,7 +78,7 @@ void CartesianPositionConstraint::getCurrentPosition(Eigen::VectorXd& current_po
     current_position = currentPosition;
 }
 
-void CartesianPositionConstraint::update() {
+void CartesianPositionConstraint::_update() {
 
     if(_is_Cartesian){
         _cartesianTask->update();

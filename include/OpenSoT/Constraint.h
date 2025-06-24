@@ -22,7 +22,7 @@
 #include <string>
 #include <matlogger2/matlogger2.h>
 #include <xbot2_interface/logger.h>
-
+#include <sstream>
 #include <OpenSoT/version.h>
 
  namespace OpenSoT {
@@ -108,10 +108,40 @@
 
         }
 
+        /** Updates the matrices and vector of the constraint */
+        virtual void _update() = 0;
+
+        /**
+         * @brief _active_joint_mask is vector of bool that represent the active joints of the task.
+         * If false the corresponding column of the task jacobian is set to 0.
+         */
+        std::vector<bool> _active_joints_mask;
+
+        /**
+         * @brief applyActiveJointsMask apply the active joint mask to the A matrix:
+         * @param A matrix of the Constraint
+         */
+        virtual void applyActiveJointsMask(Matrix_type& A)
+        {
+            int rows = A.rows();
+            for(unsigned int i = 0; i < _x_size; ++i)
+            {
+                if(!_active_joints_mask[i])
+                    for(unsigned int j = 0; j < rows; ++j)
+                        A(j,i) = 0.0;
+            }
+            //TODO: is necessary here to call update()?
+        }
+
     public:
         Constraint(const std::string constraint_id,
                    const unsigned int x_size) :
-            _constraint_id(constraint_id), _x_size(x_size) {}
+            _constraint_id(constraint_id), _x_size(x_size), _active_joints_mask(x_size)
+        {
+            for(unsigned int i = 0; i < x_size; ++i)
+                _active_joints_mask[i] = true;
+        }
+
         virtual ~Constraint() {}
 
         const unsigned int getXSize() { return _x_size; }
@@ -177,8 +207,57 @@
          */
         std::string getConstraintID(){ return _constraint_id; }
 
-        /** Updates the A, b, Aeq, beq, Aineq, b*Bound matrices */
-        virtual void update() {}
+        /**
+         * @brief getActiveJointsMask return a vector of length NumberOfDOFs.
+         * If an element is false the corresponding column of the task jacobian is set to 0.
+         * @return a vector of bool
+         */
+        virtual std::vector<bool> getActiveJointsMask(){return _active_joints_mask;}
+
+        /**
+         * @brief setActiveJointsMask set a mask on the Jacobian. The changes take effect immediately.
+         * @param active_joints_mask
+         * @return true if success
+         */
+        virtual bool setActiveJointsMask(const std::vector<bool>& active_joints_mask)
+        {
+            if(active_joints_mask.size() == _active_joints_mask.size())
+            {
+                _active_joints_mask = active_joints_mask;
+
+                if(_Aineq.cols() > 0)
+                    applyActiveJointsMask(_Aineq);
+                if(_Aeq.cols() > 0)
+                    applyActiveJointsMask(_Aeq);
+
+                return true;
+            }
+            return false;
+        }
+
+        /** Updates the constraint matrices and vectors*/
+        void update()
+        {
+            this->_update();
+
+            typedef std::vector<bool>::const_iterator it_m;
+            bool all_true = true;
+            for( it_m active_joint = _active_joints_mask.begin();
+                 active_joint != _active_joints_mask.end();
+                 ++active_joint)
+            {
+                if(*active_joint == false) all_true = false;
+            }
+
+            if(!all_true)
+            {
+                if(_Aineq.cols() > 0)
+                    applyActiveJointsMask(_Aineq);
+                if(_Aeq.cols() > 0)
+                    applyActiveJointsMask(_Aeq);
+            }
+
+        }
 
         /**
          * @brief log logs common Constraint internal variables

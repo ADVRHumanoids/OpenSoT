@@ -21,7 +21,6 @@
 #include <OpenSoT/constraints/BilateralConstraint.h>
 #include <OpenSoT/Task.h>
 
-#include <list>
 
 
  namespace OpenSoT {
@@ -63,12 +62,6 @@
                              const Eigen::VectorXd& err_lb, 
                              const Eigen::VectorXd& err_ub);
 
-            /**
-             * @brief update updates the adapted task and the adapter constraint
-             * @param q
-             */
-            void update();
-
         protected:
 
             void generateAll();
@@ -81,6 +74,12 @@
             {
                 _task->log(logger);
             }
+
+            /**
+             * @brief update updates the adapted task and the adapter constraint
+             * @param q
+             */
+            void _update();
         };
     }
  }

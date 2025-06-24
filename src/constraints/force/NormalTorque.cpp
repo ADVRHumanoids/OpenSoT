@@ -36,7 +36,7 @@ NormalTorque::NormalTorque(const std::string &contact_link,
     update();
 }
 
-void NormalTorque::update()
+void NormalTorque::_update()
 {
     _model.getPose(_contact_link, _T);
     _Ti = _T.inverse();
@@ -109,7 +109,7 @@ NormalTorque::Ptr NormalTorques::getNormalTorque(const std::string& contact_name
         return NULL;
 }
 
-void NormalTorques::update()
+void NormalTorques::_update()
 {
     _internal_constraint->update();
     generateBounds();

@@ -55,9 +55,6 @@ public:
                  const Eigen::Vector2d& X_Lims,
                  const Eigen::Vector2d& Y_Lims,
                  const double& mu);
-
-    void update();
-
     /**
      * @brief setMu update friction coefficient
      * @param mu
@@ -65,7 +62,7 @@ public:
     void setMu(const double mu);
 
 private:
-
+    void _update();
     void _updateA();
 
     std::string _contact_link;
@@ -110,12 +107,11 @@ public:
 
     NormalTorque::Ptr getNormalTorque(const std::string& contact_name);
 
-    void update();
-
 private:
     std::map<std::string, NormalTorque::Ptr> _normal_torque_map;
     OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
     void generateBounds();
+    void _update();
 };
 
        }
