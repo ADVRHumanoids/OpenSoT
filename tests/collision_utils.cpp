@@ -1,6 +1,5 @@
 #include "collision_utils.h"
 #include <octomap_msgs/conversions.h>
-#include <eigen_conversions/eigen_msg.h>
 
 #if ROS_VERSION_MINOR <= 12
 #define STATIC_POINTER_CAST boost::static_pointer_cast
@@ -590,7 +589,7 @@ std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
 
     // set transform
     fcl::Transform3d w_T_octo;
-    tf::poseMsgToEigen(pose, w_T_octo);
+    collision_utils::poseMsgToEigen(pose, w_T_octo);
     co->setTransform(w_T_octo);
 
     return co;
@@ -686,7 +685,7 @@ bool ComputeLinksDistance::setWorldCollisions(const moveit_msgs::PlanningSceneWo
 
     // set transform
     fcl::Transform3d w_T_octo;
-    tf::poseMsgToEigen(wc.octomap.origin, w_T_octo);
+    collision_utils::poseMsgToEigen(wc.octomap.origin, w_T_octo);
     coll_obj->setTransform(w_T_octo);
 
     // save collision object

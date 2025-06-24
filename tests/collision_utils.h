@@ -44,6 +44,22 @@
 
 #include <map>
 
+class collision_utils
+{
+public:
+    template<typename T>
+    static void poseMsgToEigen(const geometry_msgs::Pose &m, T &e)
+    {
+        e = Eigen::Translation3d(m.position.x,
+                                 m.position.y,
+                                 m.position.z) *
+            Eigen::Quaterniond(m.orientation.w,
+                               m.orientation.x,
+                               m.orientation.y,
+                               m.orientation.z);
+    }
+};
+
 
 
 class ComputeLinksDistance

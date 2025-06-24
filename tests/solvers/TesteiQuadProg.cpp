@@ -7,8 +7,8 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <eigen_conversions/eigen_kdl.h>
 #include "../common.h"
+#include <OpenSoT/utils/cartesian_utils.h>
 
 
 #define GREEN "\033[0;32m"
@@ -516,11 +516,11 @@ TEST_F(testeiQuadProgProblem, testContructor2Problems)
     _model_ptr->getPose("l_wrist", "Waist", T);
 
     KDL::Frame T_kdl;
-    tf::transformEigenToKDL(T, T_kdl);
+    cartesian_utils::transformEigenToKDL(T, T_kdl);
 
     std::cout<<"FINAL CONFIG: "<<T.matrix()<<std::endl;
     Eigen::Affine3d T_ref;
-    tf::transformKDLToEigen(T_ref_kdl, T_ref);
+    cartesian_utils::transformKDLToEigen(T_ref_kdl, T_ref);
     std::cout<<"DESIRED CONFIG: "<<T_ref.matrix()<<std::endl;
 
 

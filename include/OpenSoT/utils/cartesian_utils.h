@@ -284,6 +284,69 @@ public:
                                       const Eigen::Affine3d &Td,
                                       Eigen::Vector3d& position_error,
                                       Eigen::Vector3d& orientation_error);
+
+    template<typename T>
+    /**
+     * @brief transformEigenToKDL transforms a 4x4 Eigen matrix to a KDL::Frame
+     * @param e 4x4 Eigen matrix
+     * @param k KDL::Frame to be filled
+     * @note from https://github.com/ros/geometry/tree/noetic-devel/eigen_conversions
+     */
+    static void transformEigenToKDL(const T &e, KDL::Frame &k)
+    {
+        for (unsigned int i = 0; i < 3; ++i)
+            k.p[i] = e(i, 3);
+        for (unsigned int i = 0; i < 9; ++i)
+            k.M.data[i] = e(i/3, i%3);
+    }
+
+    template<typename T>
+    /**
+     * @brief transformKDLToEigen transforms a KDL::Frame to a 4x4 Eigen matrix
+     * @param k KDL::Frame to be transformed
+     * @param e 4x4 Eigen matrix to be filled
+     * @note from https://github.com/ros/geometry/tree/noetic-devel/eigen_conversions
+     */
+    static void transformKDLToEigen(const KDL::Frame &k, T &e)
+    {
+        // translation
+        for (unsigned int i = 0; i < 3; ++i)
+            e(i, 3) = k.p[i];
+
+        // rotation matrix
+        for (unsigned int i = 0; i < 9; ++i)
+            e(i/3, i%3) = k.M.data[i];
+
+        // "identity" row
+        e(3,0) = 0.0;
+        e(3,1) = 0.0;
+        e(3,2) = 0.0;
+        e(3,3) = 1.0;
+    }
+
+    /**
+     * @brief twistKDLToEigen transforms a KDL::Twist to an Eigen 6x1 vector
+     * @param k KDL::Twist to be transformed
+     * @param e 6x1 Eigen vector to be filled
+     * @note from https://github.com/ros/geometry/tree/noetic-devel/eigen_conversions
+     */
+    static void twistKDLToEigen(const KDL::Twist &k, Eigen::Matrix<double, 6, 1> &e)
+    {
+        for(int i = 0; i < 6; ++i)
+            e[i] = k[i];
+    }
+
+    /**
+     * @brief twistEigenToKDL transforms an Eigen 6x1 vector to a KDL::Twist
+     * @param e 6x1 Eigen vector to be transformed
+     * @param k KDL::Twist to be filled
+     * @note from https://github.com/ros/geometry/tree/noetic-devel/eigen_conversions
+     */
+    static void twistEigenToKDL(const Eigen::Matrix<double, 6, 1> &e, KDL::Twist &k)
+    {
+        for(int i = 0; i < 6; ++i)
+            k[i] = e[i];
+    }
 };
 
 

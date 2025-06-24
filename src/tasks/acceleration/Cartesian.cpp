@@ -1,9 +1,11 @@
 #include <OpenSoT/tasks/acceleration/Cartesian.h>
 #include <xbot2_interface/logger.h>
-#include <eigen_conversions/eigen_kdl.h>
+#include <OpenSoT/utils/cartesian_utils.h>
+
 
 using XBot::Logger;
 using namespace OpenSoT::tasks::acceleration;
+
 
 const std::string Cartesian::world_name = "world";
 
@@ -215,8 +217,8 @@ void Cartesian::setReference(const Eigen::Affine3d& pose_ref,
 void Cartesian::setReference(const KDL::Frame& pose_ref,
                              const KDL::Twist& vel_ref)
 {
-    tf::transformKDLToEigen(pose_ref, _pose_ref);
-    tf::twistKDLToEigen(vel_ref, _vel_ref);
+    cartesian_utils::transformKDLToEigen(pose_ref, _pose_ref);
+    cartesian_utils::twistKDLToEigen(vel_ref, _vel_ref);
     _acc_ref.setZero();
 
     _vel_ref_cached = _vel_ref;
@@ -239,9 +241,9 @@ void Cartesian::setReference(const KDL::Frame& pose_ref,
                              const KDL::Twist& vel_ref,
                              const KDL::Twist& acc_ref)
 {
-    tf::transformKDLToEigen(pose_ref, _pose_ref);
-    tf::twistKDLToEigen(vel_ref, _vel_ref);
-    tf::twistKDLToEigen(acc_ref, _acc_ref);
+    cartesian_utils::transformKDLToEigen(pose_ref, _pose_ref);
+    cartesian_utils::twistKDLToEigen(vel_ref, _vel_ref);
+    cartesian_utils::twistKDLToEigen(acc_ref, _acc_ref);
 
     _vel_ref_cached = _vel_ref;
     _acc_ref_cached = _acc_ref;
@@ -319,7 +321,7 @@ void Cartesian::getReference(Eigen::Affine3d& ref) const
 
 void Cartesian::getReference(KDL::Frame& ref) const
 {
-    tf::transformEigenToKDL(_pose_ref, ref);
+    cartesian_utils::transformEigenToKDL(_pose_ref, ref);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
@@ -332,8 +334,8 @@ void Cartesian::getReference(Eigen::Affine3d& desiredPose,
 void Cartesian::getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist) const
 {
-    tf::transformEigenToKDL(_pose_ref, desiredPose);
-    tf::twistEigenToKDL(_vel_ref, desiredTwist);
+    cartesian_utils::transformEigenToKDL(_pose_ref, desiredPose);
+    cartesian_utils::twistEigenToKDL(_vel_ref, desiredTwist);
 }
 
 void Cartesian::getReference(Eigen::Affine3d& desiredPose,
@@ -349,9 +351,9 @@ void Cartesian::getReference(KDL::Frame& desiredPose,
                              KDL::Twist& desiredTwist,
                              KDL::Twist& desiredAcceleration) const
 {
-    tf::transformEigenToKDL(_pose_ref, desiredPose);
-    tf::twistEigenToKDL(_vel_ref, desiredTwist);
-    tf::twistEigenToKDL(_acc_ref, desiredAcceleration);
+    cartesian_utils::transformEigenToKDL(_pose_ref, desiredPose);
+    cartesian_utils::twistEigenToKDL(_vel_ref, desiredTwist);
+    cartesian_utils::twistEigenToKDL(_acc_ref, desiredAcceleration);
 }
 
 
@@ -362,7 +364,7 @@ void Cartesian::getActualPose(Eigen::Affine3d& actual) const
 
 void Cartesian::getActualPose(KDL::Frame& actual)
 {
-    tf::transformEigenToKDL(_pose_current, actual);
+    cartesian_utils::transformEigenToKDL(_pose_current, actual);
 }
 
 const Eigen::Affine3d& Cartesian::getActualPose() const
@@ -377,7 +379,7 @@ void Cartesian::getActualTwist(Eigen::Vector6d& actual) const
 
 void Cartesian::getActualTwist(KDL::Twist& actual)
 {
-    tf::twistEigenToKDL(_vel_current, actual);
+    cartesian_utils::twistEigenToKDL(_vel_current, actual);
 }
 
 const Eigen::Vector6d& Cartesian::getActualTwist() const

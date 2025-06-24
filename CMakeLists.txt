@@ -2,7 +2,7 @@
 # Authors: Enrico Mingo Hoffman, Alessio Rocchi
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 include(ExternalProject)
 project(open_sot VERSION 4.0.0)
 
@@ -36,7 +36,6 @@ find_package(PCL 1.7 QUIET COMPONENTS   common
                                         #search
                                         #io)
                                                                                 
-find_package(eigen_conversions REQUIRED)
 find_package(xbot2_interface REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(matlogger2 REQUIRED)
@@ -67,8 +66,7 @@ endif()
 
 # add include directories
 INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
-    ${PCL_INCLUDE_DIRS} ${XBotInterface_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
-    )
+    ${PCL_INCLUDE_DIRS} ${XBotInterface_INCLUDE_DIRS} ${kdl_parser_INCLUDE_DIRS})
 
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
@@ -191,7 +189,6 @@ ADD_LIBRARY(OpenSoT SHARED
     ${OPENSOT_VARIABLES_SOURCES}
     ${sot_INCLUDES})
 
-set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
 if(${OPENSOT_COMPILE_COLLISION})
     target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision)
 endif()
@@ -206,6 +203,7 @@ install(FILES ${CMAKE_BINARY_DIR}/include/OpenSoT/version.h
         DESTINATION include/OpenSoT)
 
 
+set(PRIVATE_TLL ${PRIVATE_TLL} ${kdl_parser_LIBRARIES})
 
 TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC

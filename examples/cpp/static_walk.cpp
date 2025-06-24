@@ -16,7 +16,6 @@
 #include "qp_estimation.h"
 #include <sensor_msgs/JointState.h>
 #include "../../tests/common.h"
-#include <eigen_conversions/eigen_kdl.h>
 
 
 bool IS_ROSCORE_RUNNING;
@@ -435,9 +434,9 @@ namespace{
               * @brief Initialize trajectories, publiahers and walking stack
               **/
             KDL::Frame com_init_kdl, l_foot_init_kdl, r_foot_init_kdl;
-            tf::transformEigenToKDL(com_init, com_init_kdl);
-            tf::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
-            tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
+            cartesian_utils::transformEigenToKDL(com_init, com_init_kdl);
+            cartesian_utils::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
+            cartesian_utils::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
             this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
             this->initTrjPublisher();
             theWalkingStack ws(*_model_ptr);
@@ -518,8 +517,8 @@ namespace{
             Eigen::Affine3d r_wrist_init; _model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
 
             KDL::Frame r_wrist_init_kdl;
-            tf::transformEigenToKDL(r_wrist_init, r_wrist_init_kdl);
-            tf::transformEigenToKDL(com_init, com_init_kdl);
+            cartesian_utils::transformEigenToKDL(r_wrist_init, r_wrist_init_kdl);
+            cartesian_utils::transformEigenToKDL(com_init, com_init_kdl);
             this->initManipTrj(com_init_kdl,  r_wrist_init_kdl);
             this->initManipTrjPublisher();
 
@@ -590,9 +589,9 @@ namespace{
         this->_model_ptr->getPose("r_sole", r_foot_init);
 
 
-        tf::transformEigenToKDL(com_init, com_init_kdl);
-        tf::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
-        tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
+        cartesian_utils::transformEigenToKDL(com_init, com_init_kdl);
+        cartesian_utils::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
+        cartesian_utils::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
         this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
         this->initTrjPublisher();
 

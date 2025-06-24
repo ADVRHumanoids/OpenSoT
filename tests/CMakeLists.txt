@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(rviz_visual_tools QUIET)
 find_package(tf)
-find_package(eigen_conversions)
 find_package(tf_conversions)
 find_package(roscpp )
 find_package(robot_state_publisher )
@@ -22,7 +21,7 @@ endif()
 
 
 set(catkin_LIBRARIES
-    ${tf_LIBRARIES} ${roscpp_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${eigen_conversions_LIBRARIES}
+    ${tf_LIBRARIES} ${roscpp_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES}
 ${tf_conversions_LIBRARIES})
 
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
