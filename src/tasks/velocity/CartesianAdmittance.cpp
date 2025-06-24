@@ -69,7 +69,9 @@ void CartesianAdmittance::_update()
     _wrench_filt = Eigen::Vector6d::Map(_filter.process(_tmp).data(), CHANNELS);
     
 
-    _desiredTwist = _C.asDiagonal()*_wrench_filt;
+    // Adding to the desired twist allows to still use a desired twist additionally
+    // given by Cartesian::setReference(..., const Eigen::Vector6d& desiredTwist)
+    _desiredTwist += _C.asDiagonal()*_wrench_filt;
 
     Cartesian::_update();
 }
