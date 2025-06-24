@@ -273,7 +273,7 @@ TEST_F(testJointLimits, test_bounds)
 
         autostack->update();
         EXPECT_TRUE(solver->solve(dq));
-
+        
         autostack->log(this->logger);
 
 
