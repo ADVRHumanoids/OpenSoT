@@ -36,9 +36,10 @@ IF(NOT WIN32)
 ENDIF(NOT WIN32)
 
 target_compile_options(soth
-    PUBLIC
-    -std=c++14
+    #PUBLIC
+    #-std=c++14
     PRIVATE
+    -std=c++14
     -fvisibility-inlines-hidden
     -fvisibility=hidden)
 
@@ -56,9 +57,10 @@ library_install(${LIBRARY_NAME} 1 0 0)
 ADD_LIBRARY(hcod_wrapper SHARED HCOD_wrapper.cpp)
 
 target_compile_options(hcod_wrapper
-    PUBLIC
-    -std=c++14
+    #PUBLIC
+    #-std=c++14
     PRIVATE
+    -std=c++14
     -fvisibility-inlines-hidden
     -fvisibility=hidden)
 
