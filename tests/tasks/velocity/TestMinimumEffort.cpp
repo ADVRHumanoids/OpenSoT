@@ -3,8 +3,6 @@
 #include <memory>
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/eHQP.h>
-#include <ros/master.h>
-#include <sensor_msgs/JointState.h>
 #include "../../common.h"
 
 
@@ -39,14 +37,6 @@ protected:
 
 TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 {
-    std::shared_ptr<ros::NodeHandle> _n;
-    ros::Publisher joint_state_pub;
-    if(IS_ROSCORE_RUNNING){
-        _n.reset(new ros::NodeHandle());
-        joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
-    }
-
-
     // setting initial position with bent legs
     Eigen::VectorXd q_whole = _model_ptr->getNeutralQ();
     double angle = 45;
@@ -56,23 +46,6 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
     q_whole[_model_ptr->getQIndex("LShSag")] = -angle*M_PI/180.0;
     q_whole[_model_ptr->getQIndex("LShLat")] = 0.0*M_PI/180.0;
     q_whole[_model_ptr->getQIndex("LElbj")] = -angle*M_PI/180.0;
-
-    if(IS_ROSCORE_RUNNING)
-    {
-        sensor_msgs::JointState joint_msg;
-        for(unsigned int i = 1; i < _model_ptr->getJointNames().size(); ++i)
-        {
-            joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
-            joint_msg.position.push_back(q_whole[_model_ptr->getDofIndex(_model_ptr->getJointNames()[i])+1]);
-            joint_msg.velocity.push_back(0.0);
-            joint_msg.effort.push_back(0.0);
-        }
-        joint_msg.header.stamp = ros::Time::now();
-    //    while(ros::ok())
-    //        joint_state_pub.publish(joint_msg);
-    }
-
-
 
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
@@ -134,33 +107,9 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 
         q_whole = _model_ptr->sum(q_whole, dq);
 
-
-
-        if(IS_ROSCORE_RUNNING)
-        {
-            sensor_msgs::JointState joint_msg;
-            for(unsigned int i = 1; i < _model_ptr->getJointNames().size(); ++i)
-            {
-                joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
-                joint_msg.position.push_back(q_whole[_model_ptr->getDofIndex(_model_ptr->getJointNames()[i])+1]);
-            }
-            joint_msg.header.stamp = ros::Time::now();
-            joint_state_pub.publish(joint_msg);
-        }
-
-
-
-
         minimumEffort->update();
         EXPECT_LE(minimumEffort->computeEffort(), old_effort);
         std::cout << "Effort at step" << i << ": " << minimumEffort->computeEffort() << std::endl;
-
-        if(IS_ROSCORE_RUNNING)
-        {
-            usleep(100);
-            ros::spinOnce();
-        }
-
     }
     _model_ptr->setJointPosition(q_whole);
     _model_ptr->update();
@@ -174,8 +123,6 @@ TEST_F(testMinimumEffortTask, testMinimumEffortTask_)
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "testMinimumEffort_node");
-  IS_ROSCORE_RUNNING = ros::master::check();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
