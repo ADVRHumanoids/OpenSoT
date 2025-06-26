@@ -6,7 +6,6 @@
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
 #include <OpenSoT/constraints/force/FrictionCone.h>
-#include <ros/ros.h>
 #include <qpOASES.hpp>
 #include <OpenSoT/constraints/force/WrenchLimits.h>
 #include <xbot2_interface/xbotinterface2.h>
