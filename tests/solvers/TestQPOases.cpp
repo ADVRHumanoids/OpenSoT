@@ -621,7 +621,7 @@ TEST_F(testiHQP, testContructor1Problem)
     bounds_list.push_back(joint_limits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds(
-                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+        new OpenSoT::constraints::Aggregated(bounds_list, _model_ptr->getNv()));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
