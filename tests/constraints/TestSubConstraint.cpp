@@ -133,7 +133,8 @@ TEST_F(TestSubConstraint, testSubInequalityConstraint)
 
     EXPECT_EQ(sub_vcom->getbLowerBound(), this->_vcom_constraint->getbLowerBound().segment(0, indices.size()));
     EXPECT_EQ(sub_vcom->getbUpperBound(), this->_vcom_constraint->getbUpperBound().segment(0, indices.size()));
-    EXPECT_EQ(sub_vcom->getAineq(), this->_vcom_constraint->getAineq().block(0,0,2,2));
+    std::cout<<this->_vcom_constraint->getAineq().block(0,0,2,2)<<std::endl;
+    EXPECT_EQ(sub_vcom->getAineq(), this->_vcom_constraint->getAineq().topRows(2));
 
     this->q = _model_ptr->generateRandomQ();
 
@@ -156,7 +157,7 @@ TEST_F(TestSubConstraint, testSubInequalityConstraint)
 
     EXPECT_EQ(sub_vcom->getbLowerBound(), this->_vcom_constraint->getbLowerBound().segment(0, indices.size()));
     EXPECT_EQ(sub_vcom->getbUpperBound(), this->_vcom_constraint->getbUpperBound().segment(0, indices.size()));
-    EXPECT_EQ(sub_vcom->getAineq(), this->_vcom_constraint->getAineq().block(0,0,2,2));
+    EXPECT_EQ(sub_vcom->getAineq(), this->_vcom_constraint->getAineq().topRows(2));
 
 }
 
