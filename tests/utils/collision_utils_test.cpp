@@ -20,17 +20,10 @@
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
 
-#if ROS_VERSION_MINOR <= 12
-#define STATIC_POINTER_CAST boost::static_pointer_cast
-#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
-#define SHARED_PTR boost::shared_ptr
-#define MAKE_SHARED boost::make_shared
-#else
 #define STATIC_POINTER_CAST std::static_pointer_cast
 #define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
 #define SHARED_PTR std::shared_ptr
 #define MAKE_SHARED std::make_shared
-#endif
 
 
 Eigen::Affine3d fcl2Eigen(const fcl::Transform3<double> &in)

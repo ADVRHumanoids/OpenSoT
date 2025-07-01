@@ -378,7 +378,7 @@ ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
         _srdf->initString(*_urdf, _model.getSrdfString());
     }
 
-    _moveit_model = std::make_shared<robot_model::RobotModel>(_urdf,
+    _moveit_model = std::make_shared<RobotModel>(_urdf,
                                                               _srdf);
     parseCollisionObjects();
 
@@ -562,8 +562,8 @@ namespace
 {
 
 std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
-        const shape_msgs::SolidPrimitive& shape,
-        const geometry_msgs::Pose& pose)
+        const shape_msgs::msg::SolidPrimitive& shape,
+        const geometry_msgs::msg::Pose& pose)
 {
     std::shared_ptr<fcl::CollisionGeometryd> fcl_shape;
 

@@ -37,7 +37,7 @@
 #include <geometric_shapes/shapes.h>
 #include <geometric_shapes/shape_operations.h>
 #include <memory>
-#include <kdl_parser/kdl_parser.hpp>
+//#include <kdl_parser/kdl_parser.hpp>
 #include <moveit_msgs/msg/planning_scene_world.hpp>
 
 #include "LinkPairDistance.h"
@@ -194,7 +194,7 @@ private:
     /**
      * @brief moveit_robot_model
      */
-    RobotModelConstPtr _moveit_model;
+    std::shared_ptr<RobotModel> _moveit_model;
 
     /**
      * @brief robot_srdf is used to load the ACM every time a whiteList or blackList is generated

@@ -13,14 +13,12 @@ find_package(urdf )
 find_package(srdfdom)
 find_package(osqp QUIET)
 find_package(qpSWIFT QUIET)
-find_package(fcl 0.6.1 QUIET)
-if(DEFINED FCL_VERSION)
+find_package(fcl 0.6.0...<0.7.0 QUIET)
+if(DEFINED fcl_VERSION)
     set(FCL_FOUND 1)
 else()
     set(FCL_FOUND 0)
 endif()
-
-
 
 set(catkin_LIBRARIES
     ${tf2_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${tf2_eigen_kdl_LIBRARIES})
@@ -42,7 +40,7 @@ option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
 # compite GTest
 find_package(GTest)
 
-include_directories(${GTEST_INCLUDE_DIRS} ${FCL_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIRS} ${fcl_INCLUDE_DIRS})
 link_directories(${GTEST_LIB_DIRS})
 
 # add local include
@@ -200,11 +198,11 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
  add_test(NAME OpenSoT_constraint_SubConstraint COMMAND testSubConstraint)
 
 
-if(${FCL_FOUND})
-     #ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp collision_utils.cpp)
-     #TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd)
-     #add_dependencies(testCollisionUtils   OpenSoT)
-     #add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
+ if(${FCL_FOUND})
+     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp collision_utils.cpp)
+     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
+     add_dependencies(testCollisionUtils   OpenSoT)
+     add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 
      #ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp collision_utils.cpp)
      #TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd)
