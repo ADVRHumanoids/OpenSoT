@@ -12,7 +12,6 @@
 #include <xbot2_interface/collision.h>
 #include <chrono>
 #include <OpenSoT/utils/AutoStack.h>
-#include <eigen_conversions/eigen_msg.h>
 #include <fstream>
 #include "collision_utils.h"
 #define ENABLE_ROS false
