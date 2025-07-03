@@ -1,6 +1,7 @@
-import os
-
-import rospkg
+import rclpy
+from rclpy.node import Node
+from rcl_interfaces.srv import GetParameters
+from ament_index_python.packages import get_package_share_directory
 from xbot2_interface import pyxbot2_interface as xbi
 from pyopensot.tasks.acceleration import Cartesian, CoM, DynamicFeasibility
 from pyopensot.constraints.acceleration import JointLimits, VelocityLimits
@@ -9,32 +10,73 @@ from pyopensot.variables import Torque
 from pyopensot.tasks import MinimizeVariable
 import pyopensot as pysot
 import numpy as np
-import rospy
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped, WrenchStamped
-import tf
+from tf2_ros import TransformBroadcaster
 import subprocess
+import time
 
-# Check for franka_cartesio_condif package
+class ros2_node(Node):
+    def __init__(self):
+        super().__init__('LittleDog_id')
+        self.get_logger().info("LittleDog ID node has been started.")
+        self.client = self.create_client(GetParameters, '/robot_state_publisher/get_parameters')
+
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Waiting for parameter service...')
+
+        request = GetParameters.Request()
+        request.names = ['robot_description']
+
+        future = self.client.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+
+        self.urdf = None
+        if future.result() is not None:
+            values = future.result().values
+            for val in values:
+                self.urdf = val.string_value
+        else:
+            self.get_logger().error('Failed to call service')
+
+        self.joint_state_publisher = self.create_publisher(JointState, 'joint_states', 10)
+
+        self.force_publishers = {}
+
+        self.base_link_broadcaster = TransformBroadcaster(self)
+
+    def initialize_force_publishers(self, contact_frames):
+        for contact_frame in contact_frames:
+            self.force_publishers[contact_frame] = self.create_publisher(WrenchStamped, contact_frame, 10)
+
+    def publish(self, joint_state_msg, transform_msg, force_msgs = None):
+        self.joint_state_publisher.publish(joint_state_msg)
+        self.base_link_broadcaster.sendTransform(transform_msg)
+
+        if force_msgs is not None:
+            for contact_frame, force_msg in force_msgs.items():
+                self.force_publishers[contact_frame].publish(force_msg)
+
+
+
+package_path = None
 try:
-    package_path = rospkg.RosPack().get_path('LittleDog')
+    package_path = get_package_share_directory('LittleDog')
+    print(f"Package path: {package_path}")
 except:
-    print("To run this example is needed the LittleDog package that can be download here: https://github.com/EnricoMingo/LittleDog")
+    print("To run this example is needed the LittleDog package ([ros2 branch]) that can be download here: https://github.com/EnricoMingo/LittleDog")
 
-launch_path = package_path + "/launch/LittleDog.launch"
-print(launch_path)
-roslaunch = subprocess.Popen(['roslaunch', launch_path], stdout=subprocess.PIPE, shell=False)
-rviz_file_path = os.getcwd() + "/LittleDog_id.rviz"
-rviz = subprocess.Popen(['rviz',  '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
+cmd = 'ros2 launch LittleDog LittleDog.launch'
+roslaunch = subprocess.Popen(['ros2', 'launch', 'LittleDog', 'LittleDog.launch'], stdout=subprocess.PIPE, shell=False)
+rviz_file_path = package_path + "/launch/LittleDog.rviz"
+rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2',  '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
 
 # Initiliaze node and wait for robot_description parameter
-rospy.init_node("LittleDog_id", disable_signals=True)
-while not rospy.has_param('/robot_description'):
-    pass
+rclpy.init()
+node = ros2_node()
 
-# Get robot description parameter and initialize model interface (with Pinocchio)
-urdf = rospy.get_param('/robot_description')
-model = xbi.ModelInterface2(urdf)
+
+model = xbi.ModelInterface2(node.urdf)
 qmin, qmax = model.getJointLimits()
 dqmax = model.getVelocityLimits()
 q = [0., 0., 0., 0., 0., 0., 1.,
@@ -43,8 +85,6 @@ dq = np.zeros(model.nv)
 model.setJointPosition(q)
 model.setJointVelocity(dq)
 model.update()
-
-
 
 dt = 1./1000.
 
@@ -92,72 +132,81 @@ for i in range(len(contact_frames)):
 # Creates the solver
 solver = pysot.iHQP(stack)
 
-# ID loop: we publish also joint position, floating-base pose and contact forces
-rate = rospy.Rate(1./dt)
-pub = rospy.Publisher('joint_states', JointState, queue_size=10)
+# Initialize the node
+node.initialize_force_publishers(contact_frames)
+
 msg = JointState()
 msg.name = model.getJointNames()[1::]
-br = tf.TransformBroadcaster()
+
 w_T_b = TransformStamped()
 w_T_b.header.frame_id = "world"
 w_T_b.child_frame_id = "body"
-force_msg = list()
-fpubs = list()
-for contact_frame in contact_frames:
-    force_msg.append(WrenchStamped())
-    force_msg[-1].header.frame_id = contact_frame
-    force_msg[-1].wrench.torque.x = force_msg[-1].wrench.torque.y = force_msg[-1].wrench.torque.z = 0.
-    fpubs.append(rospy.Publisher(contact_frame, WrenchStamped, queue_size=10))
 
+force_msgs = {}
+for contact_frame in contact_frames:
+    force_msgs[contact_frame] = WrenchStamped()
+    force_msgs[contact_frame].header.frame_id = contact_frame
+    force_msgs[contact_frame].wrench.torque.x = force_msgs[contact_frame].wrench.torque.y = force_msgs[contact_frame].wrench.torque.z = 0.
+#
 t = 0.
 alpha = 0.05
-while not rospy.is_shutdown():
-    # Update actual position in the model
-    model.setJointPosition(q)
-    model.setJointVelocity(dq)
-    model.update()
+try:
+    while rclpy.ok():
+        # Update actual position in the model
+        model.setJointPosition(q)
+        model.setJointVelocity(dq)
+        model.update()
+#
+        # Compute new reference for CoM task
+        com_ref[2] = com0[2] + alpha * np.sin(3.1415 * t)
+        com_ref[1] = com0[1] + alpha * np.cos(3.1415 * t)
+        t = t + dt
+        com.setReference(com_ref)
 
-    # Compute new reference for CoM task
-    com_ref[2] = com0[2] + alpha * np.sin(3.1415 * t)
-    com_ref[1] = com0[1] + alpha * np.cos(3.1415 * t)
-    t = t + dt
-    com.setReference(com_ref)
+        # Update Stack
+        stack.update()
+#
+        # Solve
+        x = solver.solve()
+        ddq = variables.getVariable("qddot").getValue(x) # from variables vector we retrieve the joint accelerations
+        q = model.sum(q, dq*dt + 0.5 * ddq * dt * dt) # we use the model sum to account for the floating-base
+        dq += ddq*dt
+#
+        # Publish joint states
+        msg.position = q[7::]
+        msg.header.stamp = node.get_clock().now().to_msg()
+#
+        w_T_b.header.stamp = msg.header.stamp
+        w_T_b.transform.translation.x = q[0]
+        w_T_b.transform.translation.y = q[1]
+        w_T_b.transform.translation.z = q[2]
+        w_T_b.transform.rotation.x = q[3]
+        w_T_b.transform.rotation.y = q[4]
+        w_T_b.transform.rotation.z = q[5]
+        w_T_b.transform.rotation.w = q[6]
+#
+        for contact_frame in contact_frames:
+            T = model.getPose(contact_frame)
+            force_msgs[contact_frame].header.stamp = msg.header.stamp
+            f_local = T.linear.transpose() @ variables.getVariable(contact_frame).getValue(x) # here we compute the value of the contact forces in local frame from world frame
+            force_msgs[contact_frame].wrench.force.x = f_local[0]
+            force_msgs[contact_frame].wrench.force.y = f_local[1]
+            force_msgs[contact_frame].wrench.force.z = f_local[2]
+#
+        rclpy.spin_once(node, timeout_sec=0.0)
+        node.publish(msg, w_T_b, force_msgs=force_msgs)
+#
+#       # Sleep to maintain the desired rate
+        time.sleep(dt)
+#
+except KeyboardInterrupt:
+    print("KeyboardInterrupt: Stopping the node.")
+    pass
+finally:
+    print("Stopping the node.")
+    roslaunch.kill()
+    rviz.kill()
+    node.destroy_node()
 
-    # Update Stack
-    stack.update()
-
-    # Solve
-    x = solver.solve()
-    ddq = variables.getVariable("qddot").getValue(x) # from variables vector we retrieve the joint accelerations
-    q = model.sum(q, dq*dt + 0.5 * ddq * dt * dt) # we use the model sum to account for the floating-base
-    dq += ddq*dt
-
-    # Publish joint states
-    msg.position = q[7::]
-    msg.header.stamp = rospy.get_rostime()
-
-    w_T_b.header.stamp = msg.header.stamp
-    w_T_b.transform.translation.x = q[0]
-    w_T_b.transform.translation.y = q[1]
-    w_T_b.transform.translation.z = q[2]
-    w_T_b.transform.rotation.x = q[3]
-    w_T_b.transform.rotation.y = q[4]
-    w_T_b.transform.rotation.z = q[5]
-    w_T_b.transform.rotation.w = q[6]
-
-    for i in range(len(contact_frames)):
-        T = model.getPose(contact_frames[i])
-        force_msg[i].header.stamp = msg.header.stamp
-        f_local = T.linear.transpose() @ variables.getVariable(contact_frames[i]).getValue(x) # here we compute the value of the contact forces in local frame from world frame
-        force_msg[i].wrench.force.x = f_local[0]
-        force_msg[i].wrench.force.y = f_local[1]
-        force_msg[i].wrench.force.z = f_local[2]
-        fpubs[i].publish(force_msg[i])
-
-    pub.publish(msg)
-    br.sendTransformMessage(w_T_b)
-
-    rate.sleep()
-
-roslaunch.kill()
-rviz.kill()
+if rclpy.ok():
+    rclpy.shutdown()
