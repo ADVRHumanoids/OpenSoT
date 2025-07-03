@@ -2,8 +2,12 @@ from pyopensot import GenericTask, GenericConstraint, AffineHelper, ConstraintTy
 import numpy as np
 import unittest
 
-M = np.array([[1, 2, 3],[4, 5, 6]])
-q = np.array([1, 2])
+M = np.array([[1.0, 2.0, 3.0],
+              [4.0, 5.0, 6.0]])
+
+q = np.array((1.0, 2.0))
+print(f"M: {M}")
+print(f"q: {q}")
 v = AffineHelper(M, q)
 print(f"v: {v}")
 

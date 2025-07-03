@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 find_package(Python ${PYBIND11_PYTHON_VERSION} COMPONENTS Development Interpreter REQUIRED)
 find_package(pybind11 QUIET)
+find_package(Eigen3 REQUIRED)
 
 message(STATUS "check for pybind11")
 if(${pybind11_FOUND})
@@ -24,7 +25,7 @@ if(${pybind11_FOUND})
                                     constraints/force.hpp
                                     variables/torque.hpp)
 
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${Eigen3_INCLUDE_DIR})
     pybind11_add_module(pyopensot ${OPENSOT_BINDINGS_SOURCES})
 
     target_link_libraries(pyopensot PUBLIC OpenSoT)

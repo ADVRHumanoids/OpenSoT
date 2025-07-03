@@ -3,9 +3,8 @@ from pyopensot.tasks.velocity import Postural, Cartesian, Manipulability, Minimu
 from pyopensot.constraints.velocity import JointLimits, VelocityLimits
 import pyopensot as pysot
 import numpy as np
-import rospy
-from sensor_msgs.msg import JointState
 import os
+import time
 
 urdf_path = os.getcwd() + '/panda.urdf'
 urdf = open(urdf_path, 'r').read()
@@ -53,14 +52,9 @@ print(f"vel_ref: {vel_ref}")
 solver = pysot.iHQP(s)
 #solver = pysot.nHQP(s.getStack(), s.getBounds(), 1e-3)
 
-rospy.init_node('simple_ik', anonymous=True)
-rate = rospy.Rate(1./dt)
-pub = rospy.Publisher('joint_states', JointState, queue_size=10)
-msg = JointState()
-msg.name = model.getJointNames()
 t = 0.
 alpha = 0.01
-while not rospy.is_shutdown():
+for i in range(1000):
     model.setJointPosition(q)
     model.update()
 
@@ -76,11 +70,7 @@ while not rospy.is_shutdown():
     dq = solver.solve()
     q += dq
 
-    msg.position = q
-    msg.header.stamp = rospy.get_rostime()
-    pub.publish(msg)
 
-    rate.sleep()
 
 
 
