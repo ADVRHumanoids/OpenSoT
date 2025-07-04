@@ -66,7 +66,6 @@ try:
 except:
     print("To run this example is needed the LittleDog package ([ros2 branch]) that can be download here: https://github.com/EnricoMingo/LittleDog")
 
-cmd = 'ros2 launch LittleDog LittleDog.launch'
 roslaunch = subprocess.Popen(['ros2', 'launch', 'LittleDog', 'LittleDog.launch'], stdout=subprocess.PIPE, shell=False)
 rviz_file_path = package_path + "/launch/LittleDog.rviz"
 rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2',  '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
