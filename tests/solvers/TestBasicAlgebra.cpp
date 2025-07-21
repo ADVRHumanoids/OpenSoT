@@ -282,10 +282,10 @@ TEST_F(testBasicAlgebra, testqpOASES)
 TEST_F(testBasicAlgebra, checkProductOptimization)
 {
     auto logger = XBot::MatLogger2::MakeLogger("/tmp/checkProductOptimization");
-    
-    
-    
-    
+
+
+
+
     int n_task = 256;
     int n_vars = 128;
     
