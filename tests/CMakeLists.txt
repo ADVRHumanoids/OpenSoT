@@ -34,8 +34,6 @@ endif()
 
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 
-option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
-
 # compite GTest
 find_package(GTest)
 
