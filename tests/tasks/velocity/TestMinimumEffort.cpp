@@ -6,9 +6,6 @@
 #include "../../common.h"
 
 
-
-bool IS_ROSCORE_RUNNING;
-
 namespace {
 
 class testMinimumEffortTask: public TestBase
