@@ -133,7 +133,7 @@ endif()
 
  if(${GLPK_FOUND})
      ADD_EXECUTABLE(testGLPKSolver solvers/TestGLPK.cpp)
-     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
+     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs} tf2_eigen::tf2_eigen)
      add_dependencies(testGLPKSolver   OpenSoT)
      add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
  endif()
