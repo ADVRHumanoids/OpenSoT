@@ -8,9 +8,9 @@
 #define ENABLE_ROS false
 
 #if ENABLE_ROS
-    #include <ros/ros.h>
-    #include <sensor_msgs/JointState.h>
-    #include <visualization_msgs/Marker.h>
+    #include <rclcpp/rclcpp.hpp>
+    #include <sensor_msgs/msg/joint_state.hpp>
+    #include <visualization_msgs/msg/marker.hpp>
 #endif
 
 
@@ -211,6 +211,26 @@ TEST_F(testCollisionUtils, testDistanceChecksAreInvariant) {
 
 }
 
+
+#if ENABLE_ROS
+class ros2_node: public rclcpp::Node
+{
+public:
+    ros2_node():
+        Node("ros2_node")
+    {
+        joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
+        marker_pub = this->create_publisher<visualization_msgs::msg::Marker>("link_distances", 1);
+    }
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
+};
+
+#endif
+
+
+
+
 TEST_F(testCollisionUtils, testCapsuleDistance) {
 
     getGoodInitialPosition(q,_model_ptr);
@@ -224,14 +244,11 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 
 #if ENABLE_ROS
-    int argc = 1;
-    char *argv[] = {""};
-    ros::init(argc, argv, "testCapsuleDistance");
+    std::shared_ptr<ros2_node> n;
+    n.reset(new ros2_node());
 
-    ros::NodeHandle n;
-
-    sensor_msgs::JointState msg;
-    msg.header.stamp = ros::Time::now();
+    sensor_msgs::msg::JointState msg;
+    msg.header.stamp = rclcpp::Clock().now();
 
     for(unsigned int i = 0; i < _model_ptr->getJointNames().size(); ++i)
     {
@@ -240,13 +257,10 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     }
 
 
-    ros::Publisher pub = n.advertise<sensor_msgs::JointState>("joint_states", 1, true);
-    ros::Rate rate = 10;
     for(unsigned int i = 0; i <= 100; ++i)
     {
-        pub.publish(msg);
-        ros::spinOnce();
-        rate.sleep();
+        n->joint_state_pub->publish(msg);
+        usleep(100000);
     }
 #endif
 
@@ -268,13 +282,12 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
 
 
 #if ENABLE_ROS
-    ros::Publisher pub2 = n.advertise<visualization_msgs::Marker>("link_distances", 1, true);
-    visualization_msgs::Marker marker;
+    visualization_msgs::msg::Marker marker;
     marker.header.frame_id = "world";
-    marker.header.stamp = ros::Time().now();
+    marker.header.stamp = msg.header.stamp;
     marker.id = 0;
-    marker.type = visualization_msgs::Marker::LINE_LIST;
-    marker.action = visualization_msgs::Marker::ADD;
+    marker.type = visualization_msgs::msg::Marker::LINE_LIST;
+    marker.action = visualization_msgs::msg::Marker::ADD;
     marker.pose.position.x = 0.;
     marker.pose.position.y = 0.;
     marker.pose.position.z = 0.;
@@ -291,8 +304,8 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     marker.scale.z = 0.;
     for(const auto& data : results)
     {
-        auto k2p = [](const Eigen::Vector3d &k)->geometry_msgs::Point{
-            geometry_msgs::Point p;
+        auto k2p = [](const Eigen::Vector3d &k)->geometry_msgs::msg::Point{
+            geometry_msgs::msg::Point p;
             p.x = k[0]; p.y = k[1]; p.z = k[2];
             return p;
         };
@@ -306,9 +319,8 @@ TEST_F(testCollisionUtils, testCapsuleDistance) {
     }
 
     for(unsigned int i = 0; i < 100; ++i){
-        pub2.publish(marker);
-        ros::spinOnce();
-        rate.sleep();
+        n->marker_pub->publish(marker);
+        usleep(100000);
     }
 #endif
 
@@ -568,6 +580,9 @@ TEST_F(testCollisionUtils, testGlobalToLinkCoordinates)
 }
 
 int main(int argc, char **argv) {
+#if ENABLE_ROS
+    rclcpp::init(argc, argv);
+#endif
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
