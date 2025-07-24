@@ -17,9 +17,11 @@
 #define ENABLE_ROS false
 
 #if ENABLE_ROS
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
-#include <robot_state_publisher/robot_state_publisher.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <visualization_msgs/msg/marker.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+
 #endif
 
 #define STATIC_POINTER_CAST std::static_pointer_cast
@@ -28,11 +30,51 @@
 #define MAKE_SHARED std::make_shared
 
 namespace {
+#if ENABLE_ROS
+class ros2_node: public rclcpp::Node
+{
+public:
+    ros2_node():
+        Node("ros2_node")
+    {
+        joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
+        marker_pub = this->create_publisher<visualization_msgs::msg::Marker>("link_distances", 1);
+    }
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
+};
+
+#endif
+
 
 class testCollisionAvoidanceConstraint : public ::testing::Test
 {
 
 public:
+#if ENABLE_ROS
+
+    std::shared_ptr<ros2_node> n;
+
+
+    void publishJointStates(const Eigen::VectorXd& q)
+    {
+
+        sensor_msgs::msg::JointState msg;
+        for(unsigned int i = 0; i < this->_model_ptr->getNq(); ++i){
+            msg.name.push_back(this->_model_ptr->getJointNames()[i]);
+            msg.position.push_back(0.0);
+        }
+
+        std::map<std::string, double> joint_map;
+        for(unsigned int i = 0; i < q.size(); ++i){
+            msg.position[i] = q[i];
+            joint_map[msg.name[i]] = msg.position[i];
+        }
+        msg.header.stamp = rclcpp::Clock().now();
+
+        n->joint_state_pub->publish(msg);
+    }
+#endif
 
     std::string ReadFile(std::string path)
     {
@@ -45,6 +87,10 @@ public:
 
   testCollisionAvoidanceConstraint()
   {
+#if ENABLE_ROS
+      n.reset(new ros2_node());
+#endif
+
       std::string urdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman_capsules.rviz";
       std::ifstream f(urdf_capsule_path);
       std::stringstream ss;
@@ -69,25 +115,6 @@ public:
       q = _model_ptr->getNeutralQ();
       _model_ptr->setJointPosition(q);
       _model_ptr->update();
-
-#if ENABLE_ROS
-      int argc = 0;
-      char **argv;
-      ros::init(argc, argv, "collision_avoidance_environment_test");
-      n.reset(new ros::NodeHandle());
-      pub = n->advertise<sensor_msgs::JointState>("joint_states", 1000,1);
-
-      KDL::Tree my_tree;
-      if (!kdl_parser::treeFromFile(urdf_capsule_path, my_tree)){
-        ROS_ERROR("Failed to construct kdl tree");}
-      rsp = std::make_shared<robot_state_publisher::RobotStatePublisher>(my_tree);
-      n->setParam("/robot_description", ss.str());
-
-      for(unsigned int i = 0; i < this->_model_ptr->getJointNames().size(); ++i){
-          joint_state.name.push_back(this->_model_ptr->getJointNames()[i]);
-          joint_state.position.push_back(0.0);}
-#endif
-
   }
 
   virtual ~testCollisionAvoidanceConstraint() {
@@ -99,41 +126,11 @@ public:
   virtual void TearDown() {
   }
 
-#if ENABLE_ROS
-public:
-  void publishJointStates(const Eigen::VectorXd& q)
-  {
-      std::map<std::string, double> joint_map;
-      for(unsigned int i = 0; i < q.size(); ++i){
-          joint_state.position[i] = q[i];
-          joint_map[joint_state.name[i]] = joint_state.position[i];
-      }
-      joint_state.header.stamp = ros::Time::now();
-
-      pub.publish(joint_state);
-
-      rsp->publishTransforms(joint_map, ros::Time::now(), "");
-      rsp->publishFixedTransforms("");
-
-      ros::spinOnce();
-  }
-#endif
-
-
-
   XBot::ModelInterface::Ptr _model_ptr;
   Eigen::VectorXd q;
 
   urdf::ModelSharedPtr urdf;
   srdf::ModelSharedPtr srdf;
-
-#if ENABLE_ROS
-  ///ROS
-  std::shared_ptr<ros::NodeHandle> n;
-  ros::Publisher pub;
-  sensor_msgs::JointState joint_state;
-  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
-#endif
 
 };
 
@@ -272,14 +269,13 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 
 #if ENABLE_ROS
     /* visualization */
-        ros::Publisher marker_pub = n->advertise<visualization_msgs::Marker> ( "visualization_marker", 10 );
-        visualization_msgs::Marker cube;
+        visualization_msgs::msg::Marker cube;
         cube.header.frame_id = "world";
-        cube.header.stamp = ros::Time::now();
+        cube.header.stamp = rclcpp::Clock().now();
         cube.ns = "environment";
-        cube.action = visualization_msgs::Marker::ADD;
+        cube.action = visualization_msgs::msg::Marker::ADD;
         cube.id = 0;
-        cube.type = visualization_msgs::Marker::CUBE;
+        cube.type = visualization_msgs::msg::Marker::CUBE;
 
         cube.scale.x = 0.1;
         cube.scale.y = 0.6;
@@ -288,7 +284,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
         cube.color.g = 1.0;
         cube.color.a = 0.5;
 
-        tf::poseEigenToMsg ( w_T_c, cube.pose );
+        cube.pose = tf2::toMsg(w_T_c);
 #endif
 
 
@@ -323,7 +319,7 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 
 #if ENABLE_ROS
         this->publishJointStates(q);
-        marker_pub.publish ( cube );
+        this->n->marker_pub->publish(cube);
         usleep(30000);
 #endif
 
@@ -350,6 +346,9 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
 }
 
 int main(int argc, char **argv) {
+#if ENABLE_ROS
+    rclcpp::init(argc, argv);
+#endif
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
