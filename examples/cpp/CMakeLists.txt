@@ -1,5 +1,5 @@
 add_executable(example_simple_qp simple_qp.cpp)
-target_link_libraries(example_simple_qp OpenSoT)
+target_link_libraries(example_simple_qp OpenSoT OpenSotBackEndQPOases)
 
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/../../tests/")
 set(OPENSOT_TEST_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../tests/")
@@ -8,7 +8,7 @@ add_definitions(-DOPENSOT_TEST_MODEL_TYPE="pin")
 
 
 add_executable(example_joint_limits_psap joint_limits_psap.cpp JointLimitsPSAP.cpp)
-target_link_libraries(example_joint_limits_psap OpenSoT)
+target_link_libraries(example_joint_limits_psap OpenSoT OpenSotBackEndQPOases)
 
 
 find_package(catkin QUIET COMPONENTS roscpp rviz_visual_tools tf tf_conversions eigen_conversions)
