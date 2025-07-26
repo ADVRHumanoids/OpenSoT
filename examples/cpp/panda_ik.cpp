@@ -24,8 +24,6 @@ using namespace std::chrono;
 #include <tf2/LinearMath/Transform.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
-#include <OpenSoT/solvers/proxQPBackEnd.h>
-
 
 #define NUMBER_OF_RUNS 30
 

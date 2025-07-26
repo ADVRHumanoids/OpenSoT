@@ -16,14 +16,14 @@
 #include <chrono>
 using namespace std::chrono;
 
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
-#include <tf/transform_broadcaster.h>
-#include <tf_conversions/tf_eigen.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Transform.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
 
-
-
-bool IS_ROSCORE_RUNNING;
 
 #define NUMBER_OF_RUNS 30
 
@@ -56,42 +56,60 @@ struct solver_statistics{
     }
 };
 
-void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, const Eigen::Affine3d& goal,
-                        const XBot::ModelInterface::Ptr model, ros::NodeHandle& n)
+class ros2_node: public rclcpp::Node
 {
-
-    sensor_msgs::JointState joint_msg;
-    for(unsigned int i = 1; i < model->getJointNames().size(); ++i)
+public:
+    ros2_node():
+        Node("ros2_node")
     {
-        joint_msg.name.push_back(model->getJointNames()[i]);
-        joint_msg.position.push_back(q[model->getQIndex(model->getJointNames()[i])]);
+        start_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+        goal_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+        floating_base_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+        joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
     }
 
-    joint_msg.header.stamp = ros::Time::now();
-    static auto joint_state_pub = n.advertise<sensor_msgs::JointState>("joint_states", 1000);
-    joint_state_pub.publish(joint_msg);
+    std::unique_ptr<tf2_ros::TransformBroadcaster> start_broadcaster;
+    std::unique_ptr<tf2_ros::TransformBroadcaster> goal_broadcaster;
+    std::unique_ptr<tf2_ros::TransformBroadcaster> floating_base_broadcaster;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
+};
 
-    static tf::TransformBroadcaster br;
-    tf::Transform transform_start, transform_goal;
-    tf::Pose pose_start, pose_goal;
-    tf::poseEigenToTF(start, pose_start);
-    transform_start.setOrigin(pose_start.getOrigin());
-    transform_start.setRotation(pose_start.getRotation());
-    tf::poseEigenToTF(goal, pose_goal);
-    transform_goal.setOrigin(pose_goal.getOrigin());
-    transform_goal.setRotation(pose_goal.getRotation());
+
+void publishJointStates(const Eigen::VectorXd& q, const Eigen::Affine3d& start, const Eigen::Affine3d& goal,
+                        const XBot::ModelInterface::Ptr model, std::shared_ptr<ros2_node> n)
+{
+    sensor_msgs::msg::JointState msg;
+    std::vector<std::string> joint_names = model->getJointNames();
+    for(unsigned int i = 1; i < joint_names.size(); ++i)
+    {
+        msg.name.push_back(joint_names[i]);
+        msg.position.push_back(q[model->getQIndex(model->getJointNames()[i])]);
+    }
+    msg.header.stamp = rclcpp::Clock().now();
+    n->joint_state_pub->publish(msg);
+
+    auto transform_start = tf2::eigenToTransform(start);
+    auto transform_goal = tf2::eigenToTransform(goal);
+
+    transform_start.header.stamp = msg.header.stamp;
+    transform_start.header.frame_id = "world";
+    transform_start.child_frame_id = "start";
+
+    transform_goal.header.stamp = msg.header.stamp;
+    transform_goal.header.frame_id = "world";
+    transform_goal.child_frame_id = "goal";
 
     Eigen::Affine3d floating_base;
     model->getFloatingBasePose(floating_base);
-    tf::Transform transform_floating_base;
-    tf::Pose pose_floating_base;
-    tf::poseEigenToTF(floating_base, pose_floating_base);
-    transform_floating_base.setOrigin(pose_floating_base.getOrigin());
-    transform_floating_base.setRotation(pose_floating_base.getRotation());
+    auto transform_floating_base = tf2::eigenToTransform(floating_base);
+    transform_floating_base.header.stamp = msg.header.stamp;
+    transform_floating_base.header.frame_id = "world";
+    transform_floating_base.child_frame_id = "base_link";
 
-    br.sendTransform(tf::StampedTransform(transform_floating_base, joint_msg.header.stamp, "world", "base_link"));
-    br.sendTransform(tf::StampedTransform(transform_start, joint_msg.header.stamp, "world", "start"));
-    br.sendTransform(tf::StampedTransform(transform_goal, joint_msg.header.stamp, "world", "goal"));
+    n->floating_base_broadcaster->sendTransform(transform_floating_base);
+    n->start_broadcaster->sendTransform(transform_start);
+    n->goal_broadcaster->sendTransform(transform_goal);
+
 }
 
 /**
@@ -145,7 +163,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
                           XBot::ModelInterface::Ptr model, OpenSoT::AutoStack::Ptr stack,
                           OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::SolverPtr solver,
                           const unsigned int max_iterations, const double norm_error_eps,
-                          const double dT, std::shared_ptr<ros::NodeHandle> n, const std::string& back_end_name)
+                          const double dT, std::shared_ptr<ros2_node> n, const std::string& back_end_name)
 {
     /**
       * Update model with q_start and q_goal and retrieve initial and goal Cartesian pose
@@ -194,13 +212,8 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
         //4. update the state
         q = model->sum(q, dq);
 
-        if(IS_ROSCORE_RUNNING)
-        {
-            ros::Rate loop_rate(int(1./dT));
-            loop_rate.sleep();
-            publishJointStates(q, TCP_world_pose_init, TCP_world_pose_goal, model, *n.get());
-            ros::spinOnce();
-        }
+        publishJointStates(q, TCP_world_pose_init, TCP_world_pose_goal, model, n);
+        //usleep(10000); //0.01 s
 
         model->getPose(TCP_frame, TCP_world_pose);
         position_error_norm = (TCP_world_pose.matrix().block(0,3,3,1)-TCP_world_pose_goal.matrix().block(0,3,3,1)).norm();
@@ -222,7 +235,7 @@ solver_statistics solveIK(const Eigen::VectorXd& q_start, const Eigen::Affine3d&
     std::cout<<"TCP final pose in world: \n"<<TCP_world_pose.matrix()<<std::endl;
     std::cout<<"TCP goal position in world: \n"<<TCP_world_pose_goal.matrix().block(0,3,3,1).transpose()<<std::endl;
 
-    if(IS_ROSCORE_RUNNING) usleep(500000);
+    //usleep(500000);
 
     return solver_statistics(back_end_name, solver_time, iter);
 }
@@ -295,11 +308,10 @@ void positionRand(Eigen::VectorXd& p, double min, double max, std::mt19937& engi
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "coman_ik_node");
-    IS_ROSCORE_RUNNING = ros::master::check();
-    std::shared_ptr<ros::NodeHandle> n;
-    if(IS_ROSCORE_RUNNING)
-        n = std::make_shared<ros::NodeHandle>();
+    rclcpp::init(argc, argv);
+
+    std::shared_ptr<ros2_node> n;
+    n.reset(new ros2_node());
 
     /**
       * @brief Retrieve model from config file and generate random initial configuration from qmin and qmax
