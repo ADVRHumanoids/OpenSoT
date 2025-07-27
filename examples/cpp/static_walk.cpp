@@ -1,6 +1,3 @@
-#include "../../tests/trajectory_utils.h"
-#include "../../tests/ros_trj_publisher.h"
-#include <tf/transform_broadcaster.h>
 #include "StaticWalkUtils.hpp"
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/tasks/velocity/CoM.h>
@@ -10,16 +7,19 @@
 #include <OpenSoT/utils/AutoStack.h>
 #include <OpenSoT/SubTask.h>
 #include <OpenSoT/tasks/velocity/Gaze.h>
-#include <ros/master.h>
 #include <OpenSoT/constraints/TaskToConstraint.h>
 #include <qpOASES/Options.hpp>
 #include "qp_estimation.h"
-#include <sensor_msgs/JointState.h>
 #include "../../tests/common.h"
-#include <eigen_conversions/eigen_kdl.h>
+#include <xbot2_interface/xbotinterface2.h>
 
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 
-bool IS_ROSCORE_RUNNING;
 
 
 /**
@@ -198,6 +198,20 @@ namespace{
 
     };
 
+    class ros2_node: public rclcpp::Node
+    {
+    public:
+        ros2_node():
+            Node("ros2_node")
+        {
+            world_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+            joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
+        }
+        std::unique_ptr<tf2_ros::TransformBroadcaster> world_broadcaster;
+        rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
+    };
+
+
     /**
      * @brief The StaticWalk class contains publisher helpers and main execution loop
      */
@@ -227,11 +241,10 @@ namespace{
               * @brief if ROSCORE is running the nodehandle is created with some classes to visualize the execution
               * in rviz
               **/
-            if(IS_ROSCORE_RUNNING){
-                _n.reset(new ros::NodeHandle());
-                world_broadcaster.reset(new tf::TransformBroadcaster());
-            }
+            _n.reset(new ros2_node());
         }
+
+        std::shared_ptr<ros2_node> _n;
 
         ~StaticWalk(){}
 
@@ -245,146 +258,42 @@ namespace{
             manip_trj.reset(new manipulation_trajectories(com_init,r_wrist_init));
         }
 
-        void initTrjPublisher()
-        {
-            if(IS_ROSCORE_RUNNING){
-                com_trj_pub.reset(new trajectory_utils::trajectory_publisher("com_trj"));
-                com_trj_pub->setTrj(walk_trj->com_trj.getTrajectory(), "world", "com");
-
-                l_sole_trj_pub.reset(new trajectory_utils::trajectory_publisher("l_sole_trj"));
-                l_sole_trj_pub->setTrj(walk_trj->l_sole_trj.getTrajectory(), "world", "l_sole");
-
-                r_sole_trj_pub.reset(new trajectory_utils::trajectory_publisher("r_sole_trj"));
-                r_sole_trj_pub->setTrj(walk_trj->r_sole_trj.getTrajectory(), "world", "r_sole");
-
-                visual_tools.reset(new rviz_visual_tools::RvizVisualTools("world", "/com_feet_visual_marker"));
-
-                joint_state_pub = _n->advertise<sensor_msgs::JointState>("joint_states", 1000);
-            }
-        }
-
-        void initManipTrjPublisher()
-        {
-            if(IS_ROSCORE_RUNNING)
-            {
-                visual_tools->deleteAllMarkers();
-
-                com_trj_pub->deleteAllMarkersAndTrj();
-                com_trj_pub->setTrj(manip_trj->com_trj.getTrajectory(), "world", "com");
-
-                l_sole_trj_pub->deleteAllMarkersAndTrj();
-                r_sole_trj_pub->deleteAllMarkersAndTrj();
-
-                r_wrist_trj_pub.reset(new trajectory_utils::trajectory_publisher("r_wrist_trj"));
-                r_wrist_trj_pub->setTrj(manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso", "r_wrist");
-            }
-        }
-
-        void publishCoMAndFeet(const KDL::Frame& com, const KDL::Frame& l_foot, const KDL::Frame& r_foot, const std::string& anchor)
-        {
-            if(IS_ROSCORE_RUNNING)
-            {
-                visual_tools->deleteAllMarkers();
-
-                geometry_msgs::PoseStamped _com;
-                _com.pose.position.x = com.p.x();
-                _com.pose.position.y = com.p.y();
-                _com.pose.position.z = com.p.z();
-                double x,y,z,w;
-                com.M.GetQuaternion(x,y,z,w);
-                _com.pose.orientation.x = x;
-                _com.pose.orientation.y = y;
-                _com.pose.orientation.z = z;
-                _com.pose.orientation.w = w;
-
-                Eigen::Affine3d _l_foot, _r_foot;
-                _l_foot(0,3) = l_foot.p.x()+0.02;
-                _l_foot(1,3) = l_foot.p.y();
-                _l_foot(2,3) = l_foot.p.z();
-                for(unsigned int i = 0; i < 3; ++i)
-                    for(unsigned j = 0; j < 3; ++j)
-                        _l_foot(i,j) = l_foot.M(i,j);
-
-                _r_foot(0,3) = r_foot.p.x()+0.02;
-                _r_foot(1,3) = r_foot.p.y();
-                _r_foot(2,3) = r_foot.p.z();
-                for(unsigned int i = 0; i < 3; ++i)
-                    for(unsigned j = 0; j < 3; ++j)
-                        _r_foot(i,j) = r_foot.M(i,j);
-
-                _com.header.frame_id="world";
-                _com.header.stamp = ros::Time::now();
-
-                geometry_msgs::Vector3 scale;
-                scale.x = .02; scale.y = .02; scale.z = .02;
-                visual_tools->publishSphere(_com,rviz_visual_tools::colors::GREEN, scale);
-
-                Eigen::Isometry3d tmp, tmp2;
-                tmp.translation() = _l_foot.translation();
-                tmp.linear() = _l_foot.rotation();
-                tmp2.translation() = _r_foot.translation();
-                tmp2.linear() = _r_foot.rotation();
-                visual_tools->publishWireframeRectangle(tmp, 0.05, 0.1);
-                visual_tools->publishWireframeRectangle(tmp2, 0.05, 0.1);
-
-                Eigen::Isometry3d text_pose; text_pose.Identity();
-                text_pose(1,3) = -0.4;
-                std::string text = "Anchor: "+anchor+"\n";
-                text += "Robot Anchor: "+ _fb->getAnchor()+"\n";
-                std::string floating_base;
-                _model_ptr->getFloatingBaseLink(floating_base);
-                text += "Robot Floating Base: "+ floating_base+"\n";
-                visual_tools->publishText(text_pose,text);
-            }
-        }
-
 
         void publishRobotState()
         {
-
-            if(IS_ROSCORE_RUNNING)
+            sensor_msgs::msg::JointState joint_msg;
+            for(unsigned int i = 1; i < _model_ptr->getJointNames().size(); ++i)
             {
-                sensor_msgs::JointState joint_msg;
-                for(unsigned int i = 1; i < _model_ptr->getJointNames().size(); ++i)
-                {
-                    joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
-                    joint_msg.position.push_back(_q[_model_ptr->getQIndex(_model_ptr->getJointNames()[i])]);
-                }
-
-                joint_msg.header.stamp = ros::Time::now();
-
-
-                Eigen::Affine3d world_T_bl;
-                _model_ptr->getPose("Waist",world_T_bl);
-
-                tf::Transform anchor_T_world;
-                tf::transformEigenToTF(world_T_bl, anchor_T_world);
-
-                world_broadcaster->sendTransform(tf::StampedTransform(
-                    anchor_T_world.inverse(), joint_msg.header.stamp,
-                    "Waist", "world"));
-
-
-                joint_state_pub.publish(joint_msg);
+                joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
+                joint_msg.position.push_back(_q[_model_ptr->getQIndex(_model_ptr->getJointNames()[i])]);
             }
 
+            joint_msg.header.stamp = rclcpp::Clock().now();
+
+
+            Eigen::Affine3d world_T_bl;
+            _model_ptr->getPose("Waist",world_T_bl);
+
+            Eigen::Affine3d bl_T_world = world_T_bl.inverse();
+
+
+            geometry_msgs::msg::TransformStamped anchor_T_world = tf2::eigenToTransform(bl_T_world);
+            anchor_T_world.header.frame_id = "Waist";
+            anchor_T_world.child_frame_id = "world";
+            anchor_T_world.header.stamp = joint_msg.header.stamp;
+
+            _n->joint_state_pub->publish(joint_msg);
+            _n->world_broadcaster->sendTransform(anchor_T_world);
         }
 
 
         std::shared_ptr<manipulation_trajectories> manip_trj;
         std::shared_ptr<walking_pattern_generator> walk_trj;
-        std::shared_ptr<trajectory_utils::trajectory_publisher> com_trj_pub, l_sole_trj_pub, r_sole_trj_pub, r_wrist_trj_pub;
 
-        ros::Publisher joint_state_pub;
-        std::shared_ptr<tf::TransformBroadcaster> world_broadcaster;
-
-        rviz_visual_tools::RvizVisualToolsPtr visual_tools;
 
         OpenSoT::floating_base_estimation::kinematic_estimation::Ptr _fb;
         XBot::ModelInterface::Ptr _model_ptr;
         Eigen::VectorXd _q;
-
-        std::shared_ptr<ros::NodeHandle> _n;
 
         void setGoodInitialPosition() {
             _q[_model_ptr->getQIndex("RHipSag")] = -25.0*M_PI/180.0;
@@ -432,14 +341,13 @@ namespace{
             Eigen::Affine3d r_foot_init; this->_model_ptr->getPose("r_sole", r_foot_init);
 
             /**
-              * @brief Initialize trajectories, publiahers and walking stack
+              * @brief Initialize trajectories and walking stack
               **/
             KDL::Frame com_init_kdl, l_foot_init_kdl, r_foot_init_kdl;
-            tf::transformEigenToKDL(com_init, com_init_kdl);
-            tf::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
-            tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
+            tf2::transformEigenToKDL(com_init, com_init_kdl);
+            tf2::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
+            tf2::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
             this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
-            this->initTrjPublisher();
             theWalkingStack ws(*_model_ptr);
 
 
@@ -478,8 +386,7 @@ namespace{
                 ws.update();
 
                 uint tic = 0.0;
-                if(IS_ROSCORE_RUNNING)
-                    tic = ros::Time::now().nsec;
+                tic = rclcpp::Clock().now().nanoseconds();
 
                 /**
                   * @brief Solve and integrate state
@@ -489,20 +396,12 @@ namespace{
                 this->_q = _model_ptr->sum(this->_q, dq);
 
                 uint toc = 0.0;
-                if(IS_ROSCORE_RUNNING){
-                    toc = ros::Time::now().nsec;
-                    loop_time.push_back((toc-tic)/1e6);
+                toc = rclcpp::Clock().now().nanoseconds();
+                loop_time.push_back((toc-tic)/1e6);
 
-                    this->com_trj_pub->publish();
-                    this->l_sole_trj_pub->publish();
-                    this->r_sole_trj_pub->publish();
-                }
 
-                this->publishCoMAndFeet(com_d,l_sole_d,r_sole_d,anchor_d);
                 this->publishRobotState();
 
-                if(IS_ROSCORE_RUNNING)
-                    ros::spinOnce();
 
                 t+=0.01;
                 usleep(10000);
@@ -518,10 +417,9 @@ namespace{
             Eigen::Affine3d r_wrist_init; _model_ptr->getPose("r_wrist","DWYTorso",r_wrist_init);
 
             KDL::Frame r_wrist_init_kdl;
-            tf::transformEigenToKDL(r_wrist_init, r_wrist_init_kdl);
-            tf::transformEigenToKDL(com_init, com_init_kdl);
+            tf2::transformEigenToKDL(r_wrist_init, r_wrist_init_kdl);
+            tf2::transformEigenToKDL(com_init, com_init_kdl);
             this->initManipTrj(com_init_kdl,  r_wrist_init_kdl);
-            this->initManipTrjPublisher();
 
 
             t = 0.0;
@@ -540,38 +438,24 @@ namespace{
                 ws.update();
 
                 uint tic = 0.0;
-                if(IS_ROSCORE_RUNNING)
-                    tic = ros::Time::now().nsec;
+                tic = rclcpp::Clock().now().nanoseconds();
 
                 if(!ws.solve(dq))
                     dq.setZero();
                 this->_q = _model_ptr->sum(this->_q, dq);
 
                 uint toc = 0.0;
-                if(IS_ROSCORE_RUNNING){
-                    toc = ros::Time::now().nsec;
+                toc = rclcpp::Clock().now().nanoseconds();
 
-                    loop_time.push_back((toc-tic)/1e6);
-
-                    this->com_trj_pub->publish();
-                    //this->r_wrist_trj_pub->setTrj(
-                    //            this->manip_trj->r_wrist_trj.getTrajectory(), "DWYTorso");
-                    this->r_wrist_trj_pub->publish(true);
-                }
+                loop_time.push_back((toc-tic)/1e6);
 
                 this->publishRobotState();
-
-                if(IS_ROSCORE_RUNNING)
-                    ros::spinOnce();
 
 
                 t+=0.01;
                 usleep(10000);
             }
 
-            if(IS_ROSCORE_RUNNING){
-                this->com_trj_pub->deleteAllMarkersAndTrj();
-                this->r_wrist_trj_pub->deleteAllMarkersAndTrj();}
 
         //3 WALKING (AGAIN) Phase
         /**
@@ -590,11 +474,10 @@ namespace{
         this->_model_ptr->getPose("r_sole", r_foot_init);
 
 
-        tf::transformEigenToKDL(com_init, com_init_kdl);
-        tf::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
-        tf::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
+        tf2::transformEigenToKDL(com_init, com_init_kdl);
+        tf2::transformEigenToKDL(l_foot_init, l_foot_init_kdl);
+        tf2::transformEigenToKDL(r_foot_init, r_foot_init_kdl);
         this->initTrj(com_init_kdl, l_foot_init_kdl, r_foot_init_kdl);
-        this->initTrjPublisher();
 
         t = 0.;
         for(unsigned int i = 0; i < int(this->walk_trj->com_trj.Duration()) * 100; ++i)
@@ -617,28 +500,19 @@ namespace{
 
 
             uint tic = 0.0;
-            if(IS_ROSCORE_RUNNING)
-                tic = ros::Time::now().nsec;
+            tic = rclcpp::Clock().now().nanoseconds();
 
             if(!ws.solve(dq))
                 dq.setZero();
             this->_q = _model_ptr->sum(this->_q, dq);
 
             uint toc = 0.0;
-            if(IS_ROSCORE_RUNNING){
-                toc = ros::Time::now().nsec;
-                loop_time.push_back((toc-tic)/1e6);
+            toc = rclcpp::Clock().now().nanoseconds();
+            loop_time.push_back((toc-tic)/1e6);
 
-                this->com_trj_pub->publish();
-                this->l_sole_trj_pub->publish();
-                this->r_sole_trj_pub->publish();
-            }
 
-            this->publishCoMAndFeet(com_d,l_sole_d,r_sole_d,anchor_d);
             this->publishRobotState();
 
-            if(IS_ROSCORE_RUNNING)
-                ros::spinOnce();
 
             t+=0.01;
             usleep(10000);
@@ -646,12 +520,11 @@ namespace{
 
 
 
-        if(IS_ROSCORE_RUNNING){
-            double acc = 0.;
-            for(unsigned int i = 0; i < loop_time.size(); ++i)
-                acc += loop_time[i];
-            std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
-        }
+        double acc = 0.;
+        for(unsigned int i = 0; i < loop_time.size(); ++i)
+            acc += loop_time[i];
+        std::cout<<"Medium time per solve: "<<acc/double(loop_time.size())<<" ms"<<std::endl;
+
     }
 
 };
@@ -660,9 +533,8 @@ namespace{
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "testStaticWalk_node");
-  IS_ROSCORE_RUNNING = ros::master::check();
-  StaticWalk static_walk;
-  static_walk.static_walk();
-  return 0;
+    rclcpp::init(argc, argv);
+    StaticWalk static_walk;
+    static_walk.static_walk();
+    return 0;
 }

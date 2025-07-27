@@ -23,11 +23,6 @@ set(${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 add_subdirectory(doc)
 
-#find_package(Boost COMPONENTS system REQUIRED)
-#find_package(Eigen3 REQUIRED)
-#find_package(orocos_kdl REQUIRED)
-#find_package(urdf REQUIRED)
-#find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
 find_package(moveit_msgs QUIET)
 find_package(Qhull REQUIRED)
