@@ -164,6 +164,11 @@ bool CollisionAvoidance::addCollisionShape(const std::string &name,
     return _dist_calc->addCollisionShape(name, link, shape, link_T_shape, disabled_collisions);
 }
 
+bool CollisionAvoidance::setCollisionShapeActive(const std::string& name, bool flag)
+{
+    return _dist_calc->setCollisionShapeActive(name, flag);
+}
+
 bool CollisionAvoidance::moveCollisionShape(const std::string& id, const Eigen::Affine3d& new_pose)
 {
     return _dist_calc->moveCollisionShape(id, new_pose);

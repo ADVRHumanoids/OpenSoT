@@ -112,6 +112,8 @@ public:
                            const Eigen::Affine3d& link_T_shape,
                            const std::vector<std::string>& disabled_collisions = {});
 
+    bool setCollisionShapeActive(const std::string& name, bool flag);
+
     // /**
     //  * @brief remove world collision with given id
     //  */

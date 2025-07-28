@@ -36,6 +36,14 @@ std::shared_ptr<CollisionAvoidanceC> make_collision_avoidance(
 }
 
 
+std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> get_ordered_witness_point_vector(const CollisionAvoidance& ca)
+{
+    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> ordered_witness_points;
+    ca.getOrderedWitnessPointVector(ordered_witness_points);
+    return ordered_witness_points;
+}
+
+
 void pyVelocityCollisionAvoidance(py::module& m) {
     
     using CollisionAvoidance = OpenSoT::constraints::velocity::CollisionAvoidance;
@@ -52,11 +60,12 @@ void pyVelocityCollisionAvoidance(py::module& m) {
         .def("setCollisionList", &CollisionAvoidance::setCollisionList)
         .def("collisionModelUpdated", &CollisionAvoidance::collisionModelUpdated)
         .def("addCollisionShape", &CollisionAvoidance::addCollisionShape)
+        .def("setCollisionShapeActive", &CollisionAvoidance::setCollisionShapeActive)
         .def("moveCollisionShape", &CollisionAvoidance::moveCollisionShape)
         .def("setBoundScaling", &CollisionAvoidance::setBoundScaling)
         .def("setLinksVsEnvironment", &CollisionAvoidance::setLinksVsEnvironment)
         .def("getCollisionModel", (const XBot::Collision::CollisionModel& (CollisionAvoidance::*)() const) &CollisionAvoidance::getCollisionModel)
-        .def("getOrderedWitnessPointVector", &CollisionAvoidance::getOrderedWitnessPointVector)
+        .def("getOrderedWitnessPointVector", &get_ordered_witness_point_vector)
         .def("getOrderedLinkPairVector", &CollisionAvoidance::getOrderedLinkPairVector)
         .def("getOrderedDistanceVector", &CollisionAvoidance::getOrderedDistanceVector)
         .def("getCollisionJacobian", &CollisionAvoidance::getCollisionJacobian);
