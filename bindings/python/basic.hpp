@@ -66,6 +66,30 @@ void pyTask(py::module& m, const std::string& className) {
             return task1 + task2;})
         .def("__mod__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const std::list<unsigned int>& rowIndices) {
             return task % rowIndices;})
+
+        .def("__getitem__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const size_t i) {
+            std::list<unsigned int> indices;
+            indices.push_back(i);
+            return task%indices;
+        })
+
+        .def("__getitem__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, py::slice slice) {
+            size_t start, stop, step, slicelength;
+            if (!slice.compute(task->getA().rows(), &start, &stop, &step, &slicelength))
+                throw py::error_already_set();
+
+            std::list<unsigned int> slice_vector;
+            for(size_t i = 0; i < slicelength; ++i)
+            {
+                unsigned int id = start + i * step;
+                slice_vector.push_back(id);
+            }
+            return task%slice_vector;
+        })
+
+
+
+
         .def("__rmul__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const float& w) {
             return w * task;})
         .def("__truediv__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task1,
