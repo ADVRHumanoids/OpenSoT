@@ -24,6 +24,7 @@
 #include <map>
 #include <type_traits>
 #include <memory>
+#include <OpenSoT/utils/Piler.h>
 
 
 namespace OpenSoT { 
@@ -123,6 +124,21 @@ public:
     {
         _M.setZero(_M.rows(), _M.cols());
         _q.setZero(_q.rows());
+    }
+
+    template <typename OtherM, typename OtherQ>
+    static AffineHelperBase<DerivedM, DerivedQ> pile(const AffineHelperBase<OtherM, OtherQ>& A, const AffineHelperBase<OtherM, OtherQ>& B)
+    {
+        utils::MatrixPiler M;
+        utils::MatrixPiler q;
+
+        M.set(A.getM());
+        M.pile(B.getM());
+
+        q.set(A.getq());
+        q.pile(B.getq());
+
+        return AffineHelperBase(M.generate_and_get(), q.generate_and_get());
     }
     
     static AffineHelperBase<DerivedM, DerivedQ> Identity(int size)
