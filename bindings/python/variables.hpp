@@ -26,9 +26,14 @@ inline AffineHelper sum(const AffineHelper& lhs, const Eigen::VectorXd& v)
     return lhs+v;
 }
 
-inline AffineHelper mul(const Eigen::MatrixXd& M, const AffineHelper& lhs)
+inline AffineHelper matmul(const Eigen::MatrixXd& M, const AffineHelper& lhs)
 {
     return M*lhs;
+}
+
+inline AffineHelper mul(const double s, const AffineHelper& lhs)
+{
+    return s*lhs;
 }
 
 inline AffineHelper div(const AffineHelper& lhs, const AffineHelper& rhs)
@@ -43,9 +48,45 @@ inline std::string print(const AffineHelper& affine)
     return os.str();
 }
 
+inline AffineHelper subVariable(const AffineHelper& affine, const std::vector<size_t>& slice)
+{
+    Eigen::MatrixXd M;
+    M.setZero(slice.size(), affine.getM().rows());
+
+    unsigned int row = 0;
+    for(size_t index : slice)
+    {
+        M(row, index) = 1.;
+        row++;
+    }
+
+    return M*affine;
+}
+
+inline AffineHelper subVariable(const AffineHelper& affine, const size_t& id)
+{
+    std::vector<size_t> slice;
+    slice.push_back(id);
+    return subVariable(affine, slice);
+}
+
+
+
 class OptvarHelperWrapper
 {
     public:
+        OptvarHelperWrapper(const py::list& vars)
+        {
+            OptvarHelper::VariableVector vv;
+
+            for (size_t i = 0; i < vars.size(); ++i)
+            {
+                vv.push_back(vars[i].cast<std::pair<std::string, int>>());
+            }
+
+            _optvar = std::make_shared<OptvarHelper>(vv);
+        }
+
         OptvarHelperWrapper(const py::dict& vars)
         {
             OptvarHelper::VariableVector vv;
@@ -106,17 +147,50 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def("__add__", [](const AffineHelper &a, const AffineHelper &b) { return sum(a, b); })
         .def("__add__", [](const AffineHelper &a, const Eigen::VectorXd &v) { return sum(a, v); })
         .def("__sub__", [](const AffineHelper &a, const Eigen::VectorXd &v) { return diff(a, v); })
-        .def("__mul__", [](const Eigen::MatrixXd &m, const AffineHelper &a) { return mul(m, a); })
+        .def("__rmatmul__", [](const AffineHelper &a, const Eigen::MatrixXd &m) { return matmul(m, a);}, py::is_operator())
+        .def("__matmul__", [](const AffineHelper &a, const Eigen::MatrixXd &m) { return matmul(m, a); }, py::is_operator())
+        .def("__mul__", [](const AffineHelper &a, const double s) { return mul(s, a); }, py::is_operator())
+        .def("__rmul__", [](const AffineHelper &a, const double s) { return mul(s, a); }, py::is_operator())
         .def("__truediv__", [](const AffineHelper &a, const AffineHelper &b) { return div(a, b); })
-        .def("__str__", [](const AffineHelper &a) { return print(a); });
+        .def("__str__", [](const AffineHelper &a) { return print(a); })
+
+        .def("__getitem__", [](const AffineHelper& a, const size_t i) {
+            if(i >= a.getM().rows())
+                throw py::index_error();
+            return subVariable(a, i);
+        })
+
+        .def("__getitem__", [](const AffineHelper& a, py::slice slice) {
+            size_t start, stop, step, slicelength;
+            if (!slice.compute(a.getM().rows(), &start, &stop, &step, &slicelength))
+                throw py::error_already_set();
+
+            std::vector<size_t> slice_vector;
+            slice_vector.reserve(slicelength);
+            for(size_t i = 0; i < slicelength; ++i)
+            {
+                unsigned int id = start + i * step;
+                if(id >= a.getM().rows())
+                    throw py::index_error();
+                slice_vector.push_back(id);
+            }
+            return subVariable(a, slice_vector);
+        })
+
+        .def_static("pile", &AffineHelper::pile<Eigen::MatrixXd, Eigen::VectorXd>)
+        .def_static("Identity", &AffineHelper::Identity)
+        .def_static("Zero", &AffineHelper::Zero)
+
+        .attr("__array_priority__") = 1000.0;
 }
 
 void pyOptvarHelperWrapper(py::module& m, const std::string& className) {
     py::class_<OptvarHelperWrapper>(m, className.c_str())
         .def(py::init<py::dict>())
-         .def("getVariable", &OptvarHelperWrapper::getVariable)
-         .def("getAllVariables", &OptvarHelperWrapper::getAllVariables)
-         .def("getSize", &OptvarHelperWrapper::getSize);
+        .def(py::init<py::list>())
+        .def("getVariable", &OptvarHelperWrapper::getVariable)
+        .def("getAllVariables", &OptvarHelperWrapper::getAllVariables)
+        .def("getSize", &OptvarHelperWrapper::getSize);
 }
 
 
