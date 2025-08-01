@@ -155,6 +155,9 @@ try:
         model.setJointPosition(q)
         model.setJointVelocity(dq)
         model.update()
+
+        # Variable Update
+        torques.update()
 #
         # Compute new reference for CoM task
         com_ref[2] = com0[2] + alpha * np.sin(3.1415 * t)
