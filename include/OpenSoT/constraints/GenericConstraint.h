@@ -69,7 +69,7 @@ public:
 
     Type getType(){return _type;}
     
-    
+    virtual void _update();
     
 private:
     
@@ -79,7 +79,6 @@ private:
         
         Type _type;
 
-        void _update();
     
 };
     
