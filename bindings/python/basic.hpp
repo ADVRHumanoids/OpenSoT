@@ -16,7 +16,7 @@ public:
     typedef Task<MatrixType, VectorType> TMV;
 
     void _update() override {
-        PYBIND11_OVERLOAD_PURE(void, TMV, _update);
+        PYBIND11_OVERRIDE_PURE(void, TMV, _update);
     }
 };
 
@@ -27,7 +27,7 @@ public:
     typedef Constraint<MatrixType, VectorType> CMV;
 
     void _update() override {
-        PYBIND11_OVERLOAD_PURE(void, CMV, _update);
+        PYBIND11_OVERRIDE_PURE(void, CMV, _update);
     }
 };
 
