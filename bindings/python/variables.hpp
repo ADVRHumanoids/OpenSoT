@@ -127,8 +127,20 @@ Eigen::VectorXd get_value(const AffineHelper& var, const Eigen::VectorXd& x)
     return val;
 }
 
+struct PyAffineHeplerTrampoline : public AffineHelper {
+    using AffineHelper::AffineHelper;  // Inherit constructors
+
+    void update() override {
+        PYBIND11_OVERRIDE(
+            void,          // Return type
+            AffineHelper,   // C++ parent class
+            update        // Name of the function
+            );
+    }
+};
+
 void pyAffineHelper(py::module& m, const std::string& className) {
-    py::class_<AffineHelper, std::shared_ptr<AffineHelper>>(m, className.c_str())
+    py::class_<AffineHelper, std::shared_ptr<AffineHelper>, PyAffineHeplerTrampoline>(m, className.c_str())
         .def(py::init<>())
         .def(py::init<int, int>())
         .def(py::init<const Eigen::MatrixXd&, const Eigen::VectorXd&>())
@@ -141,7 +153,6 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def("getOutputSize", &AffineHelper::getOutputSize)
         .def("setZero", py::overload_cast<>(&AffineHelper::setZero))
         .def("setZero", py::overload_cast<int, int>(&AffineHelper::setZero))
-        .def("update", &AffineHelper::update)
         .def("getValue", get_value)
         .def("__sub__", [](const AffineHelper &a, const AffineHelper &b) { return diff(a, b); })
         .def("__add__", [](const AffineHelper &a, const AffineHelper &b) { return sum(a, b); })
@@ -176,6 +187,8 @@ void pyAffineHelper(py::module& m, const std::string& className) {
             }
             return subVariable(a, slice_vector);
         })
+
+        .def("update", &AffineHelper::update)
 
         .def_static("pile", &AffineHelper::pile<Eigen::MatrixXd, Eigen::VectorXd>)
         .def_static("Identity", &AffineHelper::Identity)

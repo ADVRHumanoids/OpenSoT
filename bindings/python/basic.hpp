@@ -18,6 +18,12 @@ public:
     void _update() override {
         PYBIND11_OVERRIDE_PURE(void, TMV, _update);
     }
+
+    // Lift protected members to public so Python can see them
+    using Task<MatrixType, VectorType>::_A;
+    using Task<MatrixType, VectorType>::_b;
+    using Task<MatrixType, VectorType>::_c;
+    using Task<MatrixType, VectorType>::_W;
 };
 
 template <class MatrixType, class VectorType>
@@ -29,6 +35,16 @@ public:
     void _update() override {
         PYBIND11_OVERRIDE_PURE(void, CMV, _update);
     }
+
+    using Constraint<MatrixType, VectorType>::_Aeq;
+    using Constraint<MatrixType, VectorType>::_beq;
+
+    using Constraint<MatrixType, VectorType>::_Aineq;
+    using Constraint<MatrixType, VectorType>::_bLowerBound;
+    using Constraint<MatrixType, VectorType>::_bUpperBound;
+
+    using Constraint<MatrixType, VectorType>::_lowerBound;
+    using Constraint<MatrixType, VectorType>::_upperBound;
 };
 
 
@@ -87,7 +103,10 @@ void pyTask(py::module& m, const std::string& className) {
             return task%slice_vector;
         })
 
-
+        .def_readwrite("_A", &pyTaskTrampoline<MatrixType, VectorType>::_A)
+        .def_readwrite("_b", &pyTaskTrampoline<MatrixType, VectorType>::_b)
+        .def_readwrite("_c", &pyTaskTrampoline<MatrixType, VectorType>::_c)
+        .def_readwrite("_W", &pyTaskTrampoline<MatrixType, VectorType>::_W)
 
 
         .def("__rmul__", [](const std::shared_ptr<Task<MatrixType, VectorType>> task, const float& w) {
@@ -132,6 +151,15 @@ void pyConstraint(py::module& m, const std::string& className) {
             .def("checkConsistency", &Constraint<MatrixType, VectorType>::checkConsistency)
             .def("getActiveJointsMask", &Constraint<MatrixType, VectorType>::getActiveJointsMask)
             .def("setActiveJointsMask", &Constraint<MatrixType, VectorType>::setActiveJointsMask)
+
+            .def_readwrite("_Aeq", &pyConstraintTrampoline<MatrixType, VectorType>::_Aeq)
+            .def_readwrite("_beq", &pyConstraintTrampoline<MatrixType, VectorType>::_beq)
+            .def_readwrite("_Aineq", &pyConstraintTrampoline<MatrixType, VectorType>::_Aineq)
+            .def_readwrite("_bLowerBound", &pyConstraintTrampoline<MatrixType, VectorType>::_bLowerBound)
+            .def_readwrite("_bUpperBound", &pyConstraintTrampoline<MatrixType, VectorType>::_bUpperBound)
+            .def_readwrite("_lowerBound", &pyConstraintTrampoline<MatrixType, VectorType>::_lowerBound)
+            .def_readwrite("_upperBound", &pyConstraintTrampoline<MatrixType, VectorType>::_upperBound)
+
             .def("__mod__", [](const std::shared_ptr<Constraint<MatrixType, VectorType>> constraint, const std::list<unsigned int>& rowIndices) {
                 return constraint % rowIndices;});
 }
