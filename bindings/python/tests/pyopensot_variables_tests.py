@@ -19,6 +19,11 @@ utest = unittest.TestCase()
 utest.assertTrue((V3.getM() == (M1 - M2)).all())
 utest.assertTrue((V3.getq() == (q1 - q2)).all())
 
+V3.update()
+utest.assertTrue((V3.getM() == (M1 - M2)).all())
+utest.assertTrue((V3.getq() == (q1 - q2)).all())
+
+
 v = np.array([10, 22])
 V4 = V1 - v
 print(f"M4: {V4.getM()}")
