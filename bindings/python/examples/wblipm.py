@@ -26,18 +26,12 @@ class ros2_node(Node):
 
         self.joint_state_publisher = self.create_publisher(JointState, 'joint_states', 10)
 
-        self.force_publishers = {}
-
         self.base_link_broadcaster = TransformBroadcaster(self)
 
         self.joint_msg = JointState()
         self.w_T_b = TransformStamped()
 
-    def initialize_force_publishers(self, contact_frames):
-        for contact_frame in contact_frames:
-            self.force_publishers[contact_frame] = self.create_publisher(WrenchStamped, contact_frame, 10)
-
-    def publish(self, q, force_msgs = None):
+    def publish(self, q):
         t = node.get_clock().now().to_msg()
 
         self.joint_msg.position = q[7::]
@@ -54,10 +48,6 @@ class ros2_node(Node):
 
         self.joint_state_publisher.publish(self.joint_msg)
         self.base_link_broadcaster.sendTransform(self.w_T_b)
-
-        if force_msgs is not None:
-            for contact_frame, force_msg in force_msgs.items():
-                self.force_publishers[contact_frame].publish(force_msg)
 
 roslaunch = subprocess.Popen(['ros2', 'launch', 'hurobots', 'g1.launch'], stdout=subprocess.PIPE, shell=False)
 
@@ -175,7 +165,19 @@ h = model.getCOM()[2]
 dt = tf/Ns
 integration = list()
 
-for i in range(Ns):
+# Integrate full Model
+x0 = variables.getVariable(f"x0")
+u0 = variables.getVariable(f"u0")
+x1 = variables.getVariable(f"x1")
+r = x0[0:2]
+rdot = x0[2:]
+rddot = model.getCOMJacobian()[0:2, :] @ u0 + model.getCOMJdotTimesV()[0:2]
+xdot0 = AffineHelper.pile(rdot, rddot)
+EULER = euler(x0, xdot0, x1, dt)
+integration_0_constraint = GenericTask(f"integration_0", EULER.getM(), EULER.getq())
+
+# Integrate LIPM
+for i in range(1, Ns):
     x0 = variables.getVariable(f"x{i}")
     u0 = variables.getVariable(f"u{i}")
     x1 = variables.getVariable(f"x{i + 1}")
@@ -183,11 +185,7 @@ for i in range(Ns):
     r = x0[0:2]
     rdot = x0[2:]
 
-    if i == 0:
-        rddot = model.getCOMJacobian()[0:2, :] @ u0 + model.getCOMJdotTimesV()[0:2]
-
-    else:
-        rddot = lipm(r, u0, h)
+    rddot = lipm(r, u0, h)
 
     xdot0 = AffineHelper.pile(rdot, rddot)
 
@@ -195,7 +193,7 @@ for i in range(Ns):
     integration.append(GenericTask(f"integration_{i}", integration_.getM(), integration_.getq()))
 
 
-integration_constraint = AggregatedTask(integration, variables.getSize())
+integration_constraint = AggregatedTask(integration, variables.getSize()) + integration_0_constraint
 #plt.spy(integration_constraint.getA(), markersize=5)
 #plt.show()
 
@@ -346,7 +344,7 @@ try:
         plt.draw()
 
         # --- Publish ---
-        node.publish(q, force_msgs=None)
+        node.publish(q)
 
         #ch = input()
 
