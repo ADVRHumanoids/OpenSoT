@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from pyopensot import AffineHelper, OptvarHelper, GenericTask, AggregatedTask
+from pyopensot import AffineHelper, OptvarHelper, GenericTask, AggregatedTask, Task
 import pyopensot as pysot
 from rclpy.node import Node
 from pyopensot.tasks.acceleration import Cartesian, CoM, Postural, AngularMomentum
@@ -16,7 +16,7 @@ import subprocess
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped, WrenchStamped
 from tf2_ros import TransformBroadcaster
-import tictoc
+#import tictoc
 import time
 
 class ros2_node(Node):
@@ -126,6 +126,51 @@ def lipm(r, z, h):
 def euler(x0, xdot0, x1, dt):
     return x1 - x0 - dt * xdot0 # x1 = x0 + dt * xdot0
 
+class rddot(AffineHelper):
+    def __init__(self, model, u0):
+        super().__init__(model.getNv(), 2)
+        self.model = model
+        self.u0 = u0
+        self.update()
+
+    def update(self):
+        self.rddot = self.model.getCOMJacobian()[0:2, :] @ self.u0 + self.model.getCOMJdotTimesV()[0:2]
+        self.setM(self.rddot.getM())
+        self.setq(self.rddot.getq())
+
+class full_model_integrator_constraint(Task):
+    def __init__(self, x0, rddot0, x1, model, dt):
+        super().__init__("full_model_integrator_constraint", x0.getInputSize())
+        self.x0 = x0
+        self.rddot0 = rddot0
+        self.x1 = x1
+        self.model = model
+        self.dt = dt
+
+        self.rdot = self.x0[2:]
+        self.xdot0 = AffineHelper.pile(self.rdot, self.rddot0)
+
+        self._W = np.eye(2)
+        self.update()
+
+    def _update(self):
+        M = self.xdot0.getM()
+
+        M[0:2, :] = self.rdot.getM()
+        M[2:4, :] = self.rddot0.getM()
+
+        q = self.xdot0.getq()
+        q[0:2] = self.rdot.getq()
+        q[2:4] = self.rddot0.getq()
+        q = q.reshape(-1, 1)
+
+        self.xdot0.setM(M)
+        self.xdot0.setq(q)
+        EULER = euler(self.x0, self.xdot0, self.x1, self.dt)
+
+        self._A = EULER.getM()
+        self._b = -EULER.getq()
+
 def initial_state_constraint(x0, value):
     tmp = x0 + value
     return GenericTask("initial_state", tmp.getM(), tmp.getq())
@@ -159,6 +204,8 @@ vars.append((f"x{Ns}", nx))
 variables = OptvarHelper(vars)
 print(f"variables.getSize(): {variables.getSize()}")
 
+rddot0 = rddot(model, variables.getVariable("u0"))
+
 print(f"COM: {model.getCOM()}")
 
 h = model.getCOM()[2]
@@ -169,12 +216,13 @@ integration = list()
 x0 = variables.getVariable(f"x0")
 u0 = variables.getVariable(f"u0")
 x1 = variables.getVariable(f"x1")
-r = x0[0:2]
-rdot = x0[2:]
-rddot = model.getCOMJacobian()[0:2, :] @ u0 + model.getCOMJdotTimesV()[0:2]
-xdot0 = AffineHelper.pile(rdot, rddot)
-EULER = euler(x0, xdot0, x1, dt)
-integration_0_constraint = GenericTask(f"integration_0", EULER.getM(), EULER.getq())
+#r = x0[0:2]
+#rdot = x0[2:]
+#rddot = model.getCOMJacobian()[0:2, :] @ u0 + model.getCOMJdotTimesV()[0:2]
+#xdot0 = AffineHelper.pile(rdot, rddot)
+#EULER = euler(x0, xdot0, x1, dt)
+#integration_0_constraint = GenericTask(f"integration_0", EULER.getM(), EULER.getq())
+integration_0_constraint = full_model_integrator_constraint(x0, rddot0, x1, model, dt)
 
 # Integrate LIPM
 for i in range(1, Ns):
@@ -330,6 +378,8 @@ try:
         model.setJointPosition(q)
         model.setJointVelocity(vel)
         model.update()
+
+        rddot0.update()
 
         x0 = np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
 
