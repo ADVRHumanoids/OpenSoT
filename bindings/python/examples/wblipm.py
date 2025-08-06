@@ -23,13 +23,12 @@ class ros2_node(Node):
     def __init__(self):
         super().__init__('g1_wblipm')
         self.get_logger().info("g1 ID node has been started.")
-
         self.joint_state_publisher = self.create_publisher(JointState, 'joint_states', 10)
-
         self.base_link_broadcaster = TransformBroadcaster(self)
-
         self.joint_msg = JointState()
         self.w_T_b = TransformStamped()
+        self.w_T_b.header.frame_id = "world"
+        self.w_T_b.child_frame_id = "pelvis"
 
     def publish(self, q):
         t = node.get_clock().now().to_msg()
@@ -51,9 +50,7 @@ class ros2_node(Node):
 
 roslaunch = subprocess.Popen(['ros2', 'launch', 'hurobots', 'g1.launch'], stdout=subprocess.PIPE, shell=False)
 
-package_path = get_package_share_directory('hurobots')
-urdf_path = pathlib.Path(package_path + "/description_files/urdf/g1_29dof.urdf")
-urdf_string = urdf_path.read_text()
+urdf_string = pathlib.Path(get_package_share_directory('hurobots') + "/description_files/urdf/g1_29dof.urdf").read_text()
 
 model = xbi.ModelInterface2(urdf_string)
 
@@ -86,13 +83,7 @@ model.update()
 
 rclpy.init()
 node = ros2_node()
-
-
-
 node.joint_msg.name = model.getJointNames()[1::]
-node.w_T_b.header.frame_id = "world"
-node.w_T_b.child_frame_id = "pelvis"
-
 
 def plot_trajectory(Ns, x_value, u_value, zmp_refs, dt):
     plt.figure(figsize=(8, 4))
@@ -105,6 +96,7 @@ def plot_trajectory(Ns, x_value, u_value, zmp_refs, dt):
     plt.legend()
     plt.tight_layout()
     plt.show()
+
 def zmp_pattern(ns, offset_y=0.):
     zref = np.zeros((2, ns))
     for i in range(ns):
@@ -171,6 +163,20 @@ class full_model_integrator_constraint(Task):
         self._A = EULER.getM()
         self._b = -EULER.getq()
 
+class lipm_constraint(Task):
+    def __init__(self, r0, rddot0, u0, h):
+        super().__init__("lipm_constraint", x0.getInputSize())
+        self.rddot0 = rddot0
+        self.r0 = r0
+        self.u0 = u0
+        self.h = h
+        self.update()
+    def _update(self):
+        constr = self.rddot0 - lipm(self.r0, self.u0, self.h)
+        self._A = constr.getM()
+        self._b = -constr.getq()
+
+
 def initial_state_constraint(x0, value):
     tmp = x0 + value
     return GenericTask("initial_state", tmp.getM(), tmp.getq())
@@ -191,12 +197,14 @@ nu = 2 # zmp position [zmp_x, zmp_y]
 
 Ns = 20 # number of nodes
 tf = 1.5 # final time
+print(f"Ns: {Ns}, tf: {tf}")
 
 vars = list()
 for i in range(Ns):
     vars.append((f"x{i}", nx))
     if i == 0:
-        vars.append((f"u{i}", model.getNv())) # nidot
+        vars.append((f"u{i}", nu)) # zmp
+        vars.append((f"acc{i}", model.getNv())) # acc0
     else:
         vars.append((f"u{i}", nu))
 vars.append((f"x{Ns}", nx))
@@ -204,24 +212,20 @@ vars.append((f"x{Ns}", nx))
 variables = OptvarHelper(vars)
 print(f"variables.getSize(): {variables.getSize()}")
 
-rddot0 = rddot(model, variables.getVariable("u0"))
+rddot0 = rddot(model, variables.getVariable("acc0"))
 
 print(f"COM: {model.getCOM()}")
 
 h = model.getCOM()[2]
+print(f"h: {h}")
 dt = tf/Ns
+print(f"dt: {dt}")
 integration = list()
 
 # Integrate full Model
 x0 = variables.getVariable(f"x0")
-u0 = variables.getVariable(f"u0")
+u0 = variables.getVariable(f"acc0")
 x1 = variables.getVariable(f"x1")
-#r = x0[0:2]
-#rdot = x0[2:]
-#rddot = model.getCOMJacobian()[0:2, :] @ u0 + model.getCOMJdotTimesV()[0:2]
-#xdot0 = AffineHelper.pile(rdot, rddot)
-#EULER = euler(x0, xdot0, x1, dt)
-#integration_0_constraint = GenericTask(f"integration_0", EULER.getM(), EULER.getq())
 integration_0_constraint = full_model_integrator_constraint(x0, rddot0, x1, model, dt)
 
 # Integrate LIPM
@@ -248,15 +252,15 @@ integration_constraint = AggregatedTask(integration, variables.getSize()) + inte
 initial_state = initial_state_constraint(variables.getVariable("x0"), np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2])))
 
 zmp_tasks = list()
-for i in range(1, Ns):
-    zmp_tasks.append(min_u(variables.getVariable(f"u{i}"), R=1e3 * np.array([[1, 0], [0, 1]])))
+for i in range(Ns):
+    zmp_tasks.append(min_u(variables.getVariable(f"u{i}"), R=1e6 * np.array([[1, 0], [0, 1]])))
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 x_tasks = list()
 for i in range(Ns+1):
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
-        Q = 1e6 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+        Q = 2e2 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     x_tasks.append(min_x(variables.getVariable(f"x{i}"), Q=Q))
 min_xdot_task = AggregatedTask(x_tasks, variables.getSize())
 
@@ -265,34 +269,33 @@ min_xdot_task = AggregatedTask(x_tasks, variables.getSize())
 foot_frames = ["left_foot_point_contact", "right_foot_point_contact"]
 contact_tasks = dict()
 for foot_frame in foot_frames:
-    contact_tasks[foot_frame] = Cartesian(foot_frame + "_kin", model, foot_frame, "world", variables.getVariable("u0"))
+    contact_tasks[foot_frame] = Cartesian(foot_frame + "_kin", model, foot_frame, "world", variables.getVariable("acc0"))
 
 # com task on z for the first stage
-com = CoM(model, variables.getVariable("u0"))
+com = CoM(model, variables.getVariable("acc0"))
 
 # postural task for the first stage
-postural = Postural(model, variables.getVariable("u0"))
+postural = Postural(model, variables.getVariable("acc0"))
 
 # angular momentum task for the first stage
-amom = AngularMomentum(model, variables.getVariable("u0"))
+amom = AngularMomentum(model, variables.getVariable("acc0"))
 
 # orientation of the pelvis for the first stage
-pelvis = Cartesian("pelvis", model, "pelvis", "world", variables.getVariable("u0"))
+pelvis = Cartesian("pelvis", model, "pelvis", "world", variables.getVariable("acc0"))
 
 # Create the stack
-cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("u0"), R=1e-3 * np.eye(model.getNv(), model.getNv()), id="min_acc") + com[2] + 1e-3 * postural[7:] + 0.1 * amom + 0.1 * pelvis[3:]
+cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("acc0"), R=1e-3 * np.eye(model.getNv(), model.getNv()), id="min_acc") + com[2] + 1e-3 * postural[7:] + 0.1 * amom + 0.1 * pelvis[3:]
 for foot_frame in foot_frames:
     cost = cost + contact_tasks[foot_frame]
 
-constraints = integration_constraint + initial_state
+lipmc = lipm_constraint(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
+constraints = integration_constraint + initial_state + lipmc
 
 Ns_ref = 40
 zmp_refs = zmp_pattern(Ns_ref, offset_y=model.getCOM()[1])
-for i in range(Ns-1):
+for i in range(Ns):
     zmp_tasks[i].setb(zmp_refs[:, i])
     zmp_tasks[i].update()
-
-
 
 # 1. Trajectory Optimization
 stack = pysot.AutoStack(cost) << constraints
@@ -310,7 +313,7 @@ for i in range(Ns+1):
 
 acc_value = variables.getVariable(f"u{0}").getValue(w)
 
-for i in range(1, Ns):
+for i in range(Ns):
     u_value[:,i-1] = variables.getVariable(f"u{i}").getValue(w)
 
 # Plot
@@ -318,7 +321,7 @@ plot_trajectory(Ns, x_value, u_value, zmp_refs, dt)
 
 # 2. MPC
 # zeroing references
-for i in range(Ns-1):
+for i in range(Ns):
     zmp_tasks[i].setb(model.getCOM()[0:2])
 
 stack.update()
@@ -326,10 +329,12 @@ stack.update()
 # --- Prepare plot ---
 ry = deque([model.getCOM()[1]]*100)
 zy = deque([model.getCOM()[1]]*100)
+zry = deque([model.getCOM()[1]]*100)
 
 plt.ion()
 line1, = plt.plot(ry, label='$r_y$ (CoM position)')
 line2, = plt.plot(zy, label='$z_y$ (ZMP position)')
+line3, = plt.plot(zry, label='$zr_y$ (ZMP ref)')
 plt.ylim([-0.5,0.5])
 plt.show()
 
@@ -339,7 +344,7 @@ scroll = 0
 t = 0
 
 x0 = np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
-dt_sim = 0.01
+dt_sim = 0.05
 try:
     while rclpy.ok():
         ry.append(x0[1])
@@ -351,9 +356,11 @@ try:
         initial_state.setb(x0)
 
         # shift reference to left
-        for j in range(1, Ns-1):
+        for j in range(1, Ns):
             zmp_tasks[j-1].setb(zmp_tasks[j].getb())
-        zmp_tasks[Ns-2].setb(zmp_refs[:, t % Ns_ref])
+        zmp_tasks[Ns-1].setb(zmp_refs[:, t % Ns_ref])
+        zry.append(zmp_tasks[0].getb()[1])
+        zryplot = zry.popleft()
 
         stack.update()
 
@@ -361,15 +368,15 @@ try:
 
         x_value = np.zeros((nx, Ns + 1))
         acc_value = np.zeros((model.getNv(), 1))
-        u_value = np.zeros((nu, Ns - 1))
+        u_value = np.zeros((nu, Ns))
 
         for i in range(Ns + 1):
             x_value[:, i] = variables.getVariable(f"x{i}").getValue(w)
 
-        acc_value = variables.getVariable(f"u{0}").getValue(w)
+        acc_value = variables.getVariable("acc0").getValue(w)
 
-        for i in range(1, Ns):
-            u_value[:, i - 1] = variables.getVariable(f"u{i}").getValue(w)
+        for i in range(Ns):
+            u_value[:, i] = variables.getVariable(f"u{i}").getValue(w)
 
 
         q = model.sum(q, vel * dt_sim + 0.5 * acc_value * dt_sim**2)  # we use the model sum to account for the floating-base
@@ -391,6 +398,7 @@ try:
 
         line1.set_ydata(ry)
         line2.set_ydata(zy)
+        line3.set_ydata(zry)
         plt.draw()
 
         # --- Publish ---
@@ -399,7 +407,7 @@ try:
         #ch = input()
 
         plt.pause(dt_sim)
-        time.sleep(dt_sim)
+        #time.sleep(dt_sim)
 
 
 except KeyboardInterrupt:
