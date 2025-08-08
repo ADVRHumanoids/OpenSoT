@@ -338,8 +338,6 @@ line3, = plt.plot(zry, label='$zr_y$ (ZMP ref)')
 plt.ylim([-0.5,0.5])
 plt.show()
 
-
-scroll = 0
 # --- Main Loop ---
 t = 0
 
