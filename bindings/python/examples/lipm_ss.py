@@ -29,12 +29,48 @@ def zmp_pattern(ns):
             zref[:, i] = np.array([0.0, 0.])
     return zref
 
+rclpy.init()
+
+nx = 4 # com position and velocity  [x, y, xdot, ydot]
+nu = 2 # zmp position [zmp_x, zmp_y]
+
+h = 0.83  # height of the CoM
+w = np.sqrt(9.81 / h)
+
+Ns = 40 # number of nodes
+tf = 3.0 # final time
+
+dt = tf / Ns  # time step
+
+vars = list()
+vars.append((f"x0", nx))
+for i in range(Ns):
+    vars.append((f"u{i}", nu))
+
+variables = OptvarHelper(vars)
+print(f"variables.getSize(): {variables.getSize()}")
+
 def lipm(r, z, h):
     w = np.sqrt(9.81 / h)
     return w*w*(r - z)
 
-def euler(x0, xdot0, x1, dt):
-    return x1 - x0 - dt * xdot0 # x1 = x0 + dt * xdot0
+def euler(x, xdot, dt):
+    return x + dt * xdot # x1 = x0 + dt * xdot0
+
+
+def get_state(ns, variables, h, dt):
+    x = variables.getVariable("x0")
+    if ns == 0:
+        return x
+    else:
+        for i in range(ns):
+            r = x[0:2]
+            rdot = x[2:]
+            rddot = lipm(r, variables.getVariable(f"u{i}"), h)
+
+            xdot = AffineHelper.pile(rdot, rddot)
+            x = euler(x, xdot, dt)
+        return x
 
 def initial_state_constraint(x0, value):
     tmp = x0 + value
@@ -45,76 +81,23 @@ def min_u(u, R=np.array([[1, 0], [0, 1]])):
     T.setWeight(R)
     return T
 
-def min_x(x, Q=np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])):
-    T = GenericTask("min_x", x.getM(), x.getq())
-    T.setWeight(Q)
-    return T
-
-rclpy.init()
-
-nx = 4 # com position and velocity  [x, y, xdot, ydot]
-nu = 2 # zmp position [zmp_x, zmp_y]
-
-Ns = 40 # number of nodes
-tf = 3.0 # final time
-
-vars = list()
-for i in range(Ns):
-    vars.append((f"x{i}", nx))
-    vars.append((f"u{i}", nu))
-vars.append((f"x{Ns}", nx))
-
-variables = OptvarHelper(vars)
-print(f"variables.getSize(): {variables.getSize()}")
-
-h = 0.83  # height of the CoM
-dt = tf/Ns
-integration = list()
-
-for i in range(Ns):
-    x0 = variables.getVariable(f"x{i}")
-    u0 = variables.getVariable(f"u{i}")
-    x1 = variables.getVariable(f"x{i+1}")
-
-    r = x0[0:2]
-    rdot = x0[2:]
-    rddot = lipm(r, u0, h)
-
-    xdot0 = AffineHelper.pile(rdot, rddot)
-
-    integration_ = euler(x0, xdot0, x1, dt)
-    integration.append(GenericTask(f"integration_{i}", integration_.getM(), integration_.getq()))
-
-
-integration_constraint = AggregatedTask(integration, variables.getSize())
-#plt.spy(integration_constraint.getA(), markersize=5)
-#plt.show()
-
 initial_state = initial_state_constraint(variables.getVariable("x0"), np.array([0., 0., 0, 0.]))
+final_state = get_state(Ns, variables, h, dt)
+min_rdot_final = GenericTask("min_rdot_final", final_state[2:].getM(), final_state[2:].getq())
 
 zmp_tasks = list()
 for i in range(Ns):
     zmp_tasks.append(min_u(variables.getVariable(f"u{i}"), R=1e1 * np.array([[1, 0], [0, 1]])))
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
-x_tasks = list()
-for i in range(Ns+1):
-    Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    if i == Ns:
-        Q = 1e6 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    x_tasks.append(min_x(variables.getVariable(f"x{i}"), Q=Q))
-min_xdot_task = AggregatedTask(x_tasks, variables.getSize())
-
 # Create the stack
-cost = min_xdot_task + zmp_tracking_task
-constraints = integration_constraint + initial_state
+cost = zmp_tracking_task + min_rdot_final
+constraints = initial_state
 
 zmp_refs = zmp_pattern(Ns)
 for i in range(Ns):
     zmp_tasks[i].setb(zmp_refs[:, i])
     zmp_tasks[i].update()
-
-
 
 # 1. Trajectory Optimization
 stack = pysot.AutoStack(cost) << constraints
@@ -130,10 +113,9 @@ x_value = np.zeros((nx, Ns+1))
 u_value = np.zeros((nu, Ns))
 
 for i in range(Ns):
-    x_value[:,i] = variables.getVariable(f"x{i}").getValue(w)
     u_value[:, i] = variables.getVariable(f"u{i}").getValue(w)
-x_value[:,Ns] = variables.getVariable(f"x{Ns}").getValue(w)
-
+    x_value[:, i] = get_state(i+1, variables, h, dt).getValue(w)
+x_value[:, Ns] = get_state(Ns, variables, h, dt).getValue(w)
 
 # Plot
 plot_trajectory(Ns, x_value, u_value, zmp_refs, dt)
@@ -183,9 +165,9 @@ try:
         t_mpc += toc()
 
         for i in range(Ns):
-            x_value[:, i] = variables.getVariable(f"x{i}").getValue(w)
             u_value[:, i] = variables.getVariable(f"u{i}").getValue(w)
-        x_value[:, Ns] = variables.getVariable(f"x{Ns}").getValue(w)
+            x_value[:, i] = get_state(i + 1, variables, h, dt).getValue(w)
+        x_value[:, Ns] = get_state(Ns, variables, h, dt).getValue(w)
 
         rdot = x_value[2:4, 0].flatten()
         rddot = lipm(x_value[0:2, 0], u_value[:, 0], h)
