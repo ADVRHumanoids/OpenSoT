@@ -86,3 +86,15 @@ utest.assertTrue((fooConstraint.getbLowerBound() == -foo.getq() - lims).all())
 utest.assertTrue((fooConstraint.getbUpperBound() == -foo.getq() + lims).all())
 
 
+class T(Task):
+    def __init__(self, n):
+        super().__init__("T", n)   # n is the x-size
+    def _update(self):
+        self._A = np.zeros((1, self.getXSize()))
+        self._b = np.zeros((1, ))
+
+t = T(5)
+t.update()   # should NOT throw
+print(t.getA().shape, t.getb().shape)  # (1,5) (1,)
+
+

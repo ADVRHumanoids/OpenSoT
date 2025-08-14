@@ -143,7 +143,6 @@ class full_model_integrator_constraint(Task):
         self.xdot0 = AffineHelper.pile(self.rdot, self.rddot0)
 
         self._W = np.eye(2)
-        self.update()
 
     def _update(self):
         M = self.xdot0.getM()
@@ -163,18 +162,30 @@ class full_model_integrator_constraint(Task):
         self._A = EULER.getM()
         self._b = -EULER.getq()
 
+    @classmethod
+    def create(cls, x0, rddot0, x1, model, dt):
+        obj = cls(x0, rddot0, x1, model, dt)  # fully constructed
+        obj.update()  # safe: trampoline is active
+        return obj
+
 class lipm_constraint(Task):
     def __init__(self, r0, rddot0, u0, h):
-        super().__init__("lipm_constraint", x0.getInputSize())
+        super().__init__("lipm_constraint", r0.getInputSize())
         self.rddot0 = rddot0
         self.r0 = r0
         self.u0 = u0
         self.h = h
-        self.update()
+
     def _update(self):
         constr = self.rddot0 - lipm(self.r0, self.u0, self.h)
         self._A = constr.getM()
         self._b = -constr.getq()
+
+    @classmethod
+    def create(cls, r0, rddot0, u0, h):
+        obj = cls(r0, rddot0, u0, h)
+        obj.update()
+        return obj
 
 
 def initial_state_constraint(x0, value):
@@ -226,7 +237,7 @@ integration = list()
 x0 = variables.getVariable(f"x0")
 u0 = variables.getVariable(f"acc0")
 x1 = variables.getVariable(f"x1")
-integration_0_constraint = full_model_integrator_constraint(x0, rddot0, x1, model, dt)
+integration_0_constraint = full_model_integrator_constraint.create(x0, rddot0, x1, model, dt)
 
 # Integrate LIPM
 for i in range(1, Ns):
@@ -288,8 +299,8 @@ cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("acc0"), 
 for foot_frame in foot_frames:
     cost = cost + contact_tasks[foot_frame]
 
-lipmc = lipm_constraint(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
-constraints = integration_constraint + initial_state + lipmc
+#lipmc = lipm_constraint.create(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
+constraints = integration_constraint + initial_state + lipm_constraint.create(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
 
 Ns_ref = 40
 zmp_refs = zmp_pattern(Ns_ref, offset_y=model.getCOM()[1])

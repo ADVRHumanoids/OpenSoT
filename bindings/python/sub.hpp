@@ -9,8 +9,7 @@ using namespace OpenSoT;
 
 void pySubConstraint(py::module& m) {
     py::class_<SubConstraint, std::shared_ptr<SubConstraint>, Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SubConstraint")
-       .def(py::init<std::shared_ptr<Constraint<Eigen::MatrixXd, Eigen::VectorXd>>, const std::list<unsigned int>&>())
-       .def("update", &SubConstraint::update);
+        .def(py::init<std::shared_ptr<Constraint<Eigen::MatrixXd, Eigen::VectorXd>>, const std::list<unsigned int>&>());
 }
 
 

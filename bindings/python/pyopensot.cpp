@@ -16,14 +16,14 @@
 PYBIND11_MODULE(pyopensot, m) {
     pyTask<Eigen::MatrixXd, Eigen::VectorXd>(m, "Task");
     pyConstraint<Eigen::MatrixXd, Eigen::VectorXd>(m, "Constraint");
-    pyAffineHelper(m, "AffineHelper");
-    pyOptvarHelperWrapper(m, "OptvarHelper");
-    pyGenericTask(m);
-    pyGenericConstraint(m);
     pyAggregatedTask(m);
     pyAggregatedConstraint(m);
     pySubTask(m);
     pySubConstraint(m);
+    pyAffineHelper(m, "AffineHelper");
+    pyOptvarHelperWrapper(m, "OptvarHelper");
+    pyGenericTask(m);
+    pyGenericConstraint(m);
     pyAutostack(m);
 
     pySolver<Eigen::MatrixXd, Eigen::VectorXd>(m, "Solver");
