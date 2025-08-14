@@ -299,8 +299,8 @@ cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("acc0"), 
 for foot_frame in foot_frames:
     cost = cost + contact_tasks[foot_frame]
 
-#lipmc = lipm_constraint.create(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
-constraints = integration_constraint + initial_state + lipm_constraint.create(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
+lipmc = lipm_constraint.create(variables.getVariable("x0")[0:2], rddot0, variables.getVariable("u0"), h)
+constraints = integration_constraint + initial_state + lipmc
 
 Ns_ref = 40
 zmp_refs = zmp_pattern(Ns_ref, offset_y=model.getCOM()[1])

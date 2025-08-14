@@ -7,9 +7,33 @@
 
 namespace py = pybind11;
 
+struct PyAggregatedTaskTrampoline : OpenSoT::tasks::Aggregated {
+    using OpenSoT::tasks::Aggregated::Aggregated;
+
+    void _update() override {
+        PYBIND11_OVERRIDE_PURE(
+            void,                      // Return type
+            OpenSoT::tasks::Aggregated,// Parent class
+            _update                     // Name of function in C++
+            );
+    }
+};
+
+struct PyAggregatedConstraintTrampoline : OpenSoT::constraints::Aggregated {
+    using OpenSoT::constraints::Aggregated::Aggregated;
+
+    void _update() override {
+        PYBIND11_OVERRIDE_PURE(
+            void,                      // Return type
+            OpenSoT::constraints::Aggregated,// Parent class
+            _update                     // Name of function in C++
+            );
+    }
+};
+
 void pyAggregatedTask(py::module& m) {
     // Aggregated Task
-    py::class_<OpenSoT::tasks::Aggregated,
+    py::class_<OpenSoT::tasks::Aggregated, PyAggregatedTaskTrampoline,
                std::shared_ptr<OpenSoT::tasks::Aggregated>,
                OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AggregatedTask")
         // ctor(list<TaskPtr>, x_size) -- keep the list (arg 2) alive while returned Aggregated (1) lives
@@ -45,7 +69,7 @@ void pyAggregatedConstraint(py::module& m) {
         .export_values();
 
     // Aggregated Constraint
-    py::class_<OpenSoT::constraints::Aggregated,
+    py::class_<OpenSoT::constraints::Aggregated, PyAggregatedConstraintTrampoline,
                std::shared_ptr<OpenSoT::constraints::Aggregated>,
                OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AggregatedConstraint")
         // ctor(list<ConstraintPtr>, x_size, aggregationPolicy)
