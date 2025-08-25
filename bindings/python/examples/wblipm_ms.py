@@ -16,7 +16,7 @@ import subprocess
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import TransformStamped, WrenchStamped
 from tf2_ros import TransformBroadcaster
-#import tictoc
+from ttictoc import tic, toc
 import time
 
 class ros2_node(Node):
@@ -295,7 +295,7 @@ amom = AngularMomentum(model, variables.getVariable("acc0"))
 pelvis = Cartesian("pelvis", model, "pelvis", "world", variables.getVariable("acc0"))
 
 # Create the stack
-cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("acc0"), R=1e-3 * np.eye(model.getNv(), model.getNv()), id="min_acc") + com[2] + 1e-3 * postural[7:] + 0.1 * amom + 0.1 * pelvis[3:]
+cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("acc0"), R=1e-3 * np.eye(model.getNv(), model.getNv()), id="min_acc") + com[2] + 1e-3 * postural[18:] + 0.1 * amom + 0.1 * pelvis[3:]
 for foot_frame in foot_frames:
     cost = cost + contact_tasks[foot_frame]
 
@@ -313,7 +313,10 @@ stack = pysot.AutoStack(cost) << constraints
 stack.update()
 solver = pysot.iHQP(stack)
 
+tic()
 w = solver.solve()
+elapsed = toc()  # End timer and print elapsed time
+print(f"Elapsed time: {elapsed:.3f} seconds")
 
 x_value = np.zeros((nx, Ns+1))
 acc_value = np.zeros((model.getNv(), 1))
@@ -352,6 +355,7 @@ plt.show()
 # --- Main Loop ---
 t = 0
 
+t_mpc = 0.
 x0 = np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
 dt_sim = 0.05
 try:
@@ -371,9 +375,11 @@ try:
         zry.append(zmp_tasks[0].getb()[1])
         zryplot = zry.popleft()
 
+        tic()
         stack.update()
 
         w = solver.solve()
+        t_mpc += toc()
 
         x_value = np.zeros((nx, Ns + 1))
         acc_value = np.zeros((model.getNv(), 1))
@@ -399,8 +405,6 @@ try:
 
         x0 = np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
 
-        #print(tictoc.toc())
-
         t += 1
         zy.append(u_value[1, 0])
         zyplot = zy.popleft()
@@ -425,6 +429,7 @@ except KeyboardInterrupt:
 finally:
     roslaunch.kill()
     print("Stopping the node.")
+    print("Average mpt time: {:.3f} seconds".format(t_mpc / t))
 
 if rclpy.ok():
    rclpy.shutdown()
