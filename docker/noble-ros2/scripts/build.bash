@@ -16,6 +16,11 @@ forest init
 source /opt/ros/jazzy/setup.bash
 source setup.bash
 
+# here we want to check that opensot builds and works against the binaries of the
+# xbot dependencies
+source /opt/xbot/setup.sh
+sudo apt remove -y open_sot
+
 # add recipes
 forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git -t ros2
 
