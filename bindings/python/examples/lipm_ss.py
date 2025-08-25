@@ -17,6 +17,7 @@ def plot_trajectory(Ns, x_value, u_value, zmp_refs, dt):
     plt.legend()
     plt.tight_layout()
     plt.show()
+
 def zmp_pattern(ns):
     zref = np.zeros((2, ns))
     for i in range(ns):
@@ -58,36 +59,50 @@ def euler(x, xdot, dt):
     return x + dt * xdot # x1 = x0 + dt * xdot0
 
 
-def get_state(ns, variables, h, dt):
-    x = variables.getVariable("x0")
-    if ns == 0:
-        return x
-    else:
-        for i in range(ns):
-            r = x[0:2]
-            rdot = x[2:]
-            rddot = lipm(r, variables.getVariable(f"u{i}"), h)
+class state(AffineHelper):
+    def __init__(self, ns, variables, h, dt):
+        super().__init__(nx, variables.getSize())
+        self.ns = ns
+        self.variables = variables
+        self.h = h
+        self.dt = dt
+        self.x = None
+        self.xdot = list()
 
-            xdot = AffineHelper.pile(rdot, rddot)
-            x = euler(x, xdot, dt)
-        return x
+        self.init()
 
-def initial_state_constraint(x0, value):
-    tmp = x0 + value
-    return GenericTask("initial_state", tmp.getM(), tmp.getq())
+    def init(self):
+        self.x = variables.getVariable("x0")
+        if self.ns == 0:
+            self._M = self.x.getM()
+            self._q = self.x.getq()
+        else:
+            for i in range(self.ns):
+                r = self.x[0:2]
+                rdot = self.x[2:]
+                rddot = lipm(r, self.variables.getVariable(f"u{i}"), self.h)
 
-def min_u(u, R=np.array([[1, 0], [0, 1]])):
-    T = GenericTask("zmp_tracking", u.getM(), u.getq())
-    T.setWeight(R)
-    return T
+                xdot = AffineHelper.pile(rdot, rddot)
+                self.xdot.append(xdot)
+                self.x = euler(self.x, self.xdot[i], self.dt)
 
-initial_state = initial_state_constraint(variables.getVariable("x0"), np.array([0., 0., 0, 0.]))
-final_state = get_state(Ns, variables, h, dt)
-min_rdot_final = GenericTask("min_rdot_final", final_state[2:].getM(), final_state[2:].getq())
+            self._M = self.x.getM()
+            self._q = self.x.getq()
+
+        def update(self):
+            pass
+
+
+xinit = variables.getVariable("x0") + np.array([0., 0., 0, 0.])
+initial_state = GenericTask("initial_state", xinit.getM(), xinit.getq())
+xNs = state(Ns, variables, h, dt)
+min_rdot_final = GenericTask("min_rdot_final", xNs[2:].getM(), xNs[2:].getq())
 
 zmp_tasks = list()
 for i in range(Ns):
-    zmp_tasks.append(min_u(variables.getVariable(f"u{i}"), R=1e1 * np.array([[1, 0], [0, 1]])))
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), variables.getVariable(f"u{i}").getq())
+    min_ui.setWeight(1e1 * np.array([[1, 0], [0, 1]]))
+    zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 # Create the stack
@@ -112,10 +127,13 @@ print(f"Elapsed time: {elapsed:.3f} seconds")
 x_value = np.zeros((nx, Ns+1))
 u_value = np.zeros((nu, Ns))
 
+x = list()
 for i in range(Ns):
     u_value[:, i] = variables.getVariable(f"u{i}").getValue(w)
-    x_value[:, i] = get_state(i+1, variables, h, dt).getValue(w)
-x_value[:, Ns] = get_state(Ns, variables, h, dt).getValue(w)
+    x.append(state(i, variables, h, dt))
+    x_value[:, i] = x[i].getValue(w)
+x_value[:, Ns] = xNs.getValue(w)
+
 
 # Plot
 plot_trajectory(Ns, x_value, u_value, zmp_refs, dt)
@@ -166,8 +184,8 @@ try:
 
         for i in range(Ns):
             u_value[:, i] = variables.getVariable(f"u{i}").getValue(w)
-            x_value[:, i] = get_state(i + 1, variables, h, dt).getValue(w)
-        x_value[:, Ns] = get_state(Ns, variables, h, dt).getValue(w)
+            x_value[:, i] = x[i].getValue(w)
+        x_value[:, Ns] = xNs.getValue(w)
 
         rdot = x_value[2:4, 0].flatten()
         rddot = lipm(x_value[0:2, 0], u_value[:, 0], h)
