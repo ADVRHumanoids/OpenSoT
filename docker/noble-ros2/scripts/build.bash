@@ -30,5 +30,5 @@ forest grow OpenSoT --verbose --clone-depth 1 -j ${FOREST_JOBS:-1}
 
 # build tests
 cd build/OpenSoT
-cmake -DBUILD_TESTS=1 .
+cmake -DOPENSOT_COMPILE_TESTS=1 .
 make -j ${FOREST_JOBS:-1}
