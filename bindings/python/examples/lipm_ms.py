@@ -17,6 +17,7 @@ def plot_trajectory(Ns, x_value, u_value, zmp_refs, dt):
     plt.legend()
     plt.tight_layout()
     plt.show()
+
 def zmp_pattern(ns):
     zref = np.zeros((2, ns))
     for i in range(ns):
@@ -36,19 +37,6 @@ def lipm(r, z, h):
 def euler(x0, xdot0, x1, dt):
     return x1 - x0 - dt * xdot0 # x1 = x0 + dt * xdot0
 
-def initial_state_constraint(x0, value):
-    tmp = x0 + value
-    return GenericTask("initial_state", tmp.getM(), tmp.getq())
-
-def min_u(u, R=np.array([[1, 0], [0, 1]])):
-    T = GenericTask("zmp_tracking", u.getM(), u.getq())
-    T.setWeight(R)
-    return T
-
-def min_x(x, Q=np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])):
-    T = GenericTask("min_x", x.getM(), x.getq())
-    T.setWeight(Q)
-    return T
 
 rclpy.init()
 
@@ -90,19 +78,24 @@ integration_constraint = AggregatedTask(integration, variables.getSize())
 #plt.spy(integration_constraint.getA(), markersize=5)
 #plt.show()
 
-initial_state = initial_state_constraint(variables.getVariable("x0"), np.array([0., 0., 0, 0.]))
+xinit = variables.getVariable("x0") + np.array([0., 0., 0, 0.])
+initial_state = GenericTask("initial_state", xinit.getM(), xinit.getq())
 
 zmp_tasks = list()
 for i in range(Ns):
-    zmp_tasks.append(min_u(variables.getVariable(f"u{i}"), R=1e1 * np.array([[1, 0], [0, 1]])))
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), variables.getVariable(f"u{i}").getq())
+    min_ui.setWeight(1e1 * np.array([[1, 0], [0, 1]]))
+    zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 x_tasks = list()
 for i in range(Ns+1):
+    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), variables.getVariable(f"x{i}").getq())
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
         Q = 1e6 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    x_tasks.append(min_x(variables.getVariable(f"x{i}"), Q=Q))
+    min_xi.setWeight(Q)
+    x_tasks.append(min_xi)
 min_xdot_task = AggregatedTask(x_tasks, variables.getSize())
 
 # Create the stack
