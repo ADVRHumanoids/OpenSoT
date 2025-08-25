@@ -137,6 +137,11 @@ struct PyAffineHeplerTrampoline : public AffineHelper {
             update        // Name of the function
             );
     }
+
+public:
+    // Lift protected members to public so Python can access them (as in your original)
+    using AffineHelper::_M;
+    using AffineHelper::_q;
 };
 
 void pyAffineHelper(py::module& m, const std::string& className) {
@@ -164,6 +169,10 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def("__rmul__", [](const AffineHelper &a, const double s) { return mul(s, a); }, py::is_operator())
         .def("__truediv__", [](const AffineHelper &a, const AffineHelper &b) { return div(a, b); })
         .def("__str__", [](const AffineHelper &a) { return print(a); })
+
+        // Expose lifted members from trampoline
+        .def_readwrite("_M", &PyAffineHeplerTrampoline::_M)
+        .def_readwrite("_q", &PyAffineHeplerTrampoline::_q)
 
         .def("__getitem__", [](const AffineHelper& a, const size_t i) {
             if(i >= a.getM().rows())
