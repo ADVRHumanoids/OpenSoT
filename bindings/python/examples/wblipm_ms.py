@@ -150,13 +150,13 @@ class full_model_integrator_constraint(Task):
         M[0:2, :] = self.rdot.getM()
         M[2:4, :] = self.rddot0.getM()
 
-        q = self.xdot0.getq()
-        q[0:2] = self.rdot.getq()
-        q[2:4] = self.rddot0.getq()
-        q = q.reshape(-1, 1)
+        _q = self.xdot0.getq()
+        _q[0:2] = self.rdot.getq()
+        _q[2:4] = self.rddot0.getq()
+        _q = _q.reshape(-1, 1)
 
         self.xdot0.setM(M)
-        self.xdot0.setq(q)
+        self.xdot0.setq(_q)
         EULER = euler(self.x0, self.xdot0, self.x1, self.dt)
 
         self._A = EULER.getM()
@@ -186,21 +186,6 @@ class lipm_constraint(Task):
         obj = cls(r0, rddot0, u0, h)
         obj.update()
         return obj
-
-
-def initial_state_constraint(x0, value):
-    tmp = x0 + value
-    return GenericTask("initial_state", tmp.getM(), tmp.getq())
-
-def min_u(u, R=np.array([[1, 0], [0, 1]]), id = "zmp_tracking"):
-    T = GenericTask(id, u.getM(), u.getq())
-    T.setWeight(R)
-    return T
-
-def min_x(x, Q=np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])):
-    T = GenericTask("min_x", x.getM(), x.getq())
-    T.setWeight(Q)
-    return T
 
 
 nx = 4 # com position and velocity  [x, y, xdot, ydot]
@@ -260,19 +245,24 @@ integration_constraint = AggregatedTask(integration, variables.getSize()) + inte
 #plt.spy(integration_constraint.getA(), markersize=5)
 #plt.show()
 
-initial_state = initial_state_constraint(variables.getVariable("x0"), np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2])))
+xinit = variables.getVariable("x0") + np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
+initial_state = GenericTask("initial_state", xinit.getM(), xinit.getq())
 
 zmp_tasks = list()
 for i in range(Ns):
-    zmp_tasks.append(min_u(variables.getVariable(f"u{i}"), R=1e6 * np.array([[1, 0], [0, 1]])))
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), variables.getVariable(f"u{i}").getq())
+    min_ui.setWeight(1e6 * np.array([[1, 0], [0, 1]]))
+    zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 x_tasks = list()
 for i in range(Ns+1):
+    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), variables.getVariable(f"x{i}").getq())
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
         Q = 2e2 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    x_tasks.append(min_x(variables.getVariable(f"x{i}"), Q=Q))
+    min_xi.setWeight(Q)
+    x_tasks.append(min_xi)
 min_xdot_task = AggregatedTask(x_tasks, variables.getSize())
 
 
@@ -295,7 +285,8 @@ amom = AngularMomentum(model, variables.getVariable("acc0"))
 pelvis = Cartesian("pelvis", model, "pelvis", "world", variables.getVariable("acc0"))
 
 # Create the stack
-cost = min_xdot_task + zmp_tracking_task + min_u(variables.getVariable("acc0"), R=1e-3 * np.eye(model.getNv(), model.getNv()), id="min_acc") + com[2] + 1e-3 * postural[18:] + 0.1 * amom + 0.1 * pelvis[3:]
+min_acc = GenericTask("min_acc", variables.getVariable("acc0").getM(), variables.getVariable("acc0").getq())
+cost = min_xdot_task + zmp_tracking_task + 1e-3*min_acc + com[2] + 1e-3 * postural[18:] + 0.1 * amom + 0.1 * pelvis[3:]
 for foot_frame in foot_frames:
     cost = cost + contact_tasks[foot_frame]
 
@@ -362,9 +353,6 @@ try:
     while rclpy.ok():
         ry.append(x0[1])
         ryplot = ry.popleft()
-        #tictoc.tic()
-
-
 
         initial_state.setb(x0)
 
