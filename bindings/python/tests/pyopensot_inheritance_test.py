@@ -6,18 +6,19 @@ from pyopensot import Task, Constraint, AffineHelper, ConstraintType
 class foo_var(AffineHelper):
     def __init__(self):
         super().__init__(3, 1)
-        self._M = np.zeros((1,3))
-        self._M[0,1] = 1.
-        self._q = np.array([0.]).reshape(-1,1)
+        self.M = np.zeros((1,3))
+        self.M[0,1] = 1.
+        self.q = np.array([0.]).reshape(-1,1)
 
-        self.setM(self._M)
-        self.setq(self._q)
+        self._M = self.M
+        self._q = self.q
 
     def update(self):
-        self._M[0,1] += 1.
-        self._q[0] += 1
-        self.setM(self._M)
-        self.setq(self._q)
+        self.M[0,1] += 1.
+        self.q[0] += 1
+        self._M = self.M
+        self._q = self.q
+
 
 class foo_task(Task):
     def __init__(self, variable):
