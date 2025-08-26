@@ -2,6 +2,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <OpenSoT/utils/Affine.h>
+#include <OpenSoT/utils/AffineUtils.h>
 
 namespace py = pybind11;
 using namespace OpenSoT;
@@ -204,6 +205,13 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def_static("Zero", &AffineHelper::Zero)
 
         .attr("__array_priority__") = 1000.0;
+
+    py::class_<AffineUtils::AffineTask, std::shared_ptr<AffineUtils::AffineTask>, Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AffineTask")
+        .def_static("toAffine", &AffineUtils::AffineTask::toAffine, py::arg("task"), py::arg("var"));
+
+    py::class_<AffineUtils::AffineConstraint, std::shared_ptr<AffineUtils::AffineConstraint>, Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AffineConstraint")
+        .def_static("toAffine", &AffineUtils::AffineConstraint::toAffine, py::arg("constraint"), py::arg("var"));
+
 }
 
 void pyOptvarHelperWrapper(py::module& m, const std::string& className) {
@@ -214,5 +222,4 @@ void pyOptvarHelperWrapper(py::module& m, const std::string& className) {
         .def("getAllVariables", &OptvarHelperWrapper::getAllVariables)
         .def("getSize", &OptvarHelperWrapper::getSize);
 }
-
 
