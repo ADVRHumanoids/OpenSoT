@@ -72,7 +72,7 @@ class state(AffineHelper):
         self.init()
 
     def init(self):
-        self.x = variables.getVariable("x0")
+        self.x = self.variables.getVariable("x0")
         if self.ns == 0:
             self._M = self.x.getM()
             self._q = self.x.getq()
