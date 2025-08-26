@@ -3,9 +3,9 @@ from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters
 from ament_index_python.packages import get_package_share_directory
 from xbot2_interface import pyxbot2_interface as xbi
-from pyopensot import AffineHelper, OptvarHelper, GenericTask, Task
-from pyopensot.tasks.velocity import Postural, Cartesian, Manipulability, MinimumEffort
-from pyopensot.constraints.velocity import JointLimits, VelocityLimits
+from pyopensot import AffineHelper, OptvarHelper, GenericTask, Task, AffineTask, AffineConstraint
+from pyopensot.tasks.velocity import Cartesian
+from pyopensot.constraints.velocity import JointLimits
 import pyopensot as pysot
 import numpy as np
 from sensor_msgs.msg import JointState
@@ -138,7 +138,6 @@ model.update()
 
 dt = 1./100.
 
-
 nx = 3 # [px, py, pz]
 nu = 3 # [vx, vy, vz]
 
@@ -250,7 +249,15 @@ for i in range(Ns):
 
 min_u = pysot.AggregatedTask(min_u_list, variables.getSize())
 
-stack = pysot.AutoStack(ik_task + min_u + goal_task_list[Ns-1]) << initial_state
+c = Cartesian("Cartesian", model, "fp3_link8", "world")
+c.setLambda(10.)
+
+qmin, qmax = model.getJointLimits()
+qlims = JointLimits(model, qmax, qmin)
+qlims.setBoundScaling(1./dt)
+
+
+stack = pysot.AutoStack(ik_task + min_u + goal_task_list[Ns-1] + AffineTask.toAffine(c[3:], variables.getVariable("qdot0"))) << initial_state << AffineConstraint.toAffine(qlims, variables.getVariable("qdot0"))
 stack.update()
 solver = pysot.iHQP(stack)
 
@@ -278,6 +285,8 @@ try:
                 node.marker_pose.pose.orientation.z, node.marker_pose.pose.orientation.w]
         pose_ref.linear = R.from_quat(quat).as_matrix()
         goal_task_list[Ns-1].setb(pose_ref.translation)
+
+        c.setReference(pose_ref)
 
 
         x0 = model.getPose("fp3_link8").translation
