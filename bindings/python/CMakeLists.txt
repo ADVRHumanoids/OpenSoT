@@ -77,6 +77,22 @@ if(${pybind11_FOUND})
             RUNTIME DESTINATION "bin")
     endif()
 
+    ##### HPIPM
+    set(OPENSOT_BINDINGS_hpipmoc_SOURCES pyopensot_hpipmoc.cpp solver_hpipmoc.hpp)
+
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    pybind11_add_module(pyopensot_hpipmoc ${OPENSOT_BINDINGS_hpipmoc_SOURCES})
+
+    target_link_libraries(pyopensot_hpipmoc PUBLIC OpenSoT OpenSothpipmOC)
+
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+    install(TARGETS pyopensot_hpipmoc
+        COMPONENT python
+        LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+        ARCHIVE DESTINATION "lib"
+        RUNTIME DESTINATION "bin")
+
 
 
 else()

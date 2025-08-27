@@ -293,7 +293,6 @@ if(${GLPK_FOUND})
     library_install(OpenSotBackEndGLPK 1 0 0)
 endif()
 
-
 add_subdirectory(external/eiQuadProg-ext/)
 include_directories(external/eiQuadProg-ext/include)
 message("Adding src/solvers/eiQuadProgBackEnd.cpp to compilation")
@@ -301,7 +300,13 @@ add_library(OpenSotBackEndeiQuadProg SHARED src/solvers/eiQuadProgBackEnd.cpp)
 target_link_libraries(OpenSotBackEndeiQuadProg OpenSoT eiQuadProg)
 library_install(OpenSotBackEndeiQuadProg 1 0 0)
 
-
+find_package(hpipm-cpp QUIET)
+if(${hpipm-cpp_FOUND})
+    message("Adding src/solvers/hpipmOC.cpp to compilation")
+    add_library(OpenSothpipmOC SHARED src/solvers/hpipmOC.cpp)
+    target_link_libraries(OpenSothpipmOC PRIVATE OpenSoT hpipm-cpp::hpipm-cpp)
+    library_install(OpenSothpipmOC 1 0 0)
+endif()
 
 #############################################################
 # Export OpenSoT so that it can be found using find_package #
