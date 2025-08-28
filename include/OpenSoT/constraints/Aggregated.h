@@ -59,19 +59,17 @@ using namespace OpenSoT::utils;
             };
 
         protected:
-            std::vector<Eigen::VectorXd> _boundUpperBounds, _boundLowerBounds, _boundbeqs, _boundbUpperBounds, _boundbLowerBounds;
-            std::vector<Eigen::MatrixXd> _boundAeqs, _boundAineqs;
+            std::vector<Eigen::VectorXd> _boundUpperBounds, _boundLowerBounds, _boundbUpperBounds, _boundbLowerBounds;
+            std::vector<Eigen::MatrixXd> _boundAineqs;
             void initSupportVectorsAndMatrices(const int bound_size)
             {
                 for(unsigned int i = 0; i < bound_size; ++i)
                 {
                     _boundUpperBounds.push_back(Eigen::VectorXd(0));
                     _boundLowerBounds.push_back(Eigen::VectorXd(0));
-                    _boundbeqs.push_back(Eigen::VectorXd(0));
                     _boundbUpperBounds.push_back(Eigen::VectorXd(0));
                     _boundbLowerBounds.push_back(Eigen::VectorXd(0));
 
-                    _boundAeqs.push_back(Eigen::MatrixXd(0,0));
                     _boundAineqs.push_back(Eigen::MatrixXd(0,0));
                 }
             }
@@ -79,8 +77,6 @@ using namespace OpenSoT::utils;
             VectorPiler _tmpupperBound;
             VectorPiler _tmplowerBound;
 
-            MatrixPiler _tmpAeq;
-            VectorPiler _tmpbeq;
 
             MatrixPiler _tmpAineq;
             VectorPiler _tmpbUpperBound;

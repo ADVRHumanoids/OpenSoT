@@ -108,22 +108,15 @@ TEST_F(testCoMVelocity, sizesAreCorrect) {
                                                         << "but has size"
                                                         << comVelocity->getUpperBound().size();
 
-    EXPECT_EQ(0, comVelocity->getAeq().rows()) << "Aeq should have size 0"
-                                               << "but has size"
-                                               << comVelocity->getAeq().rows();
-
-    EXPECT_EQ(0, comVelocity->getbeq().size()) << "beq should have size 0"
-                                               << "but has size"
-                                               <<  comVelocity->getbeq().size();
 
     EXPECT_EQ(3,comVelocity->getAineq().rows()) << "Aineq should have size 3"
                                                 << "but has size"
-                                                << comVelocity->getAeq().rows();
+                                                << comVelocity->getAineq().rows();
 
     EXPECT_EQ(x_size,comVelocity->getAineq().cols())<< "Aineq should have number of columns equal to "
                                                     << x_size
                                                     << " but has has "
-                                                    << comVelocity->getAeq().cols()
+                                                    << comVelocity->getAineq().cols()
                                                     << " columns instead";
 
     EXPECT_EQ(3,bLowerBound.size()) << "beq should have size 3"

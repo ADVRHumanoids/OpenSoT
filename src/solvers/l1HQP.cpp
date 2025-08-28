@@ -269,10 +269,6 @@ void constraint_helper::_update()
         _b_upper.pile(_constraints->getbUpperBound());
     }
 
-    if(_constraints->getAeq().rows() > 0 ) //TODO: equality constraints
-    {
-
-    }
 
     if(_constraints->getLowerBound().size() > 0) //bounds
     {

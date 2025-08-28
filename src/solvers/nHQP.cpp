@@ -42,11 +42,6 @@ OpenSoT::solvers::nHQP::nHQP(OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::
             throw std::runtime_error("[nHQP] Local constraints not supported");
         }
 
-        // equality constraints not supported (TODO)
-        if(bounds->getAeq().rows() > 0)
-        {
-            throw std::runtime_error("[nHQP] Equality constraints not supported");
-        }
 
         printf("[nHQP] Free variables at layer #%d = %d \n", i, num_free_vars);
 
@@ -283,10 +278,6 @@ void OpenSoT::solvers::nHQP::TaskData::compute_contraints(const Eigen::MatrixXd*
                                                           const Eigen::VectorXd& q0)
 {
 
-    if(constraints->getAeq().size() > 0)
-    {
-        throw std::runtime_error("Equality constraits not supported by nHQP solver");
-    }
 
     Aineq.reset();
     lb.reset();

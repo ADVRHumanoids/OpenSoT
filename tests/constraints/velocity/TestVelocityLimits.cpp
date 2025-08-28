@@ -56,17 +56,10 @@ TEST_F(testVelocityLimits, sizesAreCorrect) {
     EXPECT_EQ(_model_ptr->getNv(), upperBound.size()) << "upperBound should have size"
                                          << _model_ptr->getNv();
 
-    EXPECT_EQ(0, velocityLimits->getAeq().rows()) << "Aeq should have size 0"
-                                                  << "but has size"
-                                                  << velocityLimits->getAeq().rows();
-
-    EXPECT_EQ(0, velocityLimits->getbeq().size()) << "beq should have size 0"
-                                                  << "but has size"
-                                                  << velocityLimits->getbeq().size();
 
     EXPECT_EQ(0,velocityLimits->getAineq().rows()) << "Aineq should have size 0"
                                                    << "but has size"
-                                                   << velocityLimits->getAeq().rows();
+                                                   << velocityLimits->getAineq().rows();
 
     EXPECT_EQ(0,velocityLimits->getbLowerBound().size()) << "beq should have size 0"
                                                          << "but has size"

@@ -74,17 +74,10 @@ TEST_F(testJointLimits, sizesAreCorrect) {
     EXPECT_EQ(x_size, upperBound.size()) << "upperBound should have size"
                                          << x_size;
 
-    EXPECT_EQ(0, jointLimits->getAeq().rows()) << "Aeq should have size 0"
-                                               << "but has size"
-                                               << jointLimits->getAeq().rows();
-
-    EXPECT_EQ(0, jointLimits->getbeq().size()) << "beq should have size 0"
-                                               << "but has size"
-                                               << jointLimits->getbeq().size();
 
     EXPECT_EQ(0,jointLimits->getAineq().rows()) << "Aineq should have size 0"
                                                 << "but has size"
-                                                << jointLimits->getAeq().rows();
+                                                << jointLimits->getAineq().rows();
 
     EXPECT_EQ(0,jointLimits->getbLowerBound().size()) << "beq should have size 0"
                                                       << "but has size"

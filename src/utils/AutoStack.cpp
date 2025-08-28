@@ -99,15 +99,7 @@ OpenSoT::SubConstraint::Ptr operator%(const OpenSoT::constraints::Aggregated::Co
         if(*max >= constraint->getbUpperBound().size())
             throw std::runtime_error("max(rowIndices) >= constraint->getbUpperBound().size()");
     }
-    else
-    {
-        if(rowIndices.size() > static_cast<unsigned int>(constraint->getbeq().size()))
-            throw std::runtime_error("rowIndices.size() > constraint->getbeq().size()");
 
-        auto max = max_element(std::begin(rowIndices), std::end(rowIndices));
-        if(*max >= constraint->getbeq().size())
-            throw std::runtime_error("max(rowIndices) >= constraint->getbeq().size()");
-    }
 
     OpenSoT::SubConstraint::Ptr sub_constraint;
     sub_constraint = std::make_shared<OpenSoT::SubConstraint>(constraint, rowIndices);

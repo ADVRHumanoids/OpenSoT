@@ -72,26 +72,15 @@ AffineConstraint::AffineConstraint(const OpenSoT::constraints::Aggregated::Const
     }
     else
     {
-        if(constraint->isEqualityConstraint())
-        {
-           _constraint_affine = constraint->getAeq()*var;
-           _internal_generic_constraint = std::make_shared<OpenSoT::constraints::GenericConstraint>(
-                       "foo",
-                       _constraint_affine,
-                       constraint->getbeq(),
-                       constraint->getbeq(),
-                       OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
-        }
-        else
-        {
-           _constraint_affine = constraint->getAineq()*var;
-           _internal_generic_constraint = std::make_shared<OpenSoT::constraints::GenericConstraint>(
-                       "foo",
-                       _constraint_affine,
-                       constraint->getbUpperBound(),
-                       constraint->getbLowerBound(),
-                       OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
-        }
+
+       _constraint_affine = constraint->getAineq()*var;
+       _internal_generic_constraint = std::make_shared<OpenSoT::constraints::GenericConstraint>(
+                   "foo",
+                   _constraint_affine,
+                   constraint->getbUpperBound(),
+                   constraint->getbLowerBound(),
+                   OpenSoT::constraints::GenericConstraint::Type::CONSTRAINT);
+
     }
     update();
 }
@@ -116,24 +105,14 @@ void AffineConstraint::_update()
     }
     else
     {
-        if(_internal_constraint->isEqualityConstraint())
-        {
-            _constraint_affine = _internal_constraint->getAeq()*_var;
-            _internal_generic_constraint->setConstraint(
-                    _constraint_affine,
-                    _internal_constraint->getbeq(),
-                    _internal_constraint->getbeq());
-            _internal_constraint->update();
-        }
-        else
-        {
-            _constraint_affine = _internal_constraint->getAineq()*_var;
-            _internal_generic_constraint->setConstraint(
-                    _constraint_affine,
-                    _internal_constraint->getbUpperBound(),
-                    _internal_constraint->getbLowerBound());
-            _internal_constraint->update();
-        }
+
+        _constraint_affine = _internal_constraint->getAineq()*_var;
+        _internal_generic_constraint->setConstraint(
+                _constraint_affine,
+                _internal_constraint->getbUpperBound(),
+                _internal_constraint->getbLowerBound());
+        _internal_constraint->update();
+
     }
 
     //3. Update Affine Constraint (NOTE: we know from constructor that generic constraint type is CONSTRAINT)

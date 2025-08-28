@@ -192,12 +192,7 @@ void HCOD::copy_bounds()
         _uA.pile(_bounds->getbUpperBound());
     }
 
-    if(_bounds->getAeq().rows() > 0)
-    {
-        _A.pile(_bounds->getAeq());
-        _lA.pile(_bounds->getbeq());
-        _uA.pile(_bounds->getbeq());
-    }
+
 
 
     _vector_J[0] = _A.generate_and_get();

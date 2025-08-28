@@ -65,20 +65,6 @@
         Vector_type _upperBound;
 
         /**
-         * @brief _Aeq Matrix for equality constraint
-         * e.g.:
-         *              _Aeq*x = _beq
-         */
-        Matrix_type _Aeq;
-
-        /**
-         * @brief _beq constraint vector for equality constraint
-         * e.g.:
-         *              _Aeq*x = _beq
-         */
-        Vector_type _beq;
-
-        /**
          * @brief _Aineq Matrix for inequality constraint
          * e.g.:
          *              _bLowerBound <= _Aineq*x <= _bUpperBound
@@ -148,18 +134,9 @@
         virtual const Vector_type& getLowerBound() { return _lowerBound; }
         virtual const Vector_type& getUpperBound() { return _upperBound; }
 
-        virtual const Matrix_type& getAeq() { return _Aeq; }
-        virtual const Vector_type& getbeq() { return _beq; }
-
         virtual const Matrix_type& getAineq() { return _Aineq; }
         virtual const Vector_type& getbLowerBound() { return _bLowerBound; }
         virtual const Vector_type& getbUpperBound() { return _bUpperBound; }
-
-        /**
-         * @brief isEqualityConstraint
-         * @return true if Constraint enforces an equality constraint
-         */
-        virtual bool isEqualityConstraint() { return _Aeq.rows() > 0; }
 
         /**
          * @brief isEqualityConstraint
@@ -198,8 +175,7 @@
          * @brief isConstraint checks whether this Constraint is a constraint (i.e., it is not a bound)
          * @return true if the Constraint is not a bound
          */
-        virtual bool isConstraint() { return this->isEqualityConstraint() ||
-                                             this->isInequalityConstraint(); }
+        virtual bool isConstraint() { return this->isInequalityConstraint(); }
 
         /**
          * @brief getTaskID return the task id
@@ -227,9 +203,6 @@
 
                 if(_Aineq.cols() > 0)
                     applyActiveJointsMask(_Aineq);
-                if(_Aeq.cols() > 0)
-                    applyActiveJointsMask(_Aeq);
-
                 return true;
             }
             return false;
@@ -253,8 +226,6 @@
             {
                 if(_Aineq.cols() > 0)
                     applyActiveJointsMask(_Aineq);
-                if(_Aeq.cols() > 0)
-                    applyActiveJointsMask(_Aeq);
             }
 
         }
@@ -265,12 +236,8 @@
          */
         virtual void log(XBot::MatLogger2::Ptr logger)
         {
-            if(_Aeq.rows() > 0 && _Aeq.cols() > 0)
-                logger->add(_constraint_id + "_Aeq", _Aeq);
             if(_Aineq.rows() > 0 && _Aineq.cols() > 0)
                 logger->add(_constraint_id + "_Aineq", _Aineq);
-            if(_beq.size() > 0)
-                logger->add(_constraint_id + "_beq", _beq);
             if(_bLowerBound.size() > 0)
                 logger->add(_constraint_id + "_bLowerBound", _bLowerBound);
             if(_bUpperBound.size() > 0)
@@ -337,16 +304,6 @@
                     XBot::Logger::error("%s isInequalityConstraint = true and isBound = true at the same time!", _constraint_id.c_str());
                     a = false;
                 }
-                if(isEqualityConstraint())
-                {
-                    XBot::Logger::error("%s isInequalityConstraint = true and isEqualityConstraint = true at the same time!", _constraint_id.c_str());
-                    a = false;
-                }
-                if(_beq.size() != 0)
-                {
-                    XBot::Logger::error("%s: _beq.size() = %i, should be 0!", _constraint_id.c_str(), _beq.size());
-                    a = false;
-                }
             }
             //2) If isBound()
             else if(isBound())
@@ -386,16 +343,6 @@
                     }
                     XBot::Logger::warning("%s: _lowerBound.size() = 0", _constraint_id.c_str());
                 }
-                if(isEqualityConstraint())
-                {
-                    XBot::Logger::error("%s isBound = true and isEqualityConstraint = true at the same time!", _constraint_id.c_str());
-                    a = false;
-                }
-                if(_beq.size() > 0)
-                {
-                    XBot::Logger::error("%s: _beq.size() = %i, should be 0!", _constraint_id.c_str(), _beq.size());
-                    a = false;
-                }
                 if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
                 {
                     XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
@@ -403,26 +350,6 @@
                     a = false;
                 }
 
-            }
-            //3) If isEqualityConstraint()
-            else if(isEqualityConstraint())
-            {
-                if(_Aeq.rows() != _beq.size())
-                {
-                    XBot::Logger::error("%s: _Aeq.rows() != _beq.size() -> %i != %i", _constraint_id.c_str(), _Aeq.rows(), _beq.size());
-                    a = false;
-                }
-                if(_Aeq.cols() != _x_size)
-                {
-                    XBot::Logger::error("%s: _Aeq.cols() != _x_size -> %i != %i", _constraint_id.c_str(), _Aeq.cols(), _x_size);
-                    a = false;
-                }
-                if(_bUpperBound.size() > 0 || _bLowerBound.size() > 0)
-                {
-                    XBot::Logger::error("%s: _bLowerBound.size() = %i, _bLowerBound.size() = %i, both should be 0",
-                                        _constraint_id.c_str(), _bLowerBound.size(), _bUpperBound.size());
-                    a = false;
-                }
             }
             else
             {

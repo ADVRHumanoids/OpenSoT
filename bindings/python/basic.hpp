@@ -49,9 +49,6 @@ protected:
     }
 
 public:
-    // Lift protected members
-    using Base::_Aeq;
-    using Base::_beq;
 
     using Base::_Aineq;
     using Base::_bLowerBound;
@@ -163,12 +160,9 @@ void pyConstraint(py::module& m, const std::string& className) {
         .def("getXSize", &Base::getXSize)
         .def("getLowerBound", &Base::getLowerBound, py::return_value_policy::reference)
         .def("getUpperBound", &Base::getUpperBound, py::return_value_policy::reference)
-        .def("getAeq", &Base::getAeq, py::return_value_policy::reference)
-        .def("getbeq", &Base::getbeq, py::return_value_policy::reference)
         .def("getAineq", &Base::getAineq, py::return_value_policy::reference)
         .def("getbLowerBound", &Base::getbLowerBound, py::return_value_policy::reference)
         .def("getbUpperBound", &Base::getbUpperBound, py::return_value_policy::reference)
-        .def("isEqualityConstraint", &Base::isEqualityConstraint)
         .def("isInequalityConstraint", &Base::isInequalityConstraint)
         .def("isUnilateralConstraint", &Base::isUnilateralConstraint)
         .def("isBilateralConstraint", &Base::isBilateralConstraint)
@@ -186,8 +180,6 @@ void pyConstraint(py::module& m, const std::string& className) {
         .def("setActiveJointsMask", &Base::setActiveJointsMask)
 
         // Expose lifted members from trampoline
-        .def_readwrite("_Aeq", &Trmp::_Aeq)
-        .def_readwrite("_beq", &Trmp::_beq)
         .def_readwrite("_Aineq", &Trmp::_Aineq)
         .def_readwrite("_bLowerBound", &Trmp::_bLowerBound)
         .def_readwrite("_bUpperBound", &Trmp::_bUpperBound)

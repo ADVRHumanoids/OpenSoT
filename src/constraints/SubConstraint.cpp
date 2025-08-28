@@ -36,14 +36,7 @@ SubConstraint::SubConstraint(ConstraintPtr constrPtr, const std::list<unsigned i
         generateBound(this->_constraintPtr->getbUpperBound(), this->_bUpperBound);
         generateConstraint(this->_constraintPtr->getAineq(), this->_Aineq);
     }
-    else //if(constrPtr->isEqualityConstraint()) //3. is equality constraint (NOT USED)
-    {
-        this->_Aeq.resize(rowIndices.size(), _x_size);
-        this->_beq.resize(rowIndices.size());
 
-        generateBound(this->_constraintPtr->getbeq(), this->_beq);
-        generateConstraint(this->_constraintPtr->getAeq(), this->_Aeq);
-    }
 }
 
 void SubConstraint::_update()
@@ -60,11 +53,7 @@ void SubConstraint::_update()
         generateBound(this->_constraintPtr->getbUpperBound(), this->_bUpperBound);
         generateConstraint(this->_constraintPtr->getAineq(), this->_Aineq);
     }
-    else //if(constrPtr->isEqualityConstraint()) //3. is equality constraint (NOT USED)
-    {
-        generateBound(this->_constraintPtr->getbeq(), this->_beq);
-        generateConstraint(this->_constraintPtr->getAeq(), this->_Aeq);
-    }
+
 }
 
 void SubConstraint::generateConstraint(const Eigen::MatrixXd& A, Eigen::MatrixXd& sub_A)

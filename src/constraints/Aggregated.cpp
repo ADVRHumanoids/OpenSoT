@@ -75,9 +75,6 @@ void Aggregated::generateAll() {
     _tmpupperBound.reset(1);
     _tmplowerBound.reset(1);
 
-    _tmpAeq.reset(_x_size);
-    _tmpbeq.reset(1);
-
     _tmpAineq.reset(_x_size);
     _tmpbUpperBound.reset(1);
     _tmpbLowerBound.reset(1);
@@ -98,8 +95,6 @@ void Aggregated::generateAll() {
         _boundUpperBounds[j] = b->getUpperBound();
         _boundLowerBounds[j] = b->getLowerBound();
 
-        _boundAeqs[j] = b->getAeq();
-        _boundbeqs[j] = b->getbeq();
 
         _boundAineqs[j] = b->getAineq();
         _boundbUpperBounds[j] = b->getbUpperBound();
@@ -108,8 +103,6 @@ void Aggregated::generateAll() {
         Eigen::VectorXd& boundUpperBound = _boundUpperBounds[j];
         Eigen::VectorXd& boundLowerBound = _boundLowerBounds[j];
 
-        Eigen::MatrixXd& boundAeq = _boundAeqs[j];
-        Eigen::VectorXd& boundbeq = _boundbeqs[j];
 
         Eigen::MatrixXd& boundAineq = _boundAineqs[j];
         Eigen::VectorXd& boundbUpperBound = _boundbUpperBounds[j];
@@ -149,33 +142,7 @@ void Aggregated::generateAll() {
             }
         }
 
-        /* copying Aeq, beq */
-        if( boundAeq.rows() != 0 ||
-            boundbeq.rows() != 0) {
-            assert(boundAeq.rows() == boundbeq.rows());
-            /* when transforming equalities to inequalities,
-                Aeq*x = beq becomes
-                beq <= Aeq*x <= beq */
-            if(_aggregationPolicy & EQUALITIES_TO_INEQUALITIES) {
-                assert(_tmpAineq.cols() == boundAeq.cols());
-                _tmpAineq.pile(boundAeq);
-                _tmpbUpperBound.pile(boundbeq);
-                if(_aggregationPolicy & UNILATERAL_TO_BILATERAL) {
-                    _tmpbLowerBound.pile(boundbeq);
-                /* we want to have only unilateral constraints, so
-                   beq <= Aeq*x <= beq becomes
-                   -Aeq*x <= -beq && Aeq*x <= beq */
-                } else {
-                    assert(_tmpAineq.cols() == boundAeq.cols());
-                    _tmpAineq.pile(-1.0*boundAeq);
-                    _tmpbUpperBound.pile( -1.0 * boundbeq);
-                }
-            } else {
-                assert(_tmpAeq.cols() == boundAeq.cols());
-                _tmpAeq.pile(boundAeq);
-                _tmpbeq.pile(boundbeq);
-            }
-        }
+
 
         /* copying Aineq, bUpperBound, bLowerBound*/
         if( boundAineq.rows() != 0 ||
@@ -233,9 +200,6 @@ void Aggregated::generateAll() {
     assert(_tmplowerBound.rows() == 0 || _tmplowerBound.rows() == _x_size);
     assert(_tmpupperBound.rows() == 0 || _tmpupperBound.rows() == _x_size);
 
-    assert(_tmpAeq.rows() == _tmpbeq.rows());
-    if(_tmpAeq.rows() > 0)
-        assert(_tmpAeq.cols() == _x_size);
 
     assert(_tmpAineq.rows() == _tmpbUpperBound.rows());
     if(!(_aggregationPolicy & UNILATERAL_TO_BILATERAL))
@@ -247,8 +211,6 @@ void Aggregated::generateAll() {
     _upperBound = _tmpupperBound.generate_and_get();
     _lowerBound = _tmplowerBound.generate_and_get();
 
-    _Aeq = _tmpAeq.generate_and_get();
-    _beq = _tmpbeq.generate_and_get();
 
     _Aineq = _tmpAineq.generate_and_get();
     _bUpperBound = _tmpbUpperBound.generate_and_get();

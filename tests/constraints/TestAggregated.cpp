@@ -78,9 +78,6 @@ TEST_F(testAggregated, AggregatedWorks) {
     EXPECT_TRUE(aggregated->getAineq().rows() == _model_ptr->getNv());
     EXPECT_TRUE(aggregated->getbLowerBound().size() == _model_ptr->getNv());
     EXPECT_TRUE(aggregated->getbUpperBound().size() == _model_ptr->getNv());
-    /* and no equality constraint */
-    EXPECT_TRUE(aggregated->getAeq().rows() == 0);
-    EXPECT_TRUE(aggregated->getbeq().size() == 0);
 
     Eigen::VectorXd oldLowerBound = aggregated->getLowerBound();
     Eigen::VectorXd oldUpperBound = aggregated->getUpperBound();

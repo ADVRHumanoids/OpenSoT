@@ -61,9 +61,6 @@ TEST_F(testBilateralConstraint, BilateralConstraintWorks) {
     EXPECT_TRUE(bilateral->getAineq().rows() == nJ);
     EXPECT_TRUE(bilateral->getbLowerBound().size() == nJ);
     EXPECT_TRUE(bilateral->getbUpperBound().size() == nJ);
-    /* and no equality constraint */
-    EXPECT_TRUE(bilateral->getAeq().rows() == 0);
-    EXPECT_TRUE(bilateral->getbeq().size() == 0);
 
     Eigen::VectorXd oldbLowerBound = bilateral->getbLowerBound();
     Eigen::VectorXd oldbUpperBound = bilateral->getbUpperBound();

@@ -234,19 +234,12 @@ TEST_F(testConvexHull, sizesAreCorrect) {
                                                       << "but has size"
                                                       << _convexHull->getUpperBound().size();
 
-    EXPECT_EQ(0, _convexHull->getAeq().rows()) << "Aeq should have size 0"
-                                               << "but has size"
-                                               << _convexHull->getAeq().rows();
-
-    EXPECT_EQ(0, _convexHull->getbeq().size()) << "beq should have size 0"
-                                               << "but has size"
-                                               <<  _convexHull->getbeq().size();
 
 
     EXPECT_EQ(_model_ptr->getNv(),_convexHull->getAineq().cols()) <<  " Aineq should have number of columns equal to "
                                                                               << _model_ptr->getNv()
                                                                               << " but has has "
-                                                                              << _convexHull->getAeq().cols()
+                                                                              << _convexHull->getAineq().cols()
                                                                               << " columns instead";
 
     EXPECT_EQ(_links_in_contact.size(),_convexHull->getbLowerBound().size()) << "beq should have size 3"
