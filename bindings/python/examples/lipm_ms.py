@@ -71,26 +71,26 @@ for i in range(Ns):
     xdot0 = AffineHelper.pile(rdot, rddot)
 
     integration_ = euler(x0, xdot0, x1, dt)
-    integration.append(GenericTask(f"integration_{i}", integration_.getM(), -integration_.getq()))
+    integration.append(GenericTask(f"integration_{i}", integration_))
 
 
 integration_constraint = AggregatedTask(integration, variables.getSize())
 #plt.spy(integration_constraint.getA(), markersize=5)
 #plt.show()
 
-xinit = variables.getVariable("x0") + np.array([0., 0., 0, 0.])
-initial_state = GenericTask("initial_state", xinit.getM(), -xinit.getq())
+xinit = variables.getVariable("x0") - np.array([0., 0., 0, 0.])
+initial_state = GenericTask("initial_state", xinit)
 
 zmp_tasks = list()
 for i in range(Ns):
-    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), -variables.getVariable(f"u{i}").getq())
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}"))
     min_ui.setWeight(1e1 * np.array([[1, 0], [0, 1]]))
     zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 x_tasks = list()
 for i in range(Ns+1):
-    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), -variables.getVariable(f"x{i}").getq())
+    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}"))
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
         Q = 1e6 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])

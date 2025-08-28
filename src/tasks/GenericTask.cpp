@@ -41,6 +41,13 @@ GenericTask::GenericTask(const std::string &task_id, const Eigen::MatrixXd &A, c
     _W.setIdentity(_A.rows(), _A.rows());
 }
 
+GenericTask::GenericTask(const std::string& task_id, const AffineHelper& var):
+    GenericTask(task_id, var.getM(), -var.getq())
+{
+
+}
+
+
 GenericTask::~GenericTask()
 {
 

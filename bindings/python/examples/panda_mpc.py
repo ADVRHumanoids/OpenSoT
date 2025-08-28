@@ -196,9 +196,9 @@ for i in range(Ns+1):
     x.append(state(i, variables, dt))
     x[i] = x[i] - xinit
     if i == 0:
-        initial_state = GenericTask(f"goal_task_{i}", x[i].getM(), -x[i].getq())
+        initial_state = GenericTask(f"goal_task_{i}", x[i])
     else:
-        goal_task_i = GenericTask(f"goal_task_{i}", x[i].getM(), -x[i].getq())
+        goal_task_i = GenericTask(f"goal_task_{i}", x[i])
         goal_task_list.append(goal_task_i)
 
 goal_state = pysot.AggregatedTask(goal_task_list, variables.getSize())
@@ -242,7 +242,7 @@ ik_task = ik_task.create(vee[0:3], variables.getVariable("u0"))
 min_u_list = list()
 for i in range(Ns):
     u_i = variables.getVariable(f"u{i}")
-    min_ui = GenericTask(f"min_u{i}", u_i.getM(), -u_i.getq())
+    min_ui = GenericTask(f"min_u{i}", u_i)
     min_ui.setWeight(1e-3 * np.eye(u_i.getM().shape[0]))
     min_ui.update()
     min_u_list.append(min_ui)

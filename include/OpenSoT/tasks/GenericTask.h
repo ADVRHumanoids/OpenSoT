@@ -37,6 +37,13 @@ class GenericTask: public Task<Eigen::MatrixXd, Eigen::VectorXd> {
                 const Eigen::MatrixXd& A, const Eigen::VectorXd& b,
                 const AffineHelper& var);
 
+    /**
+     * @brief GenericTask constructor from affine
+     * @param task_id name of the task
+     * @param var variable
+     */
+    GenericTask(const std::string& task_id, const AffineHelper& var);
+
 
     ~GenericTask();
 

@@ -99,6 +99,31 @@ public:
 
 };
 
+class testGenericTaskVar: public ::testing::Test
+{
+protected:
+
+    testGenericTaskVar()
+    {
+
+    }
+
+    virtual ~testGenericTaskVar() {
+
+    }
+
+    virtual void SetUp() {
+
+    }
+
+    virtual void TearDown() {
+
+    }
+
+public:
+
+};
+
 TEST_F(testGenericLPTask, testMethods)
 {
     Eigen::VectorXd new_c(this->_generic_lp_task->getc().size());
@@ -289,6 +314,50 @@ TEST_F(testGenericLPTaskFoo, testSingleLPProblem)
      std::cout<<"lp_task c: \n"<<lp_task->getc()<<std::endl;
 
      EXPECT_TRUE(lp_task->getc() == expected_c);
+}
+
+TEST_F(testGenericTaskVar, testGenricTaskVariableConstructor)
+{
+    OpenSoT::tasks::GenericTask::Ptr generic_task;
+
+    std::vector<std::pair<std::string, int>> var_list;
+    var_list.emplace_back("x", 2);
+    var_list.emplace_back("u", 1);
+
+    OpenSoT::OptvarHelper opt_helper(var_list);
+
+
+    OpenSoT::AffineHelper x = opt_helper.getVariable("x");
+    OpenSoT::AffineHelper u = opt_helper.getVariable("u");
+
+    Eigen::VectorXd xr(2);
+    xr.setOnes();
+    OpenSoT::AffineHelper dx = x - xr;
+
+    generic_task = std::make_shared<OpenSoT::tasks::GenericTask>("dx", dx);
+    generic_task->update();
+
+    std::cout<<"generic_task->getA():\n"<<generic_task->getA()<<std::endl;
+    std::cout<<"generic_task->getb():\n"<<generic_task->getb()<<std::endl;
+
+    std::cout<<"dx.getM():\n"<<dx.getM()<<std::endl;
+    std::cout<<"dx.getq():\n"<<dx.getq()<<std::endl;
+
+    auto A = generic_task->getA();
+    auto M = dx.getM();
+    for(unsigned int i = 0; i < A.rows(); ++i)
+    {
+        for(unsigned int j = 0; j < A.cols(); ++j)
+        {
+            EXPECT_TRUE(A(i,j) == M(i,j));
+        }
+    }
+
+    auto b = generic_task->getb();
+    auto q = dx.getq();
+    for(unsigned int i = 0; i < b.size(); ++i)
+        EXPECT_TRUE(b[i] == -q[i]);
+
 }
 
 }

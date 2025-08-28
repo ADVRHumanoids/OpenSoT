@@ -51,6 +51,7 @@ void pyGenericTask(py::module& m) {
     py::class_<GenericTask, std::shared_ptr<GenericTask>, Task<Eigen::MatrixXd, Eigen::VectorXd>, PyGenericTaskTrampoline>(m, "GenericTask")
         .def(py::init<const std::string&, const Eigen::MatrixXd&, const Eigen::VectorXd&>())
         .def(py::init<const std::string&, const Eigen::MatrixXd&, const Eigen::VectorXd&, const AffineHelper&>())
+        .def(py::init<const std::string&, const AffineHelper&>())
         .def("setA", &GenericTask::setA)
         .def("setb", &GenericTask::setb)
         .def("setAb", &GenericTask::setAb)

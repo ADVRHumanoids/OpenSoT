@@ -93,14 +93,14 @@ class state(AffineHelper):
             pass
 
 
-xinit = variables.getVariable("x0") + np.array([0., 0., 0, 0.])
-initial_state = GenericTask("initial_state", xinit.getM(), -xinit.getq())
+xinit = variables.getVariable("x0") - np.array([0., 0., 0, 0.])
+initial_state = GenericTask("initial_state", xinit)
 xNs = state(Ns, variables, h, dt)
-min_rdot_final = GenericTask("min_rdot_final", xNs[2:].getM(), -xNs[2:].getq())
+min_rdot_final = GenericTask("min_rdot_final", xNs[2:])
 
 zmp_tasks = list()
 for i in range(Ns):
-    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), -variables.getVariable(f"u{i}").getq())
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}"))
     min_ui.setWeight(1e1 * np.array([[1, 0], [0, 1]]))
     zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())

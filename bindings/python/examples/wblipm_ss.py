@@ -208,7 +208,7 @@ class state(AffineHelper):
 xNs = state(Ns, variables, rddot0, h, dt)
 xNs.update()
 print(f"xNs: {xNs}")
-min_rdot_final = GenericTask("min_rdot_final", xNs[2:].getM(), -xNs[2:].getq())
+min_rdot_final = GenericTask("min_rdot_final", xNs[2:])
 
 
 
@@ -235,11 +235,11 @@ lipmc = lipm_constraint.create(variables.getVariable("x0")[0:2], rddot0, variabl
 
 
 xinit = variables.getVariable("x0") - np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
-initial_state = GenericTask("initial_state", xinit.getM(), -xinit.getq())
+initial_state = GenericTask("initial_state", xinit)
 
 zmp_tasks = list()
 for i in range(Ns):
-    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), -variables.getVariable(f"u{i}").getq())
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}"))
     min_ui.setWeight(1e4 * np.array([[1, 0], [0, 1]]))
     zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
@@ -264,7 +264,7 @@ pelvis = Cartesian("pelvis", model, "pelvis", "world", variables.getVariable("ac
 
 
 # Create the stack
-min_acc = GenericTask("min_acc", variables.getVariable("acc0").getM(), -variables.getVariable("acc0").getq())
+min_acc = GenericTask("min_acc", variables.getVariable("acc0"))
 cost = 10.*min_rdot_final + zmp_tracking_task + com[2] + 1e-3 * min_acc + .1 * pelvis[3:] + 1. * postural[18:] + 1e-1 * amom
 for foot_frame in foot_frames:
     cost = cost + 1. * contact_tasks[foot_frame]

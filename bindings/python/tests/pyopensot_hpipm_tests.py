@@ -69,7 +69,7 @@ rddot = lipm(r, u, h)
 xdot = AffineHelper.pile(rdot, rddot)
 
 integration_ = euler(x, xdot, dt)
-integration = GenericTask(f"integration", integration_.getM(), -integration_.getq())
+integration = GenericTask(f"integration", integration_)
 
 
 print(f"integration.getA()\n: {integration.getA()}")
@@ -91,7 +91,7 @@ for i in range(Ns):
 
 zmp_tasks = list()
 for i in range(Ns):
-    min_ui = GenericTask("zmp_tracking", u.getM(), -u.getq())
+    min_ui = GenericTask("zmp_tracking", u)
     min_ui.setWeight(1e4 * np.array([[1, 0], [0, 1]]))
     zmp_tasks.append(min_ui)
 
@@ -109,7 +109,7 @@ for i in range(Ns):
 
 x_tasks = list()
 for i in range(Ns+1):
-    min_xi = GenericTask("min_x", x.getM(), -x.getq())
+    min_xi = GenericTask("min_x", x)
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
         Q = 1e6 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
