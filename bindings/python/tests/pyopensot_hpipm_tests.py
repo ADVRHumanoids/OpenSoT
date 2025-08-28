@@ -7,7 +7,7 @@ from ttictoc import tic, toc
 import unittest
 from collections import deque
 
-SHOW_PLOTS = True
+SHOW_PLOTS = False
 
 def plot_trajectory(Ns, x_value, u_value, zmp_refs, dt):
     plt.figure(figsize=(8, 4))

@@ -45,8 +45,9 @@ void pyHPIPMOC(py::module& m) {
 
     py::class_<solvers::hpipmOC, std::shared_ptr<solvers::hpipmOC>>(m, "hpipmOC")
         .def(py::init<const unsigned int>())
-        .def("setBoxConstraintsX", &solvers::hpipmOC::setBoxConstraintsX)
-        .def("setBoxConstraintsU", &solvers::hpipmOC::setBoxConstraintsU)
+        .def("setBoundsX", &solvers::hpipmOC::setBoundsX)
+        .def("setBoundsU", &solvers::hpipmOC::setBoundsU)
+        .def("setConstraint", &solvers::hpipmOC::setConstraint)
         .def("setFullCost", &solvers::hpipmOC::setFullCost)
         .def("setCost", &solvers::hpipmOC::setCost)
         .def("setLSCost", &solvers::hpipmOC::setLSCost,

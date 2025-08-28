@@ -56,18 +56,26 @@ void hpipmOC::setStageDynamics(const unsigned int i, const Eigen::MatrixXd& A, c
     _qp[i].b = b;
 }
 
- void hpipmOC::setBoxConstraintsX(const unsigned int i, const std::vector<int>& idxbx, const Eigen::VectorXd& lbx, const Eigen::VectorXd& ubx)
+ void hpipmOC::setBoundsX(const unsigned int i, const std::vector<int>& idxbx, const Eigen::VectorXd& lbx, const Eigen::VectorXd& ubx)
 {
     _qp[i].idxbx = idxbx;
     _qp[i].lbx = lbx;
     _qp[i].ubx = ubx;
 }
 
-void hpipmOC::setBoxConstraintsU(const unsigned int i, const std::vector<int>& idxbu, const Eigen::VectorXd& lbu, const Eigen::VectorXd& ubu)
+void hpipmOC::setBoundsU(const unsigned int i, const std::vector<int>& idxbu, const Eigen::VectorXd& lbu, const Eigen::VectorXd& ubu)
 {
     _qp[i].idxbu = idxbu;
     _qp[i].lbu = lbu;
     _qp[i].ubu = ubu;
+}
+
+void hpipmOC::setConstraint(const unsigned int i, const Eigen::MatrixXd& C, const Eigen::MatrixXd& D, const Eigen::VectorXd& min, const Eigen::VectorXd& max)
+{
+    _qp[i].C = C;
+    _qp[i].D = D;
+    _qp[i].lg = min;
+    _qp[i].ug = max;
 }
 
 void hpipmOC::setFullCost(const unsigned int i, const Eigen::MatrixXd& R, const Eigen::MatrixXd& Q, const Eigen::MatrixXd& S, const Eigen::VectorXd& r, const Eigen::VectorXd& q)

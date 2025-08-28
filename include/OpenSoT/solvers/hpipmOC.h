@@ -37,22 +37,29 @@ public:
     void setStageDynamics(const unsigned int i, const Eigen::MatrixXd& A, const Eigen::MatrixXd& B, const Eigen::VectorXd& b);
 
     /**
-     * @brief setBoxConstraintsX add bounds on state variables at stage i
+     * @brief setBoundsX add bounds on state variables at stage i
+     *
+     *      lbx <= x <= ubx
+     *
      * @param i stage
      * @param idxbx indices to be considered
      * @param lbx lower bounds
      * @param ubx upper bounds
      */
-    void setBoxConstraintsX(const unsigned int i, const std::vector<int>& idxbx, const Eigen::VectorXd& lbx, const Eigen::VectorXd& ubx);
+    void setBoundsX(const unsigned int i, const std::vector<int>& idxbx, const Eigen::VectorXd& lbx, const Eigen::VectorXd& ubx);
 
     /**
-     * @brief setBoxConstraintsU add bounds on control variables at stage i
+     * @brief setBoundsU add bounds on control variables at stage i
+     *
+     *      lbu <= u <= ubu
+     *
+     *
      * @param i stage
      * @param idxbu indices to be considered
      * @param lbu lower bounds
      * @param ubu upper bounds
      */
-    void setBoxConstraintsU(const unsigned int i, const std::vector<int>& idxbu, const Eigen::VectorXd& lbu, const Eigen::VectorXd& ubu);
+    void setBoundsU(const unsigned int i, const std::vector<int>& idxbu, const Eigen::VectorXd& lbu, const Eigen::VectorXd& ubu);
 
     /**
      * @brief setFullCost sets the cost matrix as:
@@ -125,7 +132,21 @@ public:
                    const Eigen::MatrixXd& Ax, const Eigen::MatrixXd& Wx, const Eigen::VectorXd& bx,
                    const Eigen::MatrixXd& Au = Eigen::MatrixXd(0,0), const Eigen::MatrixXd& Wu = Eigen::MatrixXd(0,0), const Eigen::VectorXd& bu = Eigen::VectorXd(0));
 
-    void setLSCostRHS(const unsigned int i, const Eigen::VectorXd& bx, const Eigen::VectorXd& bu = Eigen::VectorXd(0));
+
+
+    /**
+     * @brief setConstraint set the inequality constraint:
+     *
+     *      min <= Cx + Du <= max
+     *
+     * @param i
+     * @param D
+     * @param C
+     * @param min
+     * @param max
+     */
+    void setConstraint(const unsigned int i, const Eigen::MatrixXd& C, const Eigen::MatrixXd& D, const Eigen::VectorXd& min, const Eigen::VectorXd& max);
+
 
     /**
      * @brief solve
