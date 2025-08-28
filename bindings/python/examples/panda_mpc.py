@@ -242,7 +242,7 @@ ik_task = ik_task.create(vee[0:3], variables.getVariable("u0"))
 min_u_list = list()
 for i in range(Ns):
     u_i = variables.getVariable(f"u{i}")
-    min_ui = GenericTask(f"min_u{i}", u_i.getM(), u_i.getq())
+    min_ui = GenericTask(f"min_u{i}", u_i.getM(), -u_i.getq())
     min_ui.setWeight(1e-3 * np.eye(u_i.getM().shape[0]))
     min_ui.update()
     min_u_list.append(min_ui)

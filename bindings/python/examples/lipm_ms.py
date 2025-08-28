@@ -90,7 +90,7 @@ zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 x_tasks = list()
 for i in range(Ns+1):
-    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), variables.getVariable(f"x{i}").getq())
+    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), -variables.getVariable(f"x{i}").getq())
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
         Q = 1e6 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])

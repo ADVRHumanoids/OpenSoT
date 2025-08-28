@@ -238,26 +238,26 @@ for i in range(1, Ns):
     xdot0 = AffineHelper.pile(rdot, rddot)
 
     integration_ = euler(x0, xdot0, x1, dt)
-    integration.append(GenericTask(f"integration_{i}", integration_.getM(), integration_.getq()))
+    integration.append(GenericTask(f"integration_{i}", integration_.getM(), -integration_.getq()))
 
 
 integration_constraint = AggregatedTask(integration, variables.getSize()) + integration_0_constraint
 #plt.spy(integration_constraint.getA(), markersize=5)
 #plt.show()
 
-xinit = variables.getVariable("x0") + np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
-initial_state = GenericTask("initial_state", xinit.getM(), xinit.getq())
+xinit = variables.getVariable("x0") - np.hstack((model.getCOM()[0:2], model.getCOMVelocity()[0:2]))
+initial_state = GenericTask("initial_state", xinit.getM(), -xinit.getq())
 
 zmp_tasks = list()
 for i in range(Ns):
-    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), variables.getVariable(f"u{i}").getq())
+    min_ui = GenericTask("zmp_tracking", variables.getVariable(f"u{i}").getM(), -variables.getVariable(f"u{i}").getq())
     min_ui.setWeight(1e6 * np.array([[1, 0], [0, 1]]))
     zmp_tasks.append(min_ui)
 zmp_tracking_task = AggregatedTask(zmp_tasks, variables.getSize())
 
 x_tasks = list()
 for i in range(Ns+1):
-    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), variables.getVariable(f"x{i}").getq())
+    min_xi = GenericTask("min_x", variables.getVariable(f"x{i}").getM(), -variables.getVariable(f"x{i}").getq())
     Q = 1e-3 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     if i == Ns:
         Q = 2e2 * np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
@@ -285,7 +285,7 @@ amom = AngularMomentum(model, variables.getVariable("acc0"))
 pelvis = Cartesian("pelvis", model, "pelvis", "world", variables.getVariable("acc0"))
 
 # Create the stack
-min_acc = GenericTask("min_acc", variables.getVariable("acc0").getM(), variables.getVariable("acc0").getq())
+min_acc = GenericTask("min_acc", variables.getVariable("acc0").getM(), -variables.getVariable("acc0").getq())
 cost = min_xdot_task + zmp_tracking_task + 1e-3*min_acc + com[2] + 1e-3 * postural[18:] + 0.1 * amom + 0.1 * pelvis[3:]
 for foot_frame in foot_frames:
     cost = cost + contact_tasks[foot_frame]
