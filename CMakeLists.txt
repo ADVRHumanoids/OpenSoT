@@ -167,7 +167,8 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/AffineUtils.cpp
     src/utils/Indices.cpp
     src/utils/cartesian_utils.cpp
-    src/utils/InverseDynamics.cpp)
+    src/utils/InverseDynamics.cpp
+    src/utils/oc.cpp)
 
 
 if(${PCL_FOUND})
@@ -302,7 +303,7 @@ library_install(OpenSotBackEndeiQuadProg 1 0 0)
 find_package(hpipm-cpp QUIET)
 if(${hpipm-cpp_FOUND})
     message("Adding src/solvers/hpipmOC.cpp to compilation")
-    add_library(OpenSothpipmOC SHARED src/solvers/hpipmOC.cpp)
+    add_library(OpenSothpipmOC SHARED  src/solvers/swSQP.cpp src/solvers/hpipmOC.cpp)
     target_link_libraries(OpenSothpipmOC PRIVATE OpenSoT hpipm-cpp::hpipm-cpp)
     library_install(OpenSothpipmOC 1 0 0)
 endif()
