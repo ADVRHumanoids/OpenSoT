@@ -7,33 +7,10 @@
 
 namespace py = pybind11;
 
-struct PyAggregatedTaskTrampoline : OpenSoT::tasks::Aggregated {
-    using OpenSoT::tasks::Aggregated::Aggregated;
-
-    void _update() override {
-        PYBIND11_OVERRIDE_PURE(
-            void,                      // Return type
-            OpenSoT::tasks::Aggregated,// Parent class
-            _update                     // Name of function in C++
-            );
-    }
-};
-
-struct PyAggregatedConstraintTrampoline : OpenSoT::constraints::Aggregated {
-    using OpenSoT::constraints::Aggregated::Aggregated;
-
-    void _update() override {
-        PYBIND11_OVERRIDE_PURE(
-            void,                      // Return type
-            OpenSoT::constraints::Aggregated,// Parent class
-            _update                     // Name of function in C++
-            );
-    }
-};
 
 void pyAggregatedTask(py::module& m) {
     // Aggregated Task
-    py::class_<OpenSoT::tasks::Aggregated, PyAggregatedTaskTrampoline,
+    py::class_<OpenSoT::tasks::Aggregated,
                std::shared_ptr<OpenSoT::tasks::Aggregated>,
                OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AggregatedTask")
         // ctor(list<TaskPtr>, x_size) -- keep the list (arg 2) alive while returned Aggregated (1) lives
@@ -51,7 +28,7 @@ void pyAggregatedTask(py::module& m) {
              py::keep_alive<1, 3>())
 
         // expose update() (public entry that calls the virtual _update())
-        .def("update", &OpenSoT::tasks::Aggregated::update)
+        //.def("update", &OpenSoT::tasks::Aggregated::update)
 
         .def("getOwnConstraints", &OpenSoT::tasks::Aggregated::getOwnConstraints, py::return_value_policy::reference_internal)
         .def("getAggregatedConstraints", &OpenSoT::tasks::Aggregated::getAggregatedConstraints, py::return_value_policy::reference_internal)
@@ -69,7 +46,7 @@ void pyAggregatedConstraint(py::module& m) {
         .export_values();
 
     // Aggregated Constraint
-    py::class_<OpenSoT::constraints::Aggregated, PyAggregatedConstraintTrampoline,
+    py::class_<OpenSoT::constraints::Aggregated,
                std::shared_ptr<OpenSoT::constraints::Aggregated>,
                OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "AggregatedConstraint")
         // ctor(list<ConstraintPtr>, x_size, aggregationPolicy)
@@ -91,7 +68,7 @@ void pyAggregatedConstraint(py::module& m) {
              py::keep_alive<1, 3>())
 
         // expose update()
-        .def("update", &OpenSoT::constraints::Aggregated::update)
+        //.def("update", &OpenSoT::constraints::Aggregated::update)
 
         .def("getConstraintsList", &OpenSoT::constraints::Aggregated::getConstraintsList, py::return_value_policy::reference_internal);
 }
