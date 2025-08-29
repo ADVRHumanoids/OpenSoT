@@ -121,12 +121,6 @@ class OptvarHelperWrapper
         std::shared_ptr<OptvarHelper> _optvar;
 };
 
-Eigen::VectorXd get_value(const AffineHelper& var, const Eigen::VectorXd& x)
-{
-    Eigen::VectorXd val;
-    var.getValue(x, val);
-    return val;
-}
 
 struct PyAffineHeplerTrampoline : public AffineHelper {
     using AffineHelper::AffineHelper;  // Inherit constructors
@@ -145,6 +139,8 @@ public:
     using AffineHelper::_q;
 };
 
+
+
 void pyAffineHelper(py::module& m, const std::string& className) {
     py::class_<AffineHelper, std::shared_ptr<AffineHelper>, PyAffineHeplerTrampoline>(m, className.c_str())
         .def(py::init<>())
@@ -159,7 +155,11 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def("getOutputSize", &AffineHelper::getOutputSize)
         .def("setZero", py::overload_cast<>(&AffineHelper::setZero))
         .def("setZero", py::overload_cast<int, int>(&AffineHelper::setZero))
-        .def("getValue", get_value)
+
+
+        .def("getValue", [](AffineHelperBase<Eigen::MatrixXd, Eigen::VectorXd>& self, const Eigen::VectorXd& x) -> const Eigen::VectorXd& { return self.getValue(x);})
+        .def("getValue", [](AffineHelperBase<Eigen::MatrixXd, Eigen::VectorXd>& self) -> const Eigen::VectorXd& { return self.getValue();})
+
         .def("__sub__", [](const AffineHelper &a, const AffineHelper &b) { return diff(a, b); })
         .def("__add__", [](const AffineHelper &a, const AffineHelper &b) { return sum(a, b); })
         .def("__add__", [](const AffineHelper &a, const Eigen::VectorXd &v) { return sum(a, v); })

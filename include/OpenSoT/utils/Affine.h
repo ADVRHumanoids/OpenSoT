@@ -179,16 +179,31 @@ public:
 
     
     template <typename Derived>
-    void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value) const
+    void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
     {
         value.noalias() = _M*x;
         value += _q;
+
+        _value = value;
+    }
+
+    const Eigen::VectorXd& getValue(const Eigen::VectorXd& x)
+    {
+        _value.noalias() = _M*x;
+        _value += _q;
+
+        return _value;
+    }
+
+    const Eigen::VectorXd& getValue() const
+    {
+        return _value;
     }
     
     virtual void update () {}
     
 protected:
-    
+
     AffineHelperBase<DerivedM, DerivedQ>& self() { return *this; }
     const AffineHelperBase<DerivedM, DerivedQ>& self() const { return *this; }
     
@@ -201,7 +216,9 @@ protected:
     
     DerivedM _M;
     DerivedQ _q;
-    
+
+    Eigen::VectorXd _value;
+
 };
 
 typedef AffineHelperBase<Eigen::MatrixXd, Eigen::VectorXd> AffineHelper;
