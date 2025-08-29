@@ -7,7 +7,6 @@
 #include <OpenSoT/utils/Piler.h>
 #include <hpipm-cpp/hpipm-cpp.hpp>
 
-#define PROXQP_DEFAULT_EPS_REGULARISATION 0
 
 using namespace OpenSoT::utils;
 
@@ -16,6 +15,8 @@ namespace solvers{
 
 class hpipmOC{
 public:
+    typedef std::shared_ptr<hpipmOC> Ptr;
+
     /**
      * @brief hpipmOC
      * @param Ns number of stage (Ns controls, Ns+1 states)
