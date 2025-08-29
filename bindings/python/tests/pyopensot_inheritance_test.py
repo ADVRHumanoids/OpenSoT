@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from pyopensot import Task, Constraint, AffineHelper, ConstraintType
+from pyopensot import Task, Constraint, AffineHelper, ConstraintType, AffineHelper, OptvarHelper
 
 
 class foo_var(AffineHelper):
@@ -99,3 +99,87 @@ t.update()   # should NOT throw
 print(t.getA().shape, t.getb().shape)  # (1,5) (1,)
 
 
+vars = list()
+vars.append(("x", 4))
+vars.append(("u", 2))
+
+variables = OptvarHelper(vars)
+x = variables.getVariable("x")
+u = variables.getVariable("u")
+
+w = np.array([1., 2., 3., 4., 5., 6.])
+
+class min_var(Task):
+    def __init__(self, variable):
+        super().__init__("min_var", variable.getInputSize())
+        self.variable = variable
+        self._W = np.eye(variable.getOutputSize())
+        self.update()
+
+    def _update(self):
+        self.lin =  self.variable + self.variable.getValue()
+        self._A = self.lin.getM()
+        self._b = -self.lin.getq()
+
+u.getValue(w)
+minu = min_var(u)
+
+print(f"minu.getb(): {minu.getb()}")
+utest.assertTrue((minu.getb() == -w[4:]).all())
+
+w = np.array([1., 2., 3., 4., 9., 10.])
+
+u.getValue(w)
+minu.update()
+
+print(f"minu.getb(): {minu.getb()}")
+utest.assertTrue((minu.getb() == -w[4:]).all())
+
+
+
+vars = list()
+vars.append(("q", 2))
+vars.append(("qdot", 2))
+vars.append(("qddot", 2))
+
+variables = OptvarHelper(vars)
+q = variables.getVariable("q")
+qdot = variables.getVariable("qdot")
+qddot = variables.getVariable("qddot")
+
+
+x = AffineHelper.pile(q, qdot)
+xdot = AffineHelper.pile(qdot, qddot)
+
+def euler(x, xdot, dt):
+    return x + dt * xdot  # x1 = x0 + dt * xdot0
+
+f = euler(x, xdot, 0.01)
+f.getValue(w)
+
+class dynamics_derivative(Task):
+    def __init__(self, f):
+        super().__init__("ddyn", f.getInputSize())
+        self.f = f
+        self._W = np.eye(f.getOutputSize())
+        self.update()
+
+    def _update(self):
+        self.lin = self.f + self.f.getValue()
+        self._A = self.lin.getM()
+        self._b = -self.lin.getq()
+
+ddyn = dynamics_derivative(f)
+
+print(f"ddyn.getA(): {ddyn.getA()}")
+print(f"ddyn.getb(): {ddyn.getb()}")
+print(f"f.getValue(): {f.getValue()}")
+utest.assertTrue((ddyn.getb() == -f.getValue()).all())
+
+w = np.array([1., 2., 3., 4., 13., 14.])
+f.getValue(w)
+ddyn.update()
+print(f"ddyn.getA(): {ddyn.getA()}")
+print(f"ddyn.getb(): {ddyn.getb()}")
+print(f"f.getValue(): {f.getValue()}")
+utest.assertTrue((ddyn.getb() == -f.getValue()).all())

@@ -49,3 +49,18 @@ print(f"size: {variables.getSize()}")
 vv = variables.getAllVariables()
 for v in vv:
     print(v)
+
+
+vars = list()
+vars.append(("x", 4))
+vars.append(("u", 2))
+
+variables = OptvarHelper(vars)
+x = variables.getVariable("x")
+u = variables.getVariable("u")
+
+w = np.array([1., 2., 3., 4., 5., 6.])
+utest.assertTrue((x.getValue() == []).all())
+utest.assertTrue((x.getValue(w) == w[0:4]).all())
+utest.assertTrue((x.getValue() == w[0:4]).all())
+utest.assertTrue((u.getValue(w) == w[4:]).all())
