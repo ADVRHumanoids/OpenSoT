@@ -44,7 +44,6 @@ class ros2_node(Node):
         self.server = InteractiveMarkerServer(self, 'six_dof_marker_server')
         self.marker_pose = PoseStamped()
 
-        self.collision_distances_publisher = self.create_publisher(Marker, 'collision_distances', 10)
 
 
     def make_6dof_marker(self, name, pose, frame_id):
