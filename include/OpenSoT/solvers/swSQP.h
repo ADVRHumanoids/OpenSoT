@@ -35,32 +35,24 @@ public:
 private:
     void _init();
 
-    /**
-     * @brief flatten assumes all vectors in vecs have the same size!
-     * @param vecs
-     * @param vec
-     * @return
-     */
-    void flatten(const std::vector<Eigen::VectorXd>& vecs, Eigen::VectorXd& vec)
-    {
-        const std::size_t m = vecs[0].size();   // size of each subvector
-        const std::size_t N = vecs.size();      // number of subvectors
-
-        vec.resize(N * m);
-
-        for(std::size_t i = 0; i < N; ++i) {
-            vec.segment(i * m, m) = vecs[i];
-        }
-    }
+    void computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b);
+    void computeQuadraticApproximation(const unsigned int i, Eigen::MatrixXd& H, Eigen::VectorXd& g);
+    void computeCost(const unsigned int i,
+                     Eigen::MatrixXd& Q, Eigen::VectorXd& q,
+                     Eigen::MatrixXd& R, Eigen::VectorXd& r,
+                     Eigen::MatrixXd& S);
 
     hpipmOC::Ptr _qp_solver;
     OpenSoT::ocp::Ptr _ocp;
 
     options _opt;
 
+    std::vector<Eigen::MatrixXd> _Mx, _Mu;
+
     // stores dynamics in the horizon
     std::vector<Eigen::MatrixXd> _A;
     std::vector<Eigen::MatrixXd> _B;
+    std::vector<Eigen::VectorXd> _b;
 
     // stores cost in the horizon
     std::vector<Eigen::MatrixXd> _H, _Q, _R, _S;
@@ -68,6 +60,8 @@ private:
 
 
     std::vector<Eigen::VectorXd> _x0, _u0;
+
+
 };
 
 }
