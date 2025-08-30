@@ -48,14 +48,8 @@ class ocp{
 
 
                 //1 update model
-                Eigen::VectorXd _q(q->getOutputSize());
-                q->getValue(w0, _q);
-
-                Eigen::VectorXd _qdot(qdot->getOutputSize());
-                qdot->getValue(w0, _qdot);
-
-                model->setJointPosition(_q);
-                model->setJointVelocity(_qdot);
+                model->setJointPosition(q->getValue(w0));
+                model->setJointVelocity(v->getValue(w0));
                 model->update();
 
                 //2 update and evaluate state variables
@@ -89,7 +83,7 @@ class ocp{
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;
-            std::shared_ptr<AffineHelper> x, u, q, qdot;
+            std::shared_ptr<AffineHelper> x, u, q, v;
             AutoStack::Ptr stack;
         };
 

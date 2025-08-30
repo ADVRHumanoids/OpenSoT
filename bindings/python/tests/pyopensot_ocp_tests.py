@@ -184,7 +184,7 @@ class dynamics_derivative(Task):
         self._W = np.eye(f.getOutputSize())
 
     def _update(self):
-        self.lin = self.f + self.f.getValue()
+        self.lin = self.f
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
 
@@ -219,7 +219,7 @@ for i in range(Ns):
     stage.x = x
     stage.u = qddot
     stage.q = q
-    stage.qdot = qdot
+    stage.v = qdot
 
     stage.model = xbi.ModelInterface2(node.urdf)
 
@@ -238,7 +238,7 @@ stage = Stage()
 stage.model = xbi.ModelInterface2(node.urdf)
 stage.x = x
 stage.q = q
-stage.qdot = qdot
+stage.v = qdot
 ocp.addStage(stage)
 
 
@@ -259,7 +259,7 @@ for i in range(Ns):
 # set goal at final state
 cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world")
 cartesian_task.setLambda(1)
-cartesian_task.setWeight(1e3 * np.eye(6))
+cartesian_task.setWeight(1e4 * np.eye(6))
 
 ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, variables.getVariable("qdot")))
 

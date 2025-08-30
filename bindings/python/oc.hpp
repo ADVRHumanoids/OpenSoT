@@ -43,7 +43,7 @@ void pyopensot_oc(py::module& m) {
         .def_readwrite("x", &Stage::x)
         .def_readwrite("u", &Stage::u)
         .def_readwrite("q", &Stage::q)
-        .def_readwrite("qdot", &Stage::qdot)
+        .def_readwrite("v", &Stage::v)
         .def_readwrite("stack", &Stage::stack)
         .def_readwrite("dynamics_derivative", &Stage::dynamics_derivative);
 
