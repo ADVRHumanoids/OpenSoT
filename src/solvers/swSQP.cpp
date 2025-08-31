@@ -85,18 +85,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         if(!success)
             return false;
 
-        //4) Newton Step
-        for(unsigned int k = 0; k < _x0.size(); ++k)
-        {
-            _x0[k] += _qp_solver->getSolution()[k].x;
-        }
-        dx0 = _qp_solver->getSolution()[0].x;
-        for(unsigned int k = 0; k < _u0.size(); ++k)
-        {
-            _u0[k] += _qp_solver->getSolution()[k].u;
-        }
-
-        //5) check break criteria
+        //4) check break criteria on QO solution
         bool break_ = true;
         for(unsigned int i = 0; i < _qp_solver->getSolution().size(); ++i)
         {
@@ -115,6 +104,19 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
         if(break_)
             return true;
+        else
+        {
+            //4) Newton Step
+            for(unsigned int k = 0; k < _x0.size(); ++k)
+            {
+                _x0[k] += _qp_solver->getSolution()[k].x;
+            }
+            dx0 = _qp_solver->getSolution()[0].x;
+            for(unsigned int k = 0; k < _u0.size(); ++k)
+            {
+                _u0[k] += _qp_solver->getSolution()[k].u;
+            }
+        }
     }
     return true;
 }
