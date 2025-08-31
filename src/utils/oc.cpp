@@ -47,3 +47,8 @@ double ocp::cost(const unsigned int i)
     return _stages[i]->cost();
 }
 
+double ocp::der(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
+{
+    return _stages[i]->der(dx, du);
+}
+

@@ -186,6 +186,10 @@ bool swSQP::line_search()
     double alpha = 1.;
     double initial_merit = _ocp->cost();
 
+    double merit_der = 0.;
+    for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
+        merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
+
     bool success = false;
 
 
@@ -209,13 +213,16 @@ bool swSQP::line_search()
 
         double merit = _ocp->cost();
 
-        if(merit < initial_merit)
+        if(merit < initial_merit + _opt.beta * alpha * merit_der) //Armijo's rule
         {
             //take step
             _x0 = _x0_candidate;
             _u0 = _u0_candidate;
 
             initial_merit = merit;
+            merit_der = 0.;
+            for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
+                merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
 
             _stats.alpha = alpha;
 

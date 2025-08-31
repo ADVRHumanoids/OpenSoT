@@ -90,6 +90,21 @@ class ocp{
                 return cost;
             }
 
+            double der(const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
+            {
+                Eigen::VectorXd dw(dx.size() + du.size());
+                dw.head(dx.size()) = dx;
+                dw.tail(du.size()) = du;
+
+                double der = 0.;
+                if(stack)
+                {
+                    der = ((-1.0 * stack->getStack()[0]->getA().transpose() * stack->getStack()[0]->getWb()).transpose() * dw)[0];
+                }
+
+                return der;
+            }
+
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;
@@ -114,6 +129,7 @@ class ocp{
          * @return cost of stage i
          */
         double cost(const unsigned int i);
+        double der(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du);
 
         void addStage(Stage::Ptr stage);
 

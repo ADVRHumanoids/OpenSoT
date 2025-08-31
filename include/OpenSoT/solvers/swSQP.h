@@ -77,6 +77,7 @@ public:
             min_abs_delta_solution = 1e-7;
             verbose = false;
             alpha_min = 0.125;
+            beta = 1e-4;
             use_line_search = true;
             line_search_improvs = false;
         }
@@ -102,6 +103,11 @@ public:
          */
         bool line_search_improvs;
 
+        /**
+         * @brief beta multiply merit derivative in Armijo's condition in line search
+         */
+        double beta;
+
         const std::ostringstream& toOSS()
         {
             _oss.str("");
@@ -112,6 +118,7 @@ public:
             _oss << "  max_iters              : " << max_iters << std::endl;
             _oss << "  min_abs_delta_solution : " << min_abs_delta_solution << std::endl;
             _oss << "  alpha_min              : " << alpha_min << std::endl;
+            _oss << "  beta                   : " << beta << std::endl;
             _oss << "  use_line_search        : " << use_line_search << std::endl;
             _oss << "  line_search_improvs    : " << line_search_improvs << std::endl;
 

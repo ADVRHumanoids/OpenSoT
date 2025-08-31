@@ -83,6 +83,7 @@ void pyopensot_oc(py::module& m) {
             .def_readwrite("verbose", &swSQP::options::verbose)
             .def_readwrite("max_iters", &swSQP::options::max_iters)
             .def_readwrite("alpha_min", &swSQP::options::alpha_min)
+            .def_readwrite("beta", &swSQP::options::beta)
             .def_readwrite("use_line_search", &swSQP::options::use_line_search)
             .def_readwrite("line_search_improvs", &swSQP::options::line_search_improvs);
 
