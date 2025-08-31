@@ -82,6 +82,7 @@ void pyopensot_oc(py::module& m) {
             .def("solve", &swSQP::solve)
             .def("getStateSolution", &swSQP::getStateSolution)
             .def("getControlSolution", &swSQP::getControlSolution)
+            .def("printStatistics", &swSQP::printStatistics)
             .def("getOptions", (swSQP::options& (swSQP::*)()) &swSQP::getOptions, py::return_value_policy::reference_internal);
 
 }

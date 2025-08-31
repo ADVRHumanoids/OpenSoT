@@ -3,11 +3,13 @@
 using namespace OpenSoT::solvers;
 
 swSQP::swSQP(OpenSoT::ocp::Ptr ocp):
-    _ocp(ocp)
+    _ocp(ocp), _stats(ocp->getNumberOfNodes())
 {
     _qp_solver = std::make_shared<hpipmOC>(ocp->getNumberOfNodes());
 
     _init();
+
+    std::cout<<_opt.toOSS().str()<<std::endl;
 }
 
 void swSQP::computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b)
@@ -51,12 +53,17 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     for(unsigned int iter = 0; iter < _opt.max_iters; ++iter)
     {
-        std::cout<<"iter: "<<iter<<std::endl;
+        _stats.iters = iter;
+
         //0) linearize ocp aorund x0, u0
         _ocp->update(_x0, _u0);
 
+        _stats.cost = _ocp->cost();
+
         for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
         {
+            _stats.stages_statistics[k].cost = _ocp->cost(k);
+
             // --- Dynamics (only for k < N) ---
             if(k < _ocp->getNumberOfNodes())
             {

@@ -294,6 +294,7 @@ elapsed = toc()  # End timer and print elapsed time
 print(f"Elapsed time: {elapsed:.3f} seconds")
 if(success):
     print("OCP solved!")
+    solver.printStatistics()
 else:
     print("OCP not solved!")
 

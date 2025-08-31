@@ -11,6 +11,41 @@ class swSQP{
 public:
     typedef std::shared_ptr<swSQP> Ptr;
 
+    struct stage_statistics
+    {
+        double cost;
+    };
+
+    struct statistics
+    {
+        statistics(const unsigned int Ns)
+        {
+            stages_statistics.resize(Ns + 1);
+        }
+
+        std::vector<stage_statistics> stages_statistics;
+        int iters;
+        double cost;
+
+        const std::ostringstream& toOSS()
+        {
+            _oss<<"swSQP Stats: "<<std::endl;
+            _oss<<" iters: "<<iters<<std::endl;
+            _oss<<" cost: "<<cost<<std::endl;
+
+            for(unsigned int i = 0; i < stages_statistics.size(); ++i)
+            {
+                _oss<<" stage "<<i<<" stats:"<<std::endl;
+                _oss<<"     cost: "<<stages_statistics[i].cost<<std::endl;
+            }
+
+            return _oss;
+        }
+
+    private:
+        std::ostringstream _oss;
+    };
+
     struct options
     {
         options()
@@ -28,6 +63,18 @@ public:
          * @brief min_abs_delta_solution minimum absolute delta solution allowed for increment solution
          */
         double min_abs_delta_solution;
+
+        const std::ostringstream& toOSS()
+        {
+            _oss<<"swSQP Options: "<<max_iters<<std::endl;
+            _oss<<" max_iters: "<<max_iters<<std::endl;
+            _oss<<" min_abs_delta_solution: "<<min_abs_delta_solution<<std::endl;
+
+            return _oss;
+        }
+
+    private:
+        std::ostringstream _oss;
     };
 
     swSQP(OpenSoT::ocp::Ptr ocp);
@@ -39,6 +86,8 @@ public:
 
     const std::vector<Eigen::VectorXd>& getStateSolution() const { return _x0;}
     const std::vector<Eigen::VectorXd>& getControlSolution() const { return _u0;}
+
+    void printStatistics(){ std::cout<<_stats.toOSS().str()<<std::endl; }
 
 
 private:
@@ -55,6 +104,7 @@ private:
     OpenSoT::ocp::Ptr _ocp;
 
     options _opt;
+    statistics _stats;
 
     std::vector<Eigen::MatrixXd> _Mx, _Mu;
 
