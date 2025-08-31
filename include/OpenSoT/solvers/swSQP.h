@@ -3,6 +3,8 @@
 
 #include <OpenSoT/solvers/hpipmOC.h>
 #include <OpenSoT/utils/oc.h>
+#include <chrono>
+#include <limits>
 
 namespace OpenSoT{
 namespace solvers{
@@ -29,6 +31,8 @@ public:
         double alpha;
         int line_search_iters;
         int line_search_accepted_steps;
+        double iter_time;
+        double total_time = std::numeric_limits<double>::quiet_NaN();
 
         const std::ostringstream& toOSS()
         {
@@ -36,11 +40,13 @@ public:
             _oss.clear();
 
             _oss<<"=== swSQP Statistics ==="<<std::endl;
-            _oss << "  iters             : " << iters << std::endl;
+            _oss << "  iter              : " << iters << std::endl;
             _oss << "  alpha             : " << alpha << std::endl;
             _oss << "  ls iters          : " << line_search_iters << std::endl;
             _oss << "  ls accepted steps : " << line_search_accepted_steps <<std::endl;
             _oss << "  cost              : " << cost << std::endl;
+            _oss << "  iter time         : " << iter_time << std::endl;
+            _oss << "  total time        : " << total_time << std::endl;
 
             _oss << "=== swSQP Stage Statistics ===" << std::endl;
             // Header row
@@ -161,6 +167,10 @@ private:
 
 
     std::vector<Eigen::VectorXd> _x0, _u0;
+
+
+    std::vector<Eigen::VectorXd> _x0_candidate, _u0_candidate;
+
 
 
 };

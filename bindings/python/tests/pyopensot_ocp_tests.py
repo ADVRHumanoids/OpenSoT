@@ -291,10 +291,7 @@ print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")
 
-tic()
 success = solver.solve(x0, u0)
-elapsed = toc()  # End timer and print elapsed time
-print(f"Elapsed time: {elapsed:.3f} seconds")
 if(success):
     print("OCP solved!")
 else:

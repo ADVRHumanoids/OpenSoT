@@ -43,6 +43,8 @@ void swSQP::computeCost(const unsigned int i,
 
 bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+
     _x0 = x0;
     _u0 = u0;
 
@@ -51,6 +53,8 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     for(unsigned int iter = 0; iter < _opt.max_iters; ++iter)
     {
+        auto iter_start = std::chrono::high_resolution_clock::now();
+
         _stats.iters = iter;
 
         //0) linearize ocp aorund x0, u0
@@ -101,6 +105,10 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
         if(break_)
         {
+            auto iter_end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> iter_elapsed = iter_end - iter_start;
+            _stats.iter_time = iter_elapsed.count();
+
             if(_opt.verbose)
                 std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
@@ -112,6 +120,10 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             {
                 if(line_search())
                 {
+                    auto iter_end = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> iter_elapsed = iter_end - iter_start;
+                    _stats.iter_time = iter_elapsed.count();
+
                     if(_opt.verbose)
                         std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
@@ -119,13 +131,28 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
                 }
                 else //not improving solution found, return
                 {
+
+                    auto iter_end = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> iter_elapsed = iter_end - iter_start;
+                    _stats.iter_time = iter_elapsed.count();
+
+                    auto end = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> elapsed = end - start;
+                    _stats.total_time = elapsed.count();
+
                     if(_opt.verbose)
                         std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+
+
                     return true;
                 }
             }
             else
             {
+                auto iter_end = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> iter_elapsed = iter_end - iter_start;
+                _stats.iter_time = iter_elapsed.count();
+
                 if(_opt.verbose)
                     std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
@@ -142,15 +169,17 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             }
         }
 
-
-
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+    _stats.total_time = elapsed.count();
+
     return true;
 }
 
 bool swSQP::line_search()
 {
-    std::vector<Eigen::VectorXd> _x0_candidate, _u0_candidate;
     _x0_candidate.resize(_x0.size());
     _u0_candidate.resize(_u0.size());
 
