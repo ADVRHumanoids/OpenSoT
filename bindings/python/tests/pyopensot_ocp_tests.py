@@ -163,12 +163,16 @@ class min_var(Task):
     def __init__(self, name, variable):
         super().__init__(name, variable.getInputSize())
         self.variable = variable
+        self.ref = 0. * self.variable.getq()
         self._W = np.eye(variable.getOutputSize())
 
     def _update(self):
-        self.lin =  self.variable + self.variable.getValue()
+        self.lin =  self.variable + (self.variable.getValue() - self.ref)
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
+
+    def setReference(self, ref):
+        self.ref = ref
 
 
     @classmethod
@@ -255,20 +259,24 @@ for i in range(Ns):
     minu.setWeight(1e0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
+
+
+
 #
 # set goal at final state
 cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world")
 cartesian_task.setLambda(1)
-cartesian_task.setWeight(1e4 * np.eye(6))
+cartesian_task.setWeight(1e6 * np.eye(6))
 
 ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, variables.getVariable("qdot")))
 
 T, _ = cartesian_task.getReference()
-Tr = T.copy()
-Tr.translation[0] += 0.1
-Tr.translation[1] += 0.1
-Tr.translation[2] -= 0.1
-cartesian_task.setReference(Tr)
+node.make_6dof_marker(name="fp3_link8", pose=T, frame_id="world")
+# Tr = T.copy()
+# Tr.translation[0] += 0.1
+# Tr.translation[1] += 0.1
+# Tr.translation[2] -= 0.1
+# cartesian_task.setReference(Tr)
 
 
 #
@@ -284,8 +292,8 @@ print(f"ocp.stage(Ns).stack.getStack()[0].getb(): {ocp.stage(Ns).stack.getStack(
 
 print("Initing solver...")
 solver = swSQP(ocp)
-solver.getOptions().max_iters = 1000
-solver.getOptions().verbose = True
+solver.getOptions().max_iters = 1
+solver.getOptions().verbose = False
 solver.getOptions().use_line_search = True
 solver.getOptions().line_search_improvs = False
 solver.getOptions().beta = 1e-2
@@ -293,29 +301,29 @@ print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")
 
-success = solver.solve(x0, u0)
-if(success):
-    print("OCP solved!")
-else:
-    print("OCP not solved!")
-
-
-x_solution = solver.getStateSolution()
-u_solution = solver.getControlSolution()
+# success = solver.solve(x0, u0)
+# if(success):
+#     print("OCP solved!")
+# else:
+#     print("OCP not solved!")
+#
+#
+# x_solution = solver.getStateSolution()
+# u_solution = solver.getControlSolution()
 
 
 # Publish the trajectory
 
-try:
-    while rclpy.ok():
-        for i in range(Ns):
-            js = JointState()
-            js.header.stamp = node.get_clock().now().to_msg()
-            js.name = model.getJointNames()
-            js.position = x_solution[i][:model.nq].tolist()
-            node.publish(js)
-            time.sleep(0.1)
-        time.sleep(2.)
+# try:
+#     while rclpy.ok():
+#         for i in range(Ns):
+#             js = JointState()
+#             js.header.stamp = node.get_clock().now().to_msg()
+#             js.name = model.getJointNames()
+#             js.position = x_solution[i][:model.nq].tolist()
+#             node.publish(js)
+#             time.sleep(0.1)
+#         time.sleep(2.)
 
 
 
@@ -327,13 +335,52 @@ try:
 #model.setJointPosition(q)
 #model.update()
 
+msg = JointState()
+msg.name = model.getJointNames()
+
+pose_ref = T.copy()
+dt_sim = 0.01
+try:
+    while rclpy.ok():
+        pose_ref.translation[0] = node.marker_pose.pose.position.x
+        pose_ref.translation[1] = node.marker_pose.pose.position.y
+        pose_ref.translation[2] = node.marker_pose.pose.position.z
+        quat = [node.marker_pose.pose.orientation.x, node.marker_pose.pose.orientation.y,
+                node.marker_pose.pose.orientation.z, node.marker_pose.pose.orientation.w]
+        pose_ref.linear = R.from_quat(quat).as_matrix()
+        cartesian_task.setReference(pose_ref)
+
+        ocp.update(x0, u0)
+
+        success = solver.solve(x0, u0)
+        if not success:
+            print("OCP not solved!")
+            continue
+
+
+        x0 = solver.getStateSolution()
+        u0 = solver.getControlSolution()
+
+        x_val = x0[0]
+        xdot_val = np.concatenate((qdot.getValue(x0[0]), qddot.getValue(u0[0])))
+
+        x1_val = euler(x_val, xdot_val, dt_sim)
+
+        x0 = x0[1:] + [x0[-1]]
+        x0[0] = x1_val
+        u0 = u0[1:] + [u0[-1]]
 
 
 
-#try:
-#    while rclpy.ok():
-#        pass
-#
+        # Publish joint states
+        msg.position = q.getValue(np.concatenate((x0[1], u0[1])))
+        msg.header.stamp = node.get_clock().now().to_msg()
+
+        rclpy.spin_once(node, timeout_sec=0.0)
+        node.publish(msg)
+
+        time.sleep(dt_sim)
+
 except KeyboardInterrupt:
     print("KeyboardInterrupt: Stopping the node.")
     pass
