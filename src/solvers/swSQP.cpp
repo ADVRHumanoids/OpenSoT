@@ -51,6 +51,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     for(unsigned int iter = 0; iter < _opt.max_iters; ++iter)
     {
+        std::cout<<"iter: "<<iter<<std::endl;
         //0) linearize ocp aorund x0, u0
         _ocp->update(_x0, _u0);
 
@@ -89,6 +90,24 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         {
             _u0[k] += _qp_solver->getSolution()[k].u;
         }
+
+        //5) check break criteria
+        bool break_ = true;
+        for(unsigned int i = 0; i < _qp_solver->getSolution().size(); ++i)
+        {
+            for(unsigned int j = 0; j < _qp_solver->getSolution()[i].x.size(); ++j)
+            {
+                break_ = fabs(_qp_solver->getSolution()[i].x[j]) <= _opt.min_abs_delta_solution;
+                if(!break_)
+                    break;
+            }
+            if(!break_)
+                break;
+        }
+
+        if(break_)
+            return true;
+
     }
     return true;
 }

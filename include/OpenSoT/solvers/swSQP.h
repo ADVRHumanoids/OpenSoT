@@ -16,9 +16,18 @@ public:
         options()
         {
             max_iters = 100;
+            min_abs_delta_solution = 1e-7;
         }
 
+        /**
+         * @brief max_iters maximum number of iterations of solve
+         */
         unsigned int max_iters;
+
+        /**
+         * @brief min_abs_delta_solution minimum absolute delta solution allowed for increment solution
+         */
+        double min_abs_delta_solution;
     };
 
     swSQP(OpenSoT::ocp::Ptr ocp);

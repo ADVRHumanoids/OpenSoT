@@ -68,7 +68,8 @@ void pyopensot_oc(py::module& m) {
         // Bind swSQP::options
         py::class_<swSQP::options>(m, "swSQPOptions")
             .def(py::init<>())
-            .def_readwrite("max_iters", &swSQP::options::max_iters);
+            .def_readwrite("max_iters", &swSQP::options::max_iters)
+            .def_readwrite("min_abs_delta_solution", &swSQP::options::min_abs_delta_solution);
 
         // Bind swSQP
         py::class_<swSQP, swSQP::Ptr>(m, "swSQP")

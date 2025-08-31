@@ -284,7 +284,8 @@ print(f"ocp.stage(Ns).stack.getStack()[0].getb(): {ocp.stage(Ns).stack.getStack(
 
 print("Initing solver...")
 solver = swSQP(ocp)
-solver.getOptions().max_iters = 100
+solver.getOptions().max_iters = 1000
+#solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")
 
 tic()
