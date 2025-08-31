@@ -8,8 +8,6 @@ swSQP::swSQP(OpenSoT::ocp::Ptr ocp):
     _qp_solver = std::make_shared<hpipmOC>(ocp->getNumberOfNodes());
 
     _init();
-
-    std::cout<<_opt.toOSS().str()<<std::endl;
 }
 
 void swSQP::computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b)
@@ -112,9 +110,11 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
                 break;
         }
 
+        if(_opt.verbose)
+            std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+
         if(break_)
             return true;
-
     }
     return true;
 }

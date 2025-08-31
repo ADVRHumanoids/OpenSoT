@@ -285,6 +285,8 @@ print(f"ocp.stage(Ns).stack.getStack()[0].getb(): {ocp.stage(Ns).stack.getStack(
 print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 1000
+solver.getOptions().verbose = True
+print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")
 
@@ -294,7 +296,6 @@ elapsed = toc()  # End timer and print elapsed time
 print(f"Elapsed time: {elapsed:.3f} seconds")
 if(success):
     print("OCP solved!")
-    solver.printStatistics()
 else:
     print("OCP not solved!")
 

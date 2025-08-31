@@ -29,15 +29,26 @@ public:
 
         const std::ostringstream& toOSS()
         {
-            _oss<<"swSQP Stats: "<<std::endl;
-            _oss<<" iters: "<<iters<<std::endl;
-            _oss<<" cost: "<<cost<<std::endl;
+            _oss.str("");
+            _oss.clear();
 
-            for(unsigned int i = 0; i < stages_statistics.size(); ++i)
-            {
-                _oss<<" stage "<<i<<" stats:"<<std::endl;
-                _oss<<"     cost: "<<stages_statistics[i].cost<<std::endl;
+            _oss<<"=== swSQP Statistics ==="<<std::endl;
+            _oss << "  iters : " << iters << std::endl;
+            _oss << "  cost  : " << cost << std::endl;
+
+            _oss << "=== swSQP Stage Statistics ===" << std::endl;
+            // Header row
+            _oss << std::setw(15) << "Statistic";
+            for (size_t i = 0; i < stages_statistics.size(); ++i) {
+                _oss << std::setw(12) << ("Stage " + std::to_string(i));
             }
+            _oss << std::endl;
+
+            _oss << std::setw(15) << "cost";
+            for (const auto& s : stages_statistics) {
+                _oss << std::setw(12) << s.cost;
+            }
+            _oss << std::endl;
 
             return _oss;
         }
@@ -52,6 +63,7 @@ public:
         {
             max_iters = 100;
             min_abs_delta_solution = 1e-7;
+            verbose = false;
         }
 
         /**
@@ -64,11 +76,17 @@ public:
          */
         double min_abs_delta_solution;
 
+        bool verbose;
+
         const std::ostringstream& toOSS()
         {
-            _oss<<"swSQP Options: "<<max_iters<<std::endl;
-            _oss<<" max_iters: "<<max_iters<<std::endl;
-            _oss<<" min_abs_delta_solution: "<<min_abs_delta_solution<<std::endl;
+            _oss.str("");
+            _oss.clear();
+
+            _oss << "=== swSQP Options ===" << std::endl;
+            _oss << "  verbose                : " << verbose << std::endl;
+            _oss << "  max_iters              : " << max_iters << std::endl;
+            _oss << "  min_abs_delta_solution : " << min_abs_delta_solution << std::endl;
 
             return _oss;
         }
@@ -86,9 +104,6 @@ public:
 
     const std::vector<Eigen::VectorXd>& getStateSolution() const { return _x0;}
     const std::vector<Eigen::VectorXd>& getControlSolution() const { return _u0;}
-
-    void printStatistics(){ std::cout<<_stats.toOSS().str()<<std::endl; }
-
 
 private:
     void _init();

@@ -24,6 +24,13 @@ using namespace OpenSoT::solvers;
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<OpenSoT::AffineHelper>>);
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<Stage>>);
 
+std::string print_opt(swSQP::options& opt)
+{
+    std::string str;
+    str = opt.toOSS().str();
+    return str;
+}
+
 void pyopensot_oc(py::module& m) {
     // Expose vector<stage::Ptr> as a Python list-like container (the horizon)
     py::bind_vector<std::vector<std::shared_ptr<Stage>>>(m, "StagePtrVector");
@@ -69,10 +76,11 @@ void pyopensot_oc(py::module& m) {
 
         .def("update", &ocp::update);
 
-
         // Bind swSQP::options
         py::class_<swSQP::options>(m, "swSQPOptions")
             .def(py::init<>())
+            .def("print", print_opt)
+            .def_readwrite("verbose", &swSQP::options::verbose)
             .def_readwrite("max_iters", &swSQP::options::max_iters)
             .def_readwrite("min_abs_delta_solution", &swSQP::options::min_abs_delta_solution);
 
@@ -82,7 +90,6 @@ void pyopensot_oc(py::module& m) {
             .def("solve", &swSQP::solve)
             .def("getStateSolution", &swSQP::getStateSolution)
             .def("getControlSolution", &swSQP::getControlSolution)
-            .def("printStatistics", &swSQP::printStatistics)
             .def("getOptions", (swSQP::options& (swSQP::*)()) &swSQP::getOptions, py::return_value_policy::reference_internal);
 
 }
