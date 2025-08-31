@@ -38,6 +38,7 @@ void pyopensot_oc(py::module& m) {
         .def(py::init<>())
         .def("isFinalStage", &Stage::isFinalStage)
         .def("update", &Stage::update)
+        .def("cost", &Stage::cost)
         .def_readwrite("model", &Stage::model)
         .def_readwrite("variables", &Stage::variables)
         .def_readwrite("x", &Stage::x)
@@ -62,6 +63,10 @@ void pyopensot_oc(py::module& m) {
              (ocp::horizon& (ocp::*)()) &ocp::getHorizon,
              py::return_value_policy::reference_internal)
         .def("getNumberOfNodes", &ocp::getNumberOfNodes)
+
+        .def("cost", py::overload_cast<>(&ocp::cost))
+        .def("cost", py::overload_cast<unsigned int>(&ocp::cost))
+
         .def("update", &ocp::update);
 
 

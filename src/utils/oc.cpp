@@ -33,3 +33,17 @@ void ocp::update(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen
     _stages[_stages.size()-1]->update(x0[_stages.size()-1], Eigen::VectorXd(0));
 }
 
+
+double ocp::cost()
+{
+    double cost = 0.;
+    for(unsigned int i = 0; i < _stages.size(); ++i)
+        cost += _stages[i]->cost();
+    return cost;
+}
+
+double ocp::cost(const unsigned int i)
+{
+    return _stages[i]->cost();
+}
+

@@ -80,6 +80,16 @@ class ocp{
 
             }
 
+            double cost()
+            {
+                double cost = 0.;
+                if(stack)
+                {
+                    cost = 0.5 * (stack->getStack()[0]->getb().transpose() * stack->getStack()[0]->getWb())[0];
+                }
+                return cost;
+            }
+
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;
@@ -91,6 +101,19 @@ class ocp{
 
 
         ocp();
+
+        /**
+         * @brief cost compute cumulative costs for all stages
+         * @return cumulative cost
+         */
+        double cost();
+
+        /**
+         * @brief cost return cost of stage i
+         * @param i
+         * @return cost of stage i
+         */
+        double cost(const unsigned int i);
 
         void addStage(Stage::Ptr stage);
 
