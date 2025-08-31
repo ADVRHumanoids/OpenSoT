@@ -99,26 +99,116 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
                 break;
         }
 
-        if(_opt.verbose)
-            std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
-
         if(break_)
+        {
+            if(_opt.verbose)
+                std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+
             return true;
+        }
         else
         {
-            //4) Newton Step
-            for(unsigned int k = 0; k < _x0.size(); ++k)
+            if(_opt.use_line_search)
             {
-                _x0[k] += _qp_solver->getSolution()[k].x;
+                if(line_search())
+                {
+                    if(_opt.verbose)
+                        std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+
+                    dx0 = _qp_solver->getSolution()[0].x;
+                }
+                else //not improving solution found, return
+                {
+                    if(_opt.verbose)
+                        std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+                    return true;
+                }
             }
-            dx0 = _qp_solver->getSolution()[0].x;
-            for(unsigned int k = 0; k < _u0.size(); ++k)
+            else
             {
-                _u0[k] += _qp_solver->getSolution()[k].u;
+                if(_opt.verbose)
+                    std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+
+                dx0 = _qp_solver->getSolution()[0].x;
+                //4) Newton Step
+                 for(unsigned int k = 0; k < _x0.size(); ++k)
+                 {
+                     _x0[k] += _qp_solver->getSolution()[k].x;
+                 }
+                 for(unsigned int k = 0; k < _u0.size(); ++k)
+                 {
+                     _u0[k] += _qp_solver->getSolution()[k].u;
+                 }
             }
         }
+
+
+
     }
     return true;
+}
+
+bool swSQP::line_search()
+{
+    std::vector<Eigen::VectorXd> _x0_candidate, _u0_candidate;
+    _x0_candidate.resize(_x0.size());
+    _u0_candidate.resize(_u0.size());
+
+    double alpha = 1.;
+    double initial_merit = _ocp->cost();
+
+    bool success = false;
+
+
+    int line_search_iters = 0;
+    int line_search_accepted_steps = 0;
+    while(alpha >= _opt.alpha_min)
+    {
+        //4) Newton Step
+        for(unsigned int k = 0; k < _x0.size(); ++k)
+        {
+            _x0_candidate[k] = _x0[k] + alpha * _qp_solver->getSolution()[k].x;
+        }
+
+        for(unsigned int k = 0; k < _u0.size(); ++k)
+        {
+            _u0_candidate[k] = _u0[k] + alpha * _qp_solver->getSolution()[k].u;
+        }
+
+        //0) linearize ocp aorund _x0_candidate, _u0_candidate
+        _ocp->update(_x0_candidate, _u0_candidate);
+
+        double merit = _ocp->cost();
+
+        if(merit < initial_merit)
+        {
+            //take step
+            _x0 = _x0_candidate;
+            _u0 = _u0_candidate;
+
+            initial_merit = merit;
+
+            _stats.alpha = alpha;
+
+            line_search_accepted_steps += 1;
+
+            success = true;
+        }
+        else
+        {
+            alpha = alpha/2.;
+        }
+
+        line_search_iters += 1;
+
+        if(!_opt.line_search_improvs && success)
+            break;
+    }
+
+    _stats.line_search_iters = line_search_iters;
+    _stats.line_search_accepted_steps = line_search_accepted_steps;
+
+    return success;
 }
 
 void swSQP::_init()

@@ -26,6 +26,9 @@ public:
         std::vector<stage_statistics> stages_statistics;
         int iters;
         double cost;
+        double alpha;
+        int line_search_iters;
+        int line_search_accepted_steps;
 
         const std::ostringstream& toOSS()
         {
@@ -33,8 +36,11 @@ public:
             _oss.clear();
 
             _oss<<"=== swSQP Statistics ==="<<std::endl;
-            _oss << "  iters : " << iters << std::endl;
-            _oss << "  cost  : " << cost << std::endl;
+            _oss << "  iters             : " << iters << std::endl;
+            _oss << "  alpha             : " << alpha << std::endl;
+            _oss << "  ls iters          : " << line_search_iters << std::endl;
+            _oss << "  ls accepted steps : " << line_search_accepted_steps <<std::endl;
+            _oss << "  cost              : " << cost << std::endl;
 
             _oss << "=== swSQP Stage Statistics ===" << std::endl;
             // Header row
@@ -64,6 +70,9 @@ public:
             max_iters = 100;
             min_abs_delta_solution = 1e-7;
             verbose = false;
+            alpha_min = 0.125;
+            use_line_search = true;
+            line_search_improvs = false;
         }
 
         /**
@@ -78,6 +87,15 @@ public:
 
         bool verbose;
 
+        double alpha_min;
+
+        bool use_line_search;
+
+        /**
+         * @brief line_search_improvs allows multiple impruvements inside line seaerch (as soon as alpha >= alpha_min)
+         */
+        bool line_search_improvs;
+
         const std::ostringstream& toOSS()
         {
             _oss.str("");
@@ -87,6 +105,9 @@ public:
             _oss << "  verbose                : " << verbose << std::endl;
             _oss << "  max_iters              : " << max_iters << std::endl;
             _oss << "  min_abs_delta_solution : " << min_abs_delta_solution << std::endl;
+            _oss << "  alpha_min              : " << alpha_min << std::endl;
+            _oss << "  use_line_search        : " << use_line_search << std::endl;
+            _oss << "  line_search_improvs    : " << line_search_improvs << std::endl;
 
             return _oss;
         }
@@ -101,6 +122,12 @@ public:
     options& getOptions(){return _opt;}
 
     bool solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0);
+
+    /**
+     * @brief line_search
+     * @return true if an improving solution has been found
+     */
+    bool line_search();
 
     const std::vector<Eigen::VectorXd>& getStateSolution() const { return _x0;}
     const std::vector<Eigen::VectorXd>& getControlSolution() const { return _u0;}

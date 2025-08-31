@@ -82,7 +82,10 @@ void pyopensot_oc(py::module& m) {
             .def("print", print_opt)
             .def_readwrite("verbose", &swSQP::options::verbose)
             .def_readwrite("max_iters", &swSQP::options::max_iters)
-            .def_readwrite("min_abs_delta_solution", &swSQP::options::min_abs_delta_solution);
+            .def_readwrite("alpha_min", &swSQP::options::alpha_min)
+            .def_readwrite("use_line_search", &swSQP::options::use_line_search)
+            .def_readwrite("line_search_improvs", &swSQP::options::line_search_improvs);
+
 
         // Bind swSQP
         py::class_<swSQP, swSQP::Ptr>(m, "swSQP")
