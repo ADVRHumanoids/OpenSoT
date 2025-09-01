@@ -89,21 +89,21 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         if(!success)
             return false;
 
-        //4) check break criteria on QO solution
-        bool break_ = true;
+        //4) check break criteria on QP solution
+        bool exit = true; //I assume I can exit
         for(unsigned int i = 0; i < _qp_solver->getSolution().size(); ++i)
         {
             for(unsigned int j = 0; j < _qp_solver->getSolution()[i].x.size(); ++j)
             {
-                break_ = fabs(_qp_solver->getSolution()[i].x[j]) <= _opt.min_abs_delta_solution;
-                if(!break_)
+                exit = fabs(_qp_solver->getSolution()[i].x[j]) <= _opt.min_abs_delta_solution; // check is performed on states (not needed to do it also to controls)
+                if(!exit) // if exit became false, I break this loop
                     break;
             }
-            if(!break_)
+            if(!exit) // if exit became false I break also outer loop
                 break;
         }
 
-        if(break_)
+        if(exit) // if exit remains true I return
         {
             auto iter_end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> iter_elapsed = iter_end - iter_start;
