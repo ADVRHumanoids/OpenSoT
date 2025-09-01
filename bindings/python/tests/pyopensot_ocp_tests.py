@@ -17,7 +17,8 @@ from interactive_markers.interactive_marker_server import InteractiveMarkerServe
 from geometry_msgs.msg import PoseStamped, Point
 from scipy.spatial.transform import Rotation as R
 import unittest
-from ttictoc import tic, toc
+import os
+
 
 np.set_printoptions(linewidth=np.inf)
 class ros2_node(Node):
@@ -43,7 +44,8 @@ class ros2_node(Node):
         else:
             self.get_logger().error('Failed to call service')
 
-        self.joint_state_publisher = self.create_publisher(JointState, 'joint_states', 10)
+        self.joint_state_publisher = self.create_publisher(JointState, '/joint_states', 10)
+        self.horizon_joint_state_publisher = self.create_publisher(JointState, '/horizon/joint_states', 10)
 
         self.server = InteractiveMarkerServer(self, 'six_dof_marker_server')
         self.marker_pose = PoseStamped()
@@ -114,6 +116,9 @@ class ros2_node(Node):
     def publish(self, joint_state_msg):
         self.joint_state_publisher.publish(joint_state_msg)
 
+    def publish_horizon(self, joint_state_msg):
+        self.horizon_joint_state_publisher.publish(joint_state_msg)
+
 
 # Check for franka_cartesio_condif package
 package_path = None
@@ -123,8 +128,15 @@ try:
 except:
     print("To run this example is needed the franka_cartesio_config package that can be download here: https://github.com/EnricoMingo/franka_cartesio_config")
 
+
 roslaunch = subprocess.Popen(['ros2', 'launch', 'franka_cartesio_config', 'fp3.launch'], stdout=subprocess.PIPE, shell=False)
-rviz_file_path = package_path + "/rviz/panda.rviz"
+roslaunch2 = subprocess.Popen(['ros2', 'launch', 'franka_cartesio_config', 'fp3.launch', 'namespace:=horizon'], stdout=subprocess.PIPE, shell=False)
+rosrun = subprocess.Popen(['ros2', 'run', 'tf2_ros', 'static_transform_publisher', '0.', '0.', '0.', '0.', '0.', '0.', '1.', 'world', 'horizon/world'], stdout=subprocess.PIPE, shell=False)
+
+
+#rviz_file_path = package_path + "/rviz/panda.rviz"
+rviz_file_path = os.path.dirname(os.path.abspath(__file__)) + "/panda.rviz"
+print(rviz_file_path)
 rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
 
 # Initiliaze node and wait for robot_description parameter
@@ -268,6 +280,7 @@ cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world
 cartesian_task.setLambda(1)
 cartesian_task.setWeight(1e6 * np.eye(6))
 
+
 ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, variables.getVariable("qdot")))
 
 T, _ = cartesian_task.getReference()
@@ -338,8 +351,13 @@ print("...solver inited!")
 msg = JointState()
 msg.name = model.getJointNames()
 
+horizon_msg = JointState()
+horizon_msg.name = model.getJointNames()
+
+
 pose_ref = T.copy()
-dt_sim = 0.01
+dt_sim = 0.05
+t = 2.
 try:
     while rclpy.ok():
         pose_ref.translation[0] = node.marker_pose.pose.position.x
@@ -350,7 +368,7 @@ try:
         pose_ref.linear = R.from_quat(quat).as_matrix()
         cartesian_task.setReference(pose_ref)
 
-        ocp.update(x0, u0)
+        #ocp.update(x0, u0)
 
         success = solver.solve(x0, u0)
         if not success:
@@ -361,25 +379,28 @@ try:
         x0 = solver.getStateSolution()
         u0 = solver.getControlSolution()
 
-        x_val = x0[0]
-        xdot_val = np.concatenate((qdot.getValue(x0[0]), qddot.getValue(u0[0])))
+        for i in range(len(x0)):
+            horizon_msg.position = x0[i][:model.nq].tolist()
+            horizon_msg.header.stamp = node.get_clock().now().to_msg()
+            node.publish_horizon(horizon_msg)
+            time.sleep(dt_sim/Ns)
 
-        x1_val = euler(x_val, xdot_val, dt_sim)
 
         x0 = x0[1:] + [x0[-1]]
-        x0[0] = x1_val
         u0 = u0[1:] + [u0[-1]]
 
 
 
         # Publish joint states
-        msg.position = q.getValue(np.concatenate((x0[1], u0[1])))
+        msg.position = x0[0][:model.nq].tolist()
         msg.header.stamp = node.get_clock().now().to_msg()
-
-        rclpy.spin_once(node, timeout_sec=0.0)
         node.publish(msg)
 
-        time.sleep(dt_sim)
+
+        rclpy.spin_once(node, timeout_sec=0.0)
+
+
+        #time.sleep(dt_sim)
 
 except KeyboardInterrupt:
     print("KeyboardInterrupt: Stopping the node.")
@@ -387,6 +408,8 @@ except KeyboardInterrupt:
 finally:
     print("Stopping the node.")
     roslaunch.kill()
+    roslaunch2.kill()
+    rosrun.kill()
     rviz.kill()
     node.destroy_node()
 
