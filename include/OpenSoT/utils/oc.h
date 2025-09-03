@@ -34,40 +34,33 @@ class ocp{
 
             void update(const Eigen::VectorXd& x0, const Eigen::VectorXd& u0)
             {
-                Eigen::VectorXd w0;
-                if(u)
-                {
-                    w0.resize(x0.size() + u0.size());
-                    w0.head(x0.size()) = x0;
-                    w0.tail(u0.size()) = u0;
-                }
-                else
-                {
-                    w0 = x0;
-                }
+                _w0.resize(x->getInputSize());
+                _w0.setZero();
+                _w0.head(x0.size()) = x0;
+                _w0.tail(u0.size()) = u0;
 
 
                 //1 update model
-                model->setJointPosition(q->getValue(w0));
-                model->setJointVelocity(v->getValue(w0));
+                model->setJointPosition(q->getValue(_w0));
+                model->setJointVelocity(v->getValue(_w0));
                 model->update();
 
                 //2 update and evaluate state variables
                 x->update();
-                x->getValue(w0);
+                x->getValue(_w0);
 
                 //3 update and evaluate control variables (may depends on model)
                 if(u)
                 {
                     u->update();
-                    u->getValue(w0);
+                    u->getValue(_w0);
                 };
 
                 //4 update and evaluate variables
                 for(unsigned int i = 0; i < variables.size(); ++i)
                 {
                     variables[i]->update();
-                    variables[i]->getValue(w0);
+                    variables[i]->getValue(_w0);
                 }
 
                 //3 update dynamics_derivative
@@ -92,14 +85,17 @@ class ocp{
 
             double der(const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
             {
-                Eigen::VectorXd dw(dx.size() + du.size());
-                dw.head(dx.size()) = dx;
-                dw.tail(du.size()) = du;
+                //TODO: this needs to be better implemented for the SE(3) case:
+                // _dw0.resize(_w0.size()) iff states and controls are both in R^n
+                // _dw0.resize( ... ) iff states are in SE(3) x R^n, and controls are both in R^n
+                _dw0.resize(_w0.size());
+                _dw0.head(dx.size()) = dx;
+                _dw0.tail(du.size()) = du;
 
                 double der = 0.;
                 if(stack)
                 {
-                    der = ((-1.0 * stack->getStack()[0]->getA().transpose() * stack->getStack()[0]->getWb()).transpose() * dw)[0];
+                    der = ((-1.0 * stack->getStack()[0]->getA().transpose() * stack->getStack()[0]->getWb()).transpose() * _dw0)[0];
                 }
 
                 return der;
@@ -110,6 +106,9 @@ class ocp{
             tasks::Aggregated::TaskPtr dynamics_derivative;
             std::shared_ptr<AffineHelper> x, u, q, v;
             AutoStack::Ptr stack;
+
+            private:
+                Eigen::VectorXd _w0, _dw0;
         };
 
         typedef std::vector<Stage::Ptr> horizon;

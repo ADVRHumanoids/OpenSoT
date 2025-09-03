@@ -188,7 +188,9 @@ bool swSQP::line_search()
 
     double merit_der = 0.;
     for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
+    {
         merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
+    }
 
     bool success = false;
 
