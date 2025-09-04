@@ -52,3 +52,18 @@ x1 = R7.integrate(x, dx)
 print(f"integrated x: {x1}")
 utest.assertTrue((x1 == x+dx).all())
 
+
+# ------------------------
+
+
+SE3 = CompositeSpace([Quaternion, R3])
+
+x = np.array([1,0,0,0, 0,2,1])
+print(f"x: {x}")
+dx = np.array([0,1,0, 1,1,1])
+print(f"dx: {dx}")
+
+x1 = SE3.integrate(x, dx)
+print(f"integrated x: {x1}")
+
+#TODO - do proper testing
