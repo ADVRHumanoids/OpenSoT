@@ -101,18 +101,19 @@ public:
 
         for(unsigned int i = 0; i < list.size(); ++i)
         {
-            Space::Ptr spacei = list[i];
-            if(auto composite = std::dynamic_pointer_cast<CompositeSpace>(spacei))
+            if(auto composite = std::dynamic_pointer_cast<CompositeSpace>(list[i]))
             {
-                std::vector<Space::Ptr> ssr = composite->getSpaces();
-                _spaces.insert(_spaces.end(), ssr.begin(), ssr.end());
+                _spaces.insert(_spaces.end(), composite->getSpaces().begin(), composite->getSpaces().end());
             }
             else
             {
-                _spaces.push_back(spacei);
+                _spaces.push_back(list[i]);
             }
         }
 
+        _x.resize(_spaces.size());
+
+        compute_spaces_and_indices();
     }
 
     const std::vector<Space::Ptr>& getSpaces()
@@ -122,16 +123,18 @@ public:
 
     void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
     {
-        std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> space_indices_map = get_spaces_and_indices();
+        unsigned int i = 0;
         for(auto& space : _spaces)
         {
-            unsigned int x0id = space_indices_map[space].first;
-            unsigned int dx0id = space_indices_map[space].second;
+            unsigned int x0id = _map[space].first;
+            unsigned int dx0id = _map[space].second;
 
-            Eigen::VectorXd tmp(space->nq());
-            tmp.setZero();
-            space->integrate(x0.segment(x0id, space->nq()), dx0.segment(dx0id, space->nv()), tmp);
-            x1.segment(x0id, space->nq()) = tmp;
+            _x[i].resize(space->nq());
+            _x[i].setZero();
+            space->integrate(x0.segment(x0id, space->nq()), dx0.segment(dx0id, space->nv()), _x[i]);
+            x1.segment(x0id, space->nq()) = _x[i];
+
+            i+=1;
         }
     }
 
@@ -139,27 +142,25 @@ private:
     typedef unsigned int start_index_state_space;
     typedef unsigned int start_index_tangent_space;
 
-    std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> get_spaces_and_indices() const {
-        std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> map;
+    std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> _map;
+
+    std::vector<Eigen::VectorXd> _x;
+
+
+
+    void compute_spaces_and_indices() {
+
         unsigned int offset_state = 0;
         unsigned int offset_tangent = 0;
 
         for(unsigned int i = 0; i < _spaces.size(); ++i)
         {
-            std::pair<start_index_state_space, start_index_tangent_space> tmp;
-            tmp.first = offset_state;
-            tmp.second = offset_tangent;
-
-            map[_spaces[i]] = tmp;
+            _map.emplace(_spaces[i], std::make_pair(offset_state, offset_tangent));
 
             offset_state += _spaces[i]->nq();
             offset_tangent += _spaces[i]->nv();
         }
-
-        return map;
     }
-
-
 };
 
 
