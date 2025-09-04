@@ -31,7 +31,56 @@ std::string print_opt(swSQP::options& opt)
     return str;
 }
 
+struct PyStateSpaceRepresentation : OpenSoT::Space {
+    using Space::Space;
+
+    void integrate(const Eigen::VectorXd& x0,
+             const Eigen::VectorXd& dx0,
+             Eigen::VectorXd& x1) override {
+        PYBIND11_OVERRIDE_PURE(
+            void,                         // return type
+            Space,     // parent class
+            sum,                          // function name
+            x0, dx0, x1                   // arguments
+            );
+    }
+};
+
+
+
 void pyopensot_oc(py::module& m) {
+    py::class_<OpenSoT::Space, OpenSoT::Space::Ptr, PyStateSpaceRepresentation>(m, "Space")
+        .def(py::init<unsigned int, unsigned int>(), py::arg("nq"), py::arg("nv"))
+        .def("nq",  &OpenSoT::Space::nq)
+        .def("nv",  &OpenSoT::Space::nv)
+        .def("integrate", &OpenSoT::Space::integrate, py::arg("x0"), py::arg("dx0"), py::arg("x1"));
+
+
+    // ---------------- Derived: VectorSpace ----------------
+    py::class_<OpenSoT::VectorSpace, OpenSoT::Space, OpenSoT::VectorSpace::Ptr>(m, "VectorSpace")
+        .def(py::init<unsigned int>(), py::arg("dimension"))
+        .def("integrate", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+            Eigen::VectorXd x1(x0.size());
+            x1.setZero();
+            self.integrate(x0, dx0, x1);
+            return x1;}, py::arg("x0"), py::arg("dx0"));
+
+    // ---------------- Derived: QuaternionSpace ----------------
+    py::class_<OpenSoT::QuaternionSpace, OpenSoT::Space, OpenSoT::QuaternionSpace::Ptr>(m, "QuaternionSpace")
+        .def(py::init<>())
+        .def("integrate", &OpenSoT::QuaternionSpace::integrate, py::arg("x0"), py::arg("dx0"), py::arg("x1"));
+
+    // ---------------- Composite: CompositeSpace ----------------
+    py::class_<OpenSoT::CompositeSpace, OpenSoT::Space, OpenSoT::CompositeSpace::Ptr>(m, "CompositeSpace")
+        .def(py::init<const std::vector<OpenSoT::Space::Ptr>&>(), py::arg("representations"))
+        .def("getSpaces", &OpenSoT::CompositeSpace::getSpaces)
+        .def("integrate", [](OpenSoT::CompositeSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+                              Eigen::VectorXd x1(x0.size());
+                              x1.setZero();
+                              self.integrate(x0, dx0, x1);
+                              return x1;}, py::arg("x0"), py::arg("dx0"));
+
+
     // Expose vector<stage::Ptr> as a Python list-like container (the horizon)
     py::bind_vector<std::vector<std::shared_ptr<Stage>>>(m, "StagePtrVector");
 

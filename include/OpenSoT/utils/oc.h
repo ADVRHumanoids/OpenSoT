@@ -13,6 +13,158 @@
 
 namespace OpenSoT {
 
+class Space
+{
+public:
+    typedef std::shared_ptr<Space> Ptr;
+
+    Space(const unsigned int nq, const unsigned int nv)
+    {
+        _nq = nq;
+        _nv = nv;
+    }
+
+    unsigned int nq(){ return _nq;}
+
+    unsigned int nv(){ return _nv;}
+
+    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1) = 0;
+
+protected:
+    unsigned int _nq;
+    unsigned int _nv;
+};
+
+class VectorSpace: public Space
+{
+public:
+    typedef std::shared_ptr<VectorSpace> Ptr;
+
+    VectorSpace(const unsigned int dimension):
+        Space(dimension, dimension)
+    {}
+
+    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    {
+        if(x0.size() != this->nq())
+            throw std::runtime_error("x0.size() != _nq");
+        if(x1.size() != this->nq())
+            throw std::runtime_error("x1.size() != _nq");
+        if(dx0.size() != this->nv())
+            throw std::runtime_error("dx0.size() != _nv");
+        if(x0.size() != dx0.size())
+            throw std::runtime_error("x0.size() != dx0.size()");
+
+        x1 = x0 + dx0;
+    }
+};
+
+class QuaternionSpace: public Space
+{
+public:
+    typedef std::shared_ptr<QuaternionSpace> Ptr;
+
+    QuaternionSpace():
+        Space(4, 3)
+    {}
+
+    void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    {
+        if(x0.size() != this->nq())
+            throw std::runtime_error("x0.size() != _nq");
+        if(x1.size() != this->nq())
+            throw std::runtime_error("x1.size() != _nq");
+        if(dx0.size() != this->nv())
+            throw std::runtime_error("dx0.size() != _nv");
+
+        throw std::runtime_error("sum NOT IMPLEMENTED!!!!");
+
+    }
+};
+
+class CompositeSpace : public Space
+{
+private:
+     std::vector<Space::Ptr> _spaces;
+public:
+     typedef std::shared_ptr<CompositeSpace> Ptr;
+
+    // Constructor for manual list of Space
+    CompositeSpace(const std::vector<Space::Ptr>& list):
+         Space(0,0)
+    {
+        for(auto & state_space_representation : list)
+        {
+            _nq += state_space_representation->nq();
+            _nv += state_space_representation->nv();
+        }
+
+        for(unsigned int i = 0; i < list.size(); ++i)
+        {
+            Space::Ptr spacei = list[i];
+            if(auto composite = std::dynamic_pointer_cast<CompositeSpace>(spacei))
+            {
+                std::vector<Space::Ptr> ssr = composite->getSpaces();
+                _spaces.insert(_spaces.end(), ssr.begin(), ssr.end());
+            }
+            else
+            {
+                _spaces.push_back(spacei);
+            }
+        }
+
+    }
+
+    const std::vector<Space::Ptr>& getSpaces()
+    {
+        return _spaces;
+    }
+
+    void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    {
+        std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> space_indices_map = get_spaces_and_indices();
+        for(auto& space : _spaces)
+        {
+            unsigned int x0id = space_indices_map[space].first;
+            unsigned int dx0id = space_indices_map[space].second;
+
+            Eigen::VectorXd tmp(space->nq());
+            tmp.setZero();
+            space->integrate(x0.segment(x0id, space->nq()), dx0.segment(dx0id, space->nv()), tmp);
+            x1.segment(x0id, space->nq()) = tmp;
+        }
+    }
+
+private:
+    typedef unsigned int start_index_state_space;
+    typedef unsigned int start_index_tangent_space;
+
+    std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> get_spaces_and_indices() const {
+        std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> map;
+        unsigned int offset_state = 0;
+        unsigned int offset_tangent = 0;
+
+        for(unsigned int i = 0; i < _spaces.size(); ++i)
+        {
+            std::pair<start_index_state_space, start_index_tangent_space> tmp;
+            tmp.first = offset_state;
+            tmp.second = offset_tangent;
+
+            map[_spaces[i]] = tmp;
+
+            offset_state += _spaces[i]->nq();
+            offset_tangent += _spaces[i]->nv();
+        }
+
+        return map;
+    }
+
+
+};
+
+
+
+
 class ocp{
     public:
         typedef std::shared_ptr<ocp> Ptr;
