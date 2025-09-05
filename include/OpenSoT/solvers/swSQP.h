@@ -30,7 +30,7 @@ public:
         double cost;
         double alpha;
         int line_search_iters;
-        int line_search_accepted_steps;
+        bool line_search_accepted;
         double iter_time;
         double total_time = std::numeric_limits<double>::quiet_NaN();
 
@@ -38,15 +38,18 @@ public:
         {
             _oss.str("");
             _oss.clear();
+            _oss<< std::boolalpha;
 
             _oss<<"=== swSQP Statistics ==="<<std::endl;
             _oss << "  iter              : " << iters << std::endl;
-            _oss << "  alpha             : " << alpha << std::endl;
-            _oss << "  ls iters          : " << line_search_iters << std::endl;
-            _oss << "  ls accepted steps : " << line_search_accepted_steps <<std::endl;
             _oss << "  cost              : " << cost << std::endl;
             _oss << "  iter time         : " << iter_time << std::endl;
             _oss << "  total time        : " << total_time << std::endl;
+            _oss << " === LineSearch Statistics === " << std::endl;
+            _oss << "   accepted         : " << line_search_accepted << std::endl;
+            _oss << "   alpha            : " << alpha << std::endl;
+            _oss << "   ls iters         : " << line_search_iters << std::endl;
+
 
             _oss << "=== swSQP Stage Statistics ===" << std::endl;
             // Header row
@@ -79,7 +82,6 @@ public:
             alpha_min = 0.125;
             beta = 1e-4;
             use_line_search = true;
-            line_search_improvs = false;
         }
 
         /**
@@ -120,7 +122,6 @@ public:
             _oss << "  alpha_min              : " << alpha_min << std::endl;
             _oss << "  beta                   : " << beta << std::endl;
             _oss << "  use_line_search        : " << use_line_search << std::endl;
-            _oss << "  line_search_improvs    : " << line_search_improvs << std::endl;
 
             return _oss;
         }

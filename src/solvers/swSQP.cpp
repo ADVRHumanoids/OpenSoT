@@ -53,6 +53,10 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     for(unsigned int iter = 0; iter < _opt.max_iters; ++iter)
     {
+        _stats.line_search_accepted = false;
+        _stats.line_search_iters = 0;
+        _stats.alpha = 1;
+
         auto iter_start = std::chrono::high_resolution_clock::now();
 
         _stats.iters = iter;
@@ -108,6 +112,10 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             auto iter_end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> iter_elapsed = iter_end - iter_start;
             _stats.iter_time = iter_elapsed.count();
+
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = end - start;
+            _stats.total_time = elapsed.count();
 
             if(_opt.verbose)
                 std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
@@ -192,11 +200,7 @@ bool swSQP::line_search()
         merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
     }
 
-    bool success = false;
-
-
-    int line_search_iters = 0;
-    int line_search_accepted_steps = 0;
+    _stats.line_search_iters = 1;
     while(alpha >= _opt.alpha_min)
     {
         //4) Newton Step
@@ -221,32 +225,18 @@ bool swSQP::line_search()
             _x0 = _x0_candidate;
             _u0 = _u0_candidate;
 
-            initial_merit = merit;
-            merit_der = 0.;
-            for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
-                merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
-
             _stats.alpha = alpha;
-
-            line_search_accepted_steps += 1;
-
-            success = true;
+            _stats.line_search_accepted = true;
+            return true;
         }
         else
         {
             alpha = alpha/2.;
         }
 
-        line_search_iters += 1;
-
-        if(!_opt.line_search_improvs && success)
-            break;
+        _stats.line_search_iters += 1;
     }
-
-    _stats.line_search_iters = line_search_iters;
-    _stats.line_search_accepted_steps = line_search_accepted_steps;
-
-    return success;
+    return false;
 }
 
 void swSQP::_init()
