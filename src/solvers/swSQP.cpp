@@ -45,6 +45,9 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 {
     auto start = std::chrono::high_resolution_clock::now();
 
+    _x0_candidate.resize(_x0.size());
+    _u0_candidate.resize(_u0.size());
+
     _x0 = x0;
     _u0 = u0;
 
@@ -168,7 +171,16 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
                 //4) Newton Step
                  for(unsigned int k = 0; k < _x0.size(); ++k)
                  {
-                     _x0[k] += _qp_solver->getSolution()[k].x;
+                    if(_ocp->stage(k)->state_space)
+                    {
+                        _x0_candidate[k].resize(_x0[k].size());
+                        _ocp->stage(k)->state_space->integrate(_x0[k], _qp_solver->getSolution()[k].x, _x0_candidate[k]);
+                        _x0[k] = _x0_candidate[k];
+
+                    }
+                    else
+                        throw std::runtime_error("_ocp->stage(k)->state_space is not defined for stage " + to_string(k));
+
                  }
                  for(unsigned int k = 0; k < _u0.size(); ++k)
                  {
@@ -206,7 +218,14 @@ bool swSQP::line_search()
         //4) Newton Step
         for(unsigned int k = 0; k < _x0.size(); ++k)
         {
-            _x0_candidate[k] = _x0[k] + alpha * _qp_solver->getSolution()[k].x;
+            if(_ocp->stage(k)->state_space)
+                {
+                    _x0_candidate[k].resize(_x0[k].size());
+                    _ocp->stage(k)->state_space->integrate(_x0[k], alpha*_qp_solver->getSolution()[k].x, _x0_candidate[k]);
+                }
+            else
+                throw std::runtime_error("_ocp->stage(k)->state_space is not defined for stage " + to_string(k));
+
         }
 
         for(unsigned int k = 0; k < _u0.size(); ++k)

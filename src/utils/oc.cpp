@@ -19,6 +19,7 @@ unsigned int ocp::getNumberOfNodes()
         if(_stages[Ns]->isFinalStage())
             return Ns;
     }
+    return 0;
 }
 
 void ocp::update(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0)

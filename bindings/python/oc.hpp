@@ -106,7 +106,8 @@ void pyopensot_oc(py::module& m) {
         .def_readwrite("q", &Stage::q)
         .def_readwrite("v", &Stage::v)
         .def_readwrite("stack", &Stage::stack)
-        .def_readwrite("dynamics_derivative", &Stage::dynamics_derivative);
+        .def_readwrite("dynamics_derivative", &Stage::dynamics_derivative)
+        .def_readwrite("state_space", &Stage::state_space);
 
     // Bind ocp
     py::class_<ocp, std::shared_ptr<ocp>>(m, "OCP")

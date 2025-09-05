@@ -262,6 +262,7 @@ class ocp{
             tasks::Aggregated::TaskPtr dynamics_derivative;
             std::shared_ptr<AffineHelper> x, u, q, v;
             AutoStack::Ptr stack;
+            Space::Ptr state_space;
 
             private:
                 Eigen::VectorXd _w0, _dw0;

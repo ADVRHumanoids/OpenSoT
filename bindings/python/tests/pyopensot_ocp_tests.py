@@ -233,6 +233,7 @@ for i in range(Ns):
     stage = Stage()
 
     stage.x = x
+    stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nv)])
     stage.u = qddot
     stage.q = q
     stage.v = qdot
@@ -253,6 +254,7 @@ for i in range(Ns):
 stage = Stage()
 stage.model = xbi.ModelInterface2(node.urdf)
 stage.x = x
+stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nq)])
 stage.q = q
 stage.v = qdot
 ocp.addStage(stage)
