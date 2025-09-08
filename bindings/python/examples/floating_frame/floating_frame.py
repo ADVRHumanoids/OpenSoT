@@ -63,9 +63,8 @@ class ros2_node(Node):
         self.base_link_broadcaster.sendTransform(self.w_T_b)
 
 
-
-rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2'], stdout=subprocess.PIPE, shell=False)
-
+rviz_file_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/floating_frame.rviz"
+rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
 
 # Initiliaze node and wait for robot_description parameter
 rclpy.init()
@@ -79,14 +78,15 @@ print(f"model.nq: {model.nq}")
 print(f"model.nv: {model.nv}")
 
 
-q_val = np.array([0., 1., 1., 0., 0., 0., 1.])
-qdot_val = np.array([0., 0., 0., 0., 0.1, 0.])
+q_val = np.array([1., 1., 1., 0., 0., 0., 1.])
+qdot_val = np.array([0., 0., 0., 0., 0., 1.])
 
 # model.setJointPosition(q_val)
 # model.update()
 # T = model.getPose("base_link")
 # print(f"T: \n{T}")
 
+SE3 = CompositeSpace([VectorSpace(3), QuaternionSpace()])
 
 
 
@@ -94,11 +94,10 @@ dt = 1./1000.
 try:
     t= 0.
     while rclpy.ok():
-        q_val[0]= 0.5 * np.cos(t)
-        q_val[1] = 0.5 * np.sin(t)
-        q_val[2] = 0.5 * np.sin(2*t)
+        # qdot_val[0] = -0.5 * np.sin(t)
+        # qdot_val[1] = 0.5 * np.cos(t)
 
-        
+        q_val = SE3.integrate(q_val, qdot_val*dt)
 
 
         rclpy.spin_once(node, timeout_sec=0.0)
