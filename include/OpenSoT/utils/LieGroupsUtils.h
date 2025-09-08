@@ -76,38 +76,16 @@ inline Eigen::Vector3d Log3(const Eigen::Matrix3d& R, double eps = 1e-8) {
 }
 
 // Exponential map: Quaternion -> SO(3)
-inline Eigen::Matrix3d Exp_quat(const Eigen::Vector4d& q, bool normalize = false) {
-    Eigen::Vector4d Q = q;
-    if (normalize) {
-        Q /= Q.norm();
-    }
-
-    // TODO: Check the quaternion convention
-    double qw = Q(0);
-    double qx = Q(1);
-    double qy = Q(2);
-    double qz = Q(3);
-
-    Eigen::Matrix3d R;
-    R(0,0) = 2.0 * (qw*qw + qx*qx) - 1.0;
-    R(0,1) = 2.0 * (qx*qy - qw*qz);
-    R(0,2) = 2.0 * (qx*qz + qw*qy);
-
-    R(1,0) = 2.0 * (qx*qy + qw*qz);
-    R(1,1) = 2.0 * (qw*qw + qy*qy) - 1.0;
-    R(1,2) = 2.0 * (qy*qz - qw*qx);
-
-    R(2,0) = 2.0 * (qx*qz - qw*qy);
-    R(2,1) = 2.0 * (qy*qz + qw*qx);
-    R(2,2) = 2.0 * (qw*qw + qz*qz) - 1.0;
-
-    return R;
+inline Eigen::Matrix3d Exp_quat(const Eigen::Vector4d& q) {
+    Eigen::Quaterniond Q(q(3), q(0), q(1), q(2));
+    Q.normalize();
+    return Q.toRotationMatrix();
 }
 
 // Logarithm map: SO(3) -> Quaternion
 inline Eigen::Vector4d Log_quat(const Eigen::Matrix3d& R) {
     Eigen::Quaterniond q(R);
-    return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());  // scalar first
+    return q.coeffs();
 }
 
 } // namespace OpenSot
