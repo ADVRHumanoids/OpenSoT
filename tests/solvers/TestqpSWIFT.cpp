@@ -9,7 +9,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <eigen_conversions/eigen_kdl.h>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include "../common.h"
 
 
@@ -538,7 +538,7 @@ TEST_F(testqpSWIFTProblem, testContructor2Problems)
     T_ref_kdl.p[0] = 0.283; T_ref_kdl.p[1] = 0.156; T_ref_kdl.p[2] = 0.499;
     T_ref_kdl.M = T_ref_kdl.M.Quaternion(0.0, 0.975, 0.0, -0.221);
     Eigen::Affine3d T_ref;
-    tf::transformKDLToEigen(T_ref_kdl, T_ref);
+    tf2::transformKDLToEigen(T_ref_kdl, T_ref);
     cartesian_task->setReference(T_ref);
 
     //Solve SoT

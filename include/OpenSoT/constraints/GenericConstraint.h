@@ -67,8 +67,6 @@ public:
     bool setBounds(const Eigen::VectorXd& upper_bound,
                    const Eigen::VectorXd& lower_bound);
 
-    virtual void update();
-
     Type getType(){return _type;}
     
     
@@ -81,7 +79,7 @@ private:
         
         Type _type;
 
-
+        void _update();
     
 };
     

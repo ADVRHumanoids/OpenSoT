@@ -53,6 +53,7 @@
                 Eigen::MatrixXd _C;
                 std::list<Eigen::Vector3d> _points;
                 std::vector<Eigen::Vector3d> _tmp_ch;
+                void _update();
 
             public:
                 /**
@@ -93,8 +94,6 @@
                  * @param sagetyMargin
                  */
                 void setSafetyMargin(const double safetyMargin);
-
-                void update();
 
                 std::list<std::string> getLinksInContact()
                 {

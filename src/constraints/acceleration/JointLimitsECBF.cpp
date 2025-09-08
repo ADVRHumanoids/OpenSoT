@@ -33,7 +33,7 @@ JointLimitsECBF::JointLimitsECBF(XBot::ModelInterface &robot,
     update();
 }
 
-void JointLimitsECBF::update()
+void JointLimitsECBF::_update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);

@@ -25,39 +25,41 @@
 #define ENABLE_ROS false
 
 #if ENABLE_ROS
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
-#include <robot_state_publisher/robot_state_publisher.h>
-#include <kdl_parser/kdl_parser.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <tf2_eigen/tf2_eigen.hpp>
 #endif
 
 namespace {
+
+#if ENABLE_ROS
+class ros2_node: public rclcpp::Node
+{
+public:
+    ros2_node():
+        Node("ros2_node")
+    {
+        world_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+        joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1000);
+    }
+    std::unique_ptr<tf2_ros::TransformBroadcaster> world_broadcaster;
+    rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub;
+};
+
+#endif
+
 
 class testGLPKProblem: public TestBase
 {
 protected:
 
     testGLPKProblem() : TestBase("coman")
-    {
-
-
-
+    {    
 #if ENABLE_ROS
-      int argc = 0;
-      char **argv;
-      ros::init(argc, argv, "glpk_test");
-      n.reset(new ros::NodeHandle());
-      pub = n->advertise<sensor_msgs::JointState>("joint_states", 1000);
-
-      KDL::Tree my_tree;
-      if (!kdl_parser::treeFromUrdfModel(*_model_ptr->getUrdf(), my_tree)){
-        ROS_ERROR("Failed to construct kdl tree");}
-      rsp.reset(new robot_state_publisher::RobotStatePublisher(my_tree));
-      n->setParam("/robot_description", _model_ptr->getUrdfString());
-
-      for(unsigned int i = 0; i < this->_model_ptr->getJointNames().size(); ++i){
-          joint_state.name.push_back(this->_model_ptr->getJointNames()[i]);
-          joint_state.position.push_back(0.0);}
+        _n.reset(new ros2_node());
 #endif
     }
 
@@ -96,30 +98,39 @@ protected:
     }
 
 #if ENABLE_ROS
-    void publishJointStates(const Eigen::VectorXd& q)
+    void publishRobotState(const Eigen::VectorXd& _q)
     {
-        std::map<std::string, double> joint_map;
-        for(unsigned int i = 0; i < q.size(); ++i){
-            joint_state.position[i] = q[i];
-            joint_map[joint_state.name[i]] = joint_state.position[i];
+
+
+        sensor_msgs::msg::JointState joint_msg;
+        for(unsigned int i = 0; i < _model_ptr->getJointNames().size(); ++i)
+        {
+            joint_msg.name.push_back(_model_ptr->getJointNames()[i]);
+            joint_msg.position.push_back(_q[_model_ptr->getQIndex(_model_ptr->getJointNames()[i])]);
         }
-        joint_state.header.stamp = ros::Time::now();
 
-        pub.publish(joint_state);
+        joint_msg.header.stamp = rclcpp::Clock().now();
 
-        rsp->publishTransforms(joint_map, ros::Time::now(), "");
-        rsp->publishFixedTransforms("");
 
-        ros::spinOnce();
+        Eigen::Affine3d world_T_bl;
+        _model_ptr->getPose("Waist",world_T_bl);
+
+        Eigen::Affine3d bl_T_world = world_T_bl.inverse();
+
+
+        geometry_msgs::msg::TransformStamped anchor_T_world = tf2::eigenToTransform(bl_T_world);
+        anchor_T_world.header.frame_id = "Waist";
+        anchor_T_world.child_frame_id = "world";
+        anchor_T_world.header.stamp = joint_msg.header.stamp;
+
+        _n->joint_state_pub->publish(joint_msg);
+        _n->world_broadcaster->sendTransform(anchor_T_world);
     }
 #endif
 
 
 #if ENABLE_ROS
-  std::shared_ptr<ros::NodeHandle> n;
-  ros::Publisher pub;
-  sensor_msgs::JointState joint_state;
-  std::shared_ptr<robot_state_publisher::RobotStatePublisher> rsp;
+    std::shared_ptr<ros2_node> _n;
 #endif
 
 };
@@ -148,7 +159,7 @@ TEST_F(testGLPKProblem, testIKMILP)
 #if ENABLE_ROS
     for(unsigned int i = 0; i<10; ++i)
     {
-        this->publishJointStates(q);
+        this->publishRobotState(q);
         usleep(100000);
     }
     sleep(1);
@@ -234,7 +245,7 @@ TEST_F(testGLPKProblem, testIKMILP)
         autostack->log(log1);
 
 #if ENABLE_ROS
-        this->publishJointStates(q);
+        this->publishRobotState(q);
         usleep(100);
 #endif
     }
@@ -276,9 +287,9 @@ std::cout<<"        SECOND RUN"<<std::endl;
     _model_ptr->update();
 
 #if ENABLE_ROS
-    this->publishJointStates(q);
-    this->publishJointStates(q);
-    this->publishJointStates(q);
+    this->publishRobotState(q);
+    this->publishRobotState(q);
+    this->publishRobotState(q);
 
 
     sleep(1);
@@ -417,7 +428,7 @@ std::cout<<"        SECOND RUN"<<std::endl;
         autostack2->log(log2);
 
 #if ENABLE_ROS
-        this->publishJointStates(q);
+        this->publishRobotState(q);
         usleep(100);
 #endif
     }
@@ -593,6 +604,9 @@ TEST_F(testGLPKProblem, testMILPProblem)
 }
 
 int main(int argc, char **argv) {
+#if ENABLE_ROS
+    rclcpp::init(argc, argv);
+#endif
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -23,13 +23,15 @@
 
 #include <memory>
 
-#include <eigen3/Eigen/SVD>
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/Solver.h>
 #include <OpenSoT/constraints/Aggregated.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
 #include <OpenSoT/utils/Piler.h>
+
+#include <eigen3/Eigen/SVD>
+
 
 namespace OpenSoT { namespace solvers {
 /**

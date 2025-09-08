@@ -43,7 +43,6 @@ public:
     AffineConstraint(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,
                const AffineHelper& var);
 
-    virtual void update();
     ~AffineConstraint();
 
     static AffineConstraint::Ptr toAffine(const OpenSoT::constraints::Aggregated::ConstraintPtr& constraint,
@@ -57,6 +56,9 @@ private:
 
     AffineHelper _constraint_affine; //this is used to map the constraint into an affine
     AffineHelper _var;
+
+    void _update();
+
 };
 
 

@@ -22,11 +22,9 @@
 #include <OpenSoT/utils/Indices.h>
 #include <Eigen/Dense>
 #include <list>
-#include <vector>
 #include <string>
 #include <cassert>
 #include <memory>
-#include <iterator>
 
 namespace OpenSoT {
 
@@ -45,11 +43,10 @@ public:
 
     virtual ~SubConstraint(){}
 
-    virtual void update();
-
 protected:
     Indices _subConstraintMap;
     ConstraintPtr _constraintPtr;
+    void _update();
 
     static const std::string _SUBCONSTRAINT_SEPARATION_;
 

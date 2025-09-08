@@ -14,7 +14,7 @@ OpenSoT::constraints::force::StaticConstraint::StaticConstraint(const XBot::Mode
     update();
 }
 
-void OpenSoT::constraints::force::StaticConstraint::update()
+void OpenSoT::constraints::force::StaticConstraint::_update()
 {
     _constr.setZero(getXSize(), _robot.getActuatedNv());
     

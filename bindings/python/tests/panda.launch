@@ -1,0 +1,16 @@
+<launch>
+    <!-- Start robot state publisher -->
+    <arg name="arm_id" default="panda" />
+    <node pkg="robot_state_publisher" exec="robot_state_publisher" name="robot_state_publisher" output="screen">
+        <param name='robot_description' type="str" value="$(command 'xacro $(find-pkg-share franka_description)/robots/fp3/fp3.urdf.xacro arm_id:=$(var arm_id)')"/>
+        <param name="publish_frequency" value="50.0"/>
+    </node>
+
+    <!-- Static transform publisher -->
+    <node pkg="tf2_ros" exec="static_transform_publisher" name="base_link_static_tf" output="screen" args="0 0 0 0 0 0 base_link panda_link0 100"/>
+
+    <!-- RViz -->
+    <node pkg="rviz2" exec="rviz2" name="rviz" output="screen"/>
+
+</launch>
+

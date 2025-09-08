@@ -71,7 +71,7 @@
                 void _log(XBot::MatLogger2::Ptr logger);
 
 
-
+                void _update();
 
             public:
                 /**
@@ -93,7 +93,6 @@
                             const double dt);
 
 
-                void update();
 
                 /**
                  * @brief setJointAccMax update maximum accelerations

@@ -7,7 +7,7 @@
 #include <OpenSoT/tasks/velocity/Cartesian.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/constraints/velocity/VelocityLimits.h>
-#include <eigen_conversions/eigen_kdl.h>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include "../common.h"
 
 
@@ -516,11 +516,11 @@ TEST_F(testeiQuadProgProblem, testContructor2Problems)
     _model_ptr->getPose("l_wrist", "Waist", T);
 
     KDL::Frame T_kdl;
-    tf::transformEigenToKDL(T, T_kdl);
+    tf2::transformEigenToKDL(T, T_kdl);
 
     std::cout<<"FINAL CONFIG: "<<T.matrix()<<std::endl;
     Eigen::Affine3d T_ref;
-    tf::transformKDLToEigen(T_ref_kdl, T_ref);
+    tf2::transformKDLToEigen(T_ref_kdl, T_ref);
     std::cout<<"DESIRED CONFIG: "<<T_ref.matrix()<<std::endl;
 
 

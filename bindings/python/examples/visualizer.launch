@@ -1,0 +1,19 @@
+<launch>
+      <arg name="gui" default="false" />
+
+      <group if="$(var gui)">
+  	<node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui">
+		<param name="publish_default_efforts" value="True"/>
+		<param name="use_gui" value="$(var gui)"/>
+		<param name="rate" value="50.0"/>
+     	</node>
+
+     </group>
+     
+    <!-- start robot state publisher -->
+    <node pkg="robot_state_publisher" exec="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" value="250.0" />
+        <param name='robot_description' value="$(command 'cat $(find-pkg-share tiago_dual_cartesio_config)/capsules/urdf/tiago_dual_capsules.rviz')"/> 
+    </node> 
+    
+</launch>

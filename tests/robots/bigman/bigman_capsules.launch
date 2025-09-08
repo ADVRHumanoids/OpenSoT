@@ -1,13 +1,19 @@
 <launch>
-     <arg name="gui" default="true" />
+    <arg name="gui" default="false" />
 
-     <!-- send the bigman robot XML to param server -->
-     <param name="robot_description" command="$(find xacro)/xacro 'bigman_capsules.rviz'" />
-     <!-- param name="robot_description_semantic" textfile="$(find bigman_srdf)/srdf/bigman.srdf" /-->   
-        
-    <!-- start robot state publisher -->
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" >
-        <param name="publish_frequency" type="double" value="250.0" />
-    </node> 
+    <group if="$(var gui)">
+        <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui">
+           <param name="publish_default_efforts" value="True"/>
+           <param name="use_gui" value="$(var gui)"/>
+           <param name="rate" value="50.0"/>
+        </node>
+    </group>
+
+<!-- start robot state publisher -->
+<node pkg="robot_state_publisher" exec="robot_state_publisher" name="robot_state_publisher" output="screen" args="--ros-args --log-level ERROR">
+   <param name="publish_frequency" value="250.0" />
+   <param name='robot_description' value="$(command 'cat bigman_capsules.rviz')"/>
+</node>
+
 
 </launch>

@@ -5,7 +5,6 @@
 #include <OpenSoT/solvers/eHQP.h>
 #include <OpenSoT/solvers/iHQP.h>
 #include <OpenSoT/solvers/nHQP.h>
-#include <OpenSoT/solvers/HCOD.h>
 #include <OpenSoT/solvers/BackEndFactory.h>
 
 namespace py = pybind11;
@@ -103,17 +102,4 @@ void pynHQP(py::module& m) {
        .def("setPerformAbRegularization", py::overload_cast<bool>(&solvers::nHQP::setPerformAbRegularization))
        .def("setPerformSelectiveNullSpaceRegularization", py::overload_cast<int, bool>(&solvers::nHQP::setPerformSelectiveNullSpaceRegularization))
        .def("setPerformSelectiveNullSpaceRegularization", py::overload_cast<bool>(&solvers::nHQP::setPerformSelectiveNullSpaceRegularization));
-}
-
-void pyHCOD(py::module& m) {
-#ifdef OPENSOT_SOTH_FRONT_END
-    py::class_<solvers::HCOD, std::shared_ptr<solvers::HCOD>, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>>(m, "HCOD")
-        .def(py::init<OpenSoT::AutoStack&, const double>())
-        .def(py::init<OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::Stack&, OpenSoT::Solver<Eigen::MatrixXd, Eigen::VectorXd>::ConstraintPtr, const double>())
-        .def("solve", solve<Eigen::MatrixXd, Eigen::VectorXd>)
-        .def("setDisableWeightsComputation", &solvers::HCOD::setDisableWeightsComputation)
-        .def("getDisableWeightsComputation", &solvers::HCOD::getDisableWeightsComputation)
-        .def("setDamping", &solvers::HCOD::setDamping)
-        .def("printSOT", &solvers::HCOD::printSOT);
-#endif
 }

@@ -2,17 +2,10 @@
 #include <octomap_msgs/conversions.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 
-#if ROS_VERSION_MAJOR == 1 && ROS_VERSION_MINOR <= 12
-#define STATIC_POINTER_CAST boost::static_pointer_cast
-#define DYNAMIC_POINTER_CAST boost::dynamic_pointer_cast
-#define SHARED_PTR boost::shared_ptr
-#define MAKE_SHARED boost::make_shared
-#else
 #define STATIC_POINTER_CAST std::static_pointer_cast
 #define DYNAMIC_POINTER_CAST std::dynamic_pointer_cast
 #define SHARED_PTR std::shared_ptr
 #define MAKE_SHARED std::make_shared
-#endif
 
 namespace
 {
@@ -378,7 +371,7 @@ ComputeLinksDistance::ComputeLinksDistance(const XBot::ModelInterface& _model,
         _srdf->initString(*_urdf, _model.getSrdfString());
     }
 
-    _moveit_model = std::make_shared<robot_model::RobotModel>(_urdf,
+    _moveit_model = std::make_shared<RobotModel>(_urdf,
                                                               _srdf);
     parseCollisionObjects();
 
@@ -562,8 +555,8 @@ namespace
 {
 
 std::shared_ptr<fcl::CollisionObjectd> fcl_from_primitive(
-        const shape_msgs::SolidPrimitive& shape,
-        const geometry_msgs::Pose& pose)
+        const shape_msgs::msg::SolidPrimitive& shape,
+        const geometry_msgs::msg::Pose& pose)
 {
     std::shared_ptr<fcl::CollisionGeometryd> fcl_shape;
 

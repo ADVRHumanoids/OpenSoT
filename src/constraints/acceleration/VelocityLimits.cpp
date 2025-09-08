@@ -47,7 +47,7 @@ OpenSoT::constraints::acceleration::VelocityLimits::VelocityLimits(XBot::ModelIn
     update();
 }
 
-void OpenSoT::constraints::acceleration::VelocityLimits::update()
+void OpenSoT::constraints::acceleration::VelocityLimits::_update()
 {
     _robot.getJointVelocity(_qdot);
 

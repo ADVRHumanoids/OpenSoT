@@ -2,46 +2,42 @@ include(ExternalProject)
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(rviz_visual_tools QUIET)
-find_package(tf)
-find_package(eigen_conversions)
-find_package(tf_conversions)
-find_package(roscpp )
+find_package(nav_msgs QUIET)
+find_package(tf2)
+#find_package(eigen_conversions)
+#find_package(tf_conversions)
+find_package(tf2_eigen_kdl REQUIRED)
+find_package(rclcpp QUIET)
 find_package(robot_state_publisher )
 find_package(urdf )
 find_package(srdfdom)
 find_package(osqp QUIET)
 find_package(qpSWIFT QUIET)
-find_package(fcl 0.6.1 QUIET)
-if(DEFINED FCL_VERSION)
+find_package(fcl 0.6.0...<0.7.0 QUIET)
+if(DEFINED fcl_VERSION)
     set(FCL_FOUND 1)
 else()
     set(FCL_FOUND 0)
 endif()
 
-
-
 set(catkin_LIBRARIES
-    ${tf_LIBRARIES} ${roscpp_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${eigen_conversions_LIBRARIES}
-${tf_conversions_LIBRARIES})
+    ${tf2_LIBRARIES} ${robot_state_publisher_LIBRARIES} ${urdf_LIBRARIES} ${tf2_eigen_kdl_LIBRARIES})
+#${tf_conversions_LIBRARIES})
 
 add_definitions(-DOPENSOT_TEST_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
 add_definitions(-DOPENSOT_TEST_MODEL_TYPE="pin")
 message(STATUS "DOPENSOT_TEST_PATH is ${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(${rviz_visual_tools_FOUND})
-    set(TEST_INCLUDES ${TEST_INCLUDES} ${GTEST_INCLUDE_DIRS}
-                      ${rviz_visual_tools_INCLUDE_DIRS})
+if(${rclcpp_FOUND})
+    set(TEST_INCLUDES ${TEST_INCLUDES} ${GTEST_INCLUDE_DIRS} ${rclcpp_INCLUDE_DIRS})
 endif()
 
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 
-option(SHOW_TEST_RESULTS "After running tests, show result plots" FALSE)
-
 # compite GTest
 find_package(GTest)
 
-include_directories(${GTEST_INCLUDE_DIRS} ${FCL_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIRS} ${fcl_INCLUDE_DIRS})
 link_directories(${GTEST_LIB_DIRS})
 
 # add local include
@@ -51,16 +47,10 @@ enable_testing()
 
 add_definitions(-DOPENSOT_TESTS_ROBOTS_DIR="${CMAKE_CURRENT_BINARY_DIR}/robots/")
 
-SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES}
-                     ${kdl_codyco_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES}
-                     ${srdfdom_advr_LIBRARIES} ${XBotInterface_LIBRARIES} ${catkin_LIBRARIES})
-if(${moveit_core_FOUND})
-    SET(TestLibs ${TestLibs} ${moveit_core_LIBRARIES})
-endif()
-
-if(${rviz_visual_tools_FOUND})
-    SET(TestLibs ${TestLibs} ${rviz_visual_tools_LIBRARIES})
-endif()
+SET(TestLibs OpenSoT ${GTEST_BOTH_LIBRARIES} ${qpOASES_LIBRARIES} ${orocos_kdl_LIBRARIES} ${kdl_parser_LIBRARIES} ${catkin_LIBRARIES})
+#if(${moveit_core_FOUND})
+#    SET(TestLibs ${TestLibs} ${moveit_core_LIBRARIES})
+#endif()
 
 if(${OPENSOT_SOTH_FRONT_END})
     SET(TestLibs ${TestLibs} hcod_wrapper soth)
@@ -122,7 +112,7 @@ TARGET_LINK_LIBRARIES(testQPOasesSolver ${TestLibs})
 add_dependencies(testQPOasesSolver   OpenSoT)
 add_test(NAME OpenSoT_solvers_qpOases COMMAND testQPOasesSolver)
 
-if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND})
+if(TARGET OpenSotBackEndOSQP AND ${osqp_FOUND} AND ${OPENSOT_COMPILE_OSQP_BACKEND})
     ADD_EXECUTABLE(testOSQPSolver solvers/TestOSQP.cpp)
     TARGET_LINK_LIBRARIES(testOSQPSolver ${TestLibs} osqp::osqpstatic)
     add_dependencies(testOSQPSolver   OpenSoT)
@@ -143,15 +133,15 @@ endif()
 
  if(${GLPK_FOUND})
      ADD_EXECUTABLE(testGLPKSolver solvers/TestGLPK.cpp)
-     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs})
+     TARGET_LINK_LIBRARIES(testGLPKSolver ${TestLibs} tf2_eigen::tf2_eigen)
      add_dependencies(testGLPKSolver   OpenSoT)
      add_test(NAME OpenSoT_solvers_glpk COMMAND testGLPKSolver)
  endif()
 
- ADD_EXECUTABLE(testeiQuadProgSolver solvers/TesteiQuadProg.cpp)
- TARGET_LINK_LIBRARIES(testeiQuadProgSolver ${TestLibs})
- add_dependencies(testeiQuadProgSolver   OpenSoT)
- add_test(NAME OpenSoT_solvers_eiquadprog COMMAND testeiQuadProgSolver)
+ADD_EXECUTABLE(testeiQuadProgSolver solvers/TesteiQuadProg.cpp)
+TARGET_LINK_LIBRARIES(testeiQuadProgSolver ${TestLibs})
+add_dependencies(testeiQuadProgSolver   OpenSoT)
+add_test(NAME OpenSoT_solvers_eiquadprog COMMAND testeiQuadProgSolver)
 
 ADD_EXECUTABLE(testAffineUtils utils/TestAffineUtils.cpp)
 TARGET_LINK_LIBRARIES(testAffineUtils ${TestLibs})
@@ -163,9 +153,9 @@ TARGET_LINK_LIBRARIES(testAffineHelper ${TestLibs})
 add_dependencies(testAffineHelper   OpenSoT)
 add_test(NAME OpenSoT_utils_affineHelper COMMAND testAffineHelper)
 
- if(${rviz_visual_tools_FOUND})
-     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp ros_trj_publisher.cpp)
-     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs})
+ if(${rclcpp_FOUND})
+     ADD_EXECUTABLE(testEigenSVD_StaticWalk_FloatingBase solvers/TestEigenSVD_StaticWalk_FloatingBase.cpp trajectory_utils.cpp path_circle_fix.cpp)
+     TARGET_LINK_LIBRARIES(testEigenSVD_StaticWalk_FloatingBase ${TestLibs} rclcpp::rclcpp tf2_eigen::tf2_eigen)
      add_dependencies(testEigenSVD_StaticWalk_FloatingBase   OpenSoT)
      add_test(NAME OpenSoT_solvers_EigenSVD_StaticWalk_FloatingBase COMMAND testEigenSVD_StaticWalk_FloatingBase)
  endif()
@@ -201,19 +191,19 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
  add_test(NAME OpenSoT_constraint_SubConstraint COMMAND testSubConstraint)
 
 
-if(${FCL_FOUND})
+ if(${FCL_FOUND})
      ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp collision_utils.cpp)
-     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd)
+     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
      add_dependencies(testCollisionUtils   OpenSoT)
      add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 
      ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp collision_utils.cpp)
-     TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd)
+     TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
      add_dependencies(testCollisionAvoidanceVelocityConstraint   OpenSoT)
      add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidance COMMAND testCollisionAvoidanceVelocityConstraint)
 
      ADD_EXECUTABLE(testCollisionAvoidanceEnvironmentVelocityConstraint constraints/velocity/TestCollisionAvoidanceEnvironment.cpp)
-     TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs} -lccd)
+     TARGET_LINK_LIBRARIES(testCollisionAvoidanceEnvironmentVelocityConstraint ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
      add_dependencies(testCollisionAvoidanceEnvironmentVelocityConstraint   OpenSoT)
      add_test(NAME OpenSoT_constraints_velocity_CollisionAvoidanceEnvironment COMMAND testCollisionAvoidanceEnvironmentVelocityConstraint)
 endif()

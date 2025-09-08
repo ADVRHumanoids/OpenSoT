@@ -106,7 +106,7 @@ class testJointLimits : public TestBase {
       _model_ptr->update();
 
 
-      acc_max.setOnes(_model_ptr->getJointNum());
+      acc_max.setOnes(_model_ptr->getNv());
       acc_max *= 20.;
 
       vel_max.setOnes(_model_ptr->getNv());
@@ -273,7 +273,7 @@ TEST_F(testJointLimits, test_bounds)
 
         autostack->update();
         EXPECT_TRUE(solver->solve(dq));
-
+        
         autostack->log(this->logger);
 
 

@@ -38,7 +38,7 @@ ConvexHull::ConvexHull(XBot::ModelInterface& robot,
     this->update();
 }
 
-void ConvexHull::update() {
+void ConvexHull::_update() {
 
     /************************ COMPUTING BOUNDS ****************************/
 

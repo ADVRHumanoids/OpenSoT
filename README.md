@@ -5,6 +5,7 @@ OpenSoT is a library dedicated to hierarchical whole-body control of robots subj
 OpenSoT was initially developed under the EU Project [WALK-MAN](https://cordis.europa.eu/project/id/611832).
 Its development continued under the EU Projects  [CogIMon](https://cordis.europa.eu/project/id/644727) and [CENTAURO](https://cordis.europa.eu/project/id/644839). 
 In 2018 the OpenSoT library has been recognized as an [**EU funded Deep Tech Innovation** under the category Exploring](https://innovation-radar.ec.europa.eu/innovation/30633).
+Currently, OpenSoT is a joint project between the Inria Centre at Université de Lorraine (LARSEN/HUCEBOT team) and the Istituto Italiano di Tecnologia (HHCM Lab).
 
 Documentation can be found at https://advrhumanoids.github.io/OpenSoT/index.html
 
@@ -19,14 +20,27 @@ Main Add-ons
 How to cite this work:
 ======================
 Please support ```OpenSoT``` development by referencing it in your works/publications/projects the following:
+```
+@ARTICLE{opensot:ram25,
+  author={Hoffman, Enrico Mingo and Laurenzi, Arturo and Tsagarakis, Nikos G.},
+  journal={IEEE Robotics & Automation Magazine}, 
+  title={The Open Stack of Tasks Library: OpenSoT: A Software Dedicated to Hierarchical Whole-Body Control of Robots Subject to Constraints}, 
+  year={2025},
+  volume={32},
+  number={1},
+  pages={24-34},
+  doi={10.1109/MRA.2024.3487395}}
+```
+
 
 ```
 @inproceedings{opensot:humanoids17,
   title = {Robot Control for Dummies: Insights and Examples using OpenSoT},
   author = {Mingo Hoffman, Enrico and Rocchi, Alessio and Laurenzi, Arturo and Tsagarakis, Nikos G.},
   pages     = {736-741},
-  booktitle = {{IEEE-RAS} International Conference on Humanoid Robots, Humanoids},
-  year = {2017}
+  booktitle = {{IEEE-RAS} International Conference on Humanoid Robots (Humanoids)},
+  year = {2017},
+  doi={10.1109/HUMANOIDS.2017.8246954}
 }
 ```
 
@@ -37,6 +51,7 @@ Please support ```OpenSoT``` development by referencing it in your works/publica
   booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
   pages={1093--1099},
   year={2015},
-  organization={IEEE}
+  organization={IEEE},
+  doi={10.1109/ICRA.2015.7140076}
 }
 ```

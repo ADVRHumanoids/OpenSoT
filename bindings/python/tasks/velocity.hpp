@@ -51,7 +51,7 @@ void pyVelocityCartesian(py::module& m) {
           .def("getActualPose", py::overload_cast<>(&Cartesian::getActualPose, py::const_))
           .def("getError", &Cartesian::getError)
           .def("reset", &Cartesian::reset)
-          .def("setIsBodyJacobian", &Cartesian::setIsBodyJacobian)
+          .def("setVelocityLocalReference", &Cartesian::setVelocityLocalReference)
           .def_property("orientationErrorGain", &Cartesian::getOrientationErrorGain, &Cartesian::setOrientationErrorGain)
           .def_property_readonly("distalLink", &Cartesian::getDistalLink)
           .def_property_readonly("baseLink", &Cartesian::getBaseLink)

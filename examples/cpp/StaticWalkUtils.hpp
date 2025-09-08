@@ -1,6 +1,4 @@
-#include <tf_conversions/tf_eigen.h>
-#include <tf_conversions/tf_kdl.h>
-
+#include "../../tests/trajectory_utils.h"
 
 /**
  * @brief The manipulation_trajectories class creates a simple linear trajectory for the arm and the com during

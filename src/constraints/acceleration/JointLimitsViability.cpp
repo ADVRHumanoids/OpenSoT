@@ -76,7 +76,7 @@ void JointLimitsViability::_log(XBot::MatLogger2::Ptr logger)
     logger->add("_ddq_UB_via", _ddq_UB_via);
 }
 
-void JointLimitsViability::update()
+void JointLimitsViability::_update()
 {
     _robot.getJointPosition(_q);
     _robot.getJointVelocity(_qdot);
@@ -128,9 +128,9 @@ void JointLimitsViability::accBoundsFromPosLimits()
     double a = dt * dt;
 
     _ddq_M1 = -_qdot/dt;
-    _ddq_M2 = -(_qdot.array() * _qdot.array()) / (2.0*(_jointLimitsMax.array() - _q.array()));
+    _ddq_M2 = -(_qdot.array() * _qdot.array()) / (2.0*(_jointLimitsMax.array() - _robot.difference(_q, _zeros).array()));
     _ddq_M3 = 2.0*(_jointLimitsMax - _robot.difference(_q, _zeros) - dt*_qdot)/a;
-    _ddq_m2 = (_qdot.array()*_qdot.array())/(2.0*(_q.array() - _jointLimitsMin.array()));
+    _ddq_m2 = (_qdot.array()*_qdot.array())/(2.0*(_robot.difference(_q, _zeros).array() - _jointLimitsMin.array()));
     _ddq_m3 = 2.0*(_jointLimitsMin - _robot.difference(_q, _zeros) - dt*_qdot)/a;
 
 

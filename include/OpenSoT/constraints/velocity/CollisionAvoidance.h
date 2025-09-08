@@ -60,15 +60,8 @@ public:
     CollisionAvoidance(const XBot::ModelInterface& robot,
                        int max_pairs = -1,
                        urdf::ModelConstSharedPtr collision_urdf = nullptr,
-                       srdf::ModelConstSharedPtr collision_srdf = nullptr);
-
-
-    
-    /**
-     * @brief 
-     * @param w 
-     */
-    void setInfeasiblePairWeight(double w);
+                       srdf::ModelConstSharedPtr collision_srdf = nullptr,
+                       bool skip_infeasible_pairs = true);
 
     /**
      * @brief getLinkPairThreshold distance offset between two link pairs
@@ -100,13 +93,6 @@ public:
      */
     void setDetectionThreshold(const double detection_threshold);
 
-    /**
-     * @brief update recomputes Aineq and bUpperBound if x is different than the
-     *  previously stored value
-     * @param x the state vector.
-     */
-    void update();
-
 
     void setMaxPairs(const unsigned int max_pairs);
 
@@ -125,6 +111,8 @@ public:
                            const XBot::Collision::Shape::Variant& shape,
                            const Eigen::Affine3d& link_T_shape,
                            const std::vector<std::string>& disabled_collisions = {});
+
+    bool setCollisionShapeActive(const std::string& name, bool flag);
 
     // /**
     //  * @brief remove world collision with given id
@@ -185,6 +173,12 @@ public:
     ~CollisionAvoidance();
 
 protected:
+    /**
+     * @brief _update recomputes Aineq and bUpperBound if x is different than the
+     *  previously stored value
+     * @param x the state vector.
+     */
+    void _update();
 
     /**
      * @brief _include_env
@@ -214,7 +208,7 @@ protected:
     /**
      * @brief _skip_infeasible_pairs
      */
-    double _infeasible_pair_weight;
+    bool _skip_infeasible_pairs;
 
     /**
      * @brief _robot

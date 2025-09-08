@@ -69,9 +69,6 @@
                              XBot::ModelInterface &robot,
                              const friction_cone & mu);
 
-
-                void update();
-
                 void setFrictionCone(const friction_cone& frc);
 
                 void setMu(const double mu);
@@ -86,6 +83,7 @@
 
             private:
                 void computeAineq();
+                void _update();
 
         };
 
@@ -101,12 +99,12 @@
 
                 FrictionCone::Ptr getFrictionCone(const std::string& contact_name);
 
-                void update();
 
             private:
                 std::map<std::string, FrictionCone::Ptr> _friction_cone_map;
                 OpenSoT::constraints::Aggregated::Ptr _internal_constraint;
                 void generateBounds();
+                void _update();
             };
     }
 }

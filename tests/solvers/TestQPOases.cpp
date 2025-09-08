@@ -14,7 +14,8 @@
 #include <OpenSoT/tasks/velocity/MinimumEffort.h>
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/AutoStack.h>
-#include <eigen_conversions/eigen_kdl.h>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+
 
 #include "../common.h"
 
@@ -621,7 +622,7 @@ TEST_F(testiHQP, testContructor1Problem)
     bounds_list.push_back(joint_limits);
 
     OpenSoT::constraints::Aggregated::Ptr bounds(
-                new OpenSoT::constraints::Aggregated(bounds_list, q.size()));
+        new OpenSoT::constraints::Aggregated(bounds_list, _model_ptr->getNv()));
 
     OpenSoT::solvers::iHQP::Stack stack_of_tasks;
     stack_of_tasks.push_back(postural_task);
@@ -950,7 +951,7 @@ TEST_F(testiHQP, testContructor2Problems)
     std::cout<<"INITIAL CONFIG: "<<T_init.matrix()<<std::endl;
     Eigen::Affine3d T = _model_ptr->getPose("l_wrist", "Waist");
     KDL::Frame T_kdl;
-    tf::transformEigenToKDL(T, T_kdl);
+    tf2::transformEigenToKDL(T, T_kdl);
     // std::cout<<"FINAL CONFIG: "<< T_kdl<<std::endl;
     // std::cout<<"DESIRED CONFIG: "<<T_ref_kdl<<std::endl;
 

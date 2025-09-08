@@ -22,7 +22,7 @@ TorqueLimits::TorqueLimits(const XBot::ModelInterface &robot,
     update();
 }
 
-void TorqueLimits::update()
+void TorqueLimits::_update()
 {
     _robot.computeInertiaMatrix(_B);
     _robot.computeNonlinearTerm(_h);

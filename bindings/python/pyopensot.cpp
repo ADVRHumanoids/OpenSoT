@@ -7,9 +7,11 @@
 #include "solver.hpp"
 #include "tasks/velocity.hpp"
 #include "tasks/acceleration.hpp"
+#include "tasks/minimize_variable.hpp"
 #include "constraints/velocity.hpp"
 #include "constraints/acceleration.hpp"
 #include "constraints/force.hpp"
+#include "variables/torque.hpp"
 
 PYBIND11_MODULE(pyopensot, m) {
     pyTask<Eigen::MatrixXd, Eigen::VectorXd>(m, "Task");
@@ -28,9 +30,9 @@ PYBIND11_MODULE(pyopensot, m) {
     pyeHQP(m);
     pyiHQP(m);
     pynHQP(m);
-    pyHCOD(m);
 
     auto m_t = m.def_submodule("tasks");
+    pyMinimizeVariable(m_t);
 
     auto m_tv = m_t.def_submodule("velocity");
     pyVelocityPostural(m_tv);
@@ -55,7 +57,6 @@ PYBIND11_MODULE(pyopensot, m) {
     pyVelocityJointLimits(m_cv);
     pyVelocityLimits(m_cv);
     pyVelocityOmniWheels4X(m_cv);
-    pyVelocityCollisionAvoidance(m_cv);
 
     auto m_ca = m_c.def_submodule("acceleration");
     pyAccelerationJointLimits(m_ca);
@@ -67,4 +68,8 @@ PYBIND11_MODULE(pyopensot, m) {
     pyForceFrictionCone(m_cf);
     pyForceNormalTorque(m_cf);
     pyWrenchLimits(m_cf);
+
+    auto m_v = m.def_submodule("variables");
+    pyTorqueVariable(m_v);
+
 }

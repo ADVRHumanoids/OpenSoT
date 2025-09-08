@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.20)
 include(ExternalProject)
-project(open_sot VERSION 4.0.0)
+project(open_sot VERSION 4.0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -23,11 +23,6 @@ set(${CMAKE_PROJECT_NAME}_CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 add_subdirectory(doc)
 
-#find_package(Boost COMPONENTS system REQUIRED)
-#find_package(Eigen3 REQUIRED)
-#find_package(orocos_kdl REQUIRED)
-#find_package(urdf REQUIRED)
-#find_package(kdl_parser REQUIRED)
 find_package(moveit_core QUIET)
 find_package(moveit_msgs QUIET)
 find_package(Qhull REQUIRED)
@@ -51,6 +46,7 @@ option(OPENSOT_VERBOSE "Some additional prints" FALSE)
 option(OPENSOT_VERBOSE_MATLOG "Log all aggregated tasks/constraints to MAT-file" FALSE)
 option(OPENSOT_DISABLE_VECTORIZATION "Disable Eigen3 vectorization" FALSE)
 option(OPENSOT_COMPILE_COLLISION "Compile OpenSoT collision avoidance" TRUE)
+option(OPENSOT_COMPILE_OSQP_BACKEND "Compile OpenSotBackEndOSQP" TRUE)
 
 if(${OPENSOT_DISABLE_VECTORIZATION})
     add_definitions(-DEIGEN_DONT_VECTORIZE)
@@ -261,7 +257,7 @@ if(${qpOASES_FOUND})
 endif()
 
 find_package(osqp QUIET)
-if(${osqp_FOUND})
+if(${osqp_FOUND} AND ${OPENSOT_COMPILE_OSQP_BACKEND})
     message("Adding src/solvers/OSQPBackEnd.cpp to compilation")
 
     add_library(OpenSotBackEndOSQP SHARED src/solvers/OSQPBackEnd.cpp)

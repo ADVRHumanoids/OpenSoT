@@ -114,6 +114,8 @@ using namespace OpenSoT::utils;
 
             virtual void _log(XBot::MatLogger2::Ptr logger);
 
+            void _update();
+
         public:
 
             /**
@@ -141,8 +143,6 @@ using namespace OpenSoT::utils;
                        const unsigned int aggregationPolicy =
                             EQUALITIES_TO_INEQUALITIES |
                             UNILATERAL_TO_BILATERAL);
-
-            void update();
 
             void log(XBot::MatLogger2::Ptr logger) override;
 
