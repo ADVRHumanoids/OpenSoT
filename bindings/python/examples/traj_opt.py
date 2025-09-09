@@ -151,6 +151,9 @@ model.setJointPosition(q_val)
 model.update()
 T = model.getPose("fp3_link8")
 
+"""
+This set of variables describe the state and control inputs for the (NLP) OCP.
+"""
 vars = list()
 # x
 vars.append(("q", model.nq))
@@ -165,42 +168,70 @@ qddot = variables.getVariable("qddot")
 
 print(f"variables.getSize(): {variables.getSize()}")
 
+
+"""
+This set of variables describe the state and control inputs for the internal liearized QP which acts in the tangent space.
+In this particular case both sets of variables have the same size, but in general they could be different.
+"""
+dvars = list()
+# dx
+dvars.append(("dq", model.nv))
+dvars.append(("dqdot", model.nv))
+# du
+dvars.append(("dqddot", model.nv))
+
+dvariables = OptvarHelper(dvars)
+dq = dvariables.getVariable("dq")
+dqdot = dvariables.getVariable("dqdot")
+dqddot = dvariables.getVariable("dqddot")
+
+print(f"dvariables.getSize(): {dvariables.getSize()}")
+
+
+
 class min_var(Task):
-    def __init__(self, name, variable):
+    """
+    min_var consider the following function: F(var) = var - ref
+    The dvariable is included to carry the information related to the size of the derivative of var
+    """
+    def __init__(self, name, variable, dvariable):
         super().__init__(name, variable.getInputSize())
         self.variable = variable
+        self.dvariable = dvariable
         self.ref = 0. * self.variable.getq()
-        self._W = np.eye(variable.getOutputSize())
+        self._W = np.eye(dvariable.getOutputSize())
 
     def _update(self):
-        self.lin =  self.variable + (self.variable.getValue() - self.ref)
+        self.lin =  self.dvariable + (self.variable.getValue() - self.ref)
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
 
     def setReference(self, ref):
         self.ref = ref
 
-
     @classmethod
-    def create(cls, name, variable):
-        obj = cls(name, variable)
+    def create(cls, name, variable, dvariable):
+        obj = cls(name, variable, dvariable)
         obj.update()
         return obj
 
 class dynamics_derivative(Task):
-    def __init__(self, name, f):
-        super().__init__(name, f.getInputSize())
-        self.f = f
-        self._W = np.eye(f.getOutputSize())
+    """
+    This carries the derivative of the linear dynamics computed from euler.
+    """
+    def __init__(self, name, df):
+        super().__init__(name, df.getInputSize())
+        self.df = df
+        self._W = np.eye(df.getOutputSize())
 
     def _update(self):
-        self.lin = self.f
+        self.lin = self.df
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
 
     @classmethod
-    def create(cls, name, f):
-        obj = cls(name, f)
+    def create(cls, name, df):
+        obj = cls(name, df)
         obj.update()
         return obj
 
@@ -210,6 +241,9 @@ def euler(x, xdot, dt):
 
 x = AffineHelper.pile(q, qdot)
 xdot = AffineHelper.pile(qdot, qddot)
+
+dx = AffineHelper.pile(dq, dqdot)
+dxdot = AffineHelper.pile(dqdot, dqddot)
 
 x0 = list()
 for i in range(Ns+1):
@@ -225,34 +259,39 @@ ocp = OCP()
 dd = list()
 for i in range(Ns):
     stage = Stage()
-
-    stage.x = x
+    """ First we include information related to the state space """
     stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nv)])
+
+    """ We include both state variables and dvariables """
+    stage.x = x
+    stage.dx = dx
+
+    """ We include both control variables and dvariables """
     stage.u = qddot
+    stage.du = dqddot
+
+    """ We include q and qdot defined for the state variables """
     stage.q = q
     stage.v = qdot
 
     stage.model = xbi.ModelInterface2(node.urdf)
 
-    f = euler(x, xdot, dt)
-    w0 = np.concatenate((x0[i], u0[i]))
-    f.getValue(w0)
-    stage.variables.append(f)
-    df = dynamics_derivative.create(f"df{i}", f)
+    """ Dynamics derivative are just defined in the dvariables """
+    df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
     dd.append(df)
     stage.dynamics_derivative = df
 
     ocp.addStage(stage)
 
-
+""" Last stage (Ns) does not have dynamics and control variables/dvariables """
 stage = Stage()
 stage.model = xbi.ModelInterface2(node.urdf)
 stage.x = x
+stage.dx = dx
 stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nq)])
 stage.q = q
 stage.v = qdot
 ocp.addStage(stage)
-
 
 
 ocp.update(x0, u0)
@@ -263,7 +302,7 @@ utest.assertTrue(ocp.getNumberOfNodes() == Ns)
 
 minus = list()
 for i in range(Ns):
-    minu = min_var.create(f"minu{i}", ocp.stage(i).u)
+    minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
     minu.setWeight(1e0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
@@ -276,8 +315,18 @@ cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world
 cartesian_task.setLambda(1)
 cartesian_task.setWeight(1e6 * np.eye(6))
 
+""" 
+Important:  
 
-ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, variables.getVariable("qdot")))
+The cartesian task define the function F(q) = f(q) - ref
+and its derivative:
+
+df(q)/dq = J(q)dq
+
+hence the Affine task is applied to dq: [J(q) 0] [dq dqdot]' = J(q)dq
+
+"""
+ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
 
 T, _ = cartesian_task.getReference()
 node.make_6dof_marker(name="fp3_link8", pose=T, frame_id="world")

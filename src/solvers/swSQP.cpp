@@ -262,12 +262,12 @@ void swSQP::_init()
 {
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
     {
-        _Mx.push_back(_ocp->stage(k)->x->getM());
+        _Mx.push_back(_ocp->stage(k)->dx->getM());
 
         // --- Dynamics (only for k < N) ---
         if(k < _ocp->getNumberOfNodes())
         {
-            _Mu.push_back(_ocp->stage(k)->u->getM());
+            _Mu.push_back(_ocp->stage(k)->du->getM());
 
             Eigen::MatrixXd A, B;
             Eigen::VectorXd b;

@@ -241,12 +241,14 @@ class ocp{
 
             double der(const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
             {
-                //TODO: this needs to be better implemented for the SE(3) case:
-                // _dw0.resize(_w0.size()) iff states and controls are both in R^n
-                // _dw0.resize( ... ) iff states are in SE(3) x R^n, and controls are both in R^n
-                _dw0.resize(_w0.size());
+                _dw0.resize(this->dx->getInputSize());
+                _dw0.setZero();
                 _dw0.head(dx.size()) = dx;
                 _dw0.tail(du.size()) = du;
+
+                this->dx->getValue(_dw0);
+                if(this->du)
+                    this->du->getValue(_dw0);
 
                 double der = 0.;
                 if(stack)
@@ -260,7 +262,7 @@ class ocp{
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;
-            std::shared_ptr<AffineHelper> x, u, q, v;
+            std::shared_ptr<AffineHelper> x, u, q, v, dx, du;
             AutoStack::Ptr stack;
             Space::Ptr state_space;
 

@@ -103,6 +103,8 @@ void pyopensot_oc(py::module& m) {
         .def_readwrite("variables", &Stage::variables)
         .def_readwrite("x", &Stage::x)
         .def_readwrite("u", &Stage::u)
+        .def_readwrite("dx", &Stage::dx)
+        .def_readwrite("du", &Stage::du)
         .def_readwrite("q", &Stage::q)
         .def_readwrite("v", &Stage::v)
         .def_readwrite("stack", &Stage::stack)
