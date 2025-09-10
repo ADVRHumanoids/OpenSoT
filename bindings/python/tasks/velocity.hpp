@@ -55,7 +55,8 @@ void pyVelocityCartesian(py::module& m) {
           .def_property("orientationErrorGain", &Cartesian::getOrientationErrorGain, &Cartesian::setOrientationErrorGain)
           .def_property_readonly("distalLink", &Cartesian::getDistalLink)
           .def_property_readonly("baseLink", &Cartesian::getBaseLink)
-          .def_property_readonly("baseLinkIsWorld", &Cartesian::baseLinkIsWorld);
+          .def_property_readonly("baseLinkIsWorld", &Cartesian::baseLinkIsWorld)
+          .def("rotateToLocal", &Cartesian::rotateToLocal);
 }
 
 void pyVelocityAngularMomentum(py::module& m) {
