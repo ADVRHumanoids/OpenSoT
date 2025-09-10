@@ -51,7 +51,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     _x0 = x0;
     _u0 = u0;
 
-    Eigen::VectorXd dx0(_x0[0].size());
+    Eigen::VectorXd dx0(_A[0].cols());
     dx0.setZero();
 
     for(unsigned int iter = 0; iter < _opt.max_iters; ++iter)

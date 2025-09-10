@@ -62,6 +62,69 @@ public:
     }
 };
 
+class R3: public Space
+{
+public:
+    typedef std::shared_ptr<R3> Ptr;
+
+    R3(std::shared_ptr<XBot::ModelInterface> model, const std::string& base, const std::string& distal):
+        Space(3, 3),
+        _model(model),
+        _distal(distal),
+        _base(base)
+    {}
+
+    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    {
+        if(x0.size() != this->nq())
+            throw std::runtime_error("x0.size() != _nq");
+        if(x1.size() != this->nq())
+            throw std::runtime_error("x1.size() != _nq");
+        if(dx0.size() != this->nv())
+            throw std::runtime_error("dx0.size() != _nv");
+        if(x0.size() != dx0.size())
+            throw std::runtime_error("x0.size() != dx0.size()");
+
+        if(_base == _distal)
+            _b_T_d.setIdentity();
+        else
+            _b_T_d = _model->getPose(_distal, _base);
+
+        x1 = x0 + _b_T_d.linear() * dx0;
+    }
+private:
+    std::shared_ptr<XBot::ModelInterface> _model;
+    std::string _distal;
+    std::string _base;
+    Eigen::Affine3d _b_T_d;
+};
+
+class RobotSpace: public Space
+{
+public:
+    typedef std::shared_ptr<RobotSpace> Ptr;
+
+    RobotSpace(std::shared_ptr<XBot::ModelInterface> model):
+        Space(model->getNq(), model->getNv()),
+        _model(model)
+    {}
+
+    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    {
+        if(x0.size() != this->nq())
+            throw std::runtime_error("x0.size() != _nq");
+        if(x1.size() != this->nq())
+            throw std::runtime_error("x1.size() != _nq");
+        if(dx0.size() != this->nv())
+            throw std::runtime_error("dx0.size() != _nv");
+
+        x1 = _model->sum(x0, dx0);
+    }
+private:
+    std::shared_ptr<XBot::ModelInterface> _model;
+
+};
+
 class QuaternionSpace: public Space
 {
 public:

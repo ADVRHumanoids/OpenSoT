@@ -236,28 +236,51 @@ for i in range(Ns):
 
 print(f"x0[0]: {x0[0]}")
 
+class dynamics_derivative(Task):
+    """
+    This carries the derivative of the linear dynamics computed from euler.
+    """
+    def __init__(self, name, df):
+        super().__init__(name, df.getInputSize())
+        self.df = df
+        self._W = np.eye(df.getOutputSize())
+
+    def _update(self):
+        self.lin = self.df
+        self._A = self.lin.getM()
+        self._b = -self.lin.getq()
+
+    @classmethod
+    def create(cls, name, df):
+        obj = cls(name, df)
+        obj.update()
+        return obj
+
+def euler(x, xdot, dt):
+    return x + dt * xdot  # x1 = x0 + dt * xdot0
+
 
 ocp = OCP()
+dd = list()
 for i in range(Ns):
     stage = Stage()
 
     stage.model = xbi.ModelInterface2(rosnode.urdf)
-    stage.state_space = CompositeSpace([VectorSpace(3), QuaternionSpace()])
+    #stage.state_space = CompositeSpace([RobotSpace(stage.model)])
+    stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace()])
 
     stage.x = x
-    stage.dx = dxdot
+    stage.dx = dx
 
     stage.u = qdot
     stage.du = dqdot
 
     stage.q = q
     stage.v = qdot
-    
 
-    df = Cartesian("dynamics_derivative", stage.model, "base_link", "world")
-    df.rotateToLocal(True)
-    df.setLambda(0)
-    stage.dynamics_derivative = AffineTask.toAffine(df, stage.du)
+    df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
+    dd.append(df)
+    stage.dynamics_derivative = df
 
     ocp.addStage(stage)
 
@@ -265,8 +288,8 @@ for i in range(Ns):
 
 stage = Stage()
 stage.model = xbi.ModelInterface2(rosnode.urdf)
-stage.state_space = CompositeSpace([VectorSpace(3), QuaternionSpace()])
-# stage.u = qdot
+#stage.state_space = CompositeSpace([RobotSpace(stage.model)])
+stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace()])
 stage.x = x
 stage.dx = dx
 stage.q = q
@@ -283,7 +306,7 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}",ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e0 * np.eye(model.nv))
+    #minu.setWeight(1e0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
 
