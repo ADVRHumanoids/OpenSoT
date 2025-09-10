@@ -171,42 +171,56 @@ qddot = variables.getVariable("qddot")
 
 print(f"variables.getSize(): {variables.getSize()}")
 
+
+dvars = list()
+# dx
+dvars.append(("dq", model.nv))
+dvars.append(("dqdot", model.nv))
+# du
+dvars.append(("dqddot", model.nv))
+
+dvariables = OptvarHelper(dvars)
+dq = dvariables.getVariable("dq")
+dqdot = dvariables.getVariable("dqdot")
+dqddot = dvariables.getVariable("dqddot")
+
+print(f"dvariables.getSize(): {dvariables.getSize()}")
+
 class min_var(Task):
-    def __init__(self, name, variable):
+    def __init__(self, name, variable, dvariable):
         super().__init__(name, variable.getInputSize())
         self.variable = variable
+        self.dvariable = dvariable
         self.ref = 0. * self.variable.getq()
-        self._W = np.eye(variable.getOutputSize())
+        self._W = np.eye(dvariable.getOutputSize())
 
     def _update(self):
-        self.lin =  self.variable + (self.variable.getValue() - self.ref)
+        self.lin =  self.dvariable + (self.variable.getValue() - self.ref)
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
 
     def setReference(self, ref):
         self.ref = ref
 
-
     @classmethod
-    def create(cls, name, variable):
-        obj = cls(name, variable)
+    def create(cls, name, variable, dvariable):
+        obj = cls(name, variable, dvariable)
         obj.update()
         return obj
-
 class dynamics_derivative(Task):
-    def __init__(self, name, f):
-        super().__init__(name, f.getInputSize())
-        self.f = f
-        self._W = np.eye(f.getOutputSize())
+    def __init__(self, name, df):
+        super().__init__(name, df.getInputSize())
+        self.df = df
+        self._W = np.eye(df.getOutputSize())
 
     def _update(self):
-        self.lin = self.f
+        self.lin = self.df
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
 
     @classmethod
-    def create(cls, name, f):
-        obj = cls(name, f)
+    def create(cls, name, df):
+        obj = cls(name, df)
         obj.update()
         return obj
 
@@ -216,6 +230,9 @@ def euler(x, xdot, dt):
 
 x = AffineHelper.pile(q, qdot)
 xdot = AffineHelper.pile(qdot, qddot)
+
+dx = AffineHelper.pile(dq, dqdot)
+dxdot = AffineHelper.pile(dqdot, dqddot)
 
 x0 = list()
 for i in range(Ns+1):
@@ -231,20 +248,20 @@ ocp = OCP()
 dd = list()
 for i in range(Ns):
     stage = Stage()
+    stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nv)])
 
     stage.x = x
-    stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nv)])
+    stage.dx = dx
+
     stage.u = qddot
+    stage.du = dqddot
+
     stage.q = q
     stage.v = qdot
 
     stage.model = xbi.ModelInterface2(node.urdf)
 
-    f = euler(x, xdot, dt)
-    w0 = np.concatenate((x0[i], u0[i]))
-    f.getValue(w0)
-    stage.variables.append(f)
-    df = dynamics_derivative.create(f"df{i}", f)
+    df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
     dd.append(df)
     stage.dynamics_derivative = df
 
@@ -254,6 +271,7 @@ for i in range(Ns):
 stage = Stage()
 stage.model = xbi.ModelInterface2(node.urdf)
 stage.x = x
+stage.dx = dx
 stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nq)])
 stage.q = q
 stage.v = qdot
@@ -269,7 +287,7 @@ utest.assertTrue(ocp.getNumberOfNodes() == Ns)
 
 minus = list()
 for i in range(Ns):
-    minu = min_var.create(f"minu{i}", ocp.stage(i).u)
+    minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
     minu.setWeight(1e0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
@@ -283,17 +301,10 @@ cartesian_task.setLambda(1)
 cartesian_task.setWeight(1e6 * np.eye(6))
 
 
-ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, variables.getVariable("qdot")))
+ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
 
 T, _ = cartesian_task.getReference()
 node.make_6dof_marker(name="fp3_link8", pose=T, frame_id="world")
-# Tr = T.copy()
-# Tr.translation[0] += 0.1
-# Tr.translation[1] += 0.1
-# Tr.translation[2] -= 0.1
-# cartesian_task.setReference(Tr)
-
-
 #
 ocp.update(x0, u0)
 #
@@ -315,39 +326,6 @@ print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")
 
-# success = solver.solve(x0, u0)
-# if(success):
-#     print("OCP solved!")
-# else:
-#     print("OCP not solved!")
-#
-#
-# x_solution = solver.getStateSolution()
-# u_solution = solver.getControlSolution()
-
-
-# Publish the trajectory
-
-# try:
-#     while rclpy.ok():
-#         for i in range(Ns):
-#             js = JointState()
-#             js.header.stamp = node.get_clock().now().to_msg()
-#             js.name = model.getJointNames()
-#             js.position = x_solution[i][:model.nq].tolist()
-#             node.publish(js)
-#             time.sleep(0.1)
-#         time.sleep(2.)
-
-
-
-
-
-
-# Set a homing configuration
-#
-#model.setJointPosition(q)
-#model.update()
 
 msg = JointState()
 msg.name = model.getJointNames()
@@ -369,7 +347,6 @@ try:
         pose_ref.linear = R.from_quat(quat).as_matrix()
         cartesian_task.setReference(pose_ref)
 
-        #ocp.update(x0, u0)
 
         success = solver.solve(x0, u0)
         if not success:
