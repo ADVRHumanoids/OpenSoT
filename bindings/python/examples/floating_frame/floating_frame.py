@@ -342,6 +342,8 @@ pose_ref = T.copy()
 dt_sim = 0.05
 last_pose_reference = pose_ref.copy()
 
+space = CompositeSpace([R3(model, base="world", distal="base_link"), QuaternionSpace()])
+
 try:
     t= 0.
     while rclpy.ok():
@@ -361,11 +363,16 @@ try:
             if(success):
                 x0 = solver.getStateSolution()
                 u0 = solver.getControlSolution()
-
-                for x in x0:
+                x = x0[0]
+                
+                for i in range(len(x0)-1):
                     # msg.position = x[:model.nq].tolist()
                     # msg.header.stamp = node.get_clock().now().to_msg()
                     # node.publish(msg)
+
+
+                    # x = x0[i]
+                    x = space.integrate(x, u0[i]*dt)
                     q_val = x.tolist()
                     rosnode.publish(q_val)
                     time.sleep(dt_sim)
