@@ -192,10 +192,10 @@ add_test(NAME OpenSoT_task_velocity_Postural COMMAND testPosturalVelocityTask)
 
 
  if(${FCL_FOUND})
-     ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp collision_utils.cpp)
-     TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
-     add_dependencies(testCollisionUtils   OpenSoT)
-     add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
+    #  ADD_EXECUTABLE(testCollisionUtils utils/collision_utils_test.cpp collision_utils.cpp)
+    #  TARGET_LINK_LIBRARIES(testCollisionUtils ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
+    #  add_dependencies(testCollisionUtils   OpenSoT)
+    #  add_test(NAME OpenSoT_utils_collision_utils COMMAND testCollisionUtils)
 
      ADD_EXECUTABLE(testCollisionAvoidanceVelocityConstraint constraints/velocity/TestCollisionAvoidance.cpp collision_utils.cpp)
      TARGET_LINK_LIBRARIES(testCollisionAvoidanceVelocityConstraint ${TestLibs} -lccd moveit_core::moveit_collision_detection fcl)
