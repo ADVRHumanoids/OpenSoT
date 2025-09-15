@@ -45,8 +45,8 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    _x0_candidate.resize(_x0.size());
-    _u0_candidate.resize(_u0.size());
+    _x0_candidate.resize(x0.size());
+    _u0_candidate.resize(u0.size());
 
     _x0 = x0;
     _u0 = u0;
@@ -194,6 +194,8 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
     _stats.total_time = elapsed.count();
+    if(_opt.verbose)
+        std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
     return true;
 }

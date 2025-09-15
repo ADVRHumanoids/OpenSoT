@@ -54,71 +54,6 @@ class ros2_node(Node):
         self.w_T_b.child_frame_id = "base_link"
 
 
-        self.server = InteractiveMarkerServer(self, 'six_dof_marker_server')
-        self.marker_pose = PoseStamped()
-
-    def make_6dof_marker(self, name, pose, frame_id):
-        int_marker = InteractiveMarker()
-        int_marker.header.frame_id = frame_id
-        int_marker.name = name
-        int_marker.description = '6-DOF Control'
-        int_marker.scale = 0.3
-
-        int_marker.pose.position.x = pose.translation[0]
-        int_marker.pose.position.y = pose.translation[1]
-        int_marker.pose.position.z = pose.translation[2]
-
-        quat_xyzw = R.from_matrix(pose.linear).as_quat() # Format: [x, y, z, w]
-        int_marker.pose.orientation.x = quat_xyzw[0]
-        int_marker.pose.orientation.y = quat_xyzw[1]
-        int_marker.pose.orientation.z = quat_xyzw[2]
-        int_marker.pose.orientation.w = quat_xyzw[3]
-
-        self.marker_pose.pose = int_marker.pose
-
-        # Add a visible marker (e.g., a cube)
-        cube_marker = Marker()
-        cube_marker.type = Marker.CUBE
-        cube_marker.scale.x = 0.05
-        cube_marker.scale.y = 0.05
-        cube_marker.scale.z = 0.05
-        cube_marker.color.r = 0.0
-        cube_marker.color.g = 1.0
-        cube_marker.color.b = 0.0
-        cube_marker.color.a = 1.0
-
-        control = InteractiveMarkerControl()
-        control.always_visible = True
-        control.markers.append(cube_marker)
-        int_marker.controls.append(control)
-
-        # Add 6-DOF controls
-        self.add_6dof_controls(int_marker)
-
-
-        self.server.insert(marker=int_marker, feedback_callback=self.process_feedback)
-        self.server.applyChanges()
-    def process_feedback(self, feedback):
-        self.marker_pose.header = feedback.header
-        self.marker_pose.pose = feedback.pose
-    def add_6dof_controls(self, marker):
-        axes = ['x', 'y', 'z']
-        for axis in axes:
-            # Rotation
-            control = InteractiveMarkerControl()
-            control.name = f'rotate_{axis}'
-            control.orientation.w = 1.0
-            setattr(control.orientation, axis, 1.0)
-            control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-            marker.controls.append(control)
-
-            # Translation
-            control = InteractiveMarkerControl()
-            control.name = f'move_{axis}'
-            control.orientation.w = 1.0
-            setattr(control.orientation, axis, 1.0)
-            control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-            marker.controls.append(control)
 
     def publish(self, q_):
         q_val = q_
@@ -319,7 +254,6 @@ cartesian_task.setWeight(1e6 * np.eye(6))
 ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
 
 T, _ = cartesian_task.getReference()
-rosnode.make_6dof_marker(name="base_link", pose=T, frame_id="world")
 
 
 ocp.update(x0, u0)
@@ -332,7 +266,7 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = False
+solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
@@ -340,52 +274,46 @@ print("...solver inited!")
 
 pose_ref = T.copy()
 dt_sim = 0.05
-last_pose_reference = pose_ref.copy()
 
 space = CompositeSpace([R3(model, base="world", distal="base_link"), QuaternionSpace()])
+
+pose_ref.translation[0] = 1.
+pose_ref.translation[1] = -1.
+pose_ref.translation[2] = 1.
+# quat = [0., 0., 0., 0]
+quat = [0.208514, 0.486534, 0.486534, 0.695048]
+
+pose_ref.linear = R.from_quat(quat).as_matrix()
+
+print(pose_ref)
+cartesian_task.setReference(pose_ref.copy())
+
+
+solver.solve(x0, u0)
+x0 = solver.getStateSolution()
+u0 = solver.getControlSolution()
+
+
+
 
 try:
     t= 0.
     while rclpy.ok():
         rclpy.spin_once(rosnode, timeout_sec=0.0)
 
-        pose_ref.translation[0] = rosnode.marker_pose.pose.position.x
-        pose_ref.translation[1] = rosnode.marker_pose.pose.position.y
-        pose_ref.translation[2] = rosnode.marker_pose.pose.position.z
-        quat = [rosnode.marker_pose.pose.orientation.x, rosnode.marker_pose.pose.orientation.y,
-                rosnode.marker_pose.pose.orientation.z, rosnode.marker_pose.pose.orientation.w]
-        pose_ref.linear = R.from_quat(quat).as_matrix()
+        input()
 
-        if pose_ref != last_pose_reference:
-            cartesian_task.setReference(pose_ref)
-            last_pose_reference = pose_ref.copy()
-            success = solver.solve(x0, u0)
-            if(success):
-                x0 = solver.getStateSolution()
-                u0 = solver.getControlSolution()
-                x = x0[0]
-                
-                for i in range(len(x0)-1):
-                    # msg.position = x[:model.nq].tolist()
-                    # msg.header.stamp = node.get_clock().now().to_msg()
-                    # node.publish(msg)
-
-
-                    # x = x0[i]
-                    x = space.integrate(x, u0[i]*dt)
-                    q_val = x.tolist()
-                    rosnode.publish(q_val)
-                    time.sleep(dt_sim)
-
-                for i in range(len(x0)):
-                    x0[i] = x0[-1]
-                for i in range(len(u0)):
-                    u0[i] = u0[-1]
-
-            else:
-                print("problem NOT solved!")
-        else:
+        x = x0[0]
+        for i in range(len(x0)-1):
+            # x = x0[i]
+            x = space.integrate(x, u0[i]*dt)
+            q_val = x.tolist()
             rosnode.publish(q_val)
+            time.sleep(dt_sim)
+
+
+    
+        rosnode.publish(q_val)
 
         time.sleep(dt)
         
