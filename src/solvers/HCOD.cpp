@@ -20,11 +20,22 @@ HCOD::HCOD(OpenSoT::AutoStack &stack_of_tasks, const double damping):
             constraints_in_tasks_list.push_back(constraint);
     }
 
+
     if(constraints_in_tasks_list.size() > 0)
     {
         constraints_in_tasks_list.push_back(stack_of_tasks.getBounds());
         _bounds = std::make_shared<constraints::Aggregated>(constraints_in_tasks_list, _tasks[0]->getA().cols());
     }
+
+    //we check at this point if _bounds contains any bound or constraint, if not we reset the object:
+    bool to_reset = true;
+    if(_bounds->getLowerBound().size() > 0 || _bounds->getUpperBound().size() > 0)
+        to_reset = false;
+    if(_bounds->getAineq().rows() > 0)
+        to_reset = false;
+    if(to_reset)
+        _bounds.reset();
+    //
 
     init(damping);
 }
@@ -49,6 +60,15 @@ HCOD::HCOD(Stack& stack_of_tasks, ConstraintPtr bounds, const double damping):
         _bounds = std::make_shared<constraints::Aggregated>(constraints_in_tasks_list, _tasks[0]->getA().cols());
     }
 
+    //we check at this point if _bounds contains any bound or constraint, if not we reset the object:
+    bool to_reset = true;
+    if(_bounds->getLowerBound().size() > 0 || _bounds->getUpperBound().size() > 0)
+        to_reset = false;
+    if(_bounds->getAineq().rows() > 0)
+        to_reset = false;
+    if(to_reset)
+        _bounds.reset();
+    //
 
     init(damping);
 }
