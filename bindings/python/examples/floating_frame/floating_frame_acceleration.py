@@ -15,32 +15,10 @@ from interactive_markers.interactive_marker_server import InteractiveMarkerServe
 from geometry_msgs.msg import PoseStamped, Point
 from scipy.spatial.transform import Rotation as R
 from geometry_msgs.msg import PoseStamped, Point, TransformStamped
-from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster
+from tf2_ros import TransformBroadcaster
 from pyopensot.tasks.velocity import Cartesian
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSHistoryPolicy
 from pyopensot import AffineHelper, OptvarHelper, GenericTask, Task, AffineTask, AffineConstraint
-import random
-import math
-
-def random_quaternion():
-    """
-    Generate a random unit quaternion uniformly distributed on SO(3).
-    """
-    u1 = random.random()  # in [0,1)
-    u2 = random.random()
-    u3 = random.random()
-
-    qx = math.sqrt(1 - u1) * math.sin(2 * math.pi * u2)
-    qy = math.sqrt(1 - u1) * math.cos(2 * math.pi * u2)
-    qz = math.sqrt(u1) * math.sin(2 * math.pi * u3)
-    qw = math.sqrt(u1) * math.cos(2 * math.pi * u3)
-
-    return np.array([qx, qy, qz, qw])
-
-def random_pose(min, max):
-    p = np.array([random.uniform(min, max), random.uniform(min, max), random.uniform(min, max)])
-    r = random_quaternion()
-    return np.concatenate((p, r))
 
 class ros2_node(Node):
     def __init__(self):
@@ -71,46 +49,12 @@ class ros2_node(Node):
     
         self.base_link_broadcaster = TransformBroadcaster(self)
 
-        self.goal_broadcaster = StaticTransformBroadcaster(self)
-        self.start_broadcaster = StaticTransformBroadcaster(self)
-
         self.w_T_b = TransformStamped()
         self.w_T_b.header.frame_id = "world"
         self.w_T_b.child_frame_id = "base_link"
 
-        self.w_T_goal = TransformStamped()
-        self.w_T_goal.header.frame_id = "world"
-        self.w_T_goal.child_frame_id = "goal"
 
-        self.w_T_start = TransformStamped()
-        self.w_T_start.header.frame_id = "world"
-        self.w_T_start.child_frame_id = "start"
 
-    def publish_start(self, q):
-        self.w_T_start.header.stamp = self.get_clock().now().to_msg()
-        self.w_T_start.transform.translation.x = q[0]
-        self.w_T_start.transform.translation.y = q[1]
-        self.w_T_start.transform.translation.z = q[2]
-        self.w_T_start.transform.rotation.x = q[3]
-        self.w_T_start.transform.rotation.y = q[4]
-        self.w_T_start.transform.rotation.z = q[5]
-        self.w_T_start.transform.rotation.w = q[6]
-
-        self.start_broadcaster.sendTransform(self.w_T_start)
-
-    def publish_goal(self, T):
-        self.w_T_goal.header.stamp = self.get_clock().now().to_msg()
-        self.w_T_goal.transform.translation.x = T.translation[0]
-        self.w_T_goal.transform.translation.y = T.translation[1]
-        self.w_T_goal.transform.translation.z = T.translation[2]
-        rot = R.from_matrix(T.linear)
-        quat = rot.as_quat()
-        self.w_T_goal.transform.rotation.x = quat[0]
-        self.w_T_goal.transform.rotation.y = quat[1]
-        self.w_T_goal.transform.rotation.z = quat[2]
-        self.w_T_goal.transform.rotation.w = quat[3]
-
-        self.goal_broadcaster.sendTransform(self.w_T_goal)
     def publish(self, q_):
         q_val = q_
 
@@ -122,6 +66,7 @@ class ros2_node(Node):
         self.w_T_b.transform.rotation.y = q_val[4]
         self.w_T_b.transform.rotation.z = q_val[5]
         self.w_T_b.transform.rotation.w = q_val[6]
+
 
         self.base_link_broadcaster.sendTransform(self.w_T_b)
 
@@ -165,10 +110,12 @@ model = xbi.ModelInterface2(rosnode.urdf)
 print(f"model.nq: {model.nq}")
 print(f"model.nv: {model.nv}")
 
-q_val =random_pose(-2., 2.)
-v_val = np.array([0., 0., 0., 0., 0., 0.])
 
-rosnode.publish_start(q_val)
+q_val = np.array([0., 0., 0., 0., 0., 0., 1.])
+v_val = np.array([0., 0., 0., 0., 0., 0.])
+# v_val = np.random.rand(6)
+# v_val = np.zeros(model.nv)
+a_val = np.zeros(model.nv)
 
 model.setJointPosition(q_val)
 model.update()
@@ -178,14 +125,15 @@ print(f"T: \n{T}")
 
 
 vars = list()
-# x
 vars.append(("q", model.nq))
-# u
 vars.append(("qdot", model.nv))
+vars.append(("qddot", model.nv))
+
 
 variables = OptvarHelper(vars)
 q = variables.getVariable("q")
 qdot = variables.getVariable("qdot")
+qddot = variables.getVariable("qddot")
 
 
 print(f"variables.getSize(): {variables.getSize()}")
@@ -195,12 +143,14 @@ print(f"variables.getSize(): {variables.getSize()}")
 dvars = list()
 # dx
 dvars.append(("dq", model.nv))
-# du
 dvars.append(("dqdot", model.nv))
+# du
+dvars.append(("dqddot", model.nv))
 
 dvariables = OptvarHelper(dvars)
 dq = dvariables.getVariable("dq")
 dqdot = dvariables.getVariable("dqdot")
+dqddot = dvariables.getVariable("dqddot")
 
 print(f"dvariables.getSize(): {dvariables.getSize()}")
 
@@ -209,21 +159,21 @@ Ns = 20 # number of nodes
 tf = 3.0 # final time
 dt = tf/Ns
 
-x = q
-xdot = qdot
+x = AffineHelper.pile(q, qdot)
+xdot = AffineHelper.pile(qdot, qddot)
 
-dx = dq
-dxdot = dqdot
+dx = AffineHelper.pile(dq, dqdot)
+dxdot = AffineHelper.pile(dqdot, dqddot)
 
 
 
 x0 = list()
 for i in range(Ns+1):
-    x0.append(q_val)
+    x0.append(np.concatenate((q_val,v_val)))
 
 u0 = list()
 for i in range(Ns):
-    u0.append(v_val)
+    u0.append(np.concatenate((v_val,a_val)))
 
 print(f"x0[0]: {x0[0]}")
 
@@ -258,13 +208,13 @@ for i in range(Ns):
 
     stage.model = xbi.ModelInterface2(rosnode.urdf)
     #stage.state_space = CompositeSpace([RobotSpace(stage.model)])
-    stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace()])
+    stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace(), VectorSpace(model.nv)])
 
     stage.x = x
     stage.dx = dx
 
-    stage.u = qdot
-    stage.du = dqdot
+    stage.u = qddot
+    stage.du = dqddot
 
     stage.q = q
     stage.v = qdot
@@ -280,7 +230,7 @@ for i in range(Ns):
 stage = Stage()
 stage.model = xbi.ModelInterface2(rosnode.urdf)
 #stage.state_space = CompositeSpace([RobotSpace(stage.model)])
-stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace()])
+stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace(), VectorSpace(model.nv)])
 stage.x = x
 stage.dx = dx
 stage.q = q
@@ -322,7 +272,7 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = False
+solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
@@ -333,14 +283,15 @@ dt_sim = 0.05
 
 space = CompositeSpace([R3(model, base="world", distal="base_link"), QuaternionSpace()])
 
-q_rand = random_pose(-2., 2.)
-pose_ref.translation = q_rand[0:3]
-pose_ref.linear = R.from_quat(q_rand[3:]).as_matrix()
+pose_ref.translation[0] = 1.
+pose_ref.translation[1] = 0.
+pose_ref.translation[2] = 0.
+quat = [0., 0., 0., 1.]
+# quat = [0.208514, 0.486534, 0.486534, 0.695048]
+
+pose_ref.linear = R.from_quat(quat).as_matrix()
 
 print(pose_ref)
-rosnode.publish_goal(pose_ref)
-rclpy.spin_once(rosnode, timeout_sec=0.0)
-
 cartesian_task.setReference(pose_ref.copy())
 
 
@@ -356,21 +307,24 @@ u0 = solver.getControlSolution()
 try:
     t= 0.
     while rclpy.ok():
+        rclpy.spin_once(rosnode, timeout_sec=0.0)
+
         input()
 
         x = x0[0]
         for i in range(len(x0)-1):
-            x = x0[i]
-            # x = space.integrate(x, u0[i]*dt - v_val*dt)
+            #x = x0[i]
+            #q_val = x[0:model.nq].tolist()
+            
+            v_val = x[model.nq:] + u0[i]*dt
+            x = space.integrate(x[0:model.nq], (x[model.nq:] +  0.5*u0[i]*dt)*dt)
             q_val = x.tolist()
+            x = np.concatenate((x, v_val))
+            
             rosnode.publish(q_val)
             time.sleep(dt_sim)
 
-
-    
         rosnode.publish(q_val)
-
-        rclpy.spin_once(rosnode, timeout_sec=0.0)
 
         time.sleep(dt)
         
