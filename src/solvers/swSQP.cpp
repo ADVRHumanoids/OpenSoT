@@ -41,6 +41,24 @@ void swSQP::computeCost(const unsigned int i,
     }
 }
 
+void swSQP::computeConstraints(const unsigned int i,
+                               Eigen::MatrixXd& C, Eigen::MatrixXd& D, Eigen::VectorXd& dl, Eigen::VectorXd& du)
+{
+    OpenSoT::constraints::Aggregated::ConstraintPtr constraints = _ocp->stage(i)->stack->getBounds();
+
+    //Do not make sense to check bnounds since bounds in the non-linear problem are constraints
+    if(constraints->getAineq().rows() > 0) //there are constraints
+    {
+        C = constraints->getAineq() * _Mx[i].transpose();
+        if(_ocp->stage(i)->u)
+            D = constraints->getAineq() * _Mu[i].transpose();
+
+        dl = constraints->getbLowerBound();
+        du = constraints->getbUpperBound();
+    }
+}
+
+
 bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0)
 {
     auto start = std::chrono::high_resolution_clock::now();
@@ -88,6 +106,11 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             computeCost(k, _Q[k], _q[k], _R[k], _r[k], _S[k]);
 
             _qp_solver->setFullCost(k, _R[k], _Q[k], _S[k], _r[k], _q[k]);
+
+            // --- Constraints (always) ---
+            computeConstraints(k, _C[k], _D[k], _dl[k], _du[k]);
+
+            _qp_solver->setConstraint(k, _C[k], _D[k], _dl[k], _du[k]);
         }
 
 
@@ -260,6 +283,7 @@ bool swSQP::line_search()
     return false;
 }
 
+
 void swSQP::_init()
 {
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
@@ -299,6 +323,19 @@ void swSQP::_init()
         _S.push_back(S);
 
         _qp_solver->setFullCost(k, _R[k], _Q[k], _S[k], _r[k], _q[k]);
+
+        // --- Constraints (always) ---
+        Eigen::MatrixXd C, D;
+        Eigen::VectorXd dl, du;
+        computeConstraints(k, C, D, dl, du);
+        _C.push_back(C);
+        _D.push_back(D);
+        _dl.push_back(dl);
+        _du.push_back(du);
+
+        _qp_solver->setConstraint(k, _C[k], _D[k], _dl[k], _du[k]);
+
+
     }
 }
 

@@ -294,12 +294,10 @@ for i in range(Ns):
 
 
 
-#
 # set goal at final state
 cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world")
 cartesian_task.setLambda(1)
 cartesian_task.setWeight(1e6 * np.eye(6))
-
 
 ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
 
@@ -313,6 +311,12 @@ print("ocp updated!")
 print(f"ocp.stage(Ns).stack.getStack()[0].getb(): {ocp.stage(Ns).stack.getStack()[0].getb()}")
 #
 
+qlims = list()
+for i in range(Ns+1):
+    qmin, qmax = model.getJointLimits()
+    qlims_i = JointLimits(ocp.stage(i).model, qmax, qmin)
+    qlims.append(qlims_i)
+    ocp.stage(i).stack = ocp.stage(i).stack << AffineConstraint.toAffine(qlims[-1], dvariables.getVariable("dq"))
 
 
 

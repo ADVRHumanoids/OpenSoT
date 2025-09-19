@@ -202,6 +202,8 @@ class min_var(Task):
         self._W = np.eye(dvariable.getOutputSize())
 
     def _update(self):
+        self.variable.update()
+        self.dvariable.update()
         self.lin =  self.dvariable + (self.variable.getValue() - self.ref)
         self._A = self.lin.getM()
         self._b = -self.lin.getq()
@@ -313,7 +315,9 @@ for i in range(Ns):
 # set goal at final state
 cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world")
 cartesian_task.setLambda(1)
-cartesian_task.setWeight(1e6 * np.eye(6))
+cartesian_task.setWeight(1e3 * np.eye(6))
+
+minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], ocp.stage(Ns).dx[model.nq:])
 
 """ 
 Important:  
@@ -326,7 +330,7 @@ df(q)/dq = J(q)dq
 hence the Affine task is applied to dq: [J(q) 0] [dq dqdot]' = J(q)dq
 
 """
-ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
+ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, ocp.stage(Ns).dx[0:model.nq]) + 1e4*minvel)
 
 T, _ = cartesian_task.getReference()
 node.make_6dof_marker(name="fp3_link8", pose=T, frame_id="world")
@@ -379,24 +383,30 @@ try:
                 node.marker_pose.pose.orientation.z, node.marker_pose.pose.orientation.w]
         pose_ref.linear = R.from_quat(quat).as_matrix()
 
-        if pose_ref != last_pose_reference:
-            cartesian_task.setReference(pose_ref)
-            last_pose_reference = pose_ref.copy()
-            success = solver.solve(x0, u0)
-            if(success):
-                x0 = solver.getStateSolution()
-                u0 = solver.getControlSolution()
 
-                for x in x0:
-                    msg.position = x[:model.nq].tolist()
-                    msg.header.stamp = node.get_clock().now().to_msg()
-                    node.publish(msg)
-                    time.sleep(dt_sim)
+        cartesian_task.setReference(pose_ref)
+        last_pose_reference = pose_ref.copy()
+        success = solver.solve(x0, u0)
+        if(success):
+            x0 = solver.getStateSolution()
+            u0 = solver.getControlSolution()
 
-                for i in range(len(x0)):
-                    x0[i] = x0[-1]
-                for i in range(len(u0)):
-                    u0[i] = u0[-1]
+
+            xk = x0[0]
+            for u in u0:
+                xk = euler(xk, np.concatenate((xk[model.nq:], u)), dt)
+                msg.position = xk[:model.nq].tolist()
+                msg.header.stamp = node.get_clock().now().to_msg()
+                node.publish(msg)
+                time.sleep(dt_sim)
+
+
+            for i in range(len(x0)):
+                x0[i] = xk
+            for i in range(len(u0)):
+                u0[i] = u0[i]*0.
+
+
 
             else:
                 print("problem NOT solved!")

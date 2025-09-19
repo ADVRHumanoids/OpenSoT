@@ -49,29 +49,6 @@ inline std::string print(const AffineHelper& affine)
     return os.str();
 }
 
-inline AffineHelper subVariable(const AffineHelper& affine, const std::vector<size_t>& slice)
-{
-    Eigen::MatrixXd M;
-    M.setZero(slice.size(), affine.getM().rows());
-
-    unsigned int row = 0;
-    for(size_t index : slice)
-    {
-        M(row, index) = 1.;
-        row++;
-    }
-
-    return M*affine;
-}
-
-inline AffineHelper subVariable(const AffineHelper& affine, const size_t& id)
-{
-    std::vector<size_t> slice;
-    slice.push_back(id);
-    return subVariable(affine, slice);
-}
-
-
 
 class OptvarHelperWrapper
 {
@@ -133,6 +110,16 @@ struct PyAffineHeplerTrampoline : public AffineHelper {
             );
     }
 
+    // Override getValue(const Eigen::VectorXd&)
+    const Eigen::VectorXd& getValue(const Eigen::VectorXd& x) override {
+            PYBIND11_OVERRIDE(
+                const Eigen::VectorXd&,  // Return type
+                AffineHelper,            // C++ parent class
+                getValue,                // Name of the function
+                x                        // Argument(s)
+                );
+    }
+
 public:
     // Lift protected members to public so Python can access them (as in your original)
     using AffineHelper::_M;
@@ -175,15 +162,15 @@ void pyAffineHelper(py::module& m, const std::string& className) {
         .def_readwrite("_M", &PyAffineHeplerTrampoline::_M)
         .def_readwrite("_q", &PyAffineHeplerTrampoline::_q)
 
-        .def("__getitem__", [](const AffineHelper& a, const size_t i) {
-            if(i >= a.getM().rows())
+        .def("__getitem__", [](const std::shared_ptr<AffineHelper> a, const size_t i) {
+            if(i >= a->getM().rows())
                 throw py::index_error();
-            return subVariable(a, i);
+            return SubVariable(a, i);
         })
 
-        .def("__getitem__", [](const AffineHelper& a, py::slice slice) {
+        .def("__getitem__", [](const std::shared_ptr<AffineHelper> a, py::slice slice) {
             size_t start, stop, step, slicelength;
-            if (!slice.compute(a.getM().rows(), &start, &stop, &step, &slicelength))
+            if (!slice.compute(a->getM().rows(), &start, &stop, &step, &slicelength))
                 throw py::error_already_set();
 
             std::vector<size_t> slice_vector;
@@ -191,11 +178,11 @@ void pyAffineHelper(py::module& m, const std::string& className) {
             for(size_t i = 0; i < slicelength; ++i)
             {
                 unsigned int id = start + i * step;
-                if(id >= a.getM().rows())
+                if(id >= a->getM().rows())
                     throw py::index_error();
                 slice_vector.push_back(id);
             }
-            return subVariable(a, slice_vector);
+            return SubVariable(a, slice_vector);
         })
 
         .def("update", &AffineHelper::update)
@@ -223,3 +210,21 @@ void pyOptvarHelperWrapper(py::module& m, const std::string& className) {
         .def("getSize", &OptvarHelperWrapper::getSize);
 }
 
+void pySubVariable(py::module& m, const std::string& className) {
+    py::class_<SubVariable, AffineHelper, std::shared_ptr<SubVariable>>(m, className.c_str())
+        .def(py::init<const std::shared_ptr<AffineHelper>, const std::vector<size_t>&>(), py::arg("affine"), py::arg("slice"))
+        .def(py::init<const std::shared_ptr<AffineHelper>, size_t>(), py::arg("affine"), py::arg("id"))
+        .def("update", &SubVariable::update)
+        .def("getValue",
+             [](SubVariable &self, const Eigen::VectorXd &x) -> const Eigen::VectorXd& {
+                 return self.getValue(x);
+             })
+
+        .def("getValue",
+             [](const SubVariable &self) -> const Eigen::VectorXd& {
+                 return self.getValue();
+             },
+             py::return_value_policy::reference_internal);
+
+
+}

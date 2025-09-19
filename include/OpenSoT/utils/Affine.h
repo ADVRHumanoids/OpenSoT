@@ -181,13 +181,10 @@ public:
     template <typename Derived>
     void getValue(const Eigen::VectorXd& x, Eigen::MatrixBase<Derived>& value)
     {
-        value.noalias() = _M*x;
-        value += _q;
-
-        _value = value;
+        value = getValue(x);
     }
 
-    const Eigen::VectorXd& getValue(const Eigen::VectorXd& x)
+    virtual const Eigen::VectorXd& getValue(const Eigen::VectorXd& x)
     {
         _value.noalias() = _M*x;
         _value += _q;
@@ -258,10 +255,62 @@ private:
     
 };
 
+template <typename DerivedM, typename DerivedQ>
+class SubVariableBase : public AffineHelperBase<DerivedM, DerivedQ>
+{
+public:
+    SubVariableBase(const std::shared_ptr<AffineHelperBase<DerivedM, DerivedQ>> affine, const std::vector<size_t>& slice):
+        OpenSoT::AffineHelperBase<DerivedM, DerivedQ>(affine->getInputSize(), slice.size()),
+        _affine(affine)
+    {
+        _S.setZero(slice.size(), affine->getM().rows());
+
+        unsigned int row = 0;
+        for(size_t index : slice)
+        {
+            _S(row, index) = 1.;
+            row++;
+        }
+
+        update();
+    }
+
+    SubVariableBase(const std::shared_ptr<AffineHelperBase<DerivedM, DerivedQ>> affine, const size_t id)
+    : SubVariableBase(affine, std::vector<size_t>{id})
+    {
+        update();
+    }
 
 
+    void update()
+    {
+        _sub_affine = _S*(*_affine);
+
+        this->_M = _sub_affine.getM();
+        this->_q = _sub_affine.getq();
+
+        if(_affine->getValue().size() != 0)
+            this->_value = _S * _affine->getValue();
+    }
+
+    using AffineHelperBase<DerivedM,DerivedQ>::getValue;
+
+    const Eigen::VectorXd& getValue(const Eigen::VectorXd& x) override
+    {
+        this->_affine->getValue(x);
+        update();
+        return this->_value;
+    }
+
+private:
+    DerivedM _S;
+    std::shared_ptr<AffineHelperBase<DerivedM, DerivedQ>> _affine;
+
+    AffineHelperBase<DerivedM, DerivedQ> _sub_affine;
+};
 
 
+typedef SubVariableBase<Eigen::MatrixXd, Eigen::VectorXd> SubVariable;
 
 
 
@@ -321,9 +370,9 @@ template <typename DerivedMatrix, typename DerivedM, typename DerivedQ>
 inline auto operator*(const DerivedMatrix& matrix, 
                       const AffineHelperBase<DerivedM, DerivedQ>& affine) -> 
                       AffineHelperBase<decltype(matrix*affine.getM()), decltype(matrix*affine.getq())>
-{   
-    
-    
+{
+
+
     return AffineHelperBase<decltype(matrix*affine.getM()), decltype(matrix*affine.getq())> (matrix*affine.getM(), matrix*affine.getq());
 }
 

@@ -28,6 +28,71 @@ protected:
 
 };
 
+TEST_F(testAffineHelper, testSubAffine)
+{
+    int nq = 3;
+    int nv = 2;
+
+    std::vector<std::pair<std::string, int>> name_size_pairs;
+
+    name_size_pairs.emplace_back("var1", nq);
+    name_size_pairs.emplace_back("var2", nv);
+
+    OpenSoT::OptvarHelper opt_helper(name_size_pairs);
+
+    auto var1 = std::make_shared<OpenSoT::AffineHelper>(opt_helper.getVariable("var1"));
+    auto var2 = std::make_shared<OpenSoT::AffineHelper>(opt_helper.getVariable("var2"));
+
+    Eigen::VectorXd x(nq + nv);
+    x<<1,2,3,4,5;
+
+    std::cout<<"var1.getValue(x): "<<var1->getValue(x).transpose()<<std::endl;
+    std::cout<<"var2.getValue(x): "<<var2->getValue(x).transpose()<<std::endl;
+
+    std::vector<size_t> slice;
+    slice.push_back(1);
+    slice.push_back(2);
+
+    auto subvar1 = OpenSoT::SubVariable(var1, slice);
+    EXPECT_EQ(subvar1.getOutputSize(), slice.size());
+    EXPECT_EQ(subvar1.getInputSize(),  var1->getInputSize());
+
+    std::cout<<"subvar1.getValue(): "<<subvar1.getValue().transpose()<<std::endl;
+    EXPECT_EQ(subvar1.getValue()[0], var1->getValue()[slice[0]]);
+    EXPECT_EQ(subvar1.getValue()[1], var1->getValue()[slice[1]]);
+
+    std::cout<<"var1.getM(): "<<var1->getM()<<std::endl;
+    std::cout<<"subvar1.getM(): "<<subvar1.getM()<<std::endl;
+    for(unsigned int i = 0; i < subvar1.getM().rows(); ++i)
+    {
+        for(unsigned int j = 0; j < subvar1.getM().cols(); ++j)
+        {
+            EXPECT_EQ(subvar1.getM()(i,j), var1->getM()(slice[i],j));
+        }
+    }
+
+    std::cout<<"var1.getq(): "<<var1->getq()<<std::endl;
+    std::cout<<"subvar1.getq(): "<<subvar1.getq()<<std::endl;
+    for(unsigned int i = 0; i < subvar1.getq().size(); ++i)
+    {
+        EXPECT_EQ(subvar1.getq()[i], var1->getq()[slice[i]]);
+    }
+
+    x<<6,7,8,9,0;
+    std::cout<<"var1.getValue(x): "<<var1->getValue(x).transpose()<<std::endl;
+    subvar1.update();
+    std::cout<<"subvar1.getValue(): "<<subvar1.getValue().transpose()<<std::endl;
+    EXPECT_EQ(subvar1.getValue()[0], var1->getValue()[slice[0]]);
+    EXPECT_EQ(subvar1.getValue()[1], var1->getValue()[slice[1]]);
+
+
+    x<<11,12,13,14,15;
+    std::cout<<"subvar1.getValue(x): "<<subvar1.getValue(x).transpose()<<std::endl;
+    std::cout<<"var1.getValue(): "<<var1->getValue().transpose()<<std::endl;
+
+
+}
+
 TEST_F(testAffineHelper, checkBasics)
 {
     std::vector<std::pair<std::string, int>> name_size_pairs;

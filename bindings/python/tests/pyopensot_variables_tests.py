@@ -64,3 +64,24 @@ utest.assertTrue((x.getValue() == []).all())
 utest.assertTrue((x.getValue(w) == w[0:4]).all())
 utest.assertTrue((x.getValue() == w[0:4]).all())
 utest.assertTrue((u.getValue(w) == w[4:]).all())
+
+### SUBVARIABLES ###
+vars = list()
+vars.append(("q", 3))
+vars.append(("qdot", 4))
+variables = OptvarHelper(vars)
+q = variables.getVariable("q")
+qdot = variables.getVariable("qdot")
+
+x = np.array([1,2,3,4,5,6,7])
+print(f"qdot.getValue(x): {qdot.getValue(x)}")
+print(f"qdot[2:].getValue(): {qdot[2:].getValue()}")
+utest.assertTrue(qdot[2:].getValue()[0] == qdot.getValue()[2])
+utest.assertTrue(qdot[2:].getValue()[1] == qdot.getValue()[3])
+
+x = np.array([8,9,10,11,12,13,14])
+print(f"qdot[2:].getValue(x): {qdot[2:].getValue(x)}")
+print(f"qdot.getValue(): {qdot.getValue()}")
+utest.assertTrue(qdot[2:].getValue()[0] == qdot.getValue()[2])
+utest.assertTrue(qdot[2:].getValue()[1] == qdot.getValue()[3])
+

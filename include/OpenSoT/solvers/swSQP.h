@@ -155,6 +155,8 @@ private:
                      Eigen::MatrixXd& Q, Eigen::VectorXd& q,
                      Eigen::MatrixXd& R, Eigen::VectorXd& r,
                      Eigen::MatrixXd& S);
+    void computeConstraints(const unsigned int i,
+                            Eigen::MatrixXd& C, Eigen::MatrixXd& D, Eigen::VectorXd& dl, Eigen::VectorXd& du);
 
     hpipmOC::Ptr _qp_solver;
     OpenSoT::ocp::Ptr _ocp;
@@ -172,6 +174,10 @@ private:
     // stores cost in the horizon
     std::vector<Eigen::MatrixXd> _H, _Q, _R, _S;
     std::vector<Eigen::VectorXd> _g, _q, _r;
+
+    // stores constraints in the horizon
+    std::vector<Eigen::MatrixXd> _D, _C;
+    std::vector<Eigen::VectorXd> _dl, _du;
 
 
     std::vector<Eigen::VectorXd> _x0, _u0;

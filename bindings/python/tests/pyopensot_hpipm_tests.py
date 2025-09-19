@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from pyopensot import AffineHelper, OptvarHelper, GenericTask, AggregatedTask
+from pyopensot import AffineHelper, OptvarHelper, GenericTask, AggregatedTask, SubVariable
 import pyopensot as pysot
 import pyopensot_hpipmoc as hpipmoc
 from ttictoc import tic, toc
 import unittest
 from collections import deque
 
-SHOW_PLOTS = False
+SHOW_PLOTS = True
 
 def plot_trajectory(Ns, x_value, u_value, zmp_refs, dt):
     plt.figure(figsize=(8, 4))

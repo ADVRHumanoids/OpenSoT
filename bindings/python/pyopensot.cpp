@@ -21,6 +21,7 @@ PYBIND11_MODULE(pyopensot, m) {
     pySubTask(m);
     pySubConstraint(m);
     pyAffineHelper(m, "AffineHelper");
+    pySubVariable(m, "SubVariable");
     pyOptvarHelperWrapper(m, "OptvarHelper");
     pyGenericTask(m);
     pyGenericConstraint(m);
