@@ -51,7 +51,7 @@ void pyHPIPMOC(py::module& m) {
         .def("setFullCost", &solvers::hpipmOC::setFullCost)
         .def("setCost", &solvers::hpipmOC::setCost)
         .def("setLSCost", &solvers::hpipmOC::setLSCost,
-        py::arg("i"), py::arg("Ax"), py::arg("Wx"), py::arg("bx"), py::arg("Au") = Eigen::MatrixXd(0,0), py::arg("Wu") = Eigen::MatrixXd(0,0), py::arg("bu") = Eigen::VectorXd(0,0))
+        py::arg("i"), py::arg("Ax"), py::arg("Wx"), py::arg("bx"), py::arg("Au") = Eigen::MatrixXd(0,0), py::arg("Wu") = Eigen::MatrixXd(0,0), py::arg("bu") = Eigen::VectorXd(0))
         .def("solve", &solvers::hpipmOC::solve)
         .def("getSolution", &solvers::hpipmOC::getSolution)
         .def("setStageDynamics", &solvers::hpipmOC::setStageDynamics);
