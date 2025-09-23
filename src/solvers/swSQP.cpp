@@ -78,8 +78,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             {
                 computeDynamics(k, _A[k], _B[k], _b[k]);
 
-                _qp_solver->setStageDynamics(
-                    k, _A[k], _B[k], -1.0 * _ocp->stage(k)->dynamics_derivative->getb());
+                _qp_solver->setStageDynamics(k, _A[k], _B[k], _b[k]);
             }
 
             // --- Cost (always) ---

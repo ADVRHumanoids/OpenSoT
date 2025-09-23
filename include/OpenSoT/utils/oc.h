@@ -62,51 +62,13 @@ public:
     }
 };
 
-class R3: public Space
+class SE3Space: public Space
 {
 public:
-    typedef std::shared_ptr<R3> Ptr;
+    typedef std::shared_ptr<SE3Space> Ptr;
 
-    R3(std::shared_ptr<XBot::ModelInterface> model, const std::string& base, const std::string& distal):
-        Space(3, 3),
-        _model(model),
-        _distal(distal),
-        _base(base)
-    {}
-
-    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
-    {
-        if(x0.size() != this->nq())
-            throw std::runtime_error("x0.size() != _nq");
-        if(x1.size() != this->nq())
-            throw std::runtime_error("x1.size() != _nq");
-        if(dx0.size() != this->nv())
-            throw std::runtime_error("dx0.size() != _nv");
-        if(x0.size() != dx0.size())
-            throw std::runtime_error("x0.size() != dx0.size()");
-
-        if(_base == _distal)
-            _b_T_d.setIdentity();
-        else
-            _b_T_d = _model->getPose(_distal, _base);
-
-        x1 = x0 + _b_T_d.linear() * dx0;
-    }
-private:
-    std::shared_ptr<XBot::ModelInterface> _model;
-    std::string _distal;
-    std::string _base;
-    Eigen::Affine3d _b_T_d;
-};
-
-class RobotSpace: public Space
-{
-public:
-    typedef std::shared_ptr<RobotSpace> Ptr;
-
-    RobotSpace(std::shared_ptr<XBot::ModelInterface> model):
-        Space(model->getNq(), model->getNv()),
-        _model(model)
+    SE3Space():
+        Space(7, 6)
     {}
 
     virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
@@ -118,13 +80,15 @@ public:
         if(dx0.size() != this->nv())
             throw std::runtime_error("dx0.size() != _nv");
 
-        x1 = _model->sum(x0, dx0);
-    }
-private:
-    std::shared_ptr<XBot::ModelInterface> _model;
+        Eigen::Matrix4d T1 = XYZQUATtoSE3(x0);
+        Eigen::Matrix4d T2 = Exp6(dx0);
 
+        Eigen::Matrix4d res = T1 * T2; 
+        x1 = SE3toXYZQUAT(res);
+    }
 };
 
+// SO3 space represented as a quaternion
 class QuaternionSpace: public Space
 {
 public:
@@ -143,11 +107,10 @@ public:
         if(dx0.size() != this->nv())
             throw std::runtime_error("dx0.size() != _nv");
 
-        x1 = Log_quat(Exp_quat(x0) * Exp3(dx0));
+        x1 = SO3toQUAT(QUATtoSO3(x0)* Exp3(dx0));
 
     }
 };
-
 class CompositeSpace : public Space
 {
 private:

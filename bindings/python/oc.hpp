@@ -65,28 +65,10 @@ void pyopensot_oc(py::module& m) {
             self.integrate(x0, dx0, x1);
             return x1;}, py::arg("x0"), py::arg("dx0"));
 
-    // ---------------- Derived: R3 ----------------
-    py::class_<OpenSoT::R3, OpenSoT::Space, OpenSoT::R3::Ptr>(m, "R3")
-        .def(py::init<std::shared_ptr<XBot::ModelInterface>, const std::string&, const std::string&>(), py::arg("model"), py::arg("base"), py::arg("distal"))
-        .def("integrate", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
-            Eigen::VectorXd x1(x0.size());
-            x1.setZero();
-            self.integrate(x0, dx0, x1);
-            return x1;}, py::arg("x0"), py::arg("dx0"));
-
-    // ---------------- Derived: RobotSpace ----------------
-    py::class_<OpenSoT::RobotSpace, OpenSoT::Space, OpenSoT::RobotSpace::Ptr>(m, "RobotSpace")
-        .def(py::init<std::shared_ptr<XBot::ModelInterface>>(), py::arg("model"))
-        .def("integrate", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
-            Eigen::VectorXd x1(x0.size());
-            x1.setZero();
-            self.integrate(x0, dx0, x1);
-            return x1;}, py::arg("x0"), py::arg("dx0"));
-
-    // ---------------- Derived: QuaternionSpace ----------------
-    py::class_<OpenSoT::QuaternionSpace, OpenSoT::Space, OpenSoT::QuaternionSpace::Ptr>(m, "QuaternionSpace")
+    // ---------------- Derived: SE3Space ----------------
+    py::class_<OpenSoT::SE3Space, OpenSoT::Space, OpenSoT::SE3Space::Ptr>(m, "SE3Space")
         .def(py::init<>())
-        .def("integrate", [](OpenSoT::QuaternionSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+        .def("integrate", [](OpenSoT::SE3Space& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
             Eigen::VectorXd x1(x0.size());
             x1.setZero();
             self.integrate(x0, dx0, x1);
@@ -126,7 +108,6 @@ void pyopensot_oc(py::module& m) {
         .def_readwrite("q", &Stage::q)
         .def_readwrite("v", &Stage::v)
         .def_readwrite("stack", &Stage::stack)
-        .def_readwrite("dynamics_derivative", &Stage::dynamics_derivative)
         .def_readwrite("state_space", &Stage::state_space);
 
     // Bind ocp

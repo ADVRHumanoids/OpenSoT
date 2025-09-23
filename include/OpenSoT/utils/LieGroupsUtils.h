@@ -4,8 +4,17 @@
 #include <Eigen/Dense>
 
 
-namespace OpenSoT{
+#define EPSILON 1e-8
 
+namespace Eigen{
+typedef Matrix<double, 6, 1> Vector6d;
+typedef Matrix<double, 7, 1> Vector7d;
+
+// Typedef for 6x6 matrix  
+typedef Matrix<double, 6, 6> Matrix6d;
+}
+
+namespace OpenSoT{
 // Hat operator: R^3 -> so(3)
 inline Eigen::Matrix3d hat(const Eigen::Vector3d& v) {
     Eigen::Matrix3d m;
@@ -75,18 +84,203 @@ inline Eigen::Vector3d Log3(const Eigen::Matrix3d& R, double eps = 1e-8) {
     return (theta / (2.0 * std::sin(theta))) * r;
 }
 
+// Left Jacobian of SO(3)
+inline Eigen::Matrix3d J_l(const Eigen::Vector3d& theta) {
+    double n = theta.norm();  // Euclidean norm of theta
+
+    if (n < EPSILON) {
+        return Eigen::Matrix3d::Identity();  // Return identity matrix if norm is too small
+    }
+
+    double n_sq = n * n;
+    double n_3 = n_sq * n;
+    double c = cos(n);
+    double s = sin(n);
+
+    Eigen::Matrix3d hat_theta = hat(theta);
+    Eigen::Matrix3d hat_theta_sq = hat_theta * hat_theta;  // hat_theta squared (matrix multiplication)
+
+    // JL computation
+    Eigen::Matrix3d JL = Eigen::Matrix3d::Identity() + hat_theta * ((1.0 - c) / n_sq) + hat_theta_sq * ((n - s) / n_3);
+
+    return JL;
+}
+
+// Left Jacobian of SO(3)
+inline Eigen::Matrix3d J_l_inv(const Eigen::Vector3d& theta) {
+    double n = theta.norm();  // Euclidean norm of theta
+    
+    if (n < EPSILON) {
+        return Eigen::Matrix3d::Identity();  // Return identity matrix if norm is too small
+    }
+
+    double n_sq = n * n;
+    double n_3 = n_sq * n;
+    double c = cos(n);
+    double s = sin(n);
+
+    Eigen::Matrix3d hat_theta = hat(theta);
+    Eigen::Matrix3d hat_theta_sq = hat_theta * hat_theta;  // hat_theta squared (matrix multiplication)
+
+    // JL_inv computation
+    Eigen::Matrix3d JL_inv = Eigen::Matrix3d::Identity() - 0.5 * hat_theta + (1.0 / n_sq - (1 + c)/(2*n * s))* hat_theta_sq;
+
+    return JL_inv;
+}
+
+inline Eigen::Matrix4d Exp6(const Eigen::Vector6d & tau){
+    Eigen::Vector3d rho = tau.head(3);
+    Eigen::Vector3d theta = tau.tail(3);
+
+    Eigen::Matrix4d M;
+    M.setIdentity();
+    M.block<3,3>(0,0) = Exp3(theta);
+    M.block<3,1>(0,3) = J_l(theta) * rho;
+
+    return M;
+
+}
+
+
+// Q(ρ,θ)
+inline Eigen::Matrix3d computeQ(const Eigen::Vector6d & tau) {
+    Eigen::Vector3d rho = tau.head(3);
+    Eigen::Vector3d theta = tau.tail(3);
+
+    double theta_norm = theta.norm();
+    
+    if (theta_norm < 1e-8) {
+        // Small angle approximation
+        return 0.5 * hat(rho);
+    }
+    
+    double sin_theta = std::sin(theta_norm);
+    double cos_theta = std::cos(theta_norm);
+    double theta2 = theta_norm * theta_norm;
+    double theta3 = theta2 * theta_norm;
+    double theta4 = theta3 * theta_norm;
+    double theta5 = theta4 * theta_norm;
+    
+    Eigen::Matrix3d rho_cross = hat(rho);
+    Eigen::Matrix3d theta_cross = hat(theta);
+    
+    // First term: (1/2)ρ×
+    Eigen::Matrix3d Q = 0.5 * rho_cross;
+    
+    // Second term: (θ-sin θ)/θ³ (θ×ρ× + ρ×θ× + θ×ρ×θ×)
+    double coeff2 = (theta_norm - sin_theta) / theta3;
+    Q += coeff2 * (theta_cross * rho_cross + rho_cross * theta_cross + theta_cross * rho_cross * theta_cross);
+    
+    // Third term: -(1-θ²/2-cos θ)/θ⁴ (θ²×ρ× + ρ×θ²× - 3θ×ρ×θ×)
+    double coeff3 = -(1.0 - theta2/2.0 - cos_theta) / theta4;
+    Eigen::Matrix3d theta_cross_squared = theta_cross * theta_cross;
+    Q += coeff3 * (theta_cross_squared * rho_cross + rho_cross * theta_cross_squared - 3.0 * theta_cross * rho_cross * theta_cross);
+    
+    // Fourth term: -(1/2) * ((1-θ²/2-cos θ)/θ⁴ - 3(θ-sin θ-θ³/6)/θ⁵) * (θ×ρ×θ²× + θ²×ρ×θ×)
+    double term1 = (1.0 - theta2/2.0 - cos_theta) / theta4;
+    double term2 = 3.0 * (theta_norm - sin_theta - theta3/6.0) / theta5;
+    double coeff4 = -0.5 * (term1 - term2);
+    Q += coeff4 * (theta_cross * rho_cross * theta_cross_squared + theta_cross_squared * rho_cross * theta_cross);
+    
+    return Q;
+}
+
+// Left Jacobian for SE(3)
+static Eigen::Matrix6d J_l6(const Eigen::Vector6d & tau) {
+    Eigen::Vector3d rho = tau.head(3);
+    Eigen::Vector3d theta = tau.tail(3);
+    Eigen::Matrix6d J = Eigen::Matrix6d::Zero();
+    
+    Eigen::Matrix3d J_left = J_l(theta);
+    Eigen::Matrix3d Q = computeQ(tau);
+    
+    // Upper left block: J_l(θ)
+    J.block<3,3>(0,0) = J_left;
+    
+    // Upper right block: Q(ρ,θ)  
+    J.block<3,3>(0,3) = Q;
+    
+    // Lower left block: 0
+    J.block<3,3>(3,0) = Eigen::Matrix3d::Zero();
+    
+    // Lower right block: J_l(θ)
+    J.block<3,3>(3,3) = J_left;
+    
+    return J;
+}
+
+// Left Jacobian Inverse for SE(3)
+static Eigen::Matrix6d J_l6_inv(const Eigen::Vector6d & tau) {
+    Eigen::Vector3d theta = tau.tail(3);
+    Eigen::Matrix6d J = Eigen::Matrix6d::Zero();
+    
+    Eigen::Matrix3d J_left = J_l(theta);
+    Eigen::Matrix3d Q = computeQ(tau);
+    
+    // Upper left block: J_l(θ)
+    J.block<3,3>(0,0) = J_left;
+    
+    // Upper right block: Q(ρ,θ)  
+    J.block<3,3>(0,3) = Q;
+    
+    // Lower left block: 0
+    J.block<3,3>(3,0) = Eigen::Matrix3d::Zero();
+    
+    // Lower right block: J_l(θ)
+    J.block<3,3>(3,3) = J_left;
+    
+    return J;
+}
+
+static Eigen::Matrix6d Adjoint(const Eigen::Matrix4d M){
+    Eigen::Vector3d t = M.block(0,3,3,1);
+    Eigen::Vector3d R = M.block(0,0,3,3);
+
+    Eigen::Matrix6d Adj;
+    Adj.setZero();
+
+    Adj.block(0,0,3,3) = R;
+    Adj.block(3,3,3,3) = R;
+    Adj.block(0,3,3,3) = hat(t) * R;
+
+    return Adj;
+}
+
 // Exponential map: Quaternion -> SO(3)
-inline Eigen::Matrix3d Exp_quat(const Eigen::Vector4d& q) {
+inline Eigen::Matrix3d QUATtoSO3(const Eigen::Vector4d& q) {
     Eigen::Quaterniond Q(q(3), q(0), q(1), q(2));
     Q.normalize();
     return Q.toRotationMatrix();
 }
 
 // Logarithm map: SO(3) -> Quaternion
-inline Eigen::Vector4d Log_quat(const Eigen::Matrix3d& R) {
+inline Eigen::Vector4d SO3toQUAT(const Eigen::Matrix3d& R) {
     Eigen::Quaterniond q(R);
     return q.coeffs();
 }
+
+
+inline Eigen::Matrix4d XYZQUATtoSE3(const Eigen::Vector7d& q) {
+    Eigen::Matrix4d M;
+
+    M.block<3,3>(0,0) = QUATtoSO3(q.tail(4));
+    M.block<3,1>(0,3) = q.head(3);
+    return M;
+}
+
+// Logarithm map: SO(3) -> Quaternion
+inline Eigen::Vector7d SE3toXYZQUAT(const Eigen::Matrix4d& M) {
+    Eigen::Vector7d q;
+
+    q.head(3) = M.block<3,1>(0,3);
+    q.tail(4) = SO3toQUAT(M.block<3,3>(0,0));
+
+    return q;
+
+}
+
+
+
 
 } // namespace OpenSot
 
