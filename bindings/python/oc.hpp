@@ -12,6 +12,7 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/oc.h>
 #include <OpenSoT/solvers/swSQP.h>
+#include <OpenSoT/oc/SE3Derivatives.h>
 
 namespace py = pybind11;
 
@@ -49,6 +50,11 @@ struct PyStateSpaceRepresentation : OpenSoT::Space {
 
 
 void pyopensot_oc(py::module& m) {
+
+    py::class_<OpenSoT::oc::SE3Derivatives, OpenSoT::oc::SE3Derivatives::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Derivatives")
+        .def(py::init<const XBot::ModelInterface&, const OpenSoT::AffineHelper&, const OpenSoT::AffineHelper&, const double>());
+
+
     py::class_<OpenSoT::Space, OpenSoT::Space::Ptr, PyStateSpaceRepresentation>(m, "Space")
         .def(py::init<unsigned int, unsigned int>(), py::arg("nq"), py::arg("nv"))
         .def("nq",  &OpenSoT::Space::nq)
@@ -108,6 +114,7 @@ void pyopensot_oc(py::module& m) {
         .def_readwrite("q", &Stage::q)
         .def_readwrite("v", &Stage::v)
         .def_readwrite("stack", &Stage::stack)
+        .def_readwrite("dynamics_derivative", &Stage::dynamics_derivative)
         .def_readwrite("state_space", &Stage::state_space);
 
     // Bind ocp

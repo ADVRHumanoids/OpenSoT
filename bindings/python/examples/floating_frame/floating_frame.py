@@ -1,4 +1,3 @@
-from pyopensot_oc import *
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters
@@ -165,7 +164,7 @@ model = xbi.ModelInterface2(rosnode.urdf)
 print(f"model.nq: {model.nq}")
 print(f"model.nv: {model.nv}")
 
-q_val =random_pose(-2., 2.)
+q_val = np.array([0., 0., 0., 0., 0., 1., 0.])#random_pose(-2., 2.)
 v_val = np.array([0., 0., 0., 0., 0., 0.])
 
 rosnode.publish_start(q_val)
@@ -227,38 +226,16 @@ for i in range(Ns):
 
 print(f"x0[0]: {x0[0]}")
 
-class dynamics_derivative(Task):
-    """
-    This carries the derivative of the linear dynamics computed from euler.
-    """
-    def __init__(self, name, df):
-        super().__init__(name, df.getInputSize())
-        self.df = df
-        self._W = np.eye(df.getOutputSize())
-
-    def _update(self):
-        self.lin = self.df
-        self._A = self.lin.getM()
-        self._b = -self.lin.getq()
-
-    @classmethod
-    def create(cls, name, df):
-        obj = cls(name, df)
-        obj.update()
-        return obj
-
-def euler(x, xdot, dt):
-    return x + dt * xdot  # x1 = x0 + dt * xdot0
 
 
-ocp = OCP()
+
+ocp = pysot.oc.OCP()
 dd = list()
 for i in range(Ns):
-    stage = Stage()
+    stage = pysot.oc.Stage()
 
     stage.model = xbi.ModelInterface2(rosnode.urdf)
-    #stage.state_space = CompositeSpace([RobotSpace(stage.model)])
-    stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace()])
+    stage.state_space = pysot.oc.SE3Space()
 
     stage.x = x
     stage.dx = dx
@@ -269,7 +246,7 @@ for i in range(Ns):
     stage.q = q
     stage.v = qdot
 
-    df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
+    df = pysot.oc.SE3Derivatives(stage.model, dq, dqdot, dt)
     dd.append(df)
     stage.dynamics_derivative = df
 
@@ -277,10 +254,9 @@ for i in range(Ns):
 
 
 
-stage = Stage()
+stage = pysot.oc.Stage()
 stage.model = xbi.ModelInterface2(rosnode.urdf)
-#stage.state_space = CompositeSpace([RobotSpace(stage.model)])
-stage.state_space = CompositeSpace([R3(stage.model, base="world", distal="base_link"), QuaternionSpace()])
+stage.state_space = pysot.oc.SE3Space()
 stage.x = x
 stage.dx = dx
 stage.q = q
@@ -297,7 +273,7 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}",ocp.stage(i).u, ocp.stage(i).du)
-    #minu.setWeight(1e0 * np.eye(model.nv))
+    minu.setWeight(1e-9 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
 
@@ -305,7 +281,7 @@ for i in range(Ns):
 
 cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "base_link", "world")
 cartesian_task.setLambda(1)
-cartesian_task.setWeight(1e6 * np.eye(6))
+cartesian_task.setWeight(1e0 * np.eye(6))
 
 ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
 
@@ -319,21 +295,21 @@ print(f"ocp.stage(Ns).stack.getStack()[0].getb(): {ocp.stage(Ns).stack.getStack(
 
 
 print("Initing solver...")
-solver = swSQP(ocp)
+solver = pysot.oc.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
 solver.getOptions().use_line_search = False
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
-#solver.getOptions().min_abs_delta_solution = 1e-12
+solver.getOptions().min_abs_delta_solution = 1e-3
 print("...solver inited!")
 
 pose_ref = T.copy()
 dt_sim = 0.05
 
-space = CompositeSpace([R3(model, base="world", distal="base_link"), QuaternionSpace()])
+space = pysot.oc.SE3Space()
 
-q_rand = random_pose(-2., 2.)
+q_rand = np.array([0., 0., 0., 0., 0., 0., 1.]) #random_pose(-2., 2.)
 pose_ref.translation = q_rand[0:3]
 pose_ref.linear = R.from_quat(q_rand[3:]).as_matrix()
 
@@ -359,7 +335,7 @@ try:
         input()
 
         x = x0[0]
-        for i in range(len(x0)-1):
+        for i in range(len(x0)):
             x = x0[i]
             # x = space.integrate(x, u0[i]*dt - v_val*dt)
             q_val = x.tolist()
