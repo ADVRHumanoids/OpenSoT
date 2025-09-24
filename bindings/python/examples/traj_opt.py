@@ -1,4 +1,4 @@
-from pyopensot_oc import *
+from pyopensot.oc import *
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters
@@ -349,7 +349,7 @@ solver.getOptions().verbose = True
 solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
-#solver.getOptions().min_abs_delta_solution = 1e-12
+solver.getOptions().min_abs_delta_solution = 1e-3
 print("...solver inited!")
 
 

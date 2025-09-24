@@ -1,5 +1,3 @@
-# from pyopensot_oc import *
-
 from xbot2_interface import pyxbot2_interface as xbi
 import pyopensot as pysot
 # import pyopensot.oc as

@@ -1,4 +1,4 @@
-from pyopensot_oc import *
+from pyopensot.oc import *
 import unittest
 import numpy as np
 
