@@ -13,6 +13,7 @@
 #include <OpenSoT/utils/oc.h>
 #include <OpenSoT/solvers/swSQP.h>
 #include <OpenSoT/oc/SE3Derivatives.h>
+#include <OpenSoT/oc/SE3Task.h>
 
 namespace py = pybind11;
 
@@ -53,6 +54,13 @@ void pyopensot_oc(py::module& m) {
 
     py::class_<OpenSoT::oc::SE3Derivatives, OpenSoT::oc::SE3Derivatives::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Derivatives")
         .def(py::init<const XBot::ModelInterface&, const OpenSoT::AffineHelper&, const OpenSoT::AffineHelper&, const double>());
+
+    py::class_<OpenSoT::oc::SE3Task, OpenSoT::oc::SE3Task::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Task")
+        .def(py::init<const std::string&, const XBot::ModelInterface&, const AffineHelper&, const std::string&>())
+        .def("getError", &OpenSoT::oc::SE3Task::getError)
+        .def("setReference", &OpenSoT::oc::SE3Task::setReference)
+        .def("getReference", &OpenSoT::oc::SE3Task::getReference)
+        .def("getDistalFrame", &OpenSoT::oc::SE3Task::getDistalFrame);
 
 
     py::class_<OpenSoT::Space, OpenSoT::Space::Ptr, PyStateSpaceRepresentation>(m, "Space")

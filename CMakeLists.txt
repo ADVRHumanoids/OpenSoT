@@ -143,7 +143,9 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     )
 
 ##OC
-set(OPENSOT_OC_SOURCES src/oc/SE3Derivatives.cpp)
+set(OPENSOT_OC_SOURCES 
+    src/oc/SE3Derivatives.cpp
+    src/oc/SE3Task.cpp)
 
 
 ##SOLVERS

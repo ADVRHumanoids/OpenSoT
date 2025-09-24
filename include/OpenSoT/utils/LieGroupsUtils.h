@@ -141,6 +141,15 @@ inline Eigen::Matrix4d Exp6(const Eigen::Vector6d & tau){
 
 }
 
+inline Eigen::Vector6d Log6(const Eigen::Affine3d& T){
+    Eigen::Vector6d v;
+
+    v.head(3) = J_l_inv(Log3(T.linear())) * T.translation();
+    v.tail(3) = Log3(T.linear());
+    return v;
+}
+
+
 
 // Q(ρ,θ)
 inline Eigen::Matrix3d computeQ(const Eigen::Vector6d & tau) {
