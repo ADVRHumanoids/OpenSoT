@@ -303,17 +303,11 @@ utest.assertTrue(ocp.getNumberOfNodes() == Ns)
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e0 * np.eye(model.nv))
+    minu.setWeight(1e-9 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
 
 
-
-#
-# set goal at final state
-cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world")
-cartesian_task.setLambda(1)
-cartesian_task.setWeight(1e6 * np.eye(6))
 
 """ 
 Important:  
@@ -326,9 +320,16 @@ df(q)/dq = J(q)dq
 hence the Affine task is applied to dq: [J(q) 0] [dq dqdot]' = J(q)dq
 
 """
-ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
+# ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
 
-T, _ = cartesian_task.getReference()
+
+
+cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "fp3_link8")
+cartesian_task.setWeight(1e0 * np.eye(6))
+
+ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task)
+
+T = cartesian_task.getReference()
 node.make_6dof_marker(name="fp3_link8", pose=T, frame_id="world")
 
 #
@@ -349,7 +350,7 @@ solver.getOptions().verbose = True
 solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
-solver.getOptions().min_abs_delta_solution = 1e-3
+solver.getOptions().min_abs_delta_solution = 1e-6
 print("...solver inited!")
 
 
