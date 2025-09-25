@@ -46,19 +46,16 @@ class SE3Task : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>{
         std::string _distal_frame;
 
         Eigen::Affine3d _ref;
+        Eigen::Affine3d _d_T_w;
+
+        Eigen::MatrixXd _J;
+        Eigen::Matrix6d _Adj;
 
         Eigen::Vector6d _w;
 
         virtual void _update();
 
-        
-
-        Eigen::Affine3d _d_T_w;
-
-
-
 };
-
 }
 
 
