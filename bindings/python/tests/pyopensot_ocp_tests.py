@@ -1,4 +1,4 @@
-from pyopensot_oc import *
+from pyopensot.oc import *
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters

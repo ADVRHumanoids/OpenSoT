@@ -12,6 +12,8 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/utils/oc.h>
 #include <OpenSoT/solvers/swSQP.h>
+#include <OpenSoT/oc/SE3Derivatives.h>
+#include <OpenSoT/oc/SE3Task.h>
 
 namespace py = pybind11;
 
@@ -49,6 +51,18 @@ struct PyStateSpaceRepresentation : OpenSoT::Space {
 
 
 void pyopensot_oc(py::module& m) {
+
+    py::class_<OpenSoT::oc::SE3Derivatives, OpenSoT::oc::SE3Derivatives::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Derivatives")
+        .def(py::init<const XBot::ModelInterface&, const OpenSoT::AffineHelper&, const OpenSoT::AffineHelper&, const double>());
+
+    py::class_<OpenSoT::oc::SE3Task, OpenSoT::oc::SE3Task::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Task")
+        .def(py::init<const std::string&, const XBot::ModelInterface&, const AffineHelper&, const std::string&>())
+        .def("getError", &OpenSoT::oc::SE3Task::getError)
+        .def("setReference", &OpenSoT::oc::SE3Task::setReference)
+        .def("getReference", &OpenSoT::oc::SE3Task::getReference)
+        .def("getDistalFrame", &OpenSoT::oc::SE3Task::getDistalFrame);
+
+
     py::class_<OpenSoT::Space, OpenSoT::Space::Ptr, PyStateSpaceRepresentation>(m, "Space")
         .def(py::init<unsigned int, unsigned int>(), py::arg("nq"), py::arg("nv"))
         .def("nq",  &OpenSoT::Space::nq)
@@ -65,28 +79,10 @@ void pyopensot_oc(py::module& m) {
             self.integrate(x0, dx0, x1);
             return x1;}, py::arg("x0"), py::arg("dx0"));
 
-    // ---------------- Derived: R3 ----------------
-    py::class_<OpenSoT::R3, OpenSoT::Space, OpenSoT::R3::Ptr>(m, "R3")
-        .def(py::init<std::shared_ptr<XBot::ModelInterface>, const std::string&, const std::string&>(), py::arg("model"), py::arg("base"), py::arg("distal"))
-        .def("integrate", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
-            Eigen::VectorXd x1(x0.size());
-            x1.setZero();
-            self.integrate(x0, dx0, x1);
-            return x1;}, py::arg("x0"), py::arg("dx0"));
-
-    // ---------------- Derived: RobotSpace ----------------
-    py::class_<OpenSoT::RobotSpace, OpenSoT::Space, OpenSoT::RobotSpace::Ptr>(m, "RobotSpace")
-        .def(py::init<std::shared_ptr<XBot::ModelInterface>>(), py::arg("model"))
-        .def("integrate", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
-            Eigen::VectorXd x1(x0.size());
-            x1.setZero();
-            self.integrate(x0, dx0, x1);
-            return x1;}, py::arg("x0"), py::arg("dx0"));
-
-    // ---------------- Derived: QuaternionSpace ----------------
-    py::class_<OpenSoT::QuaternionSpace, OpenSoT::Space, OpenSoT::QuaternionSpace::Ptr>(m, "QuaternionSpace")
+    // ---------------- Derived: SE3Space ----------------
+    py::class_<OpenSoT::SE3Space, OpenSoT::Space, OpenSoT::SE3Space::Ptr>(m, "SE3Space")
         .def(py::init<>())
-        .def("integrate", [](OpenSoT::QuaternionSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+        .def("integrate", [](OpenSoT::SE3Space& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
             Eigen::VectorXd x1(x0.size());
             x1.setZero();
             self.integrate(x0, dx0, x1);

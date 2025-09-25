@@ -142,6 +142,12 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
     src/tasks/floating_base/IMU.cpp
     )
 
+##OC
+set(OPENSOT_OC_SOURCES 
+    src/oc/SE3Derivatives.cpp
+    src/oc/SE3Task.cpp)
+
+
 ##SOLVERS
 set(OPENSOT_SOLVERS_SOURCES src/solvers/BackEnd.cpp
     src/solvers/BackEndFactory.cpp
@@ -186,6 +192,7 @@ ADD_LIBRARY(OpenSoT SHARED
     ${OPENSOT_SOLVERS_SOURCES}
     ${OPENSOT_UTILS_SOURCES}
     ${OPENSOT_VARIABLES_SOURCES}
+    ${OPENSOT_OC_SOURCES}
     ${sot_INCLUDES})
 
 set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})

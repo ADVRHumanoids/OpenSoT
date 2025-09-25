@@ -96,8 +96,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             {
                 computeDynamics(k, _A[k], _B[k], _b[k]);
 
-                _qp_solver->setStageDynamics(
-                    k, _A[k], _B[k], -1.0 * _ocp->stage(k)->dynamics_derivative->getb());
+                _qp_solver->setStageDynamics(k, _A[k], _B[k], _b[k]);
             }
 
             // --- Cost (always) ---
@@ -121,17 +120,10 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
         //4) check break criteria on QP solution
         bool exit = true; //I assume I can exit
+        double sq = 0;
         for(unsigned int i = 0; i < _qp_solver->getSolution().size(); ++i)
-        {
-            for(unsigned int j = 0; j < _qp_solver->getSolution()[i].x.size(); ++j)
-            {
-                exit = fabs(_qp_solver->getSolution()[i].x[j]) <= _opt.min_abs_delta_solution; // check is performed on states (not needed to do it also to controls)
-                if(!exit) // if exit became false, I break this loop
-                    break;
-            }
-            if(!exit) // if exit became false I break also outer loop
-                break;
-        }
+            sq += (_qp_solver->getSolution()[i].x.transpose() * _qp_solver->getSolution()[i].x)[0];
+        exit = std::sqrt(sq) <= _opt.min_abs_delta_solution;
 
         if(exit) // if exit remains true I return
         {
