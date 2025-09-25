@@ -313,31 +313,12 @@ for i in range(Ns):
 
 #
 # set goal at final state
-cartesian_task = Cartesian("Cartesian", ocp.stage(Ns).model, "fp3_link8", "world")
-cartesian_task.setLambda(1)
-cartesian_task.setWeight(1e3 * np.eye(6))
-
-minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], ocp.stage(Ns).dx[model.nq:])
-
-""" 
-Important:  
-
-The cartesian task define the function F(q) = f(q) - ref
-and its derivative:
-
-df(q)/dq = J(q)dq
-
-hence the Affine task is applied to dq: [J(q) 0] [dq dqdot]' = J(q)dq
-
-"""
-# ocp.stage(Ns).stack = pysot.AutoStack(AffineTask.toAffine(cartesian_task, dvariables.getVariable("dq")))
-
-
+minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], dvariables.getVariable("dqdot"))
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "fp3_link8")
 cartesian_task.setWeight(1e0 * np.eye(6))
 
-ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task)
+ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task + minvel)
 
 T = cartesian_task.getReference()
 node.make_6dof_marker(name="fp3_link8", pose=T, frame_id="world")
@@ -391,12 +372,12 @@ try:
         pose_ref.linear = R.from_quat(quat).as_matrix()
 
         
-    	cartesian_task.setReference(pose_ref)
-    	last_pose_reference = pose_ref.copy()
-    	success = solver.solve(x0, u0)
-    	if(success):
-		x0 = solver.getStateSolution()
-        	u0 = solver.getControlSolution()
+        cartesian_task.setReference(pose_ref)
+        last_pose_reference = pose_ref.copy()
+        success = solver.solve(x0, u0)
+        if(success):
+            x0 = solver.getStateSolution()
+            u0 = solver.getControlSolution()
 
         cartesian_task.setReference(pose_ref)
         last_pose_reference = pose_ref.copy()
