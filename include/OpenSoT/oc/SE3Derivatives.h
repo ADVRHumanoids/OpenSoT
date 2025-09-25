@@ -36,10 +36,17 @@ private:
 
     AffineHelper _dXnext;
 
+    Eigen::VectorXd _qdot;
+    Eigen::Vector6d _xi;
+    Eigen::Matrix3d _RbT;
+    Eigen::Matrix3d _t_skew;
+    Eigen::Matrix6d _Fx;
+    Eigen::Matrix6d _Fu;
+
+
+
     virtual void _update();
     
-
-
 };
 
 

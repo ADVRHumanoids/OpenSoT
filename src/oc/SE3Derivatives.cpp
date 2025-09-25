@@ -25,28 +25,24 @@ SE3Derivatives::SE3Derivatives(const XBot::ModelInterface& robot,
 }
 
 void SE3Derivatives::_update()
-{
-    // Eigen::VectorXd q;
-    // _robot.getJointPosition(q);
+{  
+    _robot.getJointVelocity(_qdot);
 
-    Eigen::VectorXd qdot;
-    _robot.getJointVelocity(qdot);
+    _xi = _qdot.segment<6>(0) * _dt;
 
-    Eigen::Vector6d xi = qdot.segment<6>(0) * _dt;
+    _RbT = Exp3(_xi.tail(3)).transpose();    
+    _t_skew = hat(_xi.head(3));
 
-    Eigen::Matrix3d RbT = Exp3(xi.tail(3)).transpose();    
-    Eigen::Matrix3d t_skew = hat(xi.head(3));
+    
 
+    _Fx.setZero();
+    _Fx.block<3,3>(0,0) = _RbT;
+    _Fx.block<3,3>(3,3) = _RbT;
+    _Fx.block<3,3>(0,3) = -_RbT * _t_skew;
 
-    Eigen::Matrix6d Fx;
-    Fx.setZero();
-    Fx.block<3,3>(0,0) = RbT;
-    Fx.block<3,3>(3,3) = RbT;
-    Fx.block<3,3>(0,3) = -RbT * t_skew;
+    _Fu = J_l6(-_xi) * _dt;
 
-    Eigen::Matrix6d Fu = J_l6(-xi) * _dt;
-
-    _dXnext = Fx * _dX + Fu * _dU;
+    _dXnext = _Fx * _dX + _Fu * _dU;
 
     _A = _dXnext.getM();
     _b = -_dXnext.getq();
