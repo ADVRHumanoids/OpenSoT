@@ -101,6 +101,7 @@ void hpipmOC::setLSCost(const unsigned int i,
                         const Eigen::MatrixXd& Au, const Eigen::MatrixXd& Wu, const Eigen::VectorXd& bu)
 {
     _qp[i].Q.resize(Ax.cols(), Ax.cols());
+    _qp[i].Q.setZero();
     if(Wx.isIdentity())
     {
         _WxAx[i] = Ax;
@@ -119,6 +120,7 @@ void hpipmOC::setLSCost(const unsigned int i,
     if(Au.rows() > 0)
     {
         _qp[i].R.resize(Au.cols(), Au.cols());
+        _qp[i].R.setZero();
         if(Wu.isIdentity())
         {
             _WuAu[i] = Au;
@@ -134,10 +136,10 @@ void hpipmOC::setLSCost(const unsigned int i,
 
         _qp[i].r = -1.0 * Au.transpose() * _Wubu[i];
 
-        _qp[i].S = Eigen::MatrixXd(_qp[i].R.rows(), _qp[i].Q.rows());
+        _qp[i].S = Eigen::MatrixXd::Zero(_qp[i].R.rows(), _qp[i].Q.rows());
     }
     else
-        _qp[i].S = Eigen::MatrixXd(0,0);
+        _qp[i].S = Eigen::MatrixXd(0, _qp[i].Q.rows());
 }
 
 

@@ -34,12 +34,12 @@ tf = 1.0 # final time
 dt = tf/Ns
 
 
-q_val = np.array([0., 0., 0., 0., 0., 0., 1.])
-# q_val = random_pose(-2., 2.)
-v_val = np.array([1., 0., 0., 0., 0., 0.])
+#q_val = np.array([0., 0., 0., 0., 0., 0., 1.])
+q_val = random_pose(-2., 2.)
+v_val = np.array([0., 0., 0., 0., 0., 0.])
 
-q_final = np.array([0., 0., 0., 0., 0., 0., 1.])
-# q_final = random_pose(-2,2)
+#q_final = np.array([0., 0., 0., 0., 0., 0., 1.])
+q_final = random_pose(-2,2)
 
 rosnode.publish_start(q_val)
 rosnode.publish_goal(q_final)
@@ -128,15 +128,15 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 
 minus = list()
 for i in range(Ns):
-    minu = min_var.create(f"minu{i}",ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-9 * np.eye(model.nv))
+    minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
+    minu.setWeight(1e-3*0 * np.eye(model.nv))
     minus.append(minu)
-    ocp.stage(i).stack = pysot.AutoStack(minu)
+    #ocp.stage(i).stack = pysot.AutoStack(minu)
 
 
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "base_link")
-cartesian_task.setWeight(1e0 * np.eye(model.nv))
+cartesian_task.setWeight(1e3 * np.eye(model.nv))
 
 ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task)
 
@@ -155,7 +155,7 @@ print("Initing solver...")
 solver = pysot.oc.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = False
+solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 solver.getOptions().min_abs_delta_solution = 1e-6
