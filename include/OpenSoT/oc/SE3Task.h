@@ -53,7 +53,7 @@ class SE3Task : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>{
 
         
 
-        Eigen::Affine3d _w_T_d;
+        Eigen::Affine3d _d_T_w;
 
 
 

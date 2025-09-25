@@ -19,20 +19,30 @@ _distal_frame(distal_frame)
 
 void SE3Task::_update()
 {   
-    _w_T_d = _robot.getPose(_distal_frame);
+    _d_T_w = _robot.getPose(_distal_frame).inverse();
 
     Eigen::MatrixXd J(6, _robot.getNv());
     J.setZero();
 
-    _robot.getJacobian(_distal_frame, _w_T_d.linear().transpose() * _w_T_d.translation(), J);
+    /**  
+     * Here we compute the spatial Jacobian in WORLD from the classic Jacobian in world computed by the model interface.
+     * 
+     * NOTE: we pass the translation from local to world because inside the getJacobian(frame, p, J)
+     * first rotate p in world and then apply the skew.
+     **/
+    _robot.getJacobian(_distal_frame, _d_T_w.translation(), J); 
     
+    /** 
+     * We now compute the Adjoint to rotate to LOCAL
+    **/
     Eigen::Matrix6d Adj;
     Adj.setZero();
-    Adj.block<3,3>(0,0) = _w_T_d.linear().transpose();
+    Adj.block<3,3>(0,0) = _d_T_w.linear();
+    Adj.block<3,3>(0,3) = Adj.block<3,3>(0,0) * hat(_d_T_w.inverse().translation()).transpose();
     Adj.block<3,3>(3,3) = Adj.block<3,3>(0,0);
 
     J = Adj * J;
-    _w = Log6(_w_T_d.inverse()* _ref);
+    _w = Log6(_d_T_w* _ref);
 
     _task = J*_dx - _w;
     
@@ -42,7 +52,6 @@ void SE3Task::_update()
 
  
 const Eigen::Vector6d& SE3Task::getError()
-{
-    
+{   
     return _w;
 }
