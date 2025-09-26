@@ -80,11 +80,7 @@ public:
         if(dx0.size() != this->nv())
             throw std::runtime_error("dx0.size() != _nv");
 
-        Eigen::Matrix4d T1 = XYZQUATtoSE3(x0);
-        Eigen::Matrix4d T2 = Exp6(dx0);
-
-        Eigen::Matrix4d res = T1 * T2; 
-        x1 = SE3toXYZQUAT(res);
+        x1 = SE3toXYZQUAT(XYZQUATtoSE3(x0) * Exp6(dx0));
     }
 };
 
