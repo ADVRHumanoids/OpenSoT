@@ -129,7 +129,7 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-6 * 0. * np.eye(model.nv))
+    minu.setWeight(1e-3*0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
 

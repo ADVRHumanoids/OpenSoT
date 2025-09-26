@@ -41,15 +41,16 @@ a_val = np.zeros(model.nv)
 
 q_final = np.array([-1., 0., 0., 0., 0., 0., 1.])
 
-# q_val = random_pose(-2,2)
-# q_final = random_pose(-2., 2.)
+q_val = random_pose(-2,2)
+q_final = random_pose(-2., 2.)
 
 
 quats = quaternion_trajectory_numpy(Ns+1, [0,-1,0])
 x0 = list()
 for i in range(Ns+1):
     q0 = np.concatenate((q_val[:3] + (q_final[:3]-q_val[:3])*(i/(Ns+1)) , quats[i]))
-    x0.append(np.concatenate((q0, v_val)))
+    # x0.append(np.concatenate((q0, v_val)))
+    x0.append(np.concatenate((q_val, v_val)))
 
 u0 = list()
 for i in range(Ns):
@@ -140,14 +141,14 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}",ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e3*0 * np.eye(model.nv))
+    minu.setWeight(1e-3*0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu) # TODO - check why it fails withoutit
 
 
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "base_link")
-cartesian_task.setWeight(1e-1 * np.eye(6))
+cartesian_task.setWeight(1e3 * np.eye(6))
 ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task)
 
 

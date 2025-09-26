@@ -135,9 +135,9 @@ class min_var(Task):
         self._W = np.eye(dvariable.getOutputSize())
 
     def _update(self):
-        self.lin =  self.dvariable + (self.variable.getValue() - self.ref)
-        self._A = self.lin.getM()
-        self._b = -self.lin.getq()
+        self.task =  self.dvariable + (self.variable.getValue() - self.ref)
+        self._A = self.task.getM()
+        self._b = -self.task.getq()
 
     def setReference(self, ref):
         self.ref = ref
