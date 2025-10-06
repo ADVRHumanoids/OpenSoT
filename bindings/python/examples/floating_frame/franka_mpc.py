@@ -312,6 +312,7 @@ for i in range(Ns):
 
 # set goal at final state
 minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], dvariables.getVariable("dqdot"))
+minvel.setWeight(1e3 * np.eye(model.nv))
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "fp3_link8")
 cartesian_task.setWeight(1e3 * np.eye(6))
@@ -326,6 +327,12 @@ ocp.update(x0, u0)
 print("ocp updated!")
 
 
+qlims = list()
+for i in range(Ns+1):
+    qmin, qmax = model.getJointLimits()
+    qlims_i = JointLimits(ocp.stage(i).model, qmax, qmin)
+    qlims.append(qlims_i)
+    ocp.stage(i).stack = ocp.stage(i).stack << AffineConstraint.toAffine(qlims[-1], dvariables.getVariable("dq"))
 
 
 
@@ -371,7 +378,6 @@ try:
 
         x0 = solver.getStateSolution()
         u0 = solver.getControlSolution()
-        print(u0[0])
 
 
         state = space.integrate(state, np.concatenate((state[model.nq:], u0[0]))*dt)
