@@ -168,8 +168,13 @@ class dynamics_derivative(Task):
         obj.update()
         return obj
 
+#simple euler
 def euler(x, xdot, dt):
     return x + dt * xdot
+
+#euler with defect
+def eul(dx,du, xk,uk,xk1, dt):
+    return dx + du*dt + (xk.getValue()+uk.getValue()*dt - xk1.getValue())
 
 
 

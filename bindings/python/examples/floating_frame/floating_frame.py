@@ -68,7 +68,6 @@ dqdot = dvariables.getVariable("dqdot")
 print(f"dvariables.getSize(): {dvariables.getSize()}")
 
 
-
 x = q
 xdot = qdot
 
@@ -103,10 +102,6 @@ for i in range(Ns):
     stage.q = q
     stage.v = qdot
 
-    df = pysot.oc.SE3Derivatives(stage.model, dq, dqdot, dt)
-    dd.append(df)
-    stage.dynamics_derivative = df
-
     ocp.addStage(stage)
 
 #final stage definition
@@ -119,6 +114,12 @@ stage.q = q
 stage.v = qdot
 ocp.addStage(stage)
 
+ocp.update(x0, u0)
+
+for i in range(Ns):
+    df = pysot.oc.SE3Derivatives(stage.model, dq, dqdot, ocp.stage(i).x, ocp.stage(i).u, ocp.stage(i+1).x, dt)
+    dd.append(df)
+    ocp.stage(i).dynamics_derivative = df
 
 ocp.update(x0, u0)
 

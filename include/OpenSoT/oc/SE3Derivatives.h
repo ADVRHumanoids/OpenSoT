@@ -25,13 +25,22 @@ public:
      * @param dX element of the tangent space of SE3
      * @param dU element of the tangent space of SE3
      */
-    SE3Derivatives(const XBot::ModelInterface& robot, const AffineHelper& dX, const AffineHelper& dU, const double dt);
+    SE3Derivatives(const XBot::ModelInterface& robot,
+                               const AffineHelper& dX,
+                               const AffineHelper& dU,
+                               const AffineHelper& Xk,
+                               const AffineHelper& Uk,
+                               const AffineHelper& Xk_1,
+                               const double dt);
 
 
 private:
     const XBot::ModelInterface& _robot;
     AffineHelper _dU;
     AffineHelper _dX;
+    AffineHelper _Xk;
+    AffineHelper _Uk;
+    AffineHelper _Xk_1;
     double _dt;
 
     AffineHelper _dXnext;

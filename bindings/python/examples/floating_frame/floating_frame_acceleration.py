@@ -114,12 +114,6 @@ for i in range(Ns):
     stage.q = q
     stage.v = qdot
 
-    dSE3 = pysot.oc.SE3Derivatives(stage.model, dq, dqdot, dt)
-    dvel = dynamics_derivative.create(f"df{i}", euler(dqdot, dqddot, dt))
-    dd.append(dSE3)
-    dd.append(dvel)
-    stage.dynamics_derivative = dSE3 + dvel
-
     ocp.addStage(stage)
 
 
@@ -133,10 +127,18 @@ stage.q = q
 stage.v = qdot
 ocp.addStage(stage)
 
-
 ocp.update(x0, u0)
 print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 
+for i in range(Ns):
+    dSE3 = pysot.oc.SE3Derivatives(ocp.stage(i).model, dq, dqdot, ocp.stage(i).q, ocp.stage(i).v, ocp.stage(i+1).q, dt)
+    dvel = dynamics_derivative.create(f"df{i}", eul(dqdot, dqddot, ocp.stage(i).v, ocp.stage(i).u, ocp.stage(i+1).v,  dt))
+    dd.append(dSE3)
+    dd.append(dvel)
+    ocp.stage(i).dynamics_derivative = dSE3 + dvel
+
+
+ocp.update(x0, u0)
 
 minus = list()
 for i in range(Ns):

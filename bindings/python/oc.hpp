@@ -53,7 +53,8 @@ struct PyStateSpaceRepresentation : OpenSoT::Space {
 void pyopensot_oc(py::module& m) {
 
     py::class_<OpenSoT::oc::SE3Derivatives, OpenSoT::oc::SE3Derivatives::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Derivatives")
-        .def(py::init<const XBot::ModelInterface&, const OpenSoT::AffineHelper&, const OpenSoT::AffineHelper&, const double>());
+        .def(py::init<const XBot::ModelInterface&, const AffineHelper&, const AffineHelper&, const AffineHelper&, const AffineHelper&, const AffineHelper&, const double>());
+
 
     py::class_<OpenSoT::oc::SE3Task, OpenSoT::oc::SE3Task::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Task")
         .def(py::init<const std::string&, const XBot::ModelInterface&, const AffineHelper&, const std::string&>())
