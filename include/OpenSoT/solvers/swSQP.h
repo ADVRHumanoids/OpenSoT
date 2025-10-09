@@ -150,13 +150,20 @@ private:
     void _init();
 
     void computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b);
-    void computeQuadraticApproximation(const unsigned int i, Eigen::MatrixXd& H, Eigen::VectorXd& g);
+    // void computeQuadraticApproximation(const unsigned int i, Eigen::MatrixXd& H, Eigen::VectorXd& g);
     void computeCost(const unsigned int i,
                      Eigen::MatrixXd& Q, Eigen::VectorXd& q,
                      Eigen::MatrixXd& R, Eigen::VectorXd& r,
                      Eigen::MatrixXd& S);
     void computeConstraints(const unsigned int i,
                             Eigen::MatrixXd& C, Eigen::MatrixXd& D, Eigen::VectorXd& dl, Eigen::VectorXd& du);
+
+
+    void update_qp();
+    void step();
+    bool break_criteria();
+    bool ls_filter();
+
 
     hpipmOC::Ptr _qp_solver;
     OpenSoT::ocp::Ptr _ocp;
@@ -179,13 +186,8 @@ private:
     std::vector<Eigen::MatrixXd> _D, _C;
     std::vector<Eigen::VectorXd> _dl, _du;
 
-
     std::vector<Eigen::VectorXd> _x0, _u0;
-
-
     std::vector<Eigen::VectorXd> _x0_candidate, _u0_candidate;
-
-
 
 };
 

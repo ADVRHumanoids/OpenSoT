@@ -148,10 +148,14 @@ for i in range(Ns):
     ocp.stage(i).stack = pysot.AutoStack(minu) # TODO - check why it fails withoutit
 
 
+minvel = min_var.create(f"minvel", ocp.stage(Ns).v, dvariables.getVariable("dqdot"))
+minvel.setWeight(1e3 * np.eye(model.nv))
+
+
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "base_link")
 cartesian_task.setWeight(1e3 * np.eye(6))
-ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task)
+ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task + minvel)
 
 
 ocp.update(x0, u0)

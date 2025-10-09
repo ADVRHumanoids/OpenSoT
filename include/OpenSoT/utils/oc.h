@@ -107,6 +107,8 @@ public:
 
     }
 };
+
+
 class CompositeSpace : public Space
 {
 private:
