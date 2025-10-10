@@ -288,7 +288,7 @@ void swSQP::computeConstraints(const unsigned int i,
 
 void swSQP::update_qp()
 {
-     _ocp->update(_x0, _u0);
+     _ocp->update(_x0_candidate, _u0_candidate);
     _stats.cost = _ocp->cost();
 
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
@@ -299,18 +299,15 @@ void swSQP::update_qp()
         if(k < _ocp->getNumberOfNodes())
         {
             computeDynamics(k, _A[k], _B[k], _b[k]);
-
             _qp_solver->setStageDynamics(k, _A[k], _B[k], _b[k]);
         }
 
         // --- Cost (always) ---
         computeCost(k, _Q[k], _q[k], _R[k], _r[k], _S[k]);
-
         _qp_solver->setFullCost(k, _R[k], _Q[k], _S[k], _r[k], _q[k]);
 
         // --- Constraints (always) ---
         computeConstraints(k, _C[k], _D[k], _dl[k], _du[k]);
-
         _qp_solver->setConstraint(k, _C[k], _D[k], _dl[k], _du[k]);
     }
 
@@ -321,20 +318,15 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    _x0 = x0;
-    _u0 = u0;
+    _x0_candidate = x0;
+    _u0_candidate = u0;
 
-    _x0_candidate.resize(x0.size());
-    _u0_candidate.resize(u0.size());
 
     Eigen::VectorXd dx0(_A[0].cols());
     dx0.setZero();
 
     for(unsigned int iter = 1; iter < _opt.max_iters; ++iter)
     {
-        _stats.line_search_accepted = false;
-        _stats.line_search_iters = 0;
-        _stats.alpha = 1;
         _stats.iters = iter;
 
         auto iter_start = std::chrono::high_resolution_clock::now();
@@ -345,9 +337,6 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         // solve
         if (!_qp_solver->solve(dx0)) return false;
 
-
-        dx0 = _qp_solver->getSolution()[0].x;
-
         // check break criteria on QP solution
         if (break_criteria())
         {
@@ -357,16 +346,24 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             break;
         } 
 
-        step();
+        // first update
+        step(_stats.alpha);
 
-        // if(_opt.use_line_search)
+        while(_opt.use_line_search && _stats.alpha >= _opt.alpha_min && !ls_filter())
+        {
+            _stats.alpha /= 2.;
+            _stats.line_search_iters++;
+            step(_stats.alpha);
+        }
 
 
         if(_opt.verbose)
             std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
-
     }
+
+    _x0 = _x0_candidate;
+    _u0 = _u0_candidate;
 
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -387,31 +384,42 @@ bool swSQP::break_criteria()
 
 }
 
-void swSQP::step()
+void swSQP::step(double alpha)
 {
     //4) Newton Step
-    for(unsigned int k = 0; k < _x0.size(); ++k)
+    for(unsigned int k = 0; k < _x0_candidate.size(); ++k)
     {
-    if(_ocp->stage(k)->state_space)
-    {
-        _x0_candidate[k].resize(_x0[k].size());
-        _ocp->stage(k)->state_space->integrate(_x0[k], _qp_solver->getSolution()[k].x, _x0_candidate[k]);
-        _x0[k] = _x0_candidate[k];
+        if(_ocp->stage(k)->state_space)
+        {
+            _ocp->stage(k)->state_space->integrate(_x0_candidate[k], alpha*_qp_solver->getSolution()[k].x, _x0_candidate[k]);
+        }
+        else
+            throw std::runtime_error("_ocp->stage(k)->state_space is not defined for stage " + to_string(k));
+
+        if (k < _u0_candidate.size())
+            _u0_candidate[k] = _u0_candidate[k] + alpha * _qp_solver->getSolution()[k].u;
 
     }
-    else
-        throw std::runtime_error("_ocp->stage(k)->state_space is not defined for stage " + to_string(k));
+}
 
-    }
-    for(unsigned int k = 0; k < _u0.size(); ++k)
-    {
-        _u0[k] += _qp_solver->getSolution()[k].u;
-    }
+
+bool swSQP::ls_filter()
+{
+    // _ocp->cost();
+
+    
+
+    return true;
 }
 
 
 void swSQP::_init()
 {
+    _stats.line_search_accepted = false;
+    _stats.line_search_iters = 0;
+    _stats.alpha = 1;
+
+
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
     {
         _Mx.push_back(_ocp->stage(k)->dx->getM());

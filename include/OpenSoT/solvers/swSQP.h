@@ -160,7 +160,7 @@ private:
 
 
     void update_qp();
-    void step();
+    void step(double alpha);
     bool break_criteria();
     bool ls_filter();
 

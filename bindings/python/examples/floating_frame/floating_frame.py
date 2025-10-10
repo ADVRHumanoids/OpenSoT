@@ -156,7 +156,7 @@ print("Initing solver...")
 solver = pysot.oc.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = True
+solver.getOptions().use_line_search = False
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 solver.getOptions().min_abs_delta_solution = 1e-6
