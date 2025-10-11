@@ -20,7 +20,7 @@ jobs:
     - name: Sphinx:BuildHTML
       uses: ammaraskar/sphinx-action@master
     - name: Sphinx:UploadArtifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: html-docs
         path: docs/build/html/
