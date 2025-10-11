@@ -244,11 +244,12 @@ w_T_b.child_frame_id = "base_footprint"
 dt = 1./100.
 
 ## CREATE OPTIMIZATION PROBLEM
+manipulation_base_frame = "world"
 #1. TASKS
-gripper_left = Cartesian("Cartesian", model, "gripper_left_grasping_frame", "base_link")
+gripper_left = Cartesian("Cartesian", model, "gripper_left_grasping_frame", manipulation_base_frame)
 gripper_left.setLambda(0.1)
 
-gripper_right = Cartesian("Cartesian", model, "gripper_right_grasping_frame", "base_link")
+gripper_right = Cartesian("Cartesian", model, "gripper_right_grasping_frame", manipulation_base_frame)
 gripper_right.setLambda(0.1)
 
 base = Cartesian("Cartesian", model, "base_link", "world")
@@ -360,7 +361,7 @@ solver = pysot.iHQP(stack)
 pose_ref, vel_ref = gripper_right.getReference()
 print(f"pose_ref: {pose_ref}")
 print(f"vel_ref: {vel_ref}")
-node.make_6dof_marker(name="gripper_right_marker", pose=pose_ref, frame_id="base_link")
+node.make_6dof_marker(name="gripper_right_marker", pose=pose_ref, frame_id=manipulation_base_frame)
 
 object_in_scene = False
 try:
