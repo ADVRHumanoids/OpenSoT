@@ -1,0 +1,13 @@
+services:
+  dev:
+    build: .
+    stdin_open: true
+    tty: true 
+    entrypoint: /bin/bash
+    restart: always
+    volumes:
+      - /home/$USER/.ssh:/home/user/.ssh
+      - ./scripts:/home/user/scripts
+      - ../..:/home/user/test_ws/src/OpenSoT:ro
+    environment:
+      - TERM=xterm-256color

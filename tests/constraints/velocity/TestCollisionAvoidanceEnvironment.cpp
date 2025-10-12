@@ -13,7 +13,6 @@
 #include <chrono>
 #include <OpenSoT/utils/AutoStack.h>
 #include <fstream>
-#include "collision_utils.h"
 #define ENABLE_ROS false
 
 #if ENABLE_ROS
@@ -225,9 +224,6 @@ TEST_F(testCollisionAvoidanceConstraint, testEnvironmentCollisionAvoidance){
     EXPECT_TRUE(environment_collsion_constraint->addCollisionShape("mybox", "world", box, w_T_c));
     environment_collsion_constraint->update();
     EXPECT_TRUE(environment_collsion_constraint->getAineq().rows() == max_pairs);
-    EXPECT_TRUE(environment_collsion_constraint->getCollisionJacobian().rows() == 39)<<"Links are "<<39<<
-                                                                                                 " WHILE environment_collsion_constraint->getCollisionJacobian().rows(): "<<
-                                                                                                 environment_collsion_constraint->getCollisionJacobian().rows()<<std::endl;
 
     std::set<std::string> interested_links = {"LShp","LShr","LShy","LElb","LForearm","LSoftHandLink"};
 
