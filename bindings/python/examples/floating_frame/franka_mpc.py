@@ -259,6 +259,7 @@ print(f"x0[0]: {x0[0]}")
 
 ocp = OCP()
 dd = list()
+const = list()
 for i in range(Ns):
     stage = Stage()
     """ First we include information related to the state space """
@@ -283,6 +284,12 @@ for i in range(Ns):
     dd.append(df)
     stage.dynamics_derivative = df
 
+    """  """
+    tau_lim = DynamicsConstraint(stage.model, stage.dx, stage.du,  dt)
+    const.append(tau_lim)
+    stage.stack = pysot.AutoStack(tau_lim)
+
+    """ """
     ocp.addStage(stage)
 
 """ Last stage (Ns) does not have dynamics and control variables/dvariables """
@@ -305,14 +312,14 @@ utest.assertTrue(ocp.getNumberOfNodes() == Ns)
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-9 * np.eye(model.nv))
+    minu.setWeight(1e-9*0 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
 
 
 # set goal at final state
 minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], dvariables.getVariable("dqdot"))
-minvel.setWeight(1e3 * np.eye(model.nv))
+minvel.setWeight(1e-9 * np.eye(model.nv))
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "fp3_link8")
 cartesian_task.setWeight(1e3 * np.eye(6))
@@ -326,7 +333,7 @@ ocp.update(x0, u0)
 #
 print("ocp updated!")
 
-
+#joint limits
 qlims = list()
 for i in range(Ns+1):
     qmin, qmax = model.getJointLimits()
@@ -339,15 +346,12 @@ for i in range(Ns+1):
 print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 10
-solver.getOptions().verbose = False
+solver.getOptions().verbose = True
 solver.getOptions().use_line_search = False
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 solver.getOptions().min_abs_delta_solution = 1e-6
 print("...solver inited!")
-
-
-
 
 msg = JointState()
 msg.name = model.getJointNames()
@@ -363,7 +367,6 @@ msg.position = x0[0][:model.nq].tolist()
 try:
     while rclpy.ok():
         
-
         pose_ref.translation[0] = node.marker_pose.pose.position.x
         pose_ref.translation[1] = node.marker_pose.pose.position.y
         pose_ref.translation[2] = node.marker_pose.pose.position.z
