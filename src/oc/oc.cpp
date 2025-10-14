@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/oc.h>
+#include <OpenSoT/oc/oc.h>
 
 using namespace OpenSoT;
 

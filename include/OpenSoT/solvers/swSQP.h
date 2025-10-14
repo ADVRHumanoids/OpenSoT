@@ -2,7 +2,7 @@
 #define _WB_SOT_SOLVERS_SWSQP_H_
 
 #include <OpenSoT/solvers/hpipmOC.h>
-#include <OpenSoT/utils/oc.h>
+#include <OpenSoT/oc/oc.h>
 #include <chrono>
 #include <limits>
 

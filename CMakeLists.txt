@@ -146,7 +146,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 set(OPENSOT_OC_SOURCES 
     src/oc/SE3Derivatives.cpp
     src/oc/SE3Task.cpp
-    src/oc/DynamicsConstraint.cpp)
+    src/oc/DynamicsConstraint.cpp
+    src/oc/oc.cpp)
 
 
 ##SOLVERS
@@ -174,8 +175,7 @@ set(OPENSOT_UTILS_SOURCES src/utils/AutoStack.cpp
     src/utils/AffineUtils.cpp
     src/utils/Indices.cpp
     src/utils/cartesian_utils.cpp
-    src/utils/InverseDynamics.cpp
-    src/utils/oc.cpp)
+    src/utils/InverseDynamics.cpp)
 
 
 if(${PCL_FOUND})

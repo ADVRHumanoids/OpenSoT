@@ -1,4 +1,4 @@
-#include <OpenSoT/utils/oc.h>
+#include <OpenSoT/oc/oc.h>
 
 // py_ocp.cpp
 #include <pybind11/pybind11.h>
@@ -10,8 +10,8 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <xbot2_interface/xbotinterface2.h>
-#include <OpenSoT/utils/oc.h>
 #include <OpenSoT/solvers/swSQP.h>
+#include <OpenSoT/oc/Manifolds.h>
 #include <OpenSoT/oc/SE3Derivatives.h>
 #include <OpenSoT/oc/SE3Task.h>
 #include <OpenSoT/oc/DynamicsConstraint.h>
