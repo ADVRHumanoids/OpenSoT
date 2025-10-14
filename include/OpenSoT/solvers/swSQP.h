@@ -84,9 +84,6 @@ public:
             use_line_search = true;
         }
 
-        /**
-         * @brief max_iters maximum number of iterations of solve
-         */
         unsigned int max_iters;
 
         /**
@@ -99,11 +96,6 @@ public:
         double alpha_min;
 
         bool use_line_search;
-
-        /**
-         * @brief line_search_improvs allows multiple impruvements inside line seaerch (as soon as alpha >= alpha_min)
-         */
-        bool line_search_improvs;
 
         /**
          * @brief beta multiply merit derivative in Armijo's condition in line search
@@ -137,12 +129,6 @@ public:
 
     bool solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0);
 
-    /**
-     * @brief line_search
-     * @return true if an improving solution has been found
-     */
-    bool line_search();
-
     const std::vector<Eigen::VectorXd>& getStateSolution() const { return _x0;}
     const std::vector<Eigen::VectorXd>& getControlSolution() const { return _u0;}
 
@@ -159,10 +145,17 @@ private:
                             Eigen::MatrixXd& C, Eigen::MatrixXd& D, Eigen::VectorXd& dl, Eigen::VectorXd& du);
 
 
-    void update_qp();
-    void step(double alpha);
-    bool break_criteria();
-    bool ls_filter();
+    void linearize(); // update linearization/quadritization matrices
+    void step(double alpha); //step of the solver
+    bool break_criteria(); // sqp solvers breaking criteria
+
+    double _prev_cost;  // total cost
+    double _prev_gamma; // total gap violation
+    double _prev_c; // total constraint violation 
+
+    bool ls_filter(); // filter line search implementation
+    double computeGapViolation();
+    double computeConstraintViolation();
 
 
     hpipmOC::Ptr _qp_solver;
@@ -174,8 +167,7 @@ private:
     std::vector<Eigen::MatrixXd> _Mx, _Mu;
 
     // stores dynamics in the horizon
-    std::vector<Eigen::MatrixXd> _A;
-    std::vector<Eigen::MatrixXd> _B;
+    std::vector<Eigen::MatrixXd> _A, _B;
     std::vector<Eigen::VectorXd> _b;
 
     // stores cost in the horizon

@@ -47,7 +47,7 @@ class ocp{
                 //1 update model
                 model->setJointPosition(q->getValue(_w0));
                 model->setJointVelocity(v->getValue(_w0));
-                if(a)
+                if(this->a)
                     model->setJointAcceleration(a->getValue(_w0));
                 model->update();
 
@@ -56,7 +56,7 @@ class ocp{
                 x->getValue(_w0);
 
                 //3 update and evaluate control variables (may depends on model)
-                if(u)
+                if(this->u)
                 {
                     u->update();
                     u->getValue(_w0);
@@ -70,11 +70,11 @@ class ocp{
                 }
 
                 //3 update dynamics_derivative
-                if(dynamics_derivative)
+                if(this->dynamics_derivative)
                     dynamics_derivative->update();
 
                 //4 update stack
-                if(stack)
+                if(this->stack)
                     stack->update();
 
             }
