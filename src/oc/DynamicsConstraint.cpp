@@ -17,7 +17,7 @@ DynamicsConstraint::DynamicsConstraint(XBot::ModelInterface &robot,
     // if(_dU.getOutputSize() != 6)
     //     throw std::runtime_error("_dU != 6");
 
-    _W.setIdentity(dX.getOutputSize(), dX.getOutputSize());
+    _W.setIdentity(_robot.getNv(), _robot.getNv());
 
     update();
 
@@ -43,7 +43,7 @@ void DynamicsConstraint::_update()
     // _upperBound = ( _jointLimitsMax - _dq);
     // _lowerBound = ( _jointLimitsMin - _dq);
 
-    _dTAU = _Fx * _dX + _Fu * _dU;
+    _dTAU = _Fx * _dX + _Fu * _dU + _robot.computeInverseDynamics();
 
     _A = _dTAU.getM();
     _b = -_dTAU.getq();
