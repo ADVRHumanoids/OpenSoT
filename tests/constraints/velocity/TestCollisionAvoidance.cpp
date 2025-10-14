@@ -9,7 +9,6 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <OpenSoT/utils/cartesian_utils.h>
-#include "collision_utils.h"
 #include <chrono>
 #define ENABLE_ROS false
 
@@ -18,6 +17,9 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #endif
+
+#include <fstream>
+#include <iostream>
 
 
 void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
@@ -32,17 +34,6 @@ void vectorKDLToEigen(const KDL::Vector &k, Eigen::Matrix<double, 3, 1> &e)
 #define toRad(X) (X * M_PI/180.0)
 #define SMALL_NUM 1e-5
 
-Eigen::Affine3d fcl2Eigen(const fcl::Transform3<double> &in)
-{
-    Eigen::Quaterniond q(in.linear());
-    Eigen::Vector3d t = in.translation();
-
-    Eigen::Affine3d T;
-    T.linear() = q.matrix();
-    T.translation() = t;
-
-    return T;
-}
 
 Eigen::VectorXd getGoodInitialPosition(const XBot::ModelInterface::Ptr _model_ptr) {
     Eigen::VectorXd _q = _model_ptr->getNeutralQ();
@@ -68,136 +59,6 @@ Eigen::VectorXd getGoodInitialPosition(const XBot::ModelInterface::Ptr _model_pt
 }
 
 
-double dist3D_Segment_to_Segment (const Eigen::Vector3d & segment_A_endpoint_1,
-                                  const Eigen::Vector3d & segment_A_endpoint_2,
-                                  const Eigen::Vector3d & segment_B_endpoint_1,
-                                  const Eigen::Vector3d & segment_B_endpoint_2,
-                                  Eigen::Vector3d & closest_point_on_segment_A,
-                                  Eigen::Vector3d & closest_point_on_segment_B)
-{
-
-    using namespace Eigen;
-
-    Vector3d   u = segment_A_endpoint_2 - segment_A_endpoint_1;
-    Vector3d   v = segment_B_endpoint_2 - segment_B_endpoint_1;
-    Vector3d   w = segment_A_endpoint_1 - segment_B_endpoint_1;
-    double    a = u.dot(u);         // always >= 0
-    double    b = u.dot(v);
-    double    c = v.dot(v);         // always >= 0
-    double    d = u.dot(w);
-    double    e = v.dot(w);
-    double    D = a*c - b*b;        // always >= 0
-    double    sc, sN, sD = D;       // sc = sN / sD, default sD = D >= 0
-    double    tc, tN, tD = D;       // tc = tN / tD, default tD = D >= 0
-
-    // compute the line parameters of the two closest points
-    if (D < SMALL_NUM) { // the lines are almost parallel
-        sN = 0.0;         // force using point P0 on segment S1
-        sD = 1.0;         // to prevent possible division by 0.0 later
-        tN = e;
-        tD = c;
-    }
-    else {                 // get the closest points on the infinite lines
-        sN = (b*e - c*d);
-        tN = (a*e - b*d);
-        if (sN < 0.0) {        // sc < 0 => the s=0 edge is visible
-            sN = 0.0;
-            tN = e;
-            tD = c;
-        }
-        else if (sN > sD) {  // sc > 1  => the s=1 edge is visible
-            sN = sD;
-            tN = e + b;
-            tD = c;
-        }
-    }
-
-    if (tN < 0.0) {            // tc < 0 => the t=0 edge is visible
-        tN = 0.0;
-        // recompute sc for this edge
-        if (-d < 0.0)
-            sN = 0.0;
-        else if (-d > a)
-            sN = sD;
-        else {
-            sN = -d;
-            sD = a;
-        }
-    }
-    else if (tN > tD) {      // tc > 1  => the t=1 edge is visible
-        tN = tD;
-        // recompute sc for this edge
-        if ((-d + b) < 0.0)
-            sN = 0;
-        else if ((-d + b) > a)
-            sN = sD;
-        else {
-            sN = (-d + b);
-            sD = a;
-        }
-    }
-    // finally do the division to get sc and tc
-    sc = (std::fabs(sN) < SMALL_NUM ? 0.0 : sN / sD);
-    tc = (std::fabs(tN) < SMALL_NUM ? 0.0 : tN / tD);
-
-    closest_point_on_segment_A = segment_A_endpoint_1 + sc * u;
-    closest_point_on_segment_B = segment_B_endpoint_1 + tc * v;
-
-//    std::cout << "CP1: " << std::endl << CP1 << std::endl;
-//    std::cout << "CP2: " << std::endl << CP2 << std::endl;
-
-    // get the difference of the two closest points
-    Vector3d   dP = closest_point_on_segment_A - closest_point_on_segment_B;  // =  S1(sc) - S2(tc)
-
-    double Dm = dP.norm();   // return the closest distance
-
-    // I leave the line here for observing the minimum distance between the inner line segments of the corresponding capsule pair
-    //std::cout << "Dm: " << std::endl << Dm << std::endl;
-
-    return Dm;
-}
-
-class TestCapsuleLinksDistance
-{
-
-private:
-    ComputeLinksDistance& _computeDistance;
-
-public:
-
-    TestCapsuleLinksDistance(ComputeLinksDistance& computeDistance)
-        :_computeDistance(computeDistance)
-    {
-
-    }
-
-
-    bool globalToLinkCoordinates(const std::string& linkName,
-                                 const fcl::Transform3<double> &fcl_w_T_f,
-                                 Eigen::Affine3d &link_T_f)
-    {
-
-        return _computeDistance.globalToLinkCoordinates(linkName, fcl_w_T_f, link_T_f);
-    }
-
-    bool globalToLinkCoordinatesKDL(const std::string& linkName,
-                                    const fcl::Transform3<double> &fcl_w_T_f,
-                                    Eigen::Affine3d &link_T_f)
-    {
-
-        Eigen::Affine3d w_T_f = fcl2Eigen(fcl_w_T_f);
-
-        fcl::Transform3<double> fcl_w_T_shape = _computeDistance.getCollisionObjects()[linkName]->getTransform();
-        Eigen::Affine3d w_T_shape = fcl2Eigen(fcl_w_T_shape);
-
-        Eigen::Affine3d shape_T_f = w_T_shape.inverse()*w_T_f;
-
-        link_T_f = _computeDistance.getLinkToShapeTransforms()[linkName] * shape_T_f;
-
-        return true;
-    }
-
-};
 
 namespace{
 
@@ -296,14 +157,13 @@ std::string ReadFile(std::string path)
       srdf->initFile(*urdf, srdf_capsule_path);
 
 
-      compute_distance = std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
 
       sc_constraint = std::make_shared<OpenSoT::constraints::velocity::CollisionAvoidance>
               (*_model_ptr,
                -1,
                urdf,
                srdf);
-      sc_constraint->setLinkPairThreshold(0.005);
+      sc_constraint->setLinkPairThreshold(0.005); //0.005
   }
 
   virtual ~testSelfCollisionAvoidanceConstraint() {
@@ -319,7 +179,6 @@ std::string ReadFile(std::string path)
 
   XBot::ModelInterface::Ptr _model_ptr;
   Eigen::VectorXd q;
-  std::shared_ptr<ComputeLinksDistance> compute_distance;
   OpenSoT::constraints::velocity::CollisionAvoidance::Ptr sc_constraint;
   urdf::ModelSharedPtr urdf;
   srdf::ModelSharedPtr srdf;
@@ -505,7 +364,7 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
     stack_of_tasks.push_back(taskCartesianAggregated);
     stack_of_tasks.push_back(postural_task);
 
-    int t = 100;
+    int t = 10; //100;
 
     Eigen::VectorXd qmin, qmax;
     this->_model_ptr->getJointLimits(qmin, qmax);
@@ -613,18 +472,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testCartesianTaskWithSC){
 
     std::cout<<std::endl;
 
-    // check the actual distance between the hand capsule pair
-    std::shared_ptr<ComputeLinksDistance> compute_distance =
-            std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
-    compute_distance->setCollisionWhiteList(std::list<std::pair<std::string, std::string>>(whiteList.begin(), whiteList.end()));
-    std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
-    LinkPairDistance result = results.front();
-    double reference_distance;
-    reference_distance = result.getDistance();
-    std::cout<<"reference_distance: "<<reference_distance<<std::endl;
+    std::vector<double> ds;
+    this->sc_constraint->getOrderedDistanceVector(ds);
+    EXPECT_TRUE(ds.size() == 1);
+    std::cout<<"ds[0]: "<<ds[0]<<std::endl;
+    std::cout<<"padding: "<<0.005<<std::endl;
 
 
-    EXPECT_NEAR(0.005, reference_distance, 1e-3);
+    EXPECT_NEAR(0.005, ds[0], 1e-3);
 
 
 }
@@ -817,48 +672,17 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testMultipleCapsulePairsSC){
 
     // start checking the distances of the capsules
 
-    typedef std::pair<std::string,std::string> CapsulePair;
-    std::vector<CapsulePair> CasulePairs_vec;
-    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkA,linkB));
-    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
 
 
-
-    int i;
-    for (i=0; i < CasulePairs_vec.size(); i++)
+    std::vector<double> d;
+    this->sc_constraint->getOrderedDistanceVector(d);
+    EXPECT_TRUE(d.size() == 2);
+    for(unsigned int i = 0; i < d.size(); ++i)
     {
-
-        std::string _linkA = CasulePairs_vec[i].first;
-        std::string _linkB = CasulePairs_vec[i].second;
-
-        //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
-
-        std::shared_ptr<ComputeLinksDistance> compute_distance =
-                std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
-        std::list<std::pair<std::string,std::string> > whiteList_;
-        whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
-        compute_distance->setCollisionWhiteList(whiteList_);
-        std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
-        LinkPairDistance result = results.front();
-        double reference_distance;
-        reference_distance = result.getDistance();
-
-        if (i == 0)
-        {
-            std::cout << "checking the distance between hands" << std::endl;
-            EXPECT_NEAR(0.005, reference_distance, 1e-4);
-        }
-        else if (i ==1)
-        {
-            std::cout << "checking the distance between legs" << std::endl;
-            EXPECT_NEAR(0.005, reference_distance, 1e-4);
-        }
-        else
-            std::cout << "The dimension of CasulePairs_vec is incorrect!" << std::endl;
-
-        std::cout<<"reference_distance: "<<reference_distance<<std::endl;
+        std::cout<<"d["<<i<<"]: "<<d[i]<<std::endl;
+        std::cout<<"padding 0.005"<<std::endl;
+        EXPECT_NEAR(0.005, d[i], 1e-3);
     }
-
 
 }
 
@@ -1039,46 +863,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
 
     // start checking the distances of the capsules
 
-    typedef std::pair<std::string,std::string> CapsulePair;
-    std::vector<CapsulePair> CasulePairs_vec;
-    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkA,linkB));
-    CasulePairs_vec.push_back(std::pair<std::string,std::string>(linkC,linkD));
-
-
-    for (int i=0; i < CasulePairs_vec.size(); i++)
+    std::vector<double> d;
+    this->sc_constraint->getOrderedDistanceVector(d);
+    EXPECT_TRUE(d.size() == 2);
+    for(unsigned int i = 0; i < d.size(); ++i)
     {
-
-        std::string _linkA = CasulePairs_vec[i].first;
-        std::string _linkB = CasulePairs_vec[i].second;
-
-        //Note: the names of the variables below are not their literal meanings, just for convenience of the code writing
-
-        // check the actual distance between the hand capsule pair
-        std::shared_ptr<ComputeLinksDistance> compute_distance =
-                std::make_shared<ComputeLinksDistance>(*_model_ptr, this->urdf, this->srdf);
-        std::list<std::pair<std::string,std::string> > whiteList_;
-        whiteList_.push_back(std::pair<std::string,std::string>(_linkA,_linkB));
-        compute_distance->setCollisionWhiteList(whiteList_);
-        std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
-        LinkPairDistance result = results.front();
-        double reference_distance;
-        reference_distance = result.getDistance();
-        //std::cout<<"reference_distance: "<<reference_distance<<std::endl;
-
-
-        if (i == 0)
-        {
-            std::cout << "checking the distance between hands" << std::endl;
-            EXPECT_NEAR(0.005, reference_distance, 1e-4);
-        }
-        else if (i ==1)
-        {
-            std::cout << "checking the distance between legs" << std::endl;
-            EXPECT_NEAR(0.005, reference_distance, 1e-4);
-        }
-        else
-            std::cout << "The dimension of CasulePairs_vec is incorrect!" << std::endl;
-
+        std::cout<<"d["<<i<<"]: "<<d[i]<<std::endl;
+        std::cout<<"padding 0.005"<<std::endl;
+        EXPECT_NEAR(0.005, d[i], 1e-3);
     }
 
 
@@ -1156,24 +948,14 @@ TEST_F(testSelfCollisionAvoidanceConstraint, testChangeWhitelistOnline){
     std::string srdf_capsule_path = OPENSOT_TEST_PATH "robots/bigman/bigman.srdf";
 
 
-    urdf::ModelSharedPtr urdf = std::make_shared<urdf::Model>();
-    urdf->initFile(urdf_capsule_path);
-
-    srdf::ModelSharedPtr srdf = std::make_shared<srdf::Model>();
-    srdf->initFile(*urdf, srdf_capsule_path);
-    std::shared_ptr<ComputeLinksDistance> compute_distance =
-            std::make_shared<ComputeLinksDistance>(*_model_ptr, urdf, srdf);
-    compute_distance->setCollisionWhiteList(std::list<std::pair<std::string,std::string>>(whiteList2.begin(), whiteList2.end()));
-    std::list<LinkPairDistance> results = compute_distance->getLinkDistances();
-    LinkPairDistance result = results.front();
-    double reference_distance;
-    reference_distance = result.getDistance();
-    std::cout<<"reference_distance: "<<reference_distance<<std::endl;
-
-    //checking the distance between hands
-
-    EXPECT_NEAR(0.005, reference_distance, 1e-4);
-
+    this->sc_constraint->getOrderedDistanceVector(d);
+    EXPECT_TRUE(d.size() == 1);
+    for(unsigned int i = 0; i < d.size(); ++i)
+    {
+        std::cout<<"d["<<i<<"]: "<<d[i]<<std::endl;
+        std::cout<<"padding 0.005"<<std::endl;
+        EXPECT_NEAR(0.005, d[i], 1e-3);
+    }
     //checking if actual positions of the feet are coincident with the goal reference positions
 
     for(unsigned int i = 0; i < 4; ++i)

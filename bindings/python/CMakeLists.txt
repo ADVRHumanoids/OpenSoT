@@ -56,7 +56,7 @@ if(${pybind11_FOUND})
 
         install(TARGETS pyopensot_collision
             COMPONENT python
-            LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+            LIBRARY DESTINATION "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
             ARCHIVE DESTINATION "lib"
             RUNTIME DESTINATION "bin")
     endif()
@@ -73,7 +73,7 @@ if(${pybind11_FOUND})
 
         install(TARGETS pyopensot_hcod
             COMPONENT python
-            LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+            LIBRARY DESTINATION "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
             ARCHIVE DESTINATION "lib"
             RUNTIME DESTINATION "bin")
     endif()

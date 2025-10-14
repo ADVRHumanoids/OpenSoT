@@ -145,7 +145,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 ##OC
 set(OPENSOT_OC_SOURCES 
     src/oc/SE3Derivatives.cpp
-    src/oc/SE3Task.cpp)
+    src/oc/SE3Task.cpp
+    src/oc/DynamicsConstraint.cpp)
 
 
 ##SOLVERS
@@ -292,13 +293,13 @@ if(${proxsuite_FOUND})
     library_install(OpenSotBackEndproxQP 1 0 0)
 endif()
 
-find_package(GLPK QUIET)
-if(${GLPK_FOUND})
-    message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
-    add_library(OpenSotBackEndGLPK SHARED src/solvers/GLPKBackEnd.cpp)
-    target_link_libraries(OpenSotBackEndGLPK OpenSoT ${GLPK_LIBRARY})
-    library_install(OpenSotBackEndGLPK 1 0 0)
-endif()
+# find_package(GLPK QUIET)
+# if(${GLPK_FOUND})
+#     message("Adding src/solvers/GLPKBackEnd.cpp to compilation")
+#     add_library(OpenSotBackEndGLPK SHARED src/solvers/GLPKBackEnd.cpp)
+#     target_link_libraries(OpenSotBackEndGLPK OpenSoT ${GLPK_LIBRARY})
+#     library_install(OpenSotBackEndGLPK 1 0 0)
+# endif()
 
 add_subdirectory(external/eiQuadProg-ext/)
 include_directories(external/eiQuadProg-ext/include)

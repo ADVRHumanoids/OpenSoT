@@ -223,6 +223,8 @@ class ocp{
                 //1 update model
                 model->setJointPosition(q->getValue(_w0));
                 model->setJointVelocity(v->getValue(_w0));
+                if(a)
+                    model->setJointAcceleration(a->getValue(_w0));
                 model->update();
 
                 //2 update and evaluate state variables
@@ -286,7 +288,7 @@ class ocp{
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;
-            std::shared_ptr<AffineHelper> x, u, q, v, dx, du;
+            std::shared_ptr<AffineHelper> x, u, q, v, a, dx, du;
             AutoStack::Ptr stack;
             Space::Ptr state_space;
 

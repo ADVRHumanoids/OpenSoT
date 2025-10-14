@@ -14,6 +14,7 @@
 #include <OpenSoT/solvers/swSQP.h>
 #include <OpenSoT/oc/SE3Derivatives.h>
 #include <OpenSoT/oc/SE3Task.h>
+#include <OpenSoT/oc/DynamicsConstraint.h>
 
 namespace py = pybind11;
 
@@ -54,6 +55,9 @@ void pyopensot_oc(py::module& m) {
 
     py::class_<OpenSoT::oc::SE3Derivatives, OpenSoT::oc::SE3Derivatives::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Derivatives")
         .def(py::init<const XBot::ModelInterface&, const AffineHelper&, const AffineHelper&, const AffineHelper&, const AffineHelper&, const AffineHelper&, const double>());
+
+    py::class_<OpenSoT::oc::DynamicsConstraint, OpenSoT::oc::DynamicsConstraint::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "DynamicsConstraint")
+        .def(py::init<XBot::ModelInterface&, const OpenSoT::AffineHelper&, const OpenSoT::AffineHelper&, const double>());
 
 
     py::class_<OpenSoT::oc::SE3Task, OpenSoT::oc::SE3Task::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Task")
@@ -122,6 +126,7 @@ void pyopensot_oc(py::module& m) {
         .def_readwrite("du", &Stage::du)
         .def_readwrite("q", &Stage::q)
         .def_readwrite("v", &Stage::v)
+        .def_readwrite("a", &Stage::a)
         .def_readwrite("stack", &Stage::stack)
         .def_readwrite("dynamics_derivative", &Stage::dynamics_derivative)
         .def_readwrite("state_space", &Stage::state_space);
