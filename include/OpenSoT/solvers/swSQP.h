@@ -84,23 +84,17 @@ public:
             use_line_search = true;
         }
 
+        //termination criteria
         unsigned int max_iters;
-
-        /**
-         * @brief min_abs_delta_solution minimum absolute delta solution allowed for increment solution
-         */
         double min_abs_delta_solution;
 
-        bool verbose;
-
+        /// LineSearch
         double alpha_min;
-
         bool use_line_search;
 
-        /**
-         * @brief beta multiply merit derivative in Armijo's condition in line search
-         */
-        double beta;
+        double beta; /// @brief beta multiply merit derivative in Armijo's condition in line search
+
+        bool verbose;
 
         const std::ostringstream& toOSS()
         {
@@ -154,6 +148,7 @@ private:
     double _prev_c; // total constraint violation 
 
     bool ls_filter(); // filter line search implementation
+    bool ls_merit(); // merit line search implementation
     double computeGapViolation();
     double computeConstraintViolation();
 

@@ -58,65 +58,6 @@ void swSQP::computeConstraints(const unsigned int i,
     }
 }
 
-// bool swSQP::line_search()
-// {
-//     _x0_candidate.resize(_x0.size());
-//     _u0_candidate.resize(_u0.size());
-
-//     double alpha = 1.;
-//     double initial_merit = _ocp->cost();
-
-//     double merit_der = 0.;
-//     for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
-//     {
-//         merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
-//     }
-
-//     _stats.line_search_iters = 1;
-//     while(alpha >= _opt.alpha_min)
-//     {
-//         //4) Newton Step
-//         for(unsigned int k = 0; k < _x0.size(); ++k)
-//         {
-//             if(_ocp->stage(k)->state_space)
-//                 {
-//                     _x0_candidate[k].resize(_x0[k].size());
-//                     _ocp->stage(k)->state_space->integrate(_x0[k], alpha*_qp_solver->getSolution()[k].x, _x0_candidate[k]);
-//                 }
-//             else
-//                 throw std::runtime_error("_ocp->stage(k)->state_space is not defined for stage " + to_string(k));
-
-//         }
-
-//         for(unsigned int k = 0; k < _u0.size(); ++k)
-//         {
-//             _u0_candidate[k] = _u0[k] + alpha * _qp_solver->getSolution()[k].u;
-//         }
-
-//         //0) linearize ocp aorund _x0_candidate, _u0_candidate
-//         _ocp->update(_x0_candidate, _u0_candidate);
-
-//         double merit = _ocp->cost();
-
-//         if(merit < initial_merit + _opt.beta * alpha * merit_der) //Armijo's rule
-//         {
-//             //take step
-//             _x0 = _x0_candidate;
-//             _u0 = _u0_candidate;
-
-//             _stats.alpha = alpha;
-//             _stats.line_search_accepted = true;
-//             return true;
-//         }
-//         else
-//         {
-//             alpha = alpha/2.;
-//         }
-
-//         _stats.line_search_iters += 1;
-//     }
-//     return false;
-// }
 
 
 //  Vangelis
@@ -170,6 +111,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         _stats.iters = iter;
         _stats.alpha = 1.;
         _stats.line_search_iters = 1;
+        _stats.line_search_accepted = false;
 
         auto iter_start = std::chrono::high_resolution_clock::now();
 
@@ -199,19 +141,24 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             step(_stats.alpha);
             _ocp->update(_x0_candidate, _u0_candidate);
 
-            if(ls_filter())
+            if(ls_merit())
             {
                 _stats.line_search_accepted=true;
                 break;
             }
         }
 
+        // TODO: FIX the case where the linesearch is not accepted
         _x0 = _x0_candidate;
         _u0 = _u0_candidate;
-        _stats.cost = _ocp->cost();
+        
         _prev_cost = _ocp->cost();
+
         if(_opt.verbose)
+        {
+            _stats.cost = _ocp->cost();
             std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+        }
 
     }
 
@@ -251,11 +198,19 @@ void swSQP::step(double alpha)
     }
 }
 
+bool swSQP::ls_merit()
+{
+    double merit_der = 0.;
+    for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
+    {
+        merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
+    }
 
-// bool swSQP::ls_merit()
-// {
-//     _ocp->cost()
-// }
+    if(_ocp->cost() < _prev_cost + _opt.beta * _stats.alpha * merit_der)
+        return  true;
+
+    return false;
+}
 
 
 bool swSQP::ls_filter()

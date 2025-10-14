@@ -285,7 +285,7 @@ print(f"{solver.getOptions().print()}")
 print("...solver inited!")
 
 pose_ref = cartesian_task.getReference().copy()
-pose_ref.translation[2]+= 0.1
+pose_ref.translation[2]-= 0.3
 # pose_ref.translation[1]-= 0.3
 
 
