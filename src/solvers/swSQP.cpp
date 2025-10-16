@@ -191,7 +191,7 @@ void swSQP::step(double alpha)
     {
         if(_ocp->stage(k)->state_space)
         {
-            _ocp->stage(k)->state_space->integrate(_x0[k], alpha*_qp_solver->getSolution()[k].x, _x0_candidate[k]);
+            _ocp->stage(k)->state_space->plus(_x0[k], alpha*_qp_solver->getSolution()[k].x, _x0_candidate[k]);
         }
         if (k < _u0_candidate.size())
             _u0_candidate[k] = _u0[k] + alpha * _qp_solver->getSolution()[k].u;

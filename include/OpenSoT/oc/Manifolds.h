@@ -24,7 +24,7 @@ public:
 
     unsigned int nv(){ return _nv;}
 
-    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1) = 0;
+    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1) = 0;
 
 protected:
     unsigned int _nq;
@@ -40,7 +40,7 @@ public:
         Space(dimension, dimension)
     {}
 
-    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
     {
         if(x0.size() != this->nq())
             throw std::runtime_error("x0.size() != _nq");
@@ -64,7 +64,7 @@ public:
         Space(7, 6)
     {}
 
-    virtual void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
     {
         if(x0.size() != this->nq())
             throw std::runtime_error("x0.size() != _nq");
@@ -116,7 +116,7 @@ public:
         return _spaces;
     }
 
-    void integrate(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
     {
         unsigned int i = 0;
         for(auto& space : _spaces)
@@ -126,7 +126,7 @@ public:
 
             _x[i].resize(space->nq());
             _x[i].setZero();
-            space->integrate(x0.segment(x0id, space->nq()), dx0.segment(dx0id, space->nv()), _x[i]);
+            space->plus(x0.segment(x0id, space->nq()), dx0.segment(dx0id, space->nv()), _x[i]);
             x1.segment(x0id, space->nq()) = _x[i];
 
             i+=1;

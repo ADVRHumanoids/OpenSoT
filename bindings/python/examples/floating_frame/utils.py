@@ -128,7 +128,7 @@ class min_var(Task):
     The dvariable is included to carry the information related to the size of the derivative of var
     """
     def __init__(self, name, variable, dvariable):
-        super().__init__(name, variable.getInputSize())
+        super().__init__(name, dvariable.getInputSize())
         self.variable = variable
         self.dvariable = dvariable
         self.ref = 0. * self.variable.getq()

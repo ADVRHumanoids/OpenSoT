@@ -37,7 +37,7 @@ std::string print_opt(swSQP::options& opt)
 struct PyStateSpaceRepresentation : OpenSoT::Space {
     using Space::Space;
 
-    void integrate(const Eigen::VectorXd& x0,
+    void plus(const Eigen::VectorXd& x0,
              const Eigen::VectorXd& dx0,
              Eigen::VectorXd& x1) override {
         PYBIND11_OVERRIDE_PURE(
@@ -72,35 +72,35 @@ void pyopensot_oc(py::module& m) {
         .def(py::init<unsigned int, unsigned int>(), py::arg("nq"), py::arg("nv"))
         .def("nq",  &OpenSoT::Space::nq)
         .def("nv",  &OpenSoT::Space::nv)
-        .def("integrate", &OpenSoT::Space::integrate, py::arg("x0"), py::arg("dx0"), py::arg("x1"));
+        .def("plus", &OpenSoT::Space::plus, py::arg("x0"), py::arg("dx0"), py::arg("x1"));
 
 
     // ---------------- Derived: VectorSpace ----------------
     py::class_<OpenSoT::VectorSpace, OpenSoT::Space, OpenSoT::VectorSpace::Ptr>(m, "VectorSpace")
         .def(py::init<unsigned int>(), py::arg("dimension"))
-        .def("integrate", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+        .def("plus", [](OpenSoT::VectorSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
             Eigen::VectorXd x1(x0.size());
             x1.setZero();
-            self.integrate(x0, dx0, x1);
+            self.plus(x0, dx0, x1);
             return x1;}, py::arg("x0"), py::arg("dx0"));
 
     // ---------------- Derived: SE3Space ----------------
     py::class_<OpenSoT::SE3Space, OpenSoT::Space, OpenSoT::SE3Space::Ptr>(m, "SE3Space")
         .def(py::init<>())
-        .def("integrate", [](OpenSoT::SE3Space& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+        .def("plus", [](OpenSoT::SE3Space& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
             Eigen::VectorXd x1(x0.size());
             x1.setZero();
-            self.integrate(x0, dx0, x1);
+            self.plus(x0, dx0, x1);
             return x1;}, py::arg("x0"), py::arg("dx0"));
 
     // ---------------- Composite: CompositeSpace ----------------
     py::class_<OpenSoT::CompositeSpace, OpenSoT::Space, OpenSoT::CompositeSpace::Ptr>(m, "CompositeSpace")
         .def(py::init<const std::vector<OpenSoT::Space::Ptr>&>(), py::arg("representations"))
         .def("getSpaces", &OpenSoT::CompositeSpace::getSpaces)
-        .def("integrate", [](OpenSoT::CompositeSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
+        .def("plus", [](OpenSoT::CompositeSpace& self, const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0) -> Eigen::VectorXd {
                               Eigen::VectorXd x1(x0.size());
                               x1.setZero();
-                              self.integrate(x0, dx0, x1);
+                              self.plus(x0, dx0, x1);
                               return x1;}, py::arg("x0"), py::arg("dx0"));
 
 
