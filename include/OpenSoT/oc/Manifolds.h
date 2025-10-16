@@ -24,7 +24,21 @@ public:
 
     unsigned int nv(){ return _nv;}
 
-    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1) = 0;
+    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1){
+        assert(x0.size() == this->nq());
+        assert(x1.size() == this->nq());
+        assert(dx0.size() == this->nv());
+    }
+
+    virtual void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx){
+        assert(x0.size() == this->nq());
+        assert(x1.size() == this->nq());
+        assert(dx.size() == this->nv());
+    };
+
+    Space getTangentSpace(){
+        return Space(_nv,_nv);
+    }
 
 protected:
     unsigned int _nq;
@@ -40,18 +54,14 @@ public:
         Space(dimension, dimension)
     {}
 
-    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
     {
-        if(x0.size() != this->nq())
-            throw std::runtime_error("x0.size() != _nq");
-        if(x1.size() != this->nq())
-            throw std::runtime_error("x1.size() != _nq");
-        if(dx0.size() != this->nv())
-            throw std::runtime_error("dx0.size() != _nv");
-        if(x0.size() != dx0.size())
-            throw std::runtime_error("x0.size() != dx0.size()");
-
         x1 = x0 + dx0;
+    }
+
+    void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    {
+        dx = x0 - x1;
     }
 };
 
@@ -64,16 +74,15 @@ public:
         Space(7, 6)
     {}
 
-    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
     {
-        if(x0.size() != this->nq())
-            throw std::runtime_error("x0.size() != _nq");
-        if(x1.size() != this->nq())
-            throw std::runtime_error("x1.size() != _nq");
-        if(dx0.size() != this->nv())
-            throw std::runtime_error("dx0.size() != _nv");
-
         x1 = SE3toXYZQUAT(XYZQUATtoSE3(x0) * Exp6(dx0));
+    }
+
+
+    void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    {
+        dx = Log6(XYZQUATtoSE3(x0).inverse() * XYZQUATtoSE3(x1));
     }
 };
 
@@ -81,28 +90,29 @@ class CompositeSpace : public Space
 {
 private:
      std::vector<Space::Ptr> _spaces;
+
 public:
      typedef std::shared_ptr<CompositeSpace> Ptr;
 
-    // Constructor for manual list of Space
-    CompositeSpace(const std::vector<Space::Ptr>& list):
+    // Constructor for manual spaces_list of Space
+    CompositeSpace(const std::vector<Space::Ptr>& spaces_list):
          Space(0,0)
     {
-        for(auto & state_space_representation : list)
+        for(auto & state_space_representation : spaces_list)
         {
             _nq += state_space_representation->nq();
             _nv += state_space_representation->nv();
         }
 
-        for(unsigned int i = 0; i < list.size(); ++i)
+        for(unsigned int i = 0; i < spaces_list.size(); ++i)
         {
-            if(auto composite = std::dynamic_pointer_cast<CompositeSpace>(list[i]))
+            if(auto composite = std::dynamic_pointer_cast<CompositeSpace>(spaces_list[i]))
             {
                 _spaces.insert(_spaces.end(), composite->getSpaces().begin(), composite->getSpaces().end());
             }
             else
             {
-                _spaces.push_back(list[i]);
+                _spaces.push_back(spaces_list[i]);
             }
         }
 
@@ -133,6 +143,23 @@ public:
         }
     }
 
+    void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    {
+        unsigned int i = 0;
+        for(auto& space : _spaces)
+        {
+            unsigned int x0id = _map[space].first;
+            unsigned int x1id = _map[space].second;
+
+            _x[i].resize(space->nv());
+            _x[i].setZero();
+            space->minus(x0.segment(x0id, space->nq()), x1.segment(x1id, space->nv()), _x[i]);
+            dx.segment(x0id, space->nv()) = _x[i];
+
+            i+=1;
+        }
+    }
+
 private:
     typedef unsigned int start_index_state_space;
     typedef unsigned int start_index_tangent_space;
@@ -140,8 +167,6 @@ private:
     std::unordered_map<Space::Ptr, std::pair<start_index_state_space, start_index_tangent_space>> _map;
 
     std::vector<Eigen::VectorXd> _x;
-
-
 
     void compute_spaces_and_indices() {
 
