@@ -39,17 +39,30 @@ double ocp::cost()
 {
     double cost = 0.;
     for(unsigned int i = 0; i < _stages.size(); ++i)
-        cost += _stages[i]->cost();
+        cost += _stages[i]->stage_cost();
     return cost;
 }
 
-double ocp::cost(const unsigned int i)
+double ocp::dynamics_defect()
 {
-    return _stages[i]->cost();
+    double defect = 0.;
+    for(unsigned int i = 0; i < _stages.size(); ++i)
+        defect += _stages[i]->stage_dynamics_defect();
+    return defect;
 }
 
-double ocp::der(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
+double ocp::constraint_violation()
 {
-    return _stages[i]->der(dx, du);
+    double violation = 0.;
+    for(unsigned int i = 0; i < _stages.size(); ++i)
+        violation += _stages[i]->stage_constraint_violation();
+    return violation;
+
+}
+
+
+double ocp::dcost_dw(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
+{
+    return _stages[i]->stage_dcost_dw(dx, du);
 }
 

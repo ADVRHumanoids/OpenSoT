@@ -79,17 +79,17 @@ class ocp{
 
             }
 
-            double cost()
+            double stage_cost()
             {
                 double cost = 0.;
-                if(stack)
+                if(this->stack)
                 {
                     cost = 0.5 * (stack->getStack()[0]->getb().transpose() * stack->getStack()[0]->getWb())[0];
                 }
                 return cost;
             }
 
-            double der(const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
+            double stage_dcost_dw(const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
             {
                 _dw0.resize(this->dx->getInputSize());
                 _dw0.setZero();
@@ -108,6 +108,23 @@ class ocp{
 
                 return der;
             }
+
+            double stage_constraint_violation()
+            {
+                return 0.; //TODO
+            }
+
+            double stage_dynamics_defect()
+            {
+                double inf_norm = 0.;
+                if(this->dynamics_derivative)
+                {
+                    inf_norm = this->dynamics_derivative->getb().cwiseAbs().maxCoeff();
+                }
+                return inf_norm;
+
+            }
+
 
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
@@ -130,14 +147,12 @@ class ocp{
          * @return cumulative cost
          */
         double cost();
+        double dynamics_defect();
+        double constraint_violation();
 
-        /**
-         * @brief cost return cost of stage i
-         * @param i
-         * @return cost of stage i
-         */
-        double cost(const unsigned int i);
-        double der(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du);
+        double dcost_dw(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du);
+
+        double computeConstraintViolation();
 
         void addStage(Stage::Ptr stage);
 

@@ -60,13 +60,11 @@ void swSQP::computeConstraints(const unsigned int i,
 
 
 
-//  Vangelis
-
 void swSQP::linearize()
 {
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
     {
-        _stats.stages_statistics[k].cost = _ocp->cost(k);
+        _stats.stages_statistics[k].cost = _ocp->stage(k)->stage_cost();
 
         // --- Dynamics (only for k < N) ---
         if(k < _ocp->getNumberOfNodes())
@@ -99,8 +97,8 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     _ocp->update(_x0_candidate, _u0_candidate);
     _prev_cost = _ocp->cost();
-    // _prev_gamma = computeGapViolation();
-    // _prev_c = computeConstraintViolation();
+    _prev_defect = _ocp->dynamics_defect();
+    _prev_viol =  _ocp->constraint_violation();
 
 
     Eigen::VectorXd dx0(_A[0].cols());
@@ -136,27 +134,30 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     
         while(_opt.use_line_search && _stats.alpha >= _opt.alpha_min)
         {
+            if(ls_filter())
+            {
+                _stats.line_search_accepted=true;
+                break;
+            }
             _stats.alpha /= 2.;
             _stats.line_search_iters++;
             step(_stats.alpha);
             _ocp->update(_x0_candidate, _u0_candidate);
 
-            if(ls_merit())
-            {
-                _stats.line_search_accepted=true;
-                break;
-            }
+            
         }
 
-        // TODO: FIX the case where the linesearch is not accepted
         _x0 = _x0_candidate;
         _u0 = _u0_candidate;
         
+        _ocp->update(_x0, _u0); //TODO I am not sure about this update, maybe its not needed
         _prev_cost = _ocp->cost();
 
         if(_opt.verbose)
         {
             _stats.cost = _ocp->cost();
+            std::chrono::duration<double> iter_elapsed = std::chrono::high_resolution_clock::now() - iter_start;
+            _stats.iter_time = iter_elapsed.count();
             std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
         }
 
@@ -200,13 +201,16 @@ void swSQP::step(double alpha)
 
 bool swSQP::ls_merit()
 {
+    auto merit = _ocp->cost();
+    
+
     double merit_der = 0.;
     for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
     {
-        merit_der += _ocp->stage(i)->der(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
+        merit_der += _ocp->stage(i)->stage_dcost_dw(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
     }
 
-    if(_ocp->cost() < _prev_cost + _opt.beta * _stats.alpha * merit_der)
+    if(merit < _prev_cost + _opt.beta * _stats.alpha * merit_der)
         return  true;
 
     return false;
@@ -215,32 +219,13 @@ bool swSQP::ls_merit()
 
 bool swSQP::ls_filter()
 {
-    if (_ocp->cost() <  _prev_cost)
+    if (_ocp->cost() <  _prev_cost || _ocp->dynamics_defect()< _prev_defect) //|| _ocp->constraint_violation() < _prev_viol )
         return true;
-    
-
-    
-    // _ocp->stage(i)->stack->getBounds()->
-
-    // _x0_candidate[0].cwiseAbs().maxCoeff();
 
     
 
     return false;
 }
-
-
-double swSQP::computeGapViolation()
-{
-    return 0;
-}
-
-double swSQP::computeConstraintViolation()
-{
-    return 0;
-
-}
-
 
 
 void swSQP::_init()

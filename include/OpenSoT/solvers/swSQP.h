@@ -49,6 +49,7 @@ public:
             _oss << "   accepted         : " << line_search_accepted << std::endl;
             _oss << "   alpha            : " << alpha << std::endl;
             _oss << "   ls iters         : " << line_search_iters << std::endl;
+            // TODO constraint violation
 
 
             _oss << "=== swSQP Stage Statistics ===" << std::endl;
@@ -144,13 +145,11 @@ private:
     bool break_criteria(); // sqp solvers breaking criteria
 
     double _prev_cost;  // total cost
-    double _prev_gamma; // total gap violation
-    double _prev_c; // total constraint violation 
+    double _prev_defect; // total gap violation
+    double _prev_viol; // total constraint violation 
 
     bool ls_filter(); // filter line search implementation
     bool ls_merit(); // merit line search implementation
-    double computeGapViolation();
-    double computeConstraintViolation();
 
 
     hpipmOC::Ptr _qp_solver;
