@@ -97,7 +97,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     _ocp->update(_x0_candidate, _u0_candidate);
     _prev_cost = _ocp->cost();
-    _prev_defect = _ocp->dynamics_defect();
+    // _prev_defect = _ocp->dynamics_defect();
     _prev_viol =  _ocp->constraint_violation();
 
     for (uint i = 0; i <= _ocp->getNumberOfNodes() ; i++)
@@ -123,15 +123,11 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         linearize();
 
         // solve
-        if (!_qp_solver->solve(dx0)) return false;
-
-        // check break criteria on QP solution
-        if (break_criteria())
+        if (!_qp_solver->solve(dx0))
         {
-            std::chrono::duration<double> iter_elapsed = std::chrono::high_resolution_clock::now() - iter_start;
-            _stats.iter_time = iter_elapsed.count();
-            break;
-        } 
+            std::cout<< "nosolve"<< std::endl;
+            return false;
+        }
 
         // first update
         step(_stats.alpha);
@@ -139,7 +135,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     
         while(_opt.use_line_search && _stats.alpha >= _opt.alpha_min)
         {
-            if(ls_filter())
+            if(ls_merit())
             {
                 _stats.line_search_accepted=true;
                 break;
@@ -151,6 +147,15 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
             
         }
+
+        // check break criteria on QP solution
+        if (break_criteria())
+        {
+            _stats.iters--;
+            std::chrono::duration<double> iter_elapsed = std::chrono::high_resolution_clock::now() - iter_start;
+            _stats.iter_time = iter_elapsed.count();
+            break;
+        } 
 
         _x0 = _x0_candidate;
         _u0 = _u0_candidate;
@@ -171,22 +176,23 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     _ocp->update(_x0, _u0);
     _stats.cost = _ocp->cost();
 
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = end - start;
+    std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
     _stats.total_time = elapsed.count();
-    if(_opt.verbose)
-        std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+    // if(_opt.verbose)
+    std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
     return true;
 }
 
 bool swSQP::break_criteria()
 {
-    double sq = 0;
-    for(unsigned int i = 0; i < _qp_solver->getSolution().size(); ++i)
-        sq += (_qp_solver->getSolution()[i].x.transpose() * _qp_solver->getSolution()[i].x)[0];
-    return std::sqrt(sq) <= _opt.min_abs_delta_solution;
+    double max_dw = -INFINITY;
+    for(unsigned int i = 0; i < _ocp->getNumberOfNodes() ; ++i)
+        max_dw = std::max(max_dw, (_x0[i] - _x0_candidate[i]).cwiseAbs().maxCoeff());
+    
+    // std::cout<< max_dw << ","<< _ocp->constraint_violation()<< std::endl;
+
+    return max_dw <= _opt.min_abs_delta_solution && _ocp->constraint_violation() <= _opt.min_abs_delta_solution;
 
 }
 

@@ -18,6 +18,7 @@ from geometry_msgs.msg import PoseStamped, Point
 from scipy.spatial.transform import Rotation as R
 import unittest
 import os
+from utils import eul
 
 
 np.set_printoptions(linewidth=np.inf)
@@ -71,7 +72,7 @@ rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_pat
 rclpy.init()
 node = ros2_node()
 
-Ns = 20 # number of nodes
+Ns = 60 # number of nodes
 tf = 2. # final time
 dt = tf/Ns
 
@@ -99,9 +100,7 @@ variables = OptvarHelper(vars)
 q = variables.getVariable("q")
 qdot = variables.getVariable("qdot")
 qddot = variables.getVariable("qddot")
-
 print(f"variables.getSize(): {variables.getSize()}")
-
 
 """
 This set of variables describe the state and control inputs for the internal liearized QP which acts in the tangent space.
@@ -215,7 +214,7 @@ for i in range(Ns):
     stage.model = xbi.ModelInterface2(node.urdf)
 
     """ Dynamics derivative are just defined in the dvariables """
-    df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
+    df = dynamics_derivative.create(f"df{i}", euler(x, xdot, dt))
     dd.append(df)
     stage.dynamics_derivative = df
 
@@ -235,64 +234,72 @@ ocp.addStage(stage)
 
 
 ocp.update(x0, u0)
-
 print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
-utest = unittest.TestCase()
-utest.assertTrue(ocp.getNumberOfNodes() == Ns)
+
+# for i in range(Ns):
+#     print(i)
+#     df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
+#     # df = dynamics_derivative.create(f"df{i}", eul(dx, dxdot, ocp.stage(i).x, AffineHelper.pile(ocp.stage(i).v, ocp.stage(i).a), ocp.stage(i+1).x,  dt))
+#     dd.append(df)
+#     ocp.stage(i).dynamics_derivative = df
+
+# ocp.update(x0, u0)
+
 
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-3 * np.eye(model.nv))
+    minu.setWeight(1e-3*0 * np.eye(model.nv))
     minus.append(minu)
-    # ocp.stage(i).stack = pysot.AutoStack(minu)
+    ocp.stage(i).stack = pysot.AutoStack(minu)
 
-    tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du,  dt)
+    # tau_min
+    tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du)
     const.append(tau_lim)
-    tau_lim.setWeight(1e-3 * np.eye(model.nv))
-    ocp.stage(i).stack = pysot.AutoStack(minu+ tau_lim)
+    ocp.stage(i).stack << tau_lim
 
 
 # set goal at final state
 minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], dvariables.getVariable("dqdot"))
-minvel.setWeight(1e0 * np.eye(model.nv))
+minvel.setWeight(1e-3 * np.eye(model.nv))
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "fp3_link8")
 cartesian_task.setWeight(1e3 * np.eye(6))
-ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task + minvel)
+ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task)
 
 
 ocp.update(x0, u0)
-#
-print("ocp updated!")
 
-#joint limits
+# joint limits
 qlims = list()
 for i in range(Ns+1):
     qmin, qmax = model.getJointLimits()
     qlims_i = JointLimits(ocp.stage(i).model, qmax, qmin)
     qlims.append(qlims_i)
-    ocp.stage(i).stack = ocp.stage(i).stack << AffineConstraint.toAffine(qlims[-1], dvariables.getVariable("dq"))
+    ocp.stage(i).stack << AffineConstraint.toAffine(qlims[-1], dvariables.getVariable("dq"))
 
 
 print("Initing solver...")
 solver = swSQP(ocp)
-solver.getOptions().max_iters = 1000
-solver.getOptions().verbose = True
+solver.getOptions().max_iters = 100
+solver.getOptions().verbose = False
 solver.getOptions().use_line_search = True
 solver.getOptions().min_abs_delta_solution = 1e-3
 print(f"{solver.getOptions().print()}")
 print("...solver inited!")
 
 pose_ref = cartesian_task.getReference().copy()
-pose_ref.translation[2]-= 0.3
-# pose_ref.translation[1]-= 0.3
+pose_ref.translation[0] += 0.2
+pose_ref.translation[2] -= 0.3
+pose_ref.translation[1] += 0.2
+# try orientatiion task
 
 
 cartesian_task.setReference(pose_ref)
 
 ocp.update(x0, u0)
 success = solver.solve(x0, u0)
+
 
 x0 = solver.getStateSolution()
 u0 = solver.getControlSolution()
