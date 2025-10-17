@@ -1,5 +1,5 @@
-#ifndef __OPENSOT_DYNAMICS_CONSTRAINTS_H__
-#define __OPENSOT_DYNAMICS_CONSTRAINTS_H__
+#ifndef __OPENSOT_TORQUES_TASK_H__
+#define __OPENSOT_TORQUES_TASK_H__
 
 #include <OpenSoT/Task.h>
 #include <OpenSoT/utils/Affine.h>
@@ -7,18 +7,17 @@
 
 
 namespace OpenSoT { namespace oc {
-class DynamicsConstraint : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
+class TorquesTask : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
 public:
-    typedef std::shared_ptr<DynamicsConstraint> Ptr;
+    typedef std::shared_ptr<TorquesTask> Ptr;
 
-    DynamicsConstraint(XBot::ModelInterface& robot, const AffineHelper& dX, const AffineHelper& dU, const double dt);
+    TorquesTask(XBot::ModelInterface& robot, const AffineHelper& dX, const AffineHelper& dU);
 
 
 private:
     XBot::ModelInterface& _robot;
     AffineHelper _dU;
     AffineHelper _dX;
-    double _dt;
 
     Eigen::VectorXd _q;
     Eigen::VectorXd _qdot;
@@ -31,7 +30,6 @@ private:
     AffineHelper _dTAU;
     Eigen::MatrixXd _Fx;
     Eigen::MatrixXd _Fu;
-
 
     virtual void _update();
     

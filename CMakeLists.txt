@@ -146,7 +146,8 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 set(OPENSOT_OC_SOURCES 
     src/oc/SE3Derivatives.cpp
     src/oc/SE3Task.cpp
-    src/oc/DynamicsConstraint.cpp
+    src/oc/TorquesTask.cpp
+    src/oc/TorquesConstraint.cpp
     src/oc/oc.cpp)
 
 
