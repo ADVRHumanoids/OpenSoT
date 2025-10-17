@@ -111,7 +111,17 @@ class ocp{
 
             double stage_constraint_violation()
             {
-                return 0.; //TODO
+                double inf_norm =0.;
+                if(stack->getBounds()->getAineq().rows() > 0) //there are constraints
+                {
+                    
+                    Eigen::VectorXd lviolations = ((stack->getBounds()->getbLowerBound()).cwiseMax(0.0));
+                    Eigen::VectorXd uviolations = ((-stack->getBounds()->getbUpperBound()).cwiseMax(0.0));
+
+                    inf_norm = std::max(uviolations.maxCoeff(), lviolations.maxCoeff());
+                }
+
+                return inf_norm;
             }
 
             double stage_dynamics_defect()

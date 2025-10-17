@@ -219,10 +219,8 @@ bool swSQP::ls_merit()
 
 bool swSQP::ls_filter()
 {
-    if (_ocp->cost() <  _prev_cost || _ocp->dynamics_defect()< _prev_defect) //|| _ocp->constraint_violation() < _prev_viol )
+    if (_ocp->cost() <  _prev_cost || _ocp->constraint_violation() < _prev_viol )// || _ocp->dynamics_defect()< _prev_defect) //||  )
         return true;
-
-    
 
     return false;
 }
