@@ -89,21 +89,21 @@ class ocp{
                 return cost;
             }
 
-            double stage_dcost_dw(const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
+            Eigen::VectorXd stage_dcost_dw()
             {
-                _dw0.resize(this->dx->getInputSize());
-                _dw0.setZero();
-                _dw0.head(dx.size()) = dx;
-                _dw0.tail(du.size()) = du;
+                // _dw0.resize(this->dx->getInputSize());
+                // _dw0.setZero();
+                // _dw0.head(dx.size()) = dx;
+                // _dw0.tail(du.size()) = du;
 
-                this->dx->getValue(_dw0);
-                if(this->du)
-                    this->du->getValue(_dw0);
+                // this->dx->getValue(_dw0);
+                // if(this->du)
+                //     this->du->getValue(_dw0);
 
-                double der = 0.;
+                Eigen::VectorXd der;
                 if(stack)
                 {
-                    der = ((-1.0 * stack->getStack()[0]->getA().transpose() * stack->getStack()[0]->getWb()).transpose() * _dw0)[0];
+                    der = ((-1.0 * stack->getStack()[0]->getA().transpose() * stack->getStack()[0]->getWb()).transpose());
                 }
 
                 return der;
@@ -160,7 +160,6 @@ class ocp{
         double dynamics_defect();
         double constraint_violation();
 
-        double dcost_dw(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du);
 
         double computeConstraintViolation();
 

@@ -100,8 +100,13 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     _prev_defect = _ocp->dynamics_defect();
     _prev_viol =  _ocp->constraint_violation();
 
+    for (uint i = 0; i <= _ocp->getNumberOfNodes() ; i++)
+    {
+        // dcost_dw[i].resize(_A[0].cols());
+        dcost_dw[i] = _ocp->stage(i)->stage_dcost_dw();
+    }
 
-    Eigen::VectorXd dx0(_A[0].cols());
+    Eigen::VectorXd dx0(_A[0].cols()); //initial delta state constraint (dx0 = 0)
     dx0.setZero();
 
     for(unsigned int iter = 1; iter < _opt.max_iters; ++iter)
@@ -201,13 +206,22 @@ void swSQP::step(double alpha)
 
 bool swSQP::ls_merit()
 {
-    auto merit = _ocp->cost();
-    
+    double merit = _ocp->cost();
 
+    
     double merit_der = 0.;
+
     for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
     {
-        merit_der += _ocp->stage(i)->stage_dcost_dw(_qp_solver->getSolution()[i].x, _qp_solver->getSolution()[i].u);
+        // std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
+        // std::cout<< _qp_solver->getSolution()[i].u.rows() <<","<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
+        // std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
+        // std::cout<< _Mx[i].rows() <<",,,"<< _Mx[i].cols()<< std::endl;
+        // std::cout<< _Mu[i].rows() <<",,,,"<< _Mu[i].cols()<< std::endl;
+
+        merit_der += (dcost_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
+        if(i<_ocp->getNumberOfNodes())
+            merit_der += (dcost_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
     }
 
     if(merit < _prev_cost + _opt.beta * _stats.alpha * merit_der)
@@ -232,6 +246,7 @@ void swSQP::_init()
     _stats.line_search_iters = 0;
     _stats.alpha = 1;
 
+    dcost_dw.resize(_ocp->getNumberOfNodes());
 
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
     {

@@ -151,6 +151,10 @@ private:
     bool ls_filter(); // filter line search implementation
     bool ls_merit(); // merit line search implementation
 
+    std::vector<Eigen::VectorXd> dcost_dw; // cost gradient 
+    std::vector<Eigen::VectorXd> ddefect_dw; //defect gradient 
+    std::vector<Eigen::VectorXd> dviol_dw;  //violations gradient
+
 
     hpipmOC::Ptr _qp_solver;
     OpenSoT::ocp::Ptr _ocp;

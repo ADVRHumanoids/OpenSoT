@@ -59,10 +59,3 @@ double ocp::constraint_violation()
     return violation;
 
 }
-
-
-double ocp::dcost_dw(const unsigned int i, const Eigen::MatrixXd& dx, const Eigen::MatrixXd& du)
-{
-    return _stages[i]->stage_dcost_dw(dx, du);
-}
-
