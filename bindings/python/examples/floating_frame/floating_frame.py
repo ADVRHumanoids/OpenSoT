@@ -116,7 +116,7 @@ ocp.addStage(stage)
 ocp.update(x0, u0)
 
 for i in range(Ns):
-    df = pysot.oc.SE3Derivatives(stage.model, dq, dqdot, ocp.stage(i).x, ocp.stage(i).u, ocp.stage(i+1).x, dt)
+    df = pysot.oc.EulerSE3(stage.model, dq, dqdot, ocp.stage(i).x, ocp.stage(i).u, ocp.stage(i+1).x, dt)
     dd.append(df)
     ocp.stage(i).dynamics_derivative = df
 

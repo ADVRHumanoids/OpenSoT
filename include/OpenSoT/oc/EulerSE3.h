@@ -8,12 +8,12 @@
 // #include 
 
 namespace OpenSoT { namespace oc {
-class SE3Derivatives : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
+class EulerSE3 : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd> {
 public:
-    typedef std::shared_ptr<SE3Derivatives> Ptr;
+    typedef std::shared_ptr<EulerSE3> Ptr;
 
     /**
-     * @brief SE3Derivatives computes derivatives for SE3 integration:
+     * @brief EulerSE3 computes derivatives for SE3 integration:
      * 
      *      \mathbf{X}_{k+1} = \mathbf{X}_k Exp(dt\mahtbf{U}_k)
      * 
@@ -25,7 +25,7 @@ public:
      * @param dX element of the tangent space of SE3
      * @param dU element of the tangent space of SE3
      */
-    SE3Derivatives(const XBot::ModelInterface& robot,
+    EulerSE3(const XBot::ModelInterface& robot,
                                const AffineHelper& dX,
                                const AffineHelper& dU,
                                const AffineHelper& Xk,

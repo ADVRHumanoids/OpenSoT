@@ -1,15 +1,15 @@
-#include <OpenSoT/oc/SE3Derivatives.h>
+#include <OpenSoT/oc/EulerSE3.h>
 
 using namespace OpenSoT::oc;
 
-SE3Derivatives::SE3Derivatives(const XBot::ModelInterface& robot,
+EulerSE3::EulerSE3(const XBot::ModelInterface& robot,
                                const AffineHelper& dX,
                                const AffineHelper& dU,
                                const AffineHelper& Xk,
                                const AffineHelper& Uk,
                                const AffineHelper& Xk_1,
                                const double dt):
-    Task< Eigen::MatrixXd, Eigen::VectorXd> ("SE3Derivatives", dX.getInputSize()),
+    Task< Eigen::MatrixXd, Eigen::VectorXd> ("EulerSE3", dX.getInputSize()),
     _robot(robot),
     _dU(dU),
     _dX(dX),
@@ -30,7 +30,7 @@ SE3Derivatives::SE3Derivatives(const XBot::ModelInterface& robot,
     update();
 }
 
-void SE3Derivatives::_update()
+void EulerSE3::_update()
 {  
     _robot.getJointVelocity(_qdot);
 

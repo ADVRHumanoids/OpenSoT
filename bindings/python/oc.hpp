@@ -12,7 +12,7 @@
 #include <xbot2_interface/xbotinterface2.h>
 #include <OpenSoT/solvers/swSQP.h>
 #include <OpenSoT/oc/Manifolds.h>
-#include <OpenSoT/oc/SE3Derivatives.h>
+#include <OpenSoT/oc/EulerSE3.h>
 #include <OpenSoT/oc/SE3Task.h>
 #include <OpenSoT/oc/TorquesTask.h>
 #include <OpenSoT/oc/TorquesConstraint.h>
@@ -55,7 +55,7 @@ struct PyStateSpaceRepresentation : OpenSoT::Space
 void pyopensot_oc(py::module &m)
 {
 
-    py::class_<OpenSoT::oc::SE3Derivatives, OpenSoT::oc::SE3Derivatives::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Derivatives")
+    py::class_<OpenSoT::oc::EulerSE3, OpenSoT::oc::EulerSE3::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "EulerSE3")
         .def(py::init<const XBot::ModelInterface &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const double>());
 
     py::class_<OpenSoT::oc::TorquesTask, OpenSoT::oc::TorquesTask::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "TorquesTask")

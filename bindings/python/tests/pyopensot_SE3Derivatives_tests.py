@@ -49,7 +49,7 @@ dqdot = dvariables.getVariable("dqdot")
 
 dt = 0.1
 
-dSE3 = pysot.oc.SE3Derivatives(model, dq, dqdot, dt)
+dSE3 = pysot.oc.EulerSE3(model, dq, dqdot, dt)
 
 print(f"dSE3.getA():\n{dSE3.getA()}")
 print(f"dSE3.getA().shape:\n{dSE3.getA().shape}")
@@ -116,7 +116,7 @@ dqddot = dvariables.getVariable("dqddot")
 
 
 
-dSE3 = pysot.oc.SE3Derivatives(model, dq, dqdot, dt)
+dSE3 = pysot.oc.EulerSE3(model, dq, dqdot, dt)
 
 print(f"dSE3.getA():\n{dSE3.getA()}")
 print(f"dSE3.getA().shape:\n{dSE3.getA().shape}")
