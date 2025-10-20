@@ -24,21 +24,23 @@ public:
 
     unsigned int nv(){ return _nv;}
 
-    virtual void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1){
-        assert(x0.size() == this->nq());
+    virtual void plus(const Eigen::VectorXd& x, const Eigen::VectorXd& v, Eigen::VectorXd& x1){
+        assert(x.size() == this->nq());
         assert(x1.size() == this->nq());
-        assert(dx0.size() == this->nv());
+        assert(v.size() == this->nv());
     }
 
-    virtual void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx){
-        assert(x0.size() == this->nq());
+    // virtual void dplus_dx(const Eigen::VectorXd& x, const Eigen::VectorXd& v,Eigen::MatrixXd dplus_dx);
+    // virtual void dplus_dv(const Eigen::VectorXd& x, const Eigen::VectorXd& v,Eigen::MatrixXd dplus_dv);
+
+    virtual void minus(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::VectorXd& dx){
+        assert(x.size() == this->nq());
         assert(x1.size() == this->nq());
         assert(dx.size() == this->nv());
     };
 
-    Space getTangentSpace(){
-        return Space(_nv,_nv);
-    }
+    // virtual void dminus_dx(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::MatrixXd dminus_dx);
+    // virtual void dminus_dx1(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::MatrixXd dminus_dx1);
 
 protected:
     unsigned int _nq;
@@ -54,15 +56,35 @@ public:
         Space(dimension, dimension)
     {}
 
-    void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    void plus(const Eigen::VectorXd& x, const Eigen::VectorXd& v, Eigen::VectorXd& x1)
     {
-        x1 = x0 + dx0;
+        x1 = x + v;
     }
 
-    void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    void dplus_dx(const Eigen::VectorXd& x, const Eigen::VectorXd& v,Eigen::MatrixXd dplus_dx)
     {
-        dx = x0 - x1;
+        dplus_dx = Eigen::MatrixXd::Identity(_nv,_nv);
     }
+    void dplus_dv(const Eigen::VectorXd& x, const Eigen::VectorXd& v,Eigen::MatrixXd dplus_dv)
+    {
+        dplus_dv = Eigen::MatrixXd::Identity(_nv,_nv);
+    }
+
+
+    void minus(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    {
+        dx = x - x1;
+    }
+
+    void dminus_dx(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::MatrixXd dminus_dx)
+    {
+        dminus_dx = Eigen::MatrixXd::Identity(_nv,_nv);
+    }
+    void dminus_dx1(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::MatrixXd dminus_dx1)
+    {
+        dminus_dx1 = -Eigen::MatrixXd::Identity(_nv,_nv);
+    }
+
 };
 
 class SE3Space: public Space
@@ -74,15 +96,29 @@ public:
         Space(7, 6)
     {}
 
-    void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    void plus(const Eigen::VectorXd& x, const Eigen::VectorXd& v, Eigen::VectorXd& x1)
     {
-        x1 = SE3toXYZQUAT(XYZQUATtoSE3(x0) * Exp6(dx0));
+        x1 = SE3toXYZQUAT(XYZQUATtoSE3(x) * Exp6(v));
     }
 
-
-    void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    void dplus_dx(const Eigen::VectorXd& x, const Eigen::VectorXd& v, Eigen::MatrixXd dplus_dx)
     {
-        dx = Log6(XYZQUATtoSE3(x0).inverse() * XYZQUATtoSE3(x1));
+        auto _RbT = Exp3(v.tail(3)).transpose();    
+        auto _t_skew = hat(v.head(3));
+
+        dplus_dx = Eigen::MatrixXd::Zero(_nv,_nv);
+        dplus_dx.block<3,3>(0,0) = _RbT;
+        dplus_dx.block<3,3>(3,3) = _RbT;
+        dplus_dx.block<3,3>(0,3) = -_RbT * _t_skew;
+    }
+    void dplus_dv(const Eigen::VectorXd& x, const Eigen::VectorXd& v, Eigen::MatrixXd dplus_dv)
+    {
+        dplus_dv = J_l6(-v);
+    }
+
+    void minus(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    {
+        dx = Log6(XYZQUATtoSE3(x).inverse() * XYZQUATtoSE3(x1));
     }
 };
 
@@ -126,7 +162,7 @@ public:
         return _spaces;
     }
 
-    void plus(const Eigen::VectorXd& x0, const Eigen::VectorXd& dx0, Eigen::VectorXd& x1)
+    void plus(const Eigen::VectorXd& x, const Eigen::VectorXd& v, Eigen::VectorXd& x1)
     {
         unsigned int i = 0;
         for(auto& space : _spaces)
@@ -136,14 +172,14 @@ public:
 
             _x[i].resize(space->nq());
             _x[i].setZero();
-            space->plus(x0.segment(x0id, space->nq()), dx0.segment(dx0id, space->nv()), _x[i]);
+            space->plus(x.segment(x0id, space->nq()), v.segment(dx0id, space->nv()), _x[i]);
             x1.segment(x0id, space->nq()) = _x[i];
 
             i+=1;
         }
     }
 
-    void minus(const Eigen::VectorXd& x0, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
+    void minus(const Eigen::VectorXd& x, const Eigen::VectorXd& x1, Eigen::VectorXd& dx)
     {
         unsigned int i = 0;
         for(auto& space : _spaces)
@@ -153,11 +189,15 @@ public:
 
             _x[i].resize(space->nv());
             _x[i].setZero();
-            space->minus(x0.segment(x0id, space->nq()), x1.segment(x1id, space->nv()), _x[i]);
+            space->minus(x.segment(x0id, space->nq()), x1.segment(x1id, space->nv()), _x[i]);
             dx.segment(x0id, space->nv()) = _x[i];
 
             i+=1;
         }
+    }
+
+    Space getTangentSpace(){
+        return VectorSpace(_nv);
     }
 
 private:
