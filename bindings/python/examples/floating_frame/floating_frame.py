@@ -15,7 +15,6 @@ from geometry_msgs.msg import PoseStamped, Point
 from scipy.spatial.transform import Rotation as R
 from geometry_msgs.msg import PoseStamped, Point, TransformStamped
 from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster
-from pyopensot.tasks.velocity import Cartesian
 from pyopensot import AffineHelper, OptvarHelper, GenericTask, Task, AffineTask, AffineConstraint
 import math
 
@@ -156,7 +155,7 @@ print("Initing solver...")
 solver = pysot.oc.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = False
+solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 solver.getOptions().min_abs_delta_solution = 1e-6
@@ -177,9 +176,9 @@ try:
         input()
 
         x = x0[0]
-        for i in range(len(x0)-1):
-            # x = x0[i]
-            x = space.integrate(x, u0[i]*dt)
+        for i in range(len(x0)):
+            x = x0[i]
+            # x = space.integrate(x, u0[i]*dt)
             q_val = x.tolist()
             rosnode.publish(q_val)
             time.sleep(dt)

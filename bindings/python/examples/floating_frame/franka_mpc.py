@@ -5,7 +5,7 @@ from rcl_interfaces.srv import GetParameters
 from ament_index_python.packages import get_package_share_directory
 from xbot2_interface import pyxbot2_interface as xbi
 from pyopensot import AffineHelper, OptvarHelper, GenericTask, Task, AffineTask, AffineConstraint
-from pyopensot.tasks.velocity import Cartesian
+from pyopensot.tasks.velocity import Postural
 from pyopensot.constraints.velocity import JointLimits
 import pyopensot as pysot
 import numpy as np
@@ -137,8 +137,11 @@ rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_pat
 rclpy.init()
 node = ros2_node()
 
-Ns = 60 # number of nodes
-tf = 3.0 # final time
+
+time.sleep(2)
+
+Ns = 20 # number of nodes
+tf = 0.2 # final time
 dt = tf/Ns
 
 
@@ -285,9 +288,6 @@ for i in range(Ns):
     dd.append(df)
     stage.dynamics_derivative = df
 
-    """  """
-    
-    # stage.stack = pysot.AutoStack(tau_lim)
 
     """ """
     ocp.addStage(stage)
@@ -309,25 +309,29 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 utest = unittest.TestCase()
 utest.assertTrue(ocp.getNumberOfNodes() == Ns)
 
+postural = Postural(ocp.stage(0).model)
+postural.setReference(q_val.copy())
+
+
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-9*0 * np.eye(model.nv))
+    minu.setWeight(1e-3 * np.eye(model.nv))
     minus.append(minu)
-    #ocp.stage(i).stack = pysot.AutoStack(minu)
+    ocp.stage(i).stack = pysot.AutoStack(minu + AffineTask.toAffine(postural, dvariables.getVariable("dq")))
 
-    tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du,  dt)
+    # tau_min
+    tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du)
     const.append(tau_lim)
-    tau_lim.setWeight(1e-6 * np.eye(model.nv))
-    ocp.stage(i).stack = pysot.AutoStack(tau_lim)
+    ocp.stage(i).stack << tau_lim
 
 
 # set goal at final state
 minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], dvariables.getVariable("dqdot"))
-minvel.setWeight(1e-9*0 * np.eye(model.nv))
+minvel.setWeight(1e3 * np.eye(model.nv))
 
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "fp3_link8")
-cartesian_task.setWeight(1e3*0 * np.eye(6))
+cartesian_task.setWeight(1e6 * np.eye(6))
 ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task + minvel)
 
 T = cartesian_task.getReference()
@@ -351,18 +355,18 @@ for i in range(Ns+1):
 print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 10
-solver.getOptions().verbose = True
-solver.getOptions().use_line_search = False
+solver.getOptions().verbose = False
+solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
-solver.getOptions().min_abs_delta_solution = 1e-6
+solver.getOptions().min_abs_delta_solution = 1e-3
 print("...solver inited!")
 
 msg = JointState()
 msg.name = model.getJointNames()
 
 pose_ref = T.copy()
-dt_sim = 0.0001
+dt_sim = 0.001
 
 state = np.concatenate((q_val,qdot_val))
 space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nv)])
@@ -377,12 +381,11 @@ x0 = solver.getStateSolution()
 u0 = solver.getControlSolution()
 
 
-
 last_pose_reference = pose_ref.copy()
 msg.position = x0[0][:model.nq].tolist()
 try:
     while rclpy.ok():
-        
+
         pose_ref.translation[0] = node.marker_pose.pose.position.x
         pose_ref.translation[1] = node.marker_pose.pose.position.y
         pose_ref.translation[2] = node.marker_pose.pose.position.z
@@ -390,30 +393,29 @@ try:
                 node.marker_pose.pose.orientation.z, node.marker_pose.pose.orientation.w]
         pose_ref.linear = R.from_quat(quat).as_matrix()
 
-        # cartesian_task.setReference(pose_ref)
+        cartesian_task.setReference(pose_ref)
 
-        # ocp.update(x0, u0)
-        # success = solver.solve(x0, u0)
+        ocp.update(x0, u0)
+        success = solver.solve(x0, u0)
 
-        # x0 = solver.getStateSolution()
-        # u0 = solver.getControlSolution()
+        x0 = solver.getStateSolution()
+        u0 = solver.getControlSolution()
 
 
-        # state = space.integrate(state, np.concatenate((state[model.nq:], u0[0]))*dt)
+        state = space.plus(state, np.concatenate((state[model.nq:], u0[0]))*dt)
 
-        for x in x0:
-            msg.position = x[:model.nq].tolist()
+        msg.position = state[:model.nq].tolist()
 
         
-        # for i in range(len(x0)-1):
-        #     x0[i] = x0[i+1]
-        # for i in range(len(u0)-1):
-        #     u0[i] = u0[i+1]    
-        # u0[-1] = u0[-1]*0.
+        for i in range(len(x0)-1):
+            x0[i] = x0[i+1]
+        for i in range(len(u0)-1):
+            u0[i] = u0[i+1]    
+        u0[-1] = u0[-1]*0.
         
-            msg.header.stamp = node.get_clock().now().to_msg()
-            node.publish(msg)
-            time.sleep(dt)
+        msg.header.stamp = node.get_clock().now().to_msg()
+        node.publish(msg)
+        time.sleep(dt)
 
         rclpy.spin_once(node, timeout_sec=dt_sim)
 

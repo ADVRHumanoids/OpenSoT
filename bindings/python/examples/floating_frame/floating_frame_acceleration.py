@@ -4,7 +4,7 @@ from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters
 
 from xbot2_interface import pyxbot2_interface as xbi
-import pyopensot as pysot
+# import pyopensot as pysot
 import numpy as np
 from std_msgs.msg import String 
 from sensor_msgs.msg import JointState
@@ -103,7 +103,7 @@ for i in range(Ns):
     stage = Stage()
 
     stage.model = xbi.ModelInterface2(rosnode.urdf)
-    stage.state_space = CompositeSpace([pysot.oc.SE3Space(), VectorSpace(6)])
+    stage.state_space = CompositeSpace([SE3Space(), VectorSpace(6)])
 
     stage.x = x
     stage.dx = dx
@@ -151,8 +151,6 @@ for i in range(Ns):
 minvel = min_var.create(f"minvel", ocp.stage(Ns).v, dvariables.getVariable("dqdot"))
 minvel.setWeight(1e3 * np.eye(model.nv))
 
-
-
 cartesian_task = pysot.oc.SE3Task("Cartesian", ocp.stage(Ns).model, dvariables.getVariable("dq"), "base_link")
 cartesian_task.setWeight(1e3 * np.eye(6))
 ocp.stage(Ns).stack = pysot.AutoStack(cartesian_task + minvel)
@@ -167,7 +165,7 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = False
+solver.getOptions().use_line_search = True
 solver.getOptions().beta = 1e-2
 print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12

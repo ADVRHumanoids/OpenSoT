@@ -72,7 +72,7 @@ rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_pat
 rclpy.init()
 node = ros2_node()
 
-Ns = 60 # number of nodes
+Ns = 20 # number of nodes
 tf = 2. # final time
 dt = tf/Ns
 
@@ -249,7 +249,7 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-3*0 * np.eye(model.nv))
+    minu.setWeight(1e-3 * np.eye(model.nv))
     minus.append(minu)
     ocp.stage(i).stack = pysot.AutoStack(minu)
 
@@ -282,16 +282,20 @@ for i in range(Ns+1):
 print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 100
-solver.getOptions().verbose = False
+solver.getOptions().verbose = True
 solver.getOptions().use_line_search = True
 solver.getOptions().min_abs_delta_solution = 1e-3
 print(f"{solver.getOptions().print()}")
 print("...solver inited!")
 
 pose_ref = cartesian_task.getReference().copy()
-pose_ref.translation[0] += 0.2
-pose_ref.translation[2] -= 0.3
-pose_ref.translation[1] += 0.2
+# out of task space
+# pose_ref.translation[0] += 0.5
+
+# joint lims test
+pose_ref.translation[0] -= 0.4
+pose_ref.translation[2] -= 0.4
+# pose_ref.translation[1] += 0.2
 # try orientatiion task
 
 
