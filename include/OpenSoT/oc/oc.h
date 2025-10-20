@@ -24,10 +24,7 @@ class ocp{
         struct Stage{
             typedef std::shared_ptr<Stage> Ptr;
 
-            Stage()
-            {
-
-            }
+            Stage(){}
 
             bool isFinalStage()
             {
@@ -47,7 +44,7 @@ class ocp{
                 //1 update model
                 model->setJointPosition(q->getValue(_w0));
                 model->setJointVelocity(v->getValue(_w0));
-                if(this->a)
+                if(a)
                     model->setJointAcceleration(a->getValue(_w0));
                 model->update();
 
@@ -56,7 +53,7 @@ class ocp{
                 x->getValue(_w0);
 
                 //3 update and evaluate control variables (may depends on model)
-                if(this->u)
+                if(u)
                 {
                     u->update();
                     u->getValue(_w0);
@@ -70,11 +67,11 @@ class ocp{
                 }
 
                 //3 update dynamics_derivative
-                if(this->dynamics_derivative)
+                if(dynamics_derivative)
                     dynamics_derivative->update();
 
                 //4 update stack
-                if(this->stack)
+                if(stack)
                     stack->update();
 
             }
@@ -91,14 +88,6 @@ class ocp{
 
             Eigen::VectorXd stage_dcost_dw()
             {
-                // _dw0.resize(this->dx->getInputSize());
-                // _dw0.setZero();
-                // _dw0.head(dx.size()) = dx;
-                // _dw0.tail(du.size()) = du;
-
-                // this->dx->getValue(_dw0);
-                // if(this->du)
-                //     this->du->getValue(_dw0);
 
                 Eigen::VectorXd der;
                 if(stack)
@@ -124,17 +113,73 @@ class ocp{
                 return inf_norm;
             }
 
+            Eigen::VectorXd stage_dviolation_dw(double beta = 10.0)
+            {
+                Eigen::VectorXd gradient = Eigen::VectorXd::Zero(dx->getInputSize());;
+                
+                if(stack->getBounds()->getAineq().rows() == 0)
+                    return gradient;
+                
+                Eigen::VectorXd lviolations = ((stack->getBounds()->getbLowerBound()).cwiseMax(0.0));
+                Eigen::VectorXd uviolations = ((-stack->getBounds()->getbUpperBound()).cwiseMax(0.0));
+                
+                // Combine all violations
+                std::vector<double> all_violations;
+                std::vector<int> all_indices;
+                std::vector<int> all_types;
+                
+                for(int i = 0; i < lviolations.size(); ++i) {
+                    all_violations.push_back(lviolations(i));
+                    all_indices.push_back(i);
+                    all_types.push_back(0);
+                }
+                
+                for(int i = 0; i < uviolations.size(); ++i) {
+                    all_violations.push_back(uviolations(i));
+                    all_indices.push_back(i);
+                    all_types.push_back(1);
+                }
+                
+                // Softmax weights: w_i = exp(beta * v_i) / sum_j(exp(beta * v_j))
+                double max_v = *std::max_element(all_violations.begin(), all_violations.end());
+                
+                std::vector<double> exp_vals(all_violations.size());
+                double sum_exp = 0.0;
+                
+                for(size_t i = 0; i < all_violations.size(); ++i) {
+                    exp_vals[i] = std::exp(beta * (all_violations[i] - max_v)); // avoid overflow
+                    sum_exp += exp_vals[i];
+                }
+                
+                const auto& Aineq = stack->getBounds()->getAineq();
+
+                // Compute weighted gradient
+                for(size_t i = 0; i < all_violations.size(); ++i) {
+                    double weight = exp_vals[i] / sum_exp;
+                    
+                    int idx = all_indices[i];
+                    int type = all_types[i];
+                    
+                    const auto& constraint_gradient = Aineq.row(idx);
+                    
+                    int sign = (type == 0) ? -1 : 1;
+                    
+                    gradient += weight * sign * constraint_gradient;
+                    
+                }
+                return gradient;
+            }
+
             double stage_dynamics_defect()
             {
                 double inf_norm = 0.;
-                if(this->dynamics_derivative)
+                if(dynamics_derivative)
                 {
-                    inf_norm = this->dynamics_derivative->getb().cwiseAbs().maxCoeff();
+                    inf_norm = dynamics_derivative->getb().cwiseAbs().maxCoeff();
                 }
                 return inf_norm;
 
             }
-
 
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
@@ -159,9 +204,6 @@ class ocp{
         double cost();
         double dynamics_defect();
         double constraint_violation();
-
-
-        double computeConstraintViolation();
 
         void addStage(Stage::Ptr stage);
 

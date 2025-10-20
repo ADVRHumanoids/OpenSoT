@@ -97,13 +97,14 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     _ocp->update(_x0_candidate, _u0_candidate);
     _prev_cost = _ocp->cost();
-    // _prev_defect = _ocp->dynamics_defect();
+    _prev_defect = _ocp->dynamics_defect();
     _prev_viol =  _ocp->constraint_violation();
 
     for (uint i = 0; i <= _ocp->getNumberOfNodes() ; i++)
     {
-        // dcost_dw[i].resize(_A[0].cols());
         dcost_dw[i] = _ocp->stage(i)->stage_dcost_dw();
+        dviol_dw[i] = _ocp->stage(i)->stage_dviolation_dw();
+        // ddefect_dw[i] = _ocp->stage(i)->stage_ddefect_dw();
     }
 
     Eigen::VectorXd dx0(_A[0].cols()); //initial delta state constraint (dx0 = 0)
@@ -135,7 +136,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     
         while(_opt.use_line_search && _stats.alpha >= _opt.alpha_min)
         {
-            if(ls_merit())
+            if(ls_filter())
             {
                 _stats.line_search_accepted=true;
                 break;
@@ -162,6 +163,8 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         
         _ocp->update(_x0, _u0); //TODO I am not sure about this update, maybe its not needed
         _prev_cost = _ocp->cost();
+        // _prev_defect = _ocp->dynamics_defect();
+        _prev_viol = _ocp->constraint_violation();
 
         if(_opt.verbose)
         {
@@ -178,7 +181,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
     _stats.total_time = elapsed.count();
-    // if(_opt.verbose)
+    if(_opt.verbose)
     std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
     return true;
@@ -212,7 +215,7 @@ void swSQP::step(double alpha)
 
 bool swSQP::ls_merit()
 {
-    double merit = _ocp->cost();
+    double merit = _ocp->cost() + _ocp->constraint_violation();
 
     
     double merit_der = 0.;
@@ -226,11 +229,16 @@ bool swSQP::ls_merit()
         // std::cout<< _Mu[i].rows() <<",,,,"<< _Mu[i].cols()<< std::endl;
 
         merit_der += (dcost_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
+        merit_der += (dviol_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
+
         if(i<_ocp->getNumberOfNodes())
+        {
             merit_der += (dcost_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
+            merit_der += (dviol_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
+        }
     }
 
-    if(merit < _prev_cost + _opt.beta * _stats.alpha * merit_der)
+    if(merit < _prev_cost + _prev_viol + _opt.beta * _stats.alpha * merit_der)
         return  true;
 
     return false;
@@ -239,7 +247,7 @@ bool swSQP::ls_merit()
 
 bool swSQP::ls_filter()
 {
-    if (_ocp->cost() <  _prev_cost || _ocp->constraint_violation() < _prev_viol )// || _ocp->dynamics_defect()< _prev_defect) //||  )
+    if (_ocp->cost() <  _prev_cost || _ocp->constraint_violation() < _prev_viol || _ocp->dynamics_defect()< _prev_defect)  
         return true;
 
     return false;
@@ -253,6 +261,8 @@ void swSQP::_init()
     _stats.alpha = 1;
 
     dcost_dw.resize(_ocp->getNumberOfNodes());
+    dviol_dw.resize(_ocp->getNumberOfNodes());
+    // ddefect_dw.resize(_ocp->getNumberOfNodes());
 
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
     {
