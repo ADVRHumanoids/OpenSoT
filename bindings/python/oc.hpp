@@ -13,6 +13,7 @@
 #include <OpenSoT/solvers/swSQP.h>
 #include <OpenSoT/oc/Manifolds.h>
 #include <OpenSoT/oc/EulerSE3.h>
+#include <OpenSoT/oc/EulerVector.h>
 #include <OpenSoT/oc/SE3Task.h>
 #include <OpenSoT/oc/TorquesTask.h>
 #include <OpenSoT/oc/TorquesConstraint.h>
@@ -56,6 +57,9 @@ void pyopensot_oc(py::module &m)
 {
 
     py::class_<OpenSoT::oc::EulerSE3, OpenSoT::oc::EulerSE3::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "EulerSE3")
+        .def(py::init<const XBot::ModelInterface &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const double>());
+
+    py::class_<OpenSoT::oc::EulerVector, OpenSoT::oc::EulerVector::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "EulerVector")
         .def(py::init<const XBot::ModelInterface &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const AffineHelper &, const double>());
 
     py::class_<OpenSoT::oc::TorquesTask, OpenSoT::oc::TorquesTask::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "TorquesTask")
@@ -125,6 +129,7 @@ void pyopensot_oc(py::module &m)
         .def_readwrite("model", &Stage::model)
         .def_readwrite("variables", &Stage::variables)
         .def_readwrite("x", &Stage::x)
+        .def_readwrite("xdot", &Stage::xdot)
         .def_readwrite("u", &Stage::u)
         .def_readwrite("dx", &Stage::dx)
         .def_readwrite("du", &Stage::du)

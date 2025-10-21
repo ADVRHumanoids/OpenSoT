@@ -52,6 +52,12 @@ class ocp{
                 x->update();
                 x->getValue(_w0);
 
+                if (xdot){
+                    xdot->update();
+                    xdot->getValue(_w0);
+                }
+                
+
                 //3 update and evaluate control variables (may depends on model)
                 if(u)
                 {
@@ -184,7 +190,7 @@ class ocp{
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;
-            std::shared_ptr<AffineHelper> x, u, q, v, a, dx, du;
+            std::shared_ptr<AffineHelper> x, xdot, u, q, v, a, dx, du;
             AutoStack::Ptr stack;
             Space::Ptr state_space;
 

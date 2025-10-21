@@ -131,8 +131,8 @@ ocp.update(x0, u0)
 print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 
 for i in range(Ns):
-    dSE3 = pysot.oc.SE3Derivatives(ocp.stage(i).model, dq, dqdot, ocp.stage(i).q, ocp.stage(i).v, ocp.stage(i+1).q, dt)
-    dvel = dynamics_derivative.create(f"df{i}", eul(dqdot, dqddot, ocp.stage(i).v, ocp.stage(i).u, ocp.stage(i+1).v,  dt))
+    dSE3 = pysot.oc.EulerSE3(ocp.stage(i).model, dq, dqdot, ocp.stage(i).q, ocp.stage(i).v, ocp.stage(i+1).q, dt)
+    dvel = pysot.oc.EulerVector(stage.model, dqdot, dqddot, ocp.stage(i).v, ocp.stage(i).u, ocp.stage(i+1).v, dt)
     dd.append(dSE3)
     dd.append(dvel)
     ocp.stage(i).dynamics_derivative = dSE3 + dvel

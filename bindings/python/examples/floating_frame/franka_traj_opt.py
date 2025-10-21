@@ -200,6 +200,7 @@ for i in range(Ns):
 
     """ We include both state variables and dvariables """
     stage.x = x
+    stage.xdot = xdot
     stage.dx = dx
 
     """ We include both control variables and dvariables """
@@ -213,11 +214,6 @@ for i in range(Ns):
 
     stage.model = xbi.ModelInterface2(node.urdf)
 
-    """ Dynamics derivative are just defined in the dvariables """
-    df = dynamics_derivative.create(f"df{i}", euler(x, xdot, dt))
-    dd.append(df)
-    stage.dynamics_derivative = df
-
     ocp.addStage(stage)
 
 
@@ -226,6 +222,7 @@ for i in range(Ns):
 stage = Stage()
 stage.model = xbi.ModelInterface2(node.urdf)
 stage.x = x
+stage.xdot = xdot
 stage.dx = dx
 stage.state_space = CompositeSpace([VectorSpace(model.nq), VectorSpace(model.nq)])
 stage.q = q
@@ -236,14 +233,12 @@ ocp.addStage(stage)
 ocp.update(x0, u0)
 print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 
-# for i in range(Ns):
-#     print(i)
-#     df = dynamics_derivative.create(f"df{i}", euler(dx, dxdot, dt))
-#     # df = dynamics_derivative.create(f"df{i}", eul(dx, dxdot, ocp.stage(i).x, AffineHelper.pile(ocp.stage(i).v, ocp.stage(i).a), ocp.stage(i+1).x,  dt))
-#     dd.append(df)
-#     ocp.stage(i).dynamics_derivative = df
+for i in range(Ns):
+    df = pysot.oc.EulerVector(stage.model, dx, dxdot, ocp.stage(i).x, ocp.stage(i).xdot, ocp.stage(i+1).x, dt)
+    dd.append(df)
+    ocp.stage(i).dynamics_derivative = df
 
-# ocp.update(x0, u0)
+ocp.update(x0, u0)
 
 
 minus = list()

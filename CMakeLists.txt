@@ -145,6 +145,7 @@ set(OPENSOT_TASKS_SOURCES src/tasks/Aggregated.cpp
 ##OC
 set(OPENSOT_OC_SOURCES 
     src/oc/EulerSE3.cpp
+    src/oc/EulerVector.cpp
     src/oc/SE3Task.cpp
     src/oc/TorquesTask.cpp
     src/oc/TorquesConstraint.cpp
