@@ -26,7 +26,7 @@ rviz_file_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/floating
 rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
 
 rclpy.init()
-rosnode = ros2_node()
+rosnode = floating_frame_node()
 
 model = xbi.ModelInterface2(rosnode.urdf)
 

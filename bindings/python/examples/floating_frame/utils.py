@@ -40,7 +40,7 @@ def random_pose(min, max):
     r = random_quaternion()
     return np.concatenate((p, r))
 
-class ros2_node(Node):
+class floating_frame_node(Node):
     def __init__(self):
         super().__init__('floating_frame')
 
