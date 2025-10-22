@@ -93,24 +93,25 @@ if(${pybind11_FOUND})
             LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
             ARCHIVE DESTINATION "lib"
             RUNTIME DESTINATION "bin")
+
+
+
+        set(OPENSOT_BINDINGS_oc_SOURCES pyopensot_oc.cpp oc.hpp)
+
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+        pybind11_add_module(pyopensot_oc ${OPENSOT_BINDINGS_oc_SOURCES})
+
+        target_link_libraries(pyopensot_oc PUBLIC OpenSoT OpenSothpipmOC)
+
+        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+        install(TARGETS pyopensot_oc
+            COMPONENT python
+            LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
+            ARCHIVE DESTINATION "lib"
+            RUNTIME DESTINATION "bin")
+
     endif()
-
-
-
-    set(OPENSOT_BINDINGS_oc_SOURCES pyopensot_oc.cpp oc.hpp)
-
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-    pybind11_add_module(pyopensot_oc ${OPENSOT_BINDINGS_oc_SOURCES})
-
-    target_link_libraries(pyopensot_oc PUBLIC OpenSoT OpenSothpipmOC)
-
-    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-    install(TARGETS pyopensot_oc
-        COMPONENT python
-        LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
-        ARCHIVE DESTINATION "lib"
-        RUNTIME DESTINATION "bin")
 
 
 else()
