@@ -108,7 +108,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     {
         dcost_dw[i] = _ocp->stage(i)->stage_dcost_dw();
         dviol_dw[i] = _ocp->stage(i)->stage_dviolation_dw();
-        // ddefect_dw[i] = _ocp->stage(i)->stage_ddefect_dw();
+        ddefect_dw[i] = _ocp->stage(i)->stage_ddefect_dw();
     }
 
     Eigen::VectorXd dx0(_A[0].cols()); //initial delta state constraint (dx0 = 0)
@@ -228,18 +228,21 @@ bool swSQP::ls_merit()
     {
         // std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
         // std::cout<< dviol_dw[i].rows() <<"----"<< dviol_dw[i].cols()<< std::endl;
-        // std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
-        // std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
-        // std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
-        // std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
+        std::cout<< ddefect_dw[i].rows() <<"----"<< ddefect_dw[i].cols()<< std::endl;
+        std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
+        std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
+        std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
+        std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
 
         merit_der += (dcost_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
         merit_der += (dviol_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
+        merit_der += (ddefect_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
 
         if(i<_ocp->getNumberOfNodes())
         {
             merit_der += (dcost_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
             merit_der += (dviol_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
+            merit_der += (ddefect_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
         }
     }
 
@@ -267,7 +270,7 @@ void swSQP::init()
 
     dcost_dw.resize(_ocp->getNumberOfNodes());
     dviol_dw.resize(_ocp->getNumberOfNodes());
-    // ddefect_dw.resize(_ocp->getNumberOfNodes());
+    ddefect_dw.resize(_ocp->getNumberOfNodes());
 
 
     if(_opt.line_search_strategy == 1)

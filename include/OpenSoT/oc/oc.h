@@ -187,6 +187,59 @@ class ocp{
 
             }
 
+            Eigen::VectorXd stage_ddefect_dw(double beta = 10.0)
+            {
+                Eigen::VectorXd gradient = Eigen::VectorXd::Zero(dx->getInputSize());
+                
+                if(!dynamics_derivative || dynamics_derivative->getb().size() == 0)
+                    return gradient;
+                
+                Eigen::VectorXd b = dynamics_derivative->getb();
+                Eigen::VectorXd abs_b = b.cwiseAbs();
+                
+                // Find the index of maximum absolute violation
+                int max_idx;
+                double max_val = abs_b.maxCoeff(&max_idx);
+                
+                if(max_val == 0.0)
+                    return gradient;
+                
+                // For smooth approximation using softmax
+                std::vector<double> violations;
+                std::vector<int> indices;
+                std::vector<int> signs;
+                
+                for(int i = 0; i < abs_b.size(); ++i) {
+                    violations.push_back(abs_b(i));
+                    indices.push_back(i);
+                    signs.push_back((b(i) >= 0) ? 1 : -1);
+                }
+                
+                // Softmax weights
+                double max_v = *std::max_element(violations.begin(), violations.end());
+                
+                std::vector<double> exp_vals(violations.size());
+                double sum_exp = 0.0;
+                
+                for(size_t i = 0; i < violations.size(); ++i) {
+                    exp_vals[i] = std::exp(beta * (violations[i] - max_v));
+                    sum_exp += exp_vals[i];
+                }
+                
+                const auto& A = dynamics_derivative->getA(); // or appropriate matrix
+                
+                // Compute weighted gradient
+                for(size_t i = 0; i < violations.size(); ++i) {
+                    double weight = exp_vals[i] / sum_exp;
+                    int idx = indices[i];
+                    int sign = signs[i];
+                    
+                    gradient += weight * sign * A.row(idx);
+                }
+                
+                return gradient;
+            }
+
             std::shared_ptr<XBot::ModelInterface> model;
             std::vector<std::shared_ptr<AffineHelper>> variables;
             tasks::Aggregated::TaskPtr dynamics_derivative;

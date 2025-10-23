@@ -278,7 +278,7 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 100
 solver.getOptions().verbose = True
-solver.getOptions().line_search_strategy = 2
+solver.getOptions().line_search_strategy = 1
 solver.getOptions().min_abs_delta_solution = 1e-3
 solver.init()
 print(f"{solver.getOptions().print()}")
@@ -286,11 +286,11 @@ print(f"{solver.getOptions().print()}")
 
 pose_ref = cartesian_task.getReference().copy()
 # out of task space
-# pose_ref.translation[0] += 0.5
+pose_ref.translation[0] += 0.5
 
 # joint lims test
-pose_ref.translation[0] -= 0.4
-pose_ref.translation[2] -= 0.4
+# pose_ref.translation[0] -= 0.4
+# pose_ref.translation[2] -= 0.4
 # pose_ref.translation[1] += 0.2
 # try orientatiion task
 
