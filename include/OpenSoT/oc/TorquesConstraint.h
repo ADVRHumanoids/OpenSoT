@@ -33,6 +33,8 @@ namespace OpenSoT
                                const AffineHelper &dX,
                                const AffineHelper &dU);
 
+            Eigen::VectorXd getTorqueLimit();
+            void setTorqueLimit(Eigen::VectorXd tau);
         
         };
     }

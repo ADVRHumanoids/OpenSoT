@@ -100,7 +100,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     _prev_defect = _ocp->dynamics_defect();
     _prev_viol =  _ocp->constraint_violation();
 
-    for (uint i = 0; i <= _ocp->getNumberOfNodes() ; i++)
+    for (uint i = 0; i <= _ocp->getNumberOfNodes() && _opt.use_line_search ; i++)
     {
         dcost_dw[i] = _ocp->stage(i)->stage_dcost_dw();
         dviol_dw[i] = _ocp->stage(i)->stage_dviolation_dw();
@@ -182,7 +182,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
     _stats.total_time = elapsed.count();
     if(_opt.verbose)
-    std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+        std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
 
     return true;
 }
@@ -222,11 +222,12 @@ bool swSQP::ls_merit()
 
     for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
     {
-        // std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
-        // std::cout<< _qp_solver->getSolution()[i].u.rows() <<","<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
-        // std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
-        // std::cout<< _Mx[i].rows() <<",,,"<< _Mx[i].cols()<< std::endl;
-        // std::cout<< _Mu[i].rows() <<",,,,"<< _Mu[i].cols()<< std::endl;
+        std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
+        std::cout<< dviol_dw[i].rows() <<"----"<< dviol_dw[i].cols()<< std::endl;
+        std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
+        std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
+        std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
+        std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
 
         merit_der += (dcost_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
         merit_der += (dviol_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];

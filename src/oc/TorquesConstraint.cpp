@@ -11,6 +11,8 @@ DynamicsConstraint::DynamicsConstraint(XBot::ModelInterface &robot,
                                                                  _task(robot, dX, dU)
 {
 
+    _torquelim = _robot.getEffortLimits();
+
     update();
 }
 
@@ -20,7 +22,17 @@ void DynamicsConstraint::_update()
 
     _Aineq = _task.getA();
 
-    _bLowerBound = -_robot.getEffortLimits() + _task.getb(); // + bcause of the deffinition inside the task
-    _bUpperBound = _robot.getEffortLimits() + _task.getb();  // + bcause of the deffinition inside the task
+    _bLowerBound = -_torquelim + _task.getb(); // + bcause of the deffinition inside the task
+    _bUpperBound = _torquelim + _task.getb();  // + bcause of the deffinition inside the task
 }
+
+Eigen::VectorXd DynamicsConstraint::getTorqueLimit(){
+    return _torquelim;
+}
+
+void DynamicsConstraint::setTorqueLimit(Eigen::VectorXd tau)
+{
+    _torquelim = tau;
+}
+
 

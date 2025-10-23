@@ -66,7 +66,9 @@ void pyopensot_oc(py::module &m)
         .def(py::init<XBot::ModelInterface &, const AffineHelper &, const AffineHelper &>());
 
     py::class_<OpenSoT::oc::DynamicsConstraint, OpenSoT::oc::DynamicsConstraint::Ptr, OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "DynamicsConstraint")
-        .def(py::init<XBot::ModelInterface &, const AffineHelper &, const AffineHelper &>());
+        .def(py::init<XBot::ModelInterface &, const AffineHelper &, const AffineHelper &>())
+        .def("getTorqueLimit", &OpenSoT::oc::DynamicsConstraint::getTorqueLimit)
+        .def("setTorqueLimit", &OpenSoT::oc::DynamicsConstraint::setTorqueLimit);
 
     py::class_<OpenSoT::oc::SE3Task, OpenSoT::oc::SE3Task::Ptr, OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>>(m, "SE3Task")
         .def(py::init<const std::string &, const XBot::ModelInterface &, const AffineHelper &, const std::string &>())

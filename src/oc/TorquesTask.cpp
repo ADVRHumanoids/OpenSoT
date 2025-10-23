@@ -35,9 +35,6 @@ void TorquesTask::_update()
 
     _dTAU = _Fx * _dX + _Fu * _dU + _robot.computeInverseDynamics(); //why is this here?
 
-    // _constraint->setBounds(_robot.getEffortLimits() - _dTAU.getq(),
-    //                      -_robot.getEffortLimits() - _dTAU.getq());
-
     _A = _dTAU.getM();
     _b = -_dTAU.getq();
 }
