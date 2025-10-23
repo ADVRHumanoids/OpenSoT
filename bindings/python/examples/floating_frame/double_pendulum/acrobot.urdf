@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<!-- Necessary for Pydrake, For hyrodyn comment out the base_weld joint-->
+<!-- For proper visualization in hyrodyn, change obj to STL-->
+<robot
+  name="acrobot">
+  <joint name="base_weld" type="fixed">
+      <parent link="world"/>
+      <child link="base_link"/>
+  </joint>  
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.025147 -2.3875E-12 -0.021712"
+        rpy="0 0 0" />
+      <mass
+        value="1.0806" />
+      <inertia
+        ixx="0.0052004"
+        ixy="-2.3051E-14"
+        ixz="-0.00037275"
+        iyy="0.001836"
+        iyz="-3.2374E-14"
+        izz="0.0051241" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="./meshes/base_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+  </link>
+
+  <link
+    name="Link1">
+    <inertial>
+      <origin
+        xyz="0 0 -0.27401315789473685"
+        rpy="0 0 0" />
+      <mass
+        value="0.608" />
+      <inertia
+        ixx="0.05472"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.05472"
+        iyz="0.0"
+        izz="0.05472" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="./meshes/Link1.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+  </link>
+
+  <joint
+    name="Joint1"
+    type="revolute">
+    <origin
+      xyz="0.0342 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Link1" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.1415926"
+      upper="3.1415926"
+      effort="16"
+      velocity="20" />
+    <dynamics 
+        damping="0.08089" 
+        friction="0.09335"/>
+  </joint>
+
+  <link
+    name="Link2">
+    <inertial>
+      <origin
+        xyz="0 0 0.16634950840469392"
+        rpy="0 0 0" />
+      <mass
+        value="0.6306" />
+      <inertia
+        ixx="0.02522"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.02522"
+        iyz="0.0"
+        izz="0.02522" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="./meshes/Link2.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="Joint2"
+    type="revolute">
+    <origin
+      xyz="0.0522 0 -0.3"
+      rpy="-3.1416 0 0" />
+    <parent
+      link="Link1" />
+    <child
+      link="Link2" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.1415926"
+      upper="3.1415926"
+      effort="16"
+      velocity="20" />
+    <dynamics 
+        damping="0.000" 
+        friction="0.1865"/>
+  </joint>
+
+  <link
+    name="Weight">
+    <inertial>
+      <origin
+        xyz="0.010583 -7.0876E-12 -1.5468E-12"
+        rpy="0 0 0" />
+      <mass
+        value="0" />
+      <inertia
+        ixx="0.0"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0"
+        iyz="0.0"
+        izz="0.0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="./meshes/Weight.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+  </link>
+  
+  <joint
+    name="Weight"
+    type="fixed">
+    <origin
+      xyz="0.0 0 0.0"
+      rpy="0 0 0" />
+    <parent
+      link="Link2" />
+    <child
+      link="Weight" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <transmission type="SimpleTransmission" name="elbow_trans">
+    <actuator name="Joint2"/>
+    <joint name="Joint2"/>
+    <mechanicalReduction>1</mechanicalReduction>
+  </transmission>
+</robot>

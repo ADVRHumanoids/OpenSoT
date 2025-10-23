@@ -122,6 +122,53 @@ class floating_frame_node(Node):
 
         self.base_link_broadcaster.sendTransform(self.w_T_b)
 
+
+class double_pendulum_node(Node):
+    def __init__(self):
+        super().__init__('double_pendulum')
+
+
+        urdf_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/double_pendulum/double_pendulum.urdf"
+        mesh_base_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/double_pendulum"
+        
+        # Load URDF file into a string
+        with open(urdf_path, "r") as f:
+            urdf_string = f.read()
+
+        # Replace relative paths with absolute paths
+        urdf_string = urdf_string.replace('./meshes/', f'file://{mesh_base_path}/meshes/')
+        
+        self.urdf = urdf_string
+
+        self.joint_state_publisher = self.create_publisher(JointState, '/joint_states', 10)
+
+
+    def publish_static_transform(self):
+        transform = TransformStamped()
+        transform.header.stamp = self.get_clock().now().to_msg()
+        transform.header.frame_id = 'world'
+        transform.child_frame_id = 'base_link'
+        transform.transform.translation.x = 0.0
+        transform.transform.translation.y = 0.0
+        transform.transform.translation.z = 0.0
+        transform.transform.rotation.x = 0.0
+        transform.transform.rotation.y = 0.0
+        transform.transform.rotation.z = 0.0
+        transform.transform.rotation.w = 1.0
+        self.tf_broadcaster.sendTransform(transform)
+
+
+    def publish(self,model, q_):
+
+        msg = JointState()
+        msg.name = model.getJointNames()
+
+        msg.position = q_
+        msg.header.stamp = self.get_clock().now().to_msg()
+
+        self.joint_state_publisher.publish(msg)
+
+
 class min_var(Task):
     """
     min_var consider the following function: F(var) = var - ref
