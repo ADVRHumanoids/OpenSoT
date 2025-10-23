@@ -95,7 +95,7 @@ class ocp{
             Eigen::VectorXd stage_dcost_dw()
             {
 
-                Eigen::VectorXd der;
+                Eigen::VectorXd der = Eigen::VectorXd::Zero(dx->getInputSize());
                 if(stack)
                 {
                     der = ((-1.0 * stack->getStack()[0]->getA().transpose() * stack->getStack()[0]->getWb()).transpose());
@@ -121,7 +121,7 @@ class ocp{
 
             Eigen::VectorXd stage_dviolation_dw(double beta = 10.0)
             {
-                Eigen::VectorXd gradient = Eigen::VectorXd::Zero(dx->getInputSize());;
+                Eigen::VectorXd gradient = Eigen::VectorXd::Zero(dx->getInputSize());
                 
                 if(stack->getBounds()->getAineq().rows() == 0)
                     return gradient;

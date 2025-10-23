@@ -310,7 +310,7 @@ for i in range(Ns):
 
 print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 utest = unittest.TestCase()
-utest.assertTrue(ocp.getNumberOfNodes() == Ns)
+utest.assertTrue(ocp.getNumberOfNodes() == Ns+1)
 
 postural = Postural(ocp.stage(0).model)
 postural.setReference(q_val.copy())

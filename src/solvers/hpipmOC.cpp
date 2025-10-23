@@ -20,15 +20,15 @@ hpipmOC::hpipmOC(const unsigned int Ns):
     _solver_settings.ric_alg = 0;
     _solver_settings.split_step = 1;
 
-    _qp.resize(Ns+1);
+    _qp.resize(Ns);
 
-    _WxAx.resize(Ns+1);
-    _Wxbx.resize(Ns+1);
+    _WxAx.resize(Ns);
+    _Wxbx.resize(Ns);
 
-    _WuAu.resize(Ns);
-    _Wubu.resize(Ns);
+    _WuAu.resize(Ns-1);
+    _Wubu.resize(Ns-1);
 
-    _solution.resize(Ns+1);
+    _solution.resize(Ns);
 }
 
 hpipmOC::~hpipmOC()

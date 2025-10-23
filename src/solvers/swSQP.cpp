@@ -62,12 +62,12 @@ void swSQP::computeConstraints(const unsigned int i,
 
 void swSQP::linearize()
 {
-    for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
+    for(unsigned int k = 0; k < _ocp->getNumberOfNodes(); ++k)
     {
         _stats.stages_statistics[k].cost = _ocp->stage(k)->stage_cost();
 
         // --- Dynamics (only for k < N) ---
-        if(k < _ocp->getNumberOfNodes())
+        if(k < _ocp->getNumberOfNodes()-1)
         {
             computeDynamics(k, _A[k], _B[k], _b[k]);
             _qp_solver->setStageDynamics(k, _A[k], _B[k], _b[k]);
@@ -104,7 +104,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         _prev_viol =  _ocp->constraint_violation();
     }
 
-    for (uint i = 0; i <= _ocp->getNumberOfNodes() && _opt.line_search_strategy==1 ; i++)
+    for (uint i = 0; i < _ocp->getNumberOfNodes() && _opt.line_search_strategy==1 ; i++)
     {
         dcost_dw[i] = _ocp->stage(i)->stage_dcost_dw();
         dviol_dw[i] = _ocp->stage(i)->stage_dviolation_dw();
@@ -114,7 +114,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     Eigen::VectorXd dx0(_A[0].cols()); //initial delta state constraint (dx0 = 0)
     dx0.setZero();
 
-    for(unsigned int iter = 1; iter < _opt.max_iters; ++iter)
+    for(unsigned int iter = 1; iter <= _opt.max_iters; ++iter)
     {
         _stats.iters = iter;
         _stats.alpha = 1.;
@@ -167,7 +167,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         
         _ocp->update(_x0, _u0); //TODO I am not sure about this update, maybe its not needed
         _prev_cost = _ocp->cost();
-        // _prev_defect = _ocp->dynamics_defect();
+        _prev_defect = _ocp->dynamics_defect();
         _prev_viol = _ocp->constraint_violation();
 
         if(_opt.verbose)
@@ -224,21 +224,21 @@ bool swSQP::ls_merit()
     
     double merit_der = 0.;
 
-    for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
+    for(unsigned int i = 0; i < _ocp->getNumberOfNodes(); ++i)
     {
         // std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
         // std::cout<< dviol_dw[i].rows() <<"----"<< dviol_dw[i].cols()<< std::endl;
-        std::cout<< ddefect_dw[i].rows() <<"----"<< ddefect_dw[i].cols()<< std::endl;
-        std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
-        std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
-        std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
-        std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
+        // std::cout<< ddefect_dw[i].rows() <<"----"<< ddefect_dw[i].cols()<< std::endl;
+        // std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
+        // std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
+        // std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
+        // std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
 
         merit_der += (dcost_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
         merit_der += (dviol_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
         merit_der += (ddefect_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
 
-        if(i<_ocp->getNumberOfNodes())
+        if(i<_ocp->getNumberOfNodes()-1)
         {
             merit_der += (dcost_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
             merit_der += (dviol_dw[i].transpose() * _Mu[i].transpose() * _qp_solver->getSolution()[i].u)[0];
@@ -279,12 +279,12 @@ void swSQP::init()
         ls_function = &swSQP::ls_filter;
 
 
-    for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
+    for(unsigned int k = 0; k < _ocp->getNumberOfNodes(); ++k)
     {
         _Mx.push_back(_ocp->stage(k)->dx->getM());
 
         // --- Dynamics (only for k < N) ---
-        if(k < _ocp->getNumberOfNodes())
+        if(k < _ocp->getNumberOfNodes()-1)
         {
             _Mu.push_back(_ocp->stage(k)->du->getM());
 

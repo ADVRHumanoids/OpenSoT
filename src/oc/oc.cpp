@@ -14,12 +14,12 @@ void ocp::addStage(Stage::Ptr stage)
 
 unsigned int ocp::getNumberOfNodes()
 {
-    for(unsigned int Ns = 0; Ns < _stages.size(); ++Ns)
-    {
-        if(_stages[Ns]->isFinalStage())
-            return Ns;
-    }
-    return 0;
+    //for(unsigned int Ns = 0; Ns < _stages.size(); ++Ns)
+    //{
+    //    if(_stages[Ns]->isFinalStage())
+    //        return Ns;
+    //}
+    return _stages.size();
 }
 
 void ocp::update(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0)

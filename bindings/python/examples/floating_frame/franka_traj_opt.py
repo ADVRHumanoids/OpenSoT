@@ -231,7 +231,7 @@ ocp.addStage(stage)
 
 
 ocp.update(x0, u0)
-print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
+
 
 for i in range(Ns):
     df = pysot.oc.EulerVector(stage.model, dx, dxdot, ocp.stage(i).x, ocp.stage(i).xdot, ocp.stage(i+1).x, dt)
@@ -239,6 +239,7 @@ for i in range(Ns):
     ocp.stage(i).dynamics_derivative = df
 
 ocp.update(x0, u0)
+print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 
 
 minus = list()

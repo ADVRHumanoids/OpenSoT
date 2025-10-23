@@ -22,7 +22,7 @@ public:
     {
         statistics(const unsigned int Ns)
         {
-            stages_statistics.resize(Ns + 1);
+            stages_statistics.resize(Ns);
         }
 
         std::vector<stage_statistics> stages_statistics;

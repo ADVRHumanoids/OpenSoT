@@ -19,7 +19,7 @@ public:
 
     /**
      * @brief hpipmOC
-     * @param Ns number of stage (Ns controls, Ns+1 states)
+     * @param Ns number of stage (Ns-1 controls, Ns states)
      */
     hpipmOC(const unsigned int Ns);
 

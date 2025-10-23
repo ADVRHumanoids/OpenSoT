@@ -45,7 +45,7 @@ class floating_frame_node(Node):
         super().__init__('floating_frame')
 
         # Load URDF file into a string
-        with open("/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/floating_frame.urdf", "r") as f: # TODO: Change the absolute path
+        with open("/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/floating_frame/floating_frame.urdf", "r") as f: # TODO: Change the absolute path
             urdf_string = f.read()
 
         self.urdf = urdf_string

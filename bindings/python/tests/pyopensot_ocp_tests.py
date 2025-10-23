@@ -284,7 +284,7 @@ ocp.update(x0, u0)
 
 print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 utest = unittest.TestCase()
-utest.assertTrue(ocp.getNumberOfNodes() == Ns)
+utest.assertTrue(ocp.getNumberOfNodes() == Ns+1)
 
 minus = list()
 for i in range(Ns):

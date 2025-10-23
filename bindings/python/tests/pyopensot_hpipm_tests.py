@@ -80,7 +80,7 @@ print(f"integration.getA() @ u.getM().T \n: {integration.getA() @ u.getM().T}")
 
 
 
-solver = hpipmoc.hpipmOC(Ns)
+solver = hpipmoc.hpipmOC(Ns+1)
 for i in range(Ns):
     Ai = integration.getA() @ x.getM().T
     Bi = integration.getA() @ u.getM().T
