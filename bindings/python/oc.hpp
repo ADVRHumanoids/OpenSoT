@@ -166,11 +166,12 @@ void pyopensot_oc(py::module &m)
         .def_readwrite("alpha_min", &swSQP::options::alpha_min)
         .def_readwrite("beta", &swSQP::options::beta)
         .def_readwrite("min_abs_delta_solution", &swSQP::options::min_abs_delta_solution)
-        .def_readwrite("use_line_search", &swSQP::options::use_line_search);
+        .def_readwrite("line_search_strategy", &swSQP::options::line_search_strategy);
 
     // Bind swSQP
     py::class_<swSQP, swSQP::Ptr>(m, "swSQP")
         .def(py::init<OpenSoT::ocp::Ptr>(), py::arg("ocp"))
+        .def("init", &swSQP::init)
         .def("solve", &swSQP::solve)
         .def("getStateSolution", &swSQP::getStateSolution)
         .def("getControlSolution", &swSQP::getControlSolution)

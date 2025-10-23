@@ -278,10 +278,11 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 100
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = True
+solver.getOptions().line_search_strategy = 2
 solver.getOptions().min_abs_delta_solution = 1e-3
+solver.init()
 print(f"{solver.getOptions().print()}")
-print("...solver inited!")
+# print("...solver inited!")
 
 pose_ref = cartesian_task.getReference().copy()
 # out of task space

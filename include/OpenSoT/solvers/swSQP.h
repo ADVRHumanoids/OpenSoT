@@ -82,7 +82,7 @@ public:
             verbose = false;
             alpha_min = 0.125;
             beta = 1e-4;
-            use_line_search = true;
+            line_search_strategy = 0;
         }
 
         //termination criteria
@@ -91,9 +91,8 @@ public:
 
         /// LineSearch
         double alpha_min;
-        bool use_line_search;
-
-        double beta; /// @brief beta multiply merit derivative in Armijo's condition in line search
+        uint line_search_strategy;
+        double beta; // multiply merit derivative in Armijo's condition in line search
 
         bool verbose;
 
@@ -108,7 +107,7 @@ public:
             _oss << "  min_abs_delta_solution : " << min_abs_delta_solution << std::endl;
             _oss << "  alpha_min              : " << alpha_min << std::endl;
             _oss << "  beta                   : " << beta << std::endl;
-            _oss << "  use_line_search        : " << use_line_search << std::endl;
+            _oss << "  line_search_strategy   : " << line_search_strategy << std::endl;
 
             return _oss;
         }
@@ -130,8 +129,10 @@ public:
 
     hpipmOC::Ptr getQPSolver() { return _qp_solver; }
 
+    void init();
+
 private:
-    void _init();
+    
 
     void computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b);
     // void computeQuadraticApproximation(const unsigned int i, Eigen::MatrixXd& H, Eigen::VectorXd& g);
@@ -151,6 +152,7 @@ private:
     double _prev_defect; // total gap violation
     double _prev_viol; // total constraint violation 
 
+    bool (swSQP::*ls_function)();
     bool ls_filter(); // filter line search implementation
     bool ls_merit(); // merit line search implementation
 

@@ -7,7 +7,7 @@ swSQP::swSQP(OpenSoT::ocp::Ptr ocp):
 {
     _qp_solver = std::make_shared<hpipmOC>(ocp->getNumberOfNodes());
 
-    _init();
+init();
 }
 
 void swSQP::computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b)
@@ -96,11 +96,15 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
     _u0 = u0;
 
     _ocp->update(_x0_candidate, _u0_candidate);
-    _prev_cost = _ocp->cost();
-    _prev_defect = _ocp->dynamics_defect();
-    _prev_viol =  _ocp->constraint_violation();
 
-    for (uint i = 0; i <= _ocp->getNumberOfNodes() && _opt.use_line_search ; i++)
+    if (_opt.line_search_strategy!=0)
+    {
+        _prev_cost = _ocp->cost();
+        _prev_defect = _ocp->dynamics_defect();
+        _prev_viol =  _ocp->constraint_violation();
+    }
+
+    for (uint i = 0; i <= _ocp->getNumberOfNodes() && _opt.line_search_strategy==1 ; i++)
     {
         dcost_dw[i] = _ocp->stage(i)->stage_dcost_dw();
         dviol_dw[i] = _ocp->stage(i)->stage_dviolation_dw();
@@ -134,9 +138,9 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         step(_stats.alpha);
         _ocp->update(_x0_candidate, _u0_candidate);
     
-        while(_opt.use_line_search && _stats.alpha >= _opt.alpha_min)
+        while(_opt.line_search_strategy!=0 && _stats.alpha >= _opt.alpha_min)
         {
-            if(ls_filter())
+            if((this->*ls_function)())
             {
                 _stats.line_search_accepted=true;
                 break;
@@ -222,12 +226,12 @@ bool swSQP::ls_merit()
 
     for(unsigned int i = 0; i <= _ocp->getNumberOfNodes(); ++i)
     {
-        std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
-        std::cout<< dviol_dw[i].rows() <<"----"<< dviol_dw[i].cols()<< std::endl;
-        std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
-        std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
-        std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
-        std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
+        // std::cout<< dcost_dw[i].rows() <<"----"<< dcost_dw[i].cols()<< std::endl;
+        // std::cout<< dviol_dw[i].rows() <<"----"<< dviol_dw[i].cols()<< std::endl;
+        // std::cout<< _qp_solver->getSolution()[i].x.rows() <<",,"<< _qp_solver->getSolution()[i].x.cols()<< std::endl;
+        // std::cout<< _Mx[i].rows() <<",,"<< _Mx[i].cols()<< std::endl;
+        // std::cout<< _qp_solver->getSolution()[i].u.rows() <<",,,"<< _qp_solver->getSolution()[i].u.cols()<< std::endl;
+        // std::cout<< _Mu[i].rows() <<",,,"<< _Mu[i].cols()<< std::endl;
 
         merit_der += (dcost_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
         merit_der += (dviol_dw[i].transpose() * _Mx[i].transpose() * _qp_solver->getSolution()[i].x)[0];
@@ -255,7 +259,7 @@ bool swSQP::ls_filter()
 }
 
 
-void swSQP::_init()
+void swSQP::init()
 {
     _stats.line_search_accepted = false;
     _stats.line_search_iters = 0;
@@ -264,6 +268,13 @@ void swSQP::_init()
     dcost_dw.resize(_ocp->getNumberOfNodes());
     dviol_dw.resize(_ocp->getNumberOfNodes());
     // ddefect_dw.resize(_ocp->getNumberOfNodes());
+
+
+    if(_opt.line_search_strategy == 1)
+        ls_function = &swSQP::ls_merit;
+    if(_opt.line_search_strategy == 2)
+        ls_function = &swSQP::ls_filter;
+
 
     for(unsigned int k = 0; k <= _ocp->getNumberOfNodes(); ++k)
     {
@@ -312,8 +323,9 @@ void swSQP::_init()
         _du.push_back(du);
 
         _qp_solver->setConstraint(k, _C[k], _D[k], _dl[k], _du[k]);
-
-
+   
     }
+    if(_opt.verbose)
+            std::cout<<"Solver inited"<<std::endl;
 }
 

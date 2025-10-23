@@ -165,8 +165,9 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = True
+solver.getOptions().line_search_strategy = 1
 solver.getOptions().beta = 1e-2
+solver.init()
 print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")

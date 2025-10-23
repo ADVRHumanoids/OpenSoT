@@ -359,10 +359,11 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 10
 solver.getOptions().verbose = False
-solver.getOptions().use_line_search = True
+solver.getOptions().line_search_strategy = 2
 solver.getOptions().beta = 1e-2
-print(f"{solver.getOptions().print()}")
 solver.getOptions().min_abs_delta_solution = 1e-3
+solver.init()
+print(f"{solver.getOptions().print()}")
 print("...solver inited!")
 
 msg = JointState()
