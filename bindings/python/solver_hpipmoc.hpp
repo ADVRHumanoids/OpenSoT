@@ -54,5 +54,6 @@ void pyHPIPMOC(py::module& m) {
         py::arg("i"), py::arg("Ax"), py::arg("Wx"), py::arg("bx"), py::arg("Au") = Eigen::MatrixXd(0,0), py::arg("Wu") = Eigen::MatrixXd(0,0), py::arg("bu") = Eigen::VectorXd(0))
         .def("solve", &solvers::hpipmOC::solve)
         .def("getSolution", &solvers::hpipmOC::getSolution)
-        .def("setStageDynamics", &solvers::hpipmOC::setStageDynamics);
+        .def("setStageDynamics", &solvers::hpipmOC::setStageDynamics)
+        .def("getOptions", &solvers::hpipmOC::getOptions, py::return_value_policy::reference_internal);
 }
