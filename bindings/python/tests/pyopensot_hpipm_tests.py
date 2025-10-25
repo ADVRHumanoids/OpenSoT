@@ -122,6 +122,11 @@ for i in range(Ns):
                      zmp_tasks[i].getA() @ u.getM().T, zmp_tasks[i].getWeight(), zmp_tasks[i].getb())
 solver.setLSCost(Ns, x_tasks[Ns].getA() @ x.getM().T, x_tasks[Ns].getWeight(), x_tasks[Ns].getb())
 
+print(f"solver.getOptions().iter_max: {solver.getOptions().iter_max}")
+solver.getOptions().iter_max = 100
+print(f"solver.getOptions().iter_max: {solver.getOptions().iter_max}")
+
+
 tic()
 success = solver.solve(np.array([0., 0., 0, 0.]))
 elapsed = toc()  # End timer and print elapsed time

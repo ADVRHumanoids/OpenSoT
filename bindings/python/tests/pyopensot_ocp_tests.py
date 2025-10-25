@@ -19,6 +19,7 @@ from scipy.spatial.transform import Rotation as R
 import unittest
 import os
 
+import pyopensot_hpipmoc as hpipmoc
 
 np.set_printoptions(linewidth=np.inf)
 class ros2_node(Node):
@@ -330,6 +331,11 @@ print(f"{solver.getOptions().print()}")
 #solver.getOptions().min_abs_delta_solution = 1e-12
 print("...solver inited!")
 
+#just a check that is possible to change options of internal QP solver
+print(f"solver.getQPSolver().getOptions().max_iters: {solver.getQPSolver().getOptions().iter_max}")
+solver.getQPSolver().getOptions().iter_max = 100
+print(f"solver.getQPSolver().getOptions().max_iters: {solver.getQPSolver().getOptions().iter_max}")
+solver.getQPSolver().getOptions().iter_max = 30
 
 msg = JointState()
 msg.name = model.getJointNames()
