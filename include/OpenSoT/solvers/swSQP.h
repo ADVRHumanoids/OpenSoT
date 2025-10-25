@@ -122,10 +122,13 @@ public:
 
     options& getOptions(){return _opt;}
 
+
     bool solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eigen::VectorXd>& u0);
 
     const std::vector<Eigen::VectorXd>& getStateSolution() const { return _x0;}
     const std::vector<Eigen::VectorXd>& getControlSolution() const { return _u0;}
+
+    hpipmOC::Ptr getQPSolver() { return _qp_solver; }
 
 private:
     void _init();
