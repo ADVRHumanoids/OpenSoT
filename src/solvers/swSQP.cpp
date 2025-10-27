@@ -64,8 +64,6 @@ void swSQP::linearize()
 {
     for(unsigned int k = 0; k < _ocp->getNumberOfNodes(); ++k)
     {
-        _stats.stages_statistics[k].cost = _ocp->stage(k)->stage_cost();
-
         // --- Dynamics (only for k < N) ---
         if(k < _ocp->getNumberOfNodes()-1)
         {
@@ -172,7 +170,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
         if(_opt.verbose)
         {
-            _stats.cost = _ocp->cost();
+            update_statistics();
             std::chrono::duration<double> iter_elapsed = std::chrono::high_resolution_clock::now() - iter_start;
             _stats.iter_time = iter_elapsed.count();
             std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
@@ -182,6 +180,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     _ocp->update(_x0, _u0);
     _stats.cost = _ocp->cost();
+    _stats.constraint_violation = _ocp->constraint_violation();
 
     std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
     _stats.total_time = elapsed.count();
@@ -196,10 +195,9 @@ bool swSQP::break_criteria()
     double max_dw = -INFINITY;
     for(unsigned int i = 0; i < _ocp->getNumberOfNodes() ; ++i)
         max_dw = std::max(max_dw, (_x0[i] - _x0_candidate[i]).cwiseAbs().maxCoeff());
-    
-    // std::cout<< max_dw << ","<< _ocp->constraint_violation()<< std::endl;
+        // #TODO: USE THE MANIFOLD OMINUS
 
-    return max_dw <= _opt.min_abs_delta_solution && _ocp->constraint_violation() <= _opt.min_abs_delta_solution;
+    return max_dw <= _opt.min_abs_delta_solution; //&& _ocp->constraint_violation() <= _opt.min_abs_delta_solution;
 
 }
 
@@ -250,6 +248,17 @@ bool swSQP::ls_merit()
         return  true;
 
     return false;
+}
+
+void swSQP::update_statistics()
+{
+    _stats.cost = _ocp->cost();
+    for (uint i = 0; i < _ocp->getNumberOfNodes(); i++)
+    {
+        _stats.stages_statistics[i].cost = _ocp->stage(i)->stage_cost();
+        _stats.stages_statistics[i].constraint_violation = _ocp->stage(i)->stage_constraint_violation();
+    }
+    
 }
 
 

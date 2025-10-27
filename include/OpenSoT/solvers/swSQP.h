@@ -16,6 +16,7 @@ public:
     struct stage_statistics
     {
         double cost;
+        double constraint_violation;
     };
 
     struct statistics
@@ -28,6 +29,7 @@ public:
         std::vector<stage_statistics> stages_statistics;
         int iters;
         double cost;
+        double constraint_violation;
         double alpha;
         int line_search_iters;
         bool line_search_accepted;
@@ -43,28 +45,34 @@ public:
             _oss<<"=== swSQP Statistics ==="<<std::endl;
             _oss << "  iter              : " << iters << std::endl;
             _oss << "  cost              : " << cost << std::endl;
+            _oss << "  sum-constr-viol   : " << constraint_violation << std::endl;
             _oss << "  iter time         : " << iter_time << std::endl;
             _oss << "  total time        : " << total_time << std::endl;
             _oss << " === LineSearch Statistics === " << std::endl;
             _oss << "   accepted         : " << line_search_accepted << std::endl;
             _oss << "   alpha            : " << alpha << std::endl;
             _oss << "   ls iters         : " << line_search_iters << std::endl;
-            // TODO constraint violation
 
 
             _oss << "=== swSQP Stage Statistics ===" << std::endl;
-            // Header row
-            _oss << std::setw(15) << "Statistic";
-            for (size_t i = 0; i < stages_statistics.size(); ++i) {
-                _oss << std::setw(12) << ("Stage " + std::to_string(i));
-            }
-            _oss << std::endl;
 
-            _oss << std::setw(15) << "cost";
-            for (const auto& s : stages_statistics) {
-                _oss << std::setw(12) << s.cost;
+            // Column headers
+            _oss << std::setw(10) << "Stage"
+                << std::setw(15) << "Cost"
+                << std::setw(25) << "Constr-Viol"
+                << std::endl;
+
+            // Print a separator line (optional)
+            _oss << std::string(50, '-') << std::endl;
+
+            // Print one row per stage
+            for (size_t i = 0; i < stages_statistics.size(); ++i) {
+                const auto& s = stages_statistics[i];
+                _oss << std::setw(10) << i
+                    << std::setw(15) << s.cost
+                    << std::setw(25) << s.constraint_violation
+                    << std::endl;
             }
-            _oss << std::endl;
 
             return _oss;
         }
@@ -135,7 +143,6 @@ private:
     
 
     void computeDynamics(const unsigned int i, Eigen::MatrixXd& A, Eigen::MatrixXd& B, Eigen::VectorXd& b);
-    // void computeQuadraticApproximation(const unsigned int i, Eigen::MatrixXd& H, Eigen::VectorXd& g);
     void computeCost(const unsigned int i,
                      Eigen::MatrixXd& Q, Eigen::VectorXd& q,
                      Eigen::MatrixXd& R, Eigen::VectorXd& r,
@@ -145,6 +152,7 @@ private:
 
 
     void linearize(); // update linearization/quadritization matrices
+    void update_statistics();
     void step(double alpha); //step of the solver
     bool break_criteria(); // sqp solvers breaking criteria
 

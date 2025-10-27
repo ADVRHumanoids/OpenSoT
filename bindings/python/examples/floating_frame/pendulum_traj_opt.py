@@ -107,7 +107,7 @@ for i in range(Ns):
 
 
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-6 * np.eye(model.nv))
+    minu.setWeight(1e-9 * np.eye(model.nv))
     minus.append(minu)
     
 
@@ -118,7 +118,7 @@ for i in range(Ns):
 
     # tau_min
     tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du)
-    tau_lim.setTorqueLimit([10., 10.])
+    tau_lim.setTorqueLimit([10., 1e-6])
     const.append(tau_lim)
     ocp.stage(i).stack << tau_lim
 
@@ -136,10 +136,11 @@ print("Initing solver...")
 solver = swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
-solver.getOptions().use_line_search = True
-solver.getOptions().beta = 1e-2
+solver.getOptions().line_search_strategy = 1
+solver.getOptions().beta = 1e-4
+solver.getOptions().min_abs_delta_solution = 1e-2
+solver.init()
 print(f"{solver.getOptions().print()}")
-solver.getOptions().min_abs_delta_solution = 1e-3
 print("...solver inited!")
 
 
