@@ -63,7 +63,11 @@ void OpenSoT::tasks::velocity::PureRolling::_update()
     /* The wheel forward axis is the cross product between the wheel spinning axis and the normal to the plane */
     Eigen::Vector3d _wheel_forward_axis = (_world_R_wheel*_wheel_axis).cross(_world_contact_plane_normal);
     _wheel_forward_axis /= _wheel_forward_axis.norm();
-    
+
+	/* Transform velocity to wheel local frame (rows 0..3),
+	 * and compute sideways angular velocity (i.e., about the forward axis).
+     * Very often we just use the first two rows (contact velocity on the plane)
+	 */
     _S.setIdentity(4,6);
     _S.block<3,3>(0,0) = _local_R_world.transpose();
     _S.row(3) << 0, 0, 0, _wheel_forward_axis.transpose();
