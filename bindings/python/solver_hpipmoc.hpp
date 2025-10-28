@@ -3,6 +3,15 @@
 #include <pybind11/stl.h>
 
 #include <OpenSoT/solvers/hpipmOC.h>
+#include <OpenSoT/solvers/swSQP.h>
+
+std::string print_opt(OpenSoT::solvers::swSQP::options &opt)
+{
+    std::string str;
+    str = opt.toOSS().str();
+    return str;
+}
+
 
 namespace py = pybind11;
 using namespace OpenSoT;
@@ -56,4 +65,26 @@ void pyHPIPMOC(py::module& m) {
         .def("getSolution", &solvers::hpipmOC::getSolution)
         .def("setStageDynamics", &solvers::hpipmOC::setStageDynamics)
         .def("getOptions", &solvers::hpipmOC::getOptions, py::return_value_policy::reference_internal);
+
+    // Bind swSQP::options
+    py::class_<OpenSoT::solvers::swSQP::options>(m, "swSQPOptions")
+        .def(py::init<>())
+        .def("print", print_opt)
+        .def_readwrite("verbose", &OpenSoT::solvers::swSQP::options::verbose)
+        .def_readwrite("max_iters", &OpenSoT::solvers::swSQP::options::max_iters)
+        .def_readwrite("alpha_min", &OpenSoT::solvers::swSQP::options::alpha_min)
+        .def_readwrite("beta", &OpenSoT::solvers::swSQP::options::beta)
+        .def_readwrite("min_abs_delta_solution", &OpenSoT::solvers::swSQP::options::min_abs_delta_solution)
+        .def_readwrite("line_search_strategy", &OpenSoT::solvers::swSQP::options::line_search_strategy);
+
+    // Bind swSQP
+    py::class_<OpenSoT::solvers::swSQP, OpenSoT::solvers::swSQP::Ptr>(m, "swSQP")
+        .def(py::init<OpenSoT::ocp::Ptr>(), py::arg("ocp"))
+        .def("init", &OpenSoT::solvers::swSQP::init)
+        .def("solve", &OpenSoT::solvers::swSQP::solve)
+        .def("getStateSolution", &OpenSoT::solvers::swSQP::getStateSolution)
+        .def("getControlSolution", &OpenSoT::solvers::swSQP::getControlSolution)
+        .def("getOptions", (OpenSoT::solvers::swSQP::options & (OpenSoT::solvers::swSQP::*)()) & OpenSoT::solvers::swSQP::getOptions, py::return_value_policy::reference_internal)
+        .def("getQPSolver", &OpenSoT::solvers::swSQP::getQPSolver);
+
 }

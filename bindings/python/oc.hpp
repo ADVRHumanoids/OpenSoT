@@ -10,7 +10,6 @@
 #include <OpenSoT/utils/Affine.h>
 #include <OpenSoT/tasks/Aggregated.h>
 #include <xbot2_interface/xbotinterface2.h>
-#include <OpenSoT/solvers/swSQP.h>
 #include <OpenSoT/oc/Manifolds.h>
 #include <OpenSoT/oc/EulerSE3.h>
 #include <OpenSoT/oc/EulerVector.h>
@@ -23,18 +22,11 @@ namespace py = pybind11;
 using OpenSoT::ocp;
 using Stage = OpenSoT::ocp::Stage;
 
-using namespace OpenSoT::solvers;
 
 // Opaque vector types so we can bind them as Python list-like containers
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<OpenSoT::AffineHelper>>);
 PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<Stage>>);
 
-std::string print_opt(swSQP::options &opt)
-{
-    std::string str;
-    str = opt.toOSS().str();
-    return str;
-}
 
 struct PyStateSpaceRepresentation : OpenSoT::Space
 {
@@ -156,25 +148,4 @@ void pyopensot_oc(py::module &m)
         .def("cost", py::overload_cast<>(&ocp::cost))
 
         .def("update", &ocp::update);
-
-    // Bind swSQP::options
-    py::class_<swSQP::options>(m, "swSQPOptions")
-        .def(py::init<>())
-        .def("print", print_opt)
-        .def_readwrite("verbose", &swSQP::options::verbose)
-        .def_readwrite("max_iters", &swSQP::options::max_iters)
-        .def_readwrite("alpha_min", &swSQP::options::alpha_min)
-        .def_readwrite("beta", &swSQP::options::beta)
-        .def_readwrite("min_abs_delta_solution", &swSQP::options::min_abs_delta_solution)
-        .def_readwrite("line_search_strategy", &swSQP::options::line_search_strategy);
-
-    // Bind swSQP
-    py::class_<swSQP, swSQP::Ptr>(m, "swSQP")
-        .def(py::init<OpenSoT::ocp::Ptr>(), py::arg("ocp"))
-        .def("init", &swSQP::init)
-        .def("solve", &swSQP::solve)
-        .def("getStateSolution", &swSQP::getStateSolution)
-        .def("getControlSolution", &swSQP::getControlSolution)
-        .def("getOptions", (swSQP::options & (swSQP::*)()) & swSQP::getOptions, py::return_value_policy::reference_internal)
-        .def("getQPSolver", &swSQP::getQPSolver);
 }

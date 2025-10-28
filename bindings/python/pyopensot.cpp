@@ -14,6 +14,20 @@
 #include "variables/torque.hpp"
 #include "oc.hpp"
 
+#ifdef OPENSOT_COMPILE_COLLISION
+    #include "constraints/velocity_collision.hpp"
+    #include "tasks/velocity_collision.hpp"
+#endif
+
+#ifdef OPENSOT_SOTH_FRONT_END
+    #include "solver_hcod.hpp"
+#endif
+
+#ifdef HPIPM_CPP_FOUND
+    #include "solver_hpipmoc.hpp"
+#endif
+
+
 PYBIND11_MODULE(pyopensot, m) {
     pyTask<Eigen::MatrixXd, Eigen::VectorXd>(m, "Task");
     pyConstraint<Eigen::MatrixXd, Eigen::VectorXd>(m, "Constraint");
@@ -33,6 +47,14 @@ PYBIND11_MODULE(pyopensot, m) {
     pyiHQP(m);
     pynHQP(m);
 
+#ifdef OPENSOT_SOTH_FRONT_END
+    pyHCOD(m);
+#endif
+
+#ifdef HPIPM_CPP_FOUND
+    pyHPIPMOC(m);
+#endif
+
     auto m_t = m.def_submodule("tasks");
     pyMinimizeVariable(m_t);
 
@@ -44,7 +66,6 @@ PYBIND11_MODULE(pyopensot, m) {
     pyVelocityGaze(m_tv);
     pyVelocityManipulability(m_tv);
     pyVelocityMinimumEffort(m_tv);
-    pyVelocityCollisionAvoidanceTask(m_tv);
 
     auto m_ta = m_t.def_submodule("acceleration");
     pyAccelerationPostural(m_ta);
@@ -59,6 +80,11 @@ PYBIND11_MODULE(pyopensot, m) {
     pyVelocityJointLimits(m_cv);
     pyVelocityLimits(m_cv);
     pyVelocityOmniWheels4X(m_cv);
+
+#ifdef OPENSOT_COMPILE_COLLISION
+    pyVelocityCollisionAvoidance(m_cv);
+    pyVelocityCollisionAvoidanceTask(m_tv);
+#endif
 
     auto m_ca = m_c.def_submodule("acceleration");
     pyAccelerationJointLimits(m_ca);
@@ -78,3 +104,5 @@ PYBIND11_MODULE(pyopensot, m) {
     pyopensot_oc(m_oc);
 
 }
+
+

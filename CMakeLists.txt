@@ -200,7 +200,7 @@ ADD_LIBRARY(OpenSoT SHARED
 
 set(PRIVATE_TLL ${PRIVATE_TLL} ${eigen_conversions_LIBRARIES})
 if(${OPENSOT_COMPILE_COLLISION})
-    target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision moveit_msgs::moveit_msgs__rosidl_generator_cpp tf2_eigen_kdl::tf2_eigen_kdl)
+    target_link_libraries(OpenSoT PUBLIC xbot2_interface::collision moveit_msgs::moveit_msgs__rosidl_generator_cpp)
 endif()
 if(${PCL_FOUND})
     set(PRIVATE_TLL ${PRIVATE_TLL} ${QHULL_LIBRARIES} ${PCL_LIBRARIES} tf2_eigen::tf2_eigen )
@@ -218,6 +218,7 @@ TARGET_LINK_LIBRARIES(OpenSoT
     PUBLIC
     xbot2_interface::xbot2_interface
     matlogger2::matlogger2
+    tf2_eigen_kdl::tf2_eigen_kdl
     PRIVATE
     ${PRIVATE_TLL})
 

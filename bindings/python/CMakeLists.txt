@@ -27,93 +27,36 @@ if(${pybind11_FOUND})
                                     oc.hpp)
 
     include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${Eigen3_INCLUDE_DIR})
-    pybind11_add_module(pyopensot ${OPENSOT_BINDINGS_SOURCES})
 
-    target_link_libraries(pyopensot PUBLIC OpenSoT OpenSothpipmOC)
-
+    if(${OPENSOT_COMPILE_COLLISION})
+        set(OPENSOT_BINDINGS_SOURCES ${OPENSOT_BINDINGS_SOURCES} constraints/velocity_collision.hpp)
+    endif()
     if(${OPENSOT_SOTH_FRONT_END})
-        target_compile_definitions(pyopensot PRIVATE -DOPENSOT_SOTH_FRONT_END)
+        set(OPENSOT_BINDINGS_SOURCES ${OPENSOT_BINDINGS_SOURCES} solver_hcod.hpp)
+    endif()
+    if(${hpipm-cpp_FOUND})
+        set(OPENSOT_BINDINGS_SOURCES ${OPENSOT_BINDINGS_SOURCES} solver_hpipmoc.hpp)
     endif()
 
+    pybind11_add_module(pyopensot ${OPENSOT_BINDINGS_SOURCES})
+
+    target_compile_definitions(pyopensot PRIVATE $<$<BOOL:${OPENSOT_COMPILE_COLLISION}>:OPENSOT_COMPILE_COLLISION>)
+    target_compile_definitions(pyopensot PRIVATE $<$<BOOL:${OPENSOT_SOTH_FRONT_END}>:OPENSOT_SOTH_FRONT_END>)
+    target_compile_definitions(pyopensot PRIVATE $<$<BOOL:${hpipm-cpp_FOUND}>:HPIPM_CPP_FOUND>)
+
     find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+    target_link_libraries(pyopensot PUBLIC OpenSoT)
+    if(${hpipm-cpp_FOUND})
+        target_link_libraries(pyopensot PUBLIC OpenSothpipmOC)
+    endif()
+
 
     install(TARGETS pyopensot
         COMPONENT python
         LIBRARY DESTINATION "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
         ARCHIVE DESTINATION "lib"
         RUNTIME DESTINATION "bin")
-
-    if(${OPENSOT_COMPILE_COLLISION})
-        set(OPENSOT_BINDINGS_COLLISION_SOURCES pyopensot_collision.cpp constraints/velocity_collision.hpp)
-
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-        pybind11_add_module(pyopensot_collision ${OPENSOT_BINDINGS_COLLISION_SOURCES})
-
-        target_link_libraries(pyopensot_collision PUBLIC OpenSoT)
-
-
-        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-        install(TARGETS pyopensot_collision
-            COMPONENT python
-            LIBRARY DESTINATION "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
-            ARCHIVE DESTINATION "lib"
-            RUNTIME DESTINATION "bin")
-    endif()
-
-    if(${OPENSOT_SOTH_FRONT_END})
-        set(OPENSOT_BINDINGS_HCOD_SOURCES pyopensot_hcod.cpp solver_hcod.hpp)
-
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-        pybind11_add_module(pyopensot_hcod ${OPENSOT_BINDINGS_HCOD_SOURCES})
-
-        target_link_libraries(pyopensot_hcod PUBLIC OpenSoT)
-
-        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-        install(TARGETS pyopensot_hcod
-            COMPONENT python
-            LIBRARY DESTINATION "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
-            ARCHIVE DESTINATION "lib"
-            RUNTIME DESTINATION "bin")
-    endif()
-
-    ##### HPIPM
-    if(${hpipm-cpp_FOUND})
-        set(OPENSOT_BINDINGS_hpipmoc_SOURCES pyopensot_hpipmoc.cpp solver_hpipmoc.hpp)
-
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-        pybind11_add_module(pyopensot_hpipmoc ${OPENSOT_BINDINGS_hpipmoc_SOURCES})
-
-        target_link_libraries(pyopensot_hpipmoc PUBLIC OpenSoT OpenSothpipmOC)
-
-        find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-        install(TARGETS pyopensot_hpipmoc
-            COMPONENT python
-            LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
-            ARCHIVE DESTINATION "lib"
-            RUNTIME DESTINATION "bin")
-    endif()
-
-
-
-    # set(OPENSOT_BINDINGS_oc_SOURCES pyopensot_oc.cpp 
-    # 				    oc.hpp)
-
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-    # pybind11_add_module(pyopensot_oc ${OPENSOT_BINDINGS_oc_SOURCES})
-
-    # target_link_libraries(pyopensot_oc PUBLIC OpenSoT OpenSothpipmOC)
-
-    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-    # install(TARGETS pyopensot_oc
-    #     COMPONENT python
-    #     LIBRARY DESTINATION "~/.local/lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages"
-    #     ARCHIVE DESTINATION "lib"
-    #     RUNTIME DESTINATION "bin")
-
 
 else()
     message(STATUS "pybind not found")

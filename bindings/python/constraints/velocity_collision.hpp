@@ -36,7 +36,7 @@ std::shared_ptr<CollisionAvoidanceC> make_collision_avoidance(
 }
 
 
-std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> get_ordered_witness_point_vector(const CollisionAvoidance& ca)
+std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> get_ordered_witness_point_vector(const CollisionAvoidanceC& ca)
 {
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> ordered_witness_points;
     ca.getOrderedWitnessPointVector(ordered_witness_points);
@@ -46,27 +46,25 @@ std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> get_ordered_witness_poi
 
 void pyVelocityCollisionAvoidance(py::module& m) {
     
-    using CollisionAvoidance = OpenSoT::constraints::velocity::CollisionAvoidance;
-
-    py::class_<CollisionAvoidance, std::shared_ptr<CollisionAvoidance>, OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CollisionAvoidance")
+    py::class_<CollisionAvoidanceC, std::shared_ptr<CollisionAvoidanceC>, OpenSoT::Constraint<Eigen::MatrixXd, Eigen::VectorXd>>(m, "CollisionAvoidance")
         .def(py::init(&make_collision_avoidance),
              py::arg(), py::arg("max_pairs") = -1, py::arg("collision_urdf") = "", py::arg("collision_srdf") = "")
-        .def("getLinkPairThreshold", &CollisionAvoidance::getLinkPairThreshold)
-        .def("getDetectionThreshold", &CollisionAvoidance::getDetectionThreshold)
-        .def("setLinkPairThreshold", &CollisionAvoidance::setLinkPairThreshold)
-        .def("setDetectionThreshold", &CollisionAvoidance::setDetectionThreshold)
-        .def("update", &CollisionAvoidance::update)
-        .def("setMaxPairs", &CollisionAvoidance::setMaxPairs)
-        .def("setCollisionList", &CollisionAvoidance::setCollisionList)
-        .def("collisionModelUpdated", &CollisionAvoidance::collisionModelUpdated)
-        .def("addCollisionShape", &CollisionAvoidance::addCollisionShape)
-        .def("setCollisionShapeActive", &CollisionAvoidance::setCollisionShapeActive)
-        .def("moveCollisionShape", &CollisionAvoidance::moveCollisionShape)
-        .def("setBoundScaling", &CollisionAvoidance::setBoundScaling)
-        .def("setLinksVsEnvironment", &CollisionAvoidance::setLinksVsEnvironment)
-        .def("getCollisionModel", (const XBot::Collision::CollisionModel& (CollisionAvoidance::*)() const) &CollisionAvoidance::getCollisionModel)
+        .def("getLinkPairThreshold", &CollisionAvoidanceC::getLinkPairThreshold)
+        .def("getDetectionThreshold", &CollisionAvoidanceC::getDetectionThreshold)
+        .def("setLinkPairThreshold", &CollisionAvoidanceC::setLinkPairThreshold)
+        .def("setDetectionThreshold", &CollisionAvoidanceC::setDetectionThreshold)
+        .def("update", &CollisionAvoidanceC::update)
+        .def("setMaxPairs", &CollisionAvoidanceC::setMaxPairs)
+        .def("setCollisionList", &CollisionAvoidanceC::setCollisionList)
+        .def("collisionModelUpdated", &CollisionAvoidanceC::collisionModelUpdated)
+        .def("addCollisionShape", &CollisionAvoidanceC::addCollisionShape)
+        .def("setCollisionShapeActive", &CollisionAvoidanceC::setCollisionShapeActive)
+        .def("moveCollisionShape", &CollisionAvoidanceC::moveCollisionShape)
+        .def("setBoundScaling", &CollisionAvoidanceC::setBoundScaling)
+        .def("setLinksVsEnvironment", &CollisionAvoidanceC::setLinksVsEnvironment)
+        .def("getCollisionModel", (const XBot::Collision::CollisionModel& (CollisionAvoidanceC::*)() const) &CollisionAvoidanceC::getCollisionModel)
         .def("getOrderedWitnessPointVector", &get_ordered_witness_point_vector)
-        .def("getOrderedLinkPairVector", &CollisionAvoidance::getOrderedLinkPairVector)
-        .def("getOrderedDistanceVector", &CollisionAvoidance::getOrderedDistanceVector)
-        .def("getCollisionJacobian", &CollisionAvoidance::getCollisionJacobian);
+        .def("getOrderedLinkPairVector", &CollisionAvoidanceC::getOrderedLinkPairVector)
+        .def("getOrderedDistanceVector", &CollisionAvoidanceC::getOrderedDistanceVector)
+        .def("getCollisionJacobian", &CollisionAvoidanceC::getCollisionJacobian);
 }

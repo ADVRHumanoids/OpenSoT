@@ -13,6 +13,8 @@ from sensor_msgs.msg import JointState
 import subprocess
 import time
 
+USE_HCOD = False
+
 class ros2_node(Node):
     def __init__(self):
         super().__init__('franka_panda_ik')
@@ -98,12 +100,11 @@ print(f"vel_ref: {vel_ref}")
 #
 # Creates iHQP solver with stack (using qpOASES as backend)
 #
-solver = pysot.iHQP(s)
-#try:
-#    import pyopensot_hcod
-#    solver = pyopensot_hcod.HCOD(s, 1e-3)
-#except ImportError:
-#    raise ImportError('hcod solver not found. If you want to try it please compile with `-DOPENSOT_SOTH_FRONT_END=ON` option.')
+solver = None
+if USE_HCOD:
+    solver = pysot.HCOD(s)
+else:
+    solver = pysot.iHQP(s)
 
 #
 msg = JointState()

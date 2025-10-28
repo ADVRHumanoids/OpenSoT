@@ -21,7 +21,7 @@ from geometry_msgs.msg import PoseStamped, Point
 import pyopensot as pysot
 from pyopensot.tasks.velocity import Postural, Cartesian
 from pyopensot.constraints.velocity import JointLimits, VelocityLimits
-from pyopensot_collision.constraints.velocity import CollisionAvoidance
+from pyopensot.constraints.velocity import CollisionAvoidance
 
 from std_srvs.srv import SetBool
 
