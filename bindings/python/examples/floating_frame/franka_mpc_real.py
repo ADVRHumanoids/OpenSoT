@@ -8,7 +8,6 @@ from pyopensot.constraints.velocity import JointLimits
 import pyopensot as pysot
 import numpy as np
 from sensor_msgs.msg import JointState
-from std_msgs.msg import String, Float64MultiArray
 import subprocess
 import time
 from geometry_msgs.msg import PoseStamped
@@ -30,7 +29,7 @@ class ros2_node(Node):
 
         self.robot_description_subscriber = self.create_subscription(
             String,
-            '/robot_description',
+            '/robot_description_no_hand',
             self.listener_callback,
             10)
 
@@ -91,21 +90,24 @@ node = ros2_node()
 
 
 Ns = 10 # number of nodes
-tf = 0.3 # final time
+tf = 0.5 # final time
 dt = tf/Ns
 
 model = xbi.ModelInterface2(node.urdf)
 print(model.getJointNames())
 
 
-q_val = np.array([0., -0.7, 0., -2.1, 0., 1.4, 0.])
-qdot_val = np.array([0., 0., 0., 0., 0., 0., 0.])
-qddot_val = np.array([0., 0., 0., 0., 0., 0., 0.])
+# q_val = np.array([0., -0.7, 0., -2.1, 0., 1.4, 0.])
+# qdot_val = np.array([0., 0., 0., 0., 0., 0., 0.])
+# qddot_val = np.array([0., 0., 0., 0., 0., 0., 0.])
 
 model.setJointPosition(node.state[:model.nq].copy())
 model.update()
-T = model.getPose("panda_link8")
+# T = model.getPose("panda_link8")
 
+q_val = node.state[:model.nq].copy()
+qdot_val = node.state[model.nq:].copy()
+qddot_val = np.zeros(model.nv)
 
 
 vars = list()
@@ -216,12 +218,12 @@ for i in range(Ns):
     minu.setWeight(1e-3 * np.eye(model.nv))
     minus.append(minu)
 
-    postural = Postural(ocp.stage(i).model)
-    postural.setWeight(1e-3 * np.eye(model.nv))
-    postural.setReference(q_val.copy())
-    minus.append(postural)
+    # postural = Postural(ocp.stage(i).model)
+    # postural.setWeight(1e0 * np.eye(model.nv))
+    # postural.setReference(q_val.copy())
+    # minus.append(postural)
 
-    ocp.stage(i).stack = pysot.AutoStack(minu + AffineTask.toAffine(postural, dvariables.getVariable("dq")))
+    ocp.stage(i).stack = pysot.AutoStack(minu) # + AffineTask.toAffine(postural, dvariables.getVariable("dq")))
 
     # tau_min
     tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du)
@@ -288,7 +290,7 @@ print("-"*100)
 
 msg = JointState()
 msg.name = model.getJointNames()
-print(msg.name)
+# print(msg.name)
 try:
     while rclpy.ok():
         cartesian_task.setReference(node.pose_ref.copy())
