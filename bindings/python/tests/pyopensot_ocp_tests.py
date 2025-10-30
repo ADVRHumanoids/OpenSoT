@@ -1,4 +1,3 @@
-from pyopensot.oc import *
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters
@@ -19,7 +18,6 @@ from scipy.spatial.transform import Rotation as R
 import unittest
 import os
 
-import pyopensot_hpipmoc as hpipmoc
 
 np.set_printoptions(linewidth=np.inf)
 class ros2_node(Node):
@@ -245,6 +243,8 @@ for i in range(Ns):
 
 print(f"x0[0]: {x0[0]}")
 
+from pyopensot.oc import *
+
 ocp = OCP()
 dd = list()
 for i in range(Ns):
@@ -322,7 +322,7 @@ for i in range(Ns+1):
 
 
 print("Initing solver...")
-solver = swSQP(ocp)
+solver = pysot.swSQP(ocp)
 solver.getOptions().max_iters = 1
 solver.getOptions().verbose = False
 solver.getOptions().line_search_strategy = 1

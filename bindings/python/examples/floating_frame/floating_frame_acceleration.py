@@ -162,7 +162,7 @@ print("ocp updated!")
 
 
 print("Initing solver...")
-solver = swSQP(ocp)
+solver = pysot.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
 solver.getOptions().line_search_strategy = 1

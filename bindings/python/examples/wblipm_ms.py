@@ -48,7 +48,7 @@ class ros2_node(Node):
         self.joint_state_publisher.publish(self.joint_msg)
         self.base_link_broadcaster.sendTransform(self.w_T_b)
 
-roslaunch = subprocess.Popen(['ros2', 'launch', 'hurobots', 'g1.launch'], stdout=subprocess.PIPE, shell=False)
+roslaunch = subprocess.Popen(['ros2', 'launch', 'hurobots', 'g1_state_publisher.launch.py'], stdout=subprocess.PIPE, shell=False)
 
 urdf_string = pathlib.Path(get_package_share_directory('hurobots') + "/description_files/urdf/g1/g1_29dof.urdf").read_text()
 

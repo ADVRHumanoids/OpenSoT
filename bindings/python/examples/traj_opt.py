@@ -335,7 +335,7 @@ print(f"ocp.stage(Ns).stack.getStack()[0].getb(): {ocp.stage(Ns).stack.getStack(
 
 
 print("Initing solver...")
-solver = swSQP(ocp)
+solver = pysot.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
 solver.getOptions().line_search_strategy = 1

@@ -1,17 +1,20 @@
 from xbot2_interface import pyxbot2_interface as xbi
 import pyopensot as pysot
-# import pyopensot.oc as
 import numpy as np
 import unittest
 from scipy.spatial.transform import Rotation as R
 from pyopensot.tasks.velocity import Cartesian
 
 
+assert (False), "THIS TEST NEEDS TO BE UPDATED!"
+
+
+
 np.set_printoptions(2, linewidth=200)
 
 utest = unittest.TestCase()
 
-with open("/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/floating_frame.urdf", "r") as f: # TODO: Change the absolute path
+with open("/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/floating_frame/floating_frame.urdf", "r") as f:
     urdf_string = f.read()
 
 

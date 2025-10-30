@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pyopensot import AffineHelper, OptvarHelper, GenericTask, AggregatedTask, SubVariable
 import pyopensot as pysot
-import pyopensot_hpipmoc as hpipmoc
 from ttictoc import tic, toc
 import unittest
 from collections import deque
@@ -80,7 +79,7 @@ print(f"integration.getA() @ u.getM().T \n: {integration.getA() @ u.getM().T}")
 
 
 
-solver = hpipmoc.hpipmOC(Ns+1)
+solver = pysot.hpipmOC(Ns+1)
 for i in range(Ns):
     Ai = integration.getA() @ x.getM().T
     Bi = integration.getA() @ u.getM().T

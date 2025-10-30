@@ -356,7 +356,7 @@ for i in range(Ns+1):
 
 
 print("Initing solver...")
-solver = swSQP(ocp)
+solver = pysot.swSQP(ocp)
 solver.getOptions().max_iters = 10
 solver.getOptions().verbose = False
 solver.getOptions().line_search_strategy = 2
