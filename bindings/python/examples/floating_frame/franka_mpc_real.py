@@ -325,7 +325,8 @@ try:
         # msg.header.stamp = node.get_clock().now().to_msg()
         node.publish(msg)
 
-        rclpy.spin_once(node)
+        rclpy.spin_once(node, timeout_sec=0.0)
+
 
 except KeyboardInterrupt:
     print("KeyboardInterrupt: Stopping the node.")

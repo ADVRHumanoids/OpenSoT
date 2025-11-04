@@ -149,7 +149,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             
         }
         if (_opt.line_search_strategy==0)
-                _ocp->update(_x0_candidate, _u0_candidate);
+            _ocp->update(_x0_candidate, _u0_candidate);
 
         _x0 = _x0_candidate;
         _u0 = _u0_candidate;
@@ -164,7 +164,6 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             break;
         } 
 
-        
         _prev_cost = _ocp->cost();
         _prev_defect = _ocp->dynamics_defect();
         _prev_viol = _ocp->constraint_violation();
@@ -179,14 +178,17 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     }
 
-    _ocp->update(_x0, _u0);
-    _stats.cost = _ocp->cost();
-    _stats.constraint_violation = _ocp->constraint_violation();
+    // _ocp->update(_x0, _u0);
 
-    std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
-    _stats.total_time = elapsed.count();
     if(_opt.verbose)
+    {
+        _stats.cost = _ocp->cost();
+        _stats.constraint_violation = _ocp->constraint_violation();
+        std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
+        _stats.total_time = elapsed.count();
+
         std::cout<<_stats.toOSS().str()<<"\n"<<std::endl;
+    }
 
     return true;
 }
@@ -218,7 +220,7 @@ void swSQP::step(double alpha)
 
 bool swSQP::ls_merit()
 {
-    double merit = _ocp->cost() + _ocp->constraint_violation();
+    double merit = _ocp->cost() + _ocp->constraint_violation() + _ocp->dynamics_defect();
 
     
     double merit_der = 0.;
@@ -245,11 +247,20 @@ bool swSQP::ls_merit()
         }
     }
 
-    if(merit < _prev_cost + _prev_viol + _opt.beta * _stats.alpha * merit_der)
+    if(merit < _prev_cost + _prev_viol + _prev_defect + _opt.beta * _stats.alpha * merit_der)
         return  true;
 
     return false;
 }
+
+bool swSQP::ls_filter()
+{
+    if (_ocp->cost() <  _prev_cost || _ocp->constraint_violation() < _prev_viol || _ocp->dynamics_defect()< _prev_defect)  
+        return true;
+
+    return false;
+}
+
 
 void swSQP::update_statistics()
 {
@@ -260,15 +271,6 @@ void swSQP::update_statistics()
         _stats.stages_statistics[i].constraint_violation = _ocp->stage(i)->stage_constraint_violation();
     }
     
-}
-
-
-bool swSQP::ls_filter()
-{
-    if (_ocp->cost() <  _prev_cost || _ocp->constraint_violation() < _prev_viol || _ocp->dynamics_defect()< _prev_defect)  
-        return true;
-
-    return false;
 }
 
 
