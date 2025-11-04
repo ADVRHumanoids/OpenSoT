@@ -19,6 +19,9 @@ EulerVector::EulerVector(const XBot::ModelInterface& robot,
     _dt(dt)
 {
 
+    _Fx = Eigen::MatrixXd::Identity(_dX.getOutputSize(), _dX.getOutputSize());
+    _Fu = Eigen::MatrixXd::Identity(_dU.getOutputSize(), _dU.getOutputSize()) * _dt;
+
     _W.setIdentity(dX.getOutputSize(), dX.getOutputSize());
 
     update();
@@ -26,10 +29,6 @@ EulerVector::EulerVector(const XBot::ModelInterface& robot,
 
 void EulerVector::_update()
 {  
-    _Fx = Eigen::MatrixXd::Identity(_dX.getOutputSize(), _dX.getOutputSize());
-
-    _Fu = Eigen::MatrixXd::Identity(_dU.getOutputSize(), _dU.getOutputSize()) * _dt;
-
     _dXnext = _Fx * _dX + _Fu * _dU + (_Xk.getValue() + _Uk.getValue()*_dt - _Xk_1.getValue());
 
     _A = _dXnext.getM();

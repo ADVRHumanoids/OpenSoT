@@ -109,8 +109,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         ddefect_dw[i] = _ocp->stage(i)->stage_ddefect_dw();
     }
 
-    Eigen::VectorXd dx0(_A[0].cols()); //initial delta state constraint (dx0 = 0)
-    dx0.setZero();
+    _dx0.setZero();
 
     for(unsigned int iter = 1; iter <= _opt.max_iters; ++iter)
     {
@@ -122,11 +121,10 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         auto iter_start = std::chrono::high_resolution_clock::now();
 
         // relinarize and update qp
-        _ocp->update(_x0_candidate, _u0_candidate);
         linearize();
 
         // solve
-        if (!_qp_solver->solve(dx0))
+        if (!_qp_solver->solve(_dx0))
         {
             std::cout<< "nosolve"<< std::endl;
             return false;
@@ -134,10 +132,11 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
         // first update
         step(_stats.alpha);
-        _ocp->update(_x0_candidate, _u0_candidate);
+        
     
         while(_opt.line_search_strategy!=0 && _stats.alpha >= _opt.alpha_min)
         {
+            _ocp->update(_x0_candidate, _u0_candidate);
             if((this->*ls_function)())
             {
                 _stats.line_search_accepted=true;
@@ -146,10 +145,15 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             _stats.alpha /= 2.;
             _stats.line_search_iters++;
             step(_stats.alpha);
-            _ocp->update(_x0_candidate, _u0_candidate);
 
             
         }
+        if (_opt.line_search_strategy==0)
+                _ocp->update(_x0_candidate, _u0_candidate);
+
+        _x0 = _x0_candidate;
+        _u0 = _u0_candidate;
+        
 
         // check break criteria on QP solution
         if (break_criteria())
@@ -160,10 +164,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
             break;
         } 
 
-        _x0 = _x0_candidate;
-        _u0 = _u0_candidate;
         
-        _ocp->update(_x0, _u0); //TODO I am not sure about this update, maybe its not needed
         _prev_cost = _ocp->cost();
         _prev_defect = _ocp->dynamics_defect();
         _prev_viol = _ocp->constraint_violation();
@@ -307,6 +308,7 @@ void swSQP::init()
 
             _qp_solver->setStageDynamics(k, A, B, b);
         }
+        _dx0.setZero(_A[0].cols()); //initial delta state constraint (_dx0 = 0)
 
         // --- Cost (always) ---
         _H.push_back(Eigen::MatrixXd(_ocp->stage(k)->stack->getStack()[0]->getA().cols(), _ocp->stage(k)->stack->getStack()[0]->getA().cols()));

@@ -15,6 +15,7 @@ from scipy.spatial.transform import Rotation as R
 import unittest
 import os
 from utils import *
+from ttictoc import tic, toc 
 
 
 np.set_printoptions(linewidth=np.inf)
@@ -258,10 +259,10 @@ for i in range(Ns+1):
 
 
 print("Initing solver...")
-solver = swSQP(ocp)
+solver = pysot.swSQP(ocp)
 solver.getOptions().max_iters = 10
 solver.getOptions().verbose = False
-solver.getOptions().line_search_strategy = 2
+solver.getOptions().line_search_strategy = 0
 solver.getOptions().beta = 1e-2
 solver.getOptions().min_abs_delta_solution = 1e-3
 solver.init()
@@ -287,7 +288,7 @@ u0 = solver.getControlSolution()
 
 
 print("-"*100)
-
+# b = toc()
 msg = JointState()
 msg.name = model.getJointNames()
 # print(msg.name)
@@ -296,8 +297,10 @@ try:
         cartesian_task.setReference(node.pose_ref.copy())
 
         # x0[0] = node.state
-        ocp.update(x0, u0)
+        # tic()
         success = solver.solve(x0, u0)
+        # b = toc()
+        # print(b)
 
         x0 = solver.getStateSolution()
         u0 = solver.getControlSolution()

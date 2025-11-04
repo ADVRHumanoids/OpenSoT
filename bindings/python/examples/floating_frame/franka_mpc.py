@@ -18,6 +18,7 @@ from geometry_msgs.msg import PoseStamped, Point
 from scipy.spatial.transform import Rotation as R
 import unittest
 import os
+from ttictoc import tic, toc
 
 
 np.set_printoptions(linewidth=np.inf)
@@ -140,7 +141,7 @@ node = ros2_node()
 
 time.sleep(2)
 
-Ns = 20 # number of nodes
+Ns = 10 # number of nodes
 tf = 0.2 # final time
 dt = tf/Ns
 
@@ -399,8 +400,10 @@ try:
 
         cartesian_task.setReference(pose_ref)
 
-        ocp.update(x0, u0)
+        tic()
         success = solver.solve(x0, u0)
+        b = toc()
+        print(b)
 
         x0 = solver.getStateSolution()
         u0 = solver.getControlSolution()

@@ -192,6 +192,9 @@ private:
     std::vector<Eigen::VectorXd> _x0, _u0;
     std::vector<Eigen::VectorXd> _x0_candidate, _u0_candidate;
 
+    Eigen::VectorXd _dx0; //initial delta state constraint (_dx0 = 0)
+    
+
 };
 
 }
