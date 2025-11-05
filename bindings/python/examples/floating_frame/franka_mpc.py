@@ -313,15 +313,18 @@ print(f"ocp.getNumberOfNodes(): {ocp.getNumberOfNodes()}")
 utest = unittest.TestCase()
 utest.assertTrue(ocp.getNumberOfNodes() == Ns+1)
 
-postural = Postural(ocp.stage(0).model)
-postural.setReference(q_val.copy())
-
 
 minus = list()
 for i in range(Ns):
     minu = min_var.create(f"minu{i}", ocp.stage(i).u, ocp.stage(i).du)
-    minu.setWeight(1e-3 * np.eye(model.nv))
+    minu.setWeight(1e0 * np.eye(model.nv))
     minus.append(minu)
+
+    postural = Postural(ocp.stage(i).model)
+    postural.setWeight(1e-3 * np.eye(model.nv))
+    postural.setReference(q_val.copy())
+    minus.append(postural)
+
     ocp.stage(i).stack = pysot.AutoStack(minu + AffineTask.toAffine(postural, dvariables.getVariable("dq")))
 
     # tau_min
@@ -352,7 +355,7 @@ for i in range(Ns+1):
     qmin, qmax = model.getJointLimits()
     qlims_i = JointLimits(ocp.stage(i).model, qmax, qmin)
     qlims.append(qlims_i)
-    ocp.stage(i).stack = ocp.stage(i).stack << AffineConstraint.toAffine(qlims[-1], dvariables.getVariable("dq"))
+    ocp.stage(i).stack = ocp.stage(i).stack << AffineConstraint.toAffine(qlims_i, dvariables.getVariable("dq"))
 
 
 
@@ -403,13 +406,14 @@ try:
         tic()
         success = solver.solve(x0, u0)
         b = toc()
-        print(b)
+        # print(b)
 
         x0 = solver.getStateSolution()
         u0 = solver.getControlSolution()
 
 
-        state = space.plus(state, np.concatenate((state[model.nq:], u0[0]))*dt)
+        # state = space.plus(state, np.concatenate((state[model.nq:], u0[0]))*dt)
+        state = x0[1]
 
         msg.position = state[:model.nq].tolist()
 

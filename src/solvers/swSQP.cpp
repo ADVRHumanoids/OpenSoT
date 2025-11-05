@@ -158,7 +158,6 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
         // check break criteria on QP solution
         if (break_criteria())
         {
-            _stats.iters--;
             std::chrono::duration<double> iter_elapsed = std::chrono::high_resolution_clock::now() - iter_start;
             _stats.iter_time = iter_elapsed.count();
             break;
@@ -182,8 +181,7 @@ bool swSQP::solve(const std::vector<Eigen::VectorXd>& x0, const std::vector<Eige
 
     if(_opt.verbose)
     {
-        _stats.cost = _ocp->cost();
-        _stats.constraint_violation = _ocp->constraint_violation();
+        update_statistics();   
         std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - start;
         _stats.total_time = elapsed.count();
 
@@ -200,7 +198,7 @@ bool swSQP::break_criteria()
         max_dw = std::max(max_dw, (_x0[i] - _x0_candidate[i]).cwiseAbs().maxCoeff());
         // #TODO: USE THE MANIFOLD OMINUS
 
-    return max_dw <= _opt.min_abs_delta_solution; //&& _ocp->constraint_violation() <= _opt.min_abs_delta_solution;
+    return max_dw <= _opt.min_abs_delta_solution && _ocp->constraint_violation() <= _opt.min_abs_delta_solution;
 
 }
 
@@ -265,6 +263,7 @@ bool swSQP::ls_filter()
 void swSQP::update_statistics()
 {
     _stats.cost = _ocp->cost();
+    _stats.constraint_violation = _ocp->constraint_violation();
     for (uint i = 0; i < _ocp->getNumberOfNodes(); i++)
     {
         _stats.stages_statistics[i].cost = _ocp->stage(i)->stage_cost();

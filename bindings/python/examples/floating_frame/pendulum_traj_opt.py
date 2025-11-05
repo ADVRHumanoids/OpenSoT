@@ -57,7 +57,7 @@ dx = AffineHelper.pile(dq, dqdot)
 dxdot = AffineHelper.pile(dqdot, dqddot)
 
 
-Ns = 60 # number of nodes
+Ns = 100 # number of nodes
 tf = 3. # final time
 dt = tf/Ns
 
@@ -118,12 +118,12 @@ for i in range(Ns):
 
     # tau_min
     tau_lim = DynamicsConstraint(ocp.stage(i).model, ocp.stage(i).dx, ocp.stage(i).du)
-    tau_lim.setTorqueLimit([10., 1e-6])
+    tau_lim.setTorqueLimit([10., 0.])
     const.append(tau_lim)
     ocp.stage(i).stack << tau_lim
 
 minvel = min_var.create(f"minvel", ocp.stage(Ns).x[model.nq:], dvariables.getVariable("dqdot"))
-minvel.setWeight(1e-3 * np.eye(model.nv))
+minvel.setWeight(1e0 * np.eye(model.nv))
 
 postural = Postural(ocp.stage(Ns).model)
 postural.setWeight(1e3 * np.eye(model.nv))
@@ -137,8 +137,8 @@ solver = pysot.swSQP(ocp)
 solver.getOptions().max_iters = 1000
 solver.getOptions().verbose = True
 solver.getOptions().line_search_strategy = 1
-solver.getOptions().beta = 1e-4
-solver.getOptions().min_abs_delta_solution = 1e-2
+solver.getOptions().beta = 1e-2
+solver.getOptions().min_abs_delta_solution = 1e-3
 solver.init()
 print(f"{solver.getOptions().print()}")
 print("...solver inited!")
@@ -161,13 +161,13 @@ try:
         for i in range(len(x0)):
             x = x0[i]
             q_val = x.tolist()[:model.nv]
-            if i<Ns: print(-mintaus[i].getb())
+            # if i<Ns: print(-mintaus[i].getb())
             rosnode.publish(model, q_val)
             time.sleep(dt)
 
         rosnode.publish(model, q_val)
 
-        rclpy.spin_once(rosnode, timeout_sec=0.01)
+        rclpy.spin_once(rosnode, timeout_sec=0.0)
 
         # time.sleep(0.001)
         
