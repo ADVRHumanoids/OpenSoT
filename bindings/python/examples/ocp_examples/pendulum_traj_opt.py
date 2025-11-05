@@ -13,8 +13,8 @@ from pyopensot.tasks.velocity import Postural
 
 from utils import *
 
-roslaunch = subprocess.Popen(['ros2', 'launch', '/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/double_pendulum/pendulum.launch.py'], stdout=subprocess.PIPE, shell=False)
-rviz_file_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/double_pendulum/doub_pend.rviz"
+roslaunch = subprocess.Popen(['ros2', 'launch', '/home/forest_ws/code/OpenSoT/bindings/python/examples/ocp_examples/double_pendulum/pendulum.launch.py'], stdout=subprocess.PIPE, shell=False)
+rviz_file_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/ocp_examples/double_pendulum/doub_pend.rviz"
 rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
 rclpy.init()
 rosnode = double_pendulum_node()

@@ -22,7 +22,7 @@ from pyopensot import AffineHelper, OptvarHelper, GenericTask, Task, AffineTask,
 
 from utils import *
 
-rviz_file_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/floating_frame/floating_frame/floating_frame.rviz"
+rviz_file_path = "/home/forest_ws/code/OpenSoT/bindings/python/examples/ocp_examples/floating_frame/floating_frame.rviz"
 rviz = subprocess.Popen(['ros2', 'run', 'rviz2', 'rviz2', '-d', f'{rviz_file_path}'], stdout=subprocess.PIPE, shell=False)
 
 rclpy.init()
