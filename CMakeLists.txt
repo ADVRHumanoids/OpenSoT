@@ -66,7 +66,7 @@ if(${OPENSOT_VERBOSE})
 endif()
 
 # add include directories
-INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR}
+INCLUDE_DIRECTORIES(include ${EIGEN3_INCLUDE_DIR} ${tf2_eigen_kdl_INCLUDE_DIRS} ${moveit_msgs_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS} ${XBotInterface_INCLUDE_DIRS} ${eigen_conversions_INCLUDE_DIRS}
     )
 
