@@ -56,6 +56,11 @@
   <build_depend>kdl_parser</build_depend>
   <build_depend>orocos_kdl</build_depend>
   <build_depend>interactive_markers</build_depend>
+  
+  <build_depend>xbot2_interface</build_depend>
+  <build_depend>matlogger2</build_depend>
+  <build_depend>tf2_eigen_kdl</build_depend>
+  
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>roslib</run_depend>
@@ -67,6 +72,10 @@
   <run_depend>rosconsole</run_depend>
   <run_depend>orocos_kdl</run_depend>
   <run_depend>interactive_markers</run_depend>
+  
+  <run_depend>xbot2_interface</run_depend>
+  <run_depend>matlogger2</run_depend>
+  <run_depend>tf2_eigen_kdl</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
