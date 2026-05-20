@@ -5,6 +5,8 @@ on:
     branches: [ "ros2" ]
   pull_request:
     branches: [ "ros2" ]
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
 
