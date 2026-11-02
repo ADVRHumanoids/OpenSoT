@@ -256,7 +256,11 @@ if(${qpOASES_FOUND})
 
 endif()
 
-find_package(osqp QUIET)
+if(OPENSOT_COMPILE_OSQP_BACKEND)
+    # This backend uses the 0.6 API pinned by the Forest recipe. Newer OSQP
+    # installations have different public types and update/setup functions.
+    find_package(osqp 0.6.3 EXACT REQUIRED)
+endif()
 if(${osqp_FOUND} AND ${OPENSOT_COMPILE_OSQP_BACKEND})
     message("Adding src/solvers/OSQPBackEnd.cpp to compilation")
 
