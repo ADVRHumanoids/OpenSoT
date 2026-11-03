@@ -26,7 +26,7 @@ forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git -t ros2
 
 # build
 export PYTHONUNBUFFERED=1
-forest grow OpenSoT --verbose --clone-depth 1 -j ${FOREST_JOBS:-1}
+forest grow osqp OpenSoT --verbose --clone-depth 1 -j ${FOREST_JOBS:-1}
 
 # build tests
 cd build/OpenSoT
